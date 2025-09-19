@@ -2,17 +2,28 @@
 
 ## Project Overview
 
-This is a React Native e-commerce app built with Expo, using file-based routing, Supabase backend, Stripe payments, and Zustand state management. The app sells gadgets with features for browsing, cart management, and order processing.
+This is a comprehensive React Native shopping mall app built with Expo, featuring file-based routing, Supabase backend, Stripe payments, and Zustand state management. The app integrates four main business models:
+
+1. **E-commerce** - Gadget sales with cart management and order processing
+2. **Services Marketplace** - Appointment-based services (hair, beauty, tech support)
+3. **Event Ticketing** - Venue-based events with ticket sales
+4. **Mall Directory** - Individual shop listings with their own products and features
+
+This multi-modal architecture requires understanding cross-domain data flows and shared UI patterns.
 
 ## Architecture & Key Patterns
 
 ### File-Based Routing (Expo Router)
 
 - Main entry point: `src/app/_layout.tsx` (not `App.tsx` which is unused)
-- Route structure: `src/app/(shop)/`, `src/app/categories/`, `src/app/product/`
+- Route structure:
+  - `src/app/(shop)/` - Main tab navigation (index, services, events, profile, orders)
+  - `src/app/categories/` - Product categories
+  - `src/app/product/` - Individual product details
+  - `src/app/shop/` - Individual mall shop details
 - Use `Link` from `expo-router` for navigation, not React Navigation components
 - Route groups in parentheses like `(shop)` don't appear in URL paths
-- Dynamic routes use `[slug].tsx` pattern
+- Dynamic routes use `[slug].tsx` or `[id].tsx` pattern
 
 ### Provider Architecture Stack
 
@@ -68,10 +79,14 @@ Never modify this order - it ensures proper initialization dependencies.
 
 ### API Integration
 
-- Use React Query hooks from `src/api/api.ts`
+- Use React Query hooks from `src/api/api.ts` (main products/services/events)
+- Shop-specific APIs in `src/api/shops.ts`
 - Pattern: `const { data, error, isLoading } = getProductsAndCategories()`
+- Multi-domain queries: Services (`getServiceCategories`, `getServicesByCategory`), Events (`getEvents`, `getEventsByCategory`), Shops (`getShops`, `getShopsByCategory`)
 - Always handle loading/error states in components
 - Mutations use `useMutation` with proper invalidation
+- Service bookings: `createServiceBooking()` mutation
+- Event tickets: `createTicketPurchase()` mutation
 
 ### Cart Management
 
@@ -106,6 +121,31 @@ Never modify this order - it ensures proper initialization dependencies.
 - Expo notifications with device token storage
 - Notification provider wraps app for push notification handling
 - Tokens stored in Supabase user profiles
+
+### Service Booking System
+
+- Service categories, providers, and bookings managed in Supabase
+- Booking flow: Select service → Choose provider → Pick date/time → Confirm
+- Modal components: `BookingModal` for service appointments
+- API pattern: `createServiceBooking()` returns mutation for appointment creation
+- Database tables: `service`, `service_category`, `service_provider`, `service_booking`
+
+### Event Ticketing System
+
+- Events linked to venues with capacity management
+- Categories: Music, Comedy, Art, Business, Culture, Film
+- Ticket purchasing flow with quantity selection and payment
+- Components: `EventBookingModal` for ticket purchases
+- API pattern: `createTicketPurchase()` for ticket sales
+- Database tables: `events`, `event_venue`, `ticket_purchases`
+
+### Mall Shop Directory
+
+- Individual shops with their own products and features
+- Shop-specific APIs in `src/api/shops.ts` separate from main product APIs
+- Features per shop: delivery, collection, appointments, virtual try-on
+- Route: `/shop/[id]` for individual shop details with product listings
+- Database tables: `shops`, `shop_reviews`, enhanced `product` table with `shop_id`
 
 ## File Structure Guidelines
 
