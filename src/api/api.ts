@@ -9,7 +9,9 @@ export const getProductsAndCategories = () => {
     queryKey: ["products", "categories"],
     queryFn: async () => {
       const [products, categories] = await Promise.all([
-        supabase.from("product").select("*"),
+        supabase
+          .from("product")
+          .select("*, shops:shop_id(id, name, description, image_url)"),
         supabase.from("category").select("*"),
       ]);
 
@@ -28,7 +30,7 @@ export const getProduct = (slug: string) => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("product")
-        .select("*")
+        .select("*, shops:shop_id(id, name, description, image_url)")
         .eq("slug", slug)
         .single();
 
@@ -59,7 +61,7 @@ export const getCategoryAndProducts = (categorySlug: string) => {
 
       const { data: products, error: productsError } = await supabase
         .from("product")
-        .select("*")
+        .select("*, shops:shop_id(id, name, description, logo_url)")
         .eq("category", category.id);
 
       if (productsError) {
@@ -69,6 +71,135 @@ export const getCategoryAndProducts = (categorySlug: string) => {
       return { category, products };
     },
   });
+};
+
+// Shop-related API functions
+export const getShops = () => {
+  return useQuery({
+    queryKey: ["shops"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("shops")
+        .select("*")
+        .eq("is_active", true)
+        .order("name");
+
+      if (error) {
+        throw new Error(
+          "An error occurred while fetching shops: " + error.message
+        );
+      }
+
+      return data;
+    },
+  });
+};
+
+export const getShop = (id: number) => {
+  return useQuery({
+    queryKey: ["shop", id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("shops")
+        .select("*")
+        .eq("id", id)
+        .single();
+
+      if (error || !data) {
+        throw new Error(
+          "An error occurred while fetching shop: " + error?.message
+        );
+      }
+
+      return data;
+    },
+  });
+};
+
+export const getShopProducts = (shopId: number) => {
+  return useQuery({
+    queryKey: ["shopProducts", shopId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("product")
+        .select("*, shops:shop_id(id, name, description)")
+        .eq("shop_id", shopId);
+
+      if (error) {
+        throw new Error(
+          "An error occurred while fetching shop products: " + error.message
+        );
+      }
+
+      return data;
+    },
+  });
+};
+
+export const getProductsWithShops = () => {
+  return useQuery({
+    queryKey: ["productsWithShops"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("product")
+        .select("*, shops:shop_id(id, name, description, image_url)")
+        .order("created_at", { ascending: false });
+
+      if (error) {
+        throw new Error(
+          "An error occurred while fetching products with shops: " +
+            error.message
+        );
+      }
+
+      return data;
+    },
+  });
+};
+
+export const getShopsWithProductCount = () => {
+  return useQuery({
+    queryKey: ["shopsWithProductCount"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("shops")
+        .select("*, products:product(count)")
+        .eq("is_active", true)
+        .order("name");
+
+      if (error) {
+        throw new Error(
+          "An error occurred while fetching shops with product count: " +
+            error.message
+        );
+      }
+
+      return data;
+    },
+  });
+};
+
+// Async version for direct usage (non-hook)
+export const fetchShopsWithProductCount = async () => {
+  const { data, error } = await supabase
+    .from("shops")
+    .select(
+      `
+      *, 
+      category:category_id(id, name, slug),
+      products:product!shop_id(count)
+    `
+    )
+    .order("name");
+
+  if (error) {
+    throw new Error(
+      "An error occurred while fetching shops with product count: " +
+        error.message
+    );
+  }
+
+  return data;
 };
 
 export const getMyOrders = () => {

@@ -60,10 +60,9 @@ export default function ShopDetails() {
 
   const handleBrowseProducts = () => {
     if (products.length > 0) {
-      // Navigate to products page when implemented
-      Alert.alert(
-        "Browse Products",
-        `Viewing ${products.length} products from ${shop?.name}`
+      // Navigate to product listing page with shop filter
+      router.push(
+        `/product?shop=${shop.id}&shopName=${encodeURIComponent(shop.name)}`
       );
     } else {
       Alert.alert(
@@ -220,7 +219,8 @@ export default function ShopDetails() {
                   {products.slice(0, 2).map((product, index) => (
                     <TouchableOpacity
                       key={product.id}
-                      style={styles.productCardPreview}>
+                      style={styles.productCardPreview}
+                      onPress={() => router.push(`/product/${product.slug}`)}>
                       {product.imageUrl ? (
                         <Image
                           source={{ uri: product.imageUrl }}

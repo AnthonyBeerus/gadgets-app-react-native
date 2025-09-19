@@ -20,7 +20,12 @@ import {
   getShopsWithFeature,
   getShopsByCategory,
 } from "../api/shops";
+import {
+  getShopsWithProductCount,
+  fetchShopsWithProductCount,
+} from "../api/api";
 import { Tables } from "../types/database.types";
+import { ShopListItem } from "./shop-list-item";
 
 type Shop = Tables<"shops">;
 type Category = Tables<"category">;
@@ -133,82 +138,7 @@ export default function ShopsScreen() {
   ];
 
   const renderShopCard = ({ item }: { item: ShopWithCategory }) => (
-    <TouchableOpacity
-      style={styles.shopCard}
-      onPress={() => navigateToShop(item.id)}
-      activeOpacity={0.7}>
-      {item.image_url && (
-        <Image source={{ uri: item.image_url }} style={styles.shopImage} />
-      )}
-      <View style={styles.shopInfo}>
-        <View style={styles.shopHeader}>
-          <Text style={styles.shopName}>{item.name}</Text>
-          {item.is_featured && (
-            <View style={styles.featuredBadge}>
-              <Ionicons name="star" size={12} color="#fff" />
-              <Text style={styles.featuredText}>Featured</Text>
-            </View>
-          )}
-        </View>
-
-        <Text style={styles.categoryName}>{item.category?.name}</Text>
-
-        {item.description && (
-          <Text style={styles.description} numberOfLines={2}>
-            {item.description}
-          </Text>
-        )}
-
-        <View style={styles.shopDetails}>
-          {item.location && (
-            <View style={styles.detailRow}>
-              <Ionicons name="location" size={14} color="#666" />
-              <Text style={styles.detailText}>{item.location}</Text>
-            </View>
-          )}
-
-          {item.rating && item.rating > 0 && (
-            <View style={styles.detailRow}>
-              <Ionicons name="star" size={14} color="#FFD700" />
-              <Text style={styles.detailText}>{item.rating.toFixed(1)}</Text>
-            </View>
-          )}
-        </View>
-
-        <View style={styles.featuresRow}>
-          {item.has_delivery && (
-            <View style={styles.featureTag}>
-              <Ionicons name="bicycle" size={12} color="#4CAF50" />
-              <Text style={styles.featureTagText}>Delivery</Text>
-            </View>
-          )}
-          {item.has_collection && (
-            <View style={styles.featureTag}>
-              <Ionicons name="bag-handle" size={12} color="#2196F3" />
-              <Text style={styles.featureTagText}>Collection</Text>
-            </View>
-          )}
-          {item.has_appointment_booking && (
-            <View style={styles.featureTag}>
-              <Ionicons name="calendar" size={12} color="#FF9800" />
-              <Text style={styles.featureTagText}>Appointments</Text>
-            </View>
-          )}
-          {item.has_virtual_try_on && (
-            <View style={styles.featureTag}>
-              <Ionicons name="glasses" size={12} color="#9C27B0" />
-              <Text style={styles.featureTagText}>Virtual Try-On</Text>
-            </View>
-          )}
-        </View>
-
-        {item.has_delivery && item.delivery_fee && (
-          <Text style={styles.deliveryInfo}>
-            Delivery from P{item.delivery_fee} • {item.estimated_delivery_time}
-          </Text>
-        )}
-      </View>
-    </TouchableOpacity>
+    <ShopListItem shop={item} />
   );
 
   const renderCategoryChip = ({ item }: { item: Category }) => (
