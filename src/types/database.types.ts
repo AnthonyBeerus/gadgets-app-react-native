@@ -496,6 +496,251 @@ export type Database = {
           }
         ];
       };
+      event_venue: {
+        Row: {
+          id: number;
+          name: string;
+          type: string;
+          location: string;
+          description: string;
+          capacity: string;
+          amenities: string[];
+          price_range: string;
+          phone: string;
+          email: string | null;
+          is_available: boolean;
+          created_at: string;
+          image_url: string | null;
+          icon: string;
+          color: string;
+        };
+        Insert: {
+          id?: number;
+          name: string;
+          type: string;
+          location: string;
+          description: string;
+          capacity: string;
+          amenities: string[];
+          price_range: string;
+          phone: string;
+          email?: string | null;
+          is_available?: boolean;
+          created_at?: string;
+          image_url?: string | null;
+          icon: string;
+          color: string;
+        };
+        Update: {
+          id?: number;
+          name?: string;
+          type?: string;
+          location?: string;
+          description?: string;
+          capacity?: string;
+          amenities?: string[];
+          price_range?: string;
+          phone?: string;
+          email?: string | null;
+          is_available?: boolean;
+          created_at?: string;
+          image_url?: string | null;
+          icon?: string;
+          color?: string;
+        };
+        Relationships: [];
+      };
+      event_booking: {
+        Row: {
+          id: number;
+          venue_id: number;
+          user_id: string;
+          event_name: string;
+          event_type: string;
+          event_date: string;
+          start_time: string;
+          end_time: string;
+          estimated_guests: number;
+          special_requirements: string | null;
+          contact_phone: string;
+          contact_email: string;
+          total_price: number;
+          status: string;
+          created_at: string;
+          notes: string | null;
+        };
+        Insert: {
+          id?: number;
+          venue_id: number;
+          user_id: string;
+          event_name: string;
+          event_type: string;
+          event_date: string;
+          start_time: string;
+          end_time: string;
+          estimated_guests: number;
+          special_requirements?: string | null;
+          contact_phone: string;
+          contact_email: string;
+          total_price: number;
+          status?: string;
+          created_at?: string;
+          notes?: string | null;
+        };
+        Update: {
+          id?: number;
+          venue_id?: number;
+          user_id?: string;
+          event_name?: string;
+          event_type?: string;
+          event_date?: string;
+          start_time?: string;
+          end_time?: string;
+          estimated_guests?: number;
+          special_requirements?: string | null;
+          contact_phone?: string;
+          contact_email?: string;
+          total_price?: number;
+          status?: string;
+          created_at?: string;
+          notes?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "event_booking_venue_id_fkey";
+            columns: ["venue_id"];
+            isOneToOne: false;
+            referencedRelation: "event_venue";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "event_booking_user_id_fkey";
+            columns: ["user_id"];
+            isOneToOne: false;
+            referencedRelation: "users";
+            referencedColumns: ["id"];
+          }
+        ];
+      };
+      events: {
+        Row: {
+          id: number;
+          title: string;
+          description: string;
+          venue_id: number | null;
+          category: string;
+          event_date: string;
+          start_time: string;
+          end_time: string;
+          image_url: string | null;
+          price: number;
+          total_tickets: number;
+          available_tickets: number;
+          is_featured: boolean;
+          tags: string[] | null;
+          status: string;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: number;
+          title: string;
+          description: string;
+          venue_id?: number | null;
+          category: string;
+          event_date: string;
+          start_time: string;
+          end_time: string;
+          image_url?: string | null;
+          price: number;
+          total_tickets?: number;
+          available_tickets?: number;
+          is_featured?: boolean;
+          tags?: string[] | null;
+          status?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: number;
+          title?: string;
+          description?: string;
+          venue_id?: number | null;
+          category?: string;
+          event_date?: string;
+          start_time?: string;
+          end_time?: string;
+          image_url?: string | null;
+          price?: number;
+          total_tickets?: number;
+          available_tickets?: number;
+          is_featured?: boolean;
+          tags?: string[] | null;
+          status?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "events_venue_id_fkey";
+            columns: ["venue_id"];
+            isOneToOne: false;
+            referencedRelation: "event_venue";
+            referencedColumns: ["id"];
+          }
+        ];
+      };
+      ticket_purchases: {
+        Row: {
+          id: number;
+          event_id: number;
+          user_id: string;
+          quantity: number;
+          total_price: number;
+          purchase_date: string;
+          status: string;
+          payment_intent_id: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: number;
+          event_id: number;
+          user_id: string;
+          quantity?: number;
+          total_price: number;
+          purchase_date?: string;
+          status?: string;
+          payment_intent_id?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: number;
+          event_id?: number;
+          user_id?: string;
+          quantity?: number;
+          total_price?: number;
+          purchase_date?: string;
+          status?: string;
+          payment_intent_id?: string | null;
+          created_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "ticket_purchases_event_id_fkey";
+            columns: ["event_id"];
+            isOneToOne: false;
+            referencedRelation: "events";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "ticket_purchases_user_id_fkey";
+            columns: ["user_id"];
+            isOneToOne: false;
+            referencedRelation: "users";
+            referencedColumns: ["id"];
+          }
+        ];
+      };
       users: {
         Row: {
           avatar_url: string;

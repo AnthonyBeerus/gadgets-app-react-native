@@ -94,6 +94,22 @@ const TabsLayout = () => {
             tabBarIcon({ focused }) {
               return (
                 <TabBarIcon
+                  name="medical-services"
+                  type="MaterialIcons"
+                  focused={focused}
+                  color={""}
+                />
+              );
+            },
+          }}
+        />
+        <Tabs.Screen
+          name="events"
+          options={{
+            title: "Events",
+            tabBarIcon({ focused }) {
+              return (
+                <TabBarIcon
                   name="event"
                   type="MaterialIcons"
                   focused={focused}

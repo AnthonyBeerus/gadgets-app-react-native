@@ -641,3 +641,435 @@ export const createServiceReview = () => {
     },
   });
 };
+
+// ===== EVENT VENUE RELATED FUNCTIONS =====
+
+export const getEventVenues = () => {
+  return useQuery({
+    queryKey: ["eventVenues"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("event_venue")
+        .select("*")
+        .eq("is_available", true)
+        .order("name");
+
+      if (error) {
+        throw new Error(
+          "An error occurred while fetching event venues: " + error.message
+        );
+      }
+
+      return data;
+    },
+  });
+};
+
+export const getEventVenue = (venueId: number) => {
+  return useQuery({
+    queryKey: ["eventVenue", venueId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("event_venue")
+        .select("*")
+        .eq("id", venueId)
+        .single();
+
+      if (error || !data) {
+        throw new Error(
+          "An error occurred while fetching venue details: " + error?.message
+        );
+      }
+
+      return data;
+    },
+  });
+};
+
+export const createEventBooking = () => {
+  const {
+    user: { id },
+  } = useAuth();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    async mutationFn({
+      venueId,
+      eventName,
+      eventType,
+      eventDate,
+      startTime,
+      endTime,
+      estimatedGuests,
+      contactPhone,
+      contactEmail,
+      totalPrice,
+      specialRequirements,
+      notes,
+    }: {
+      venueId: number;
+      eventName: string;
+      eventType: string;
+      eventDate: string;
+      startTime: string;
+      endTime: string;
+      estimatedGuests: number;
+      contactPhone: string;
+      contactEmail: string;
+      totalPrice: number;
+      specialRequirements?: string;
+      notes?: string;
+    }) {
+      const { data, error } = await supabase
+        .from("event_booking")
+        .insert({
+          user_id: id,
+          venue_id: venueId,
+          event_name: eventName,
+          event_type: eventType,
+          event_date: eventDate,
+          start_time: startTime,
+          end_time: endTime,
+          estimated_guests: estimatedGuests,
+          contact_phone: contactPhone,
+          contact_email: contactEmail,
+          total_price: totalPrice,
+          special_requirements: specialRequirements,
+          notes,
+          status: "pending",
+        })
+        .select("*")
+        .single();
+
+      if (error) {
+        throw new Error(
+          "An error occurred while creating event booking: " + error.message
+        );
+      }
+
+      return data;
+    },
+
+    async onSuccess() {
+      await queryClient.invalidateQueries({ queryKey: ["eventBookings"] });
+      await queryClient.invalidateQueries({ queryKey: ["myEventBookings"] });
+    },
+  });
+};
+
+export const getMyEventBookings = () => {
+  const {
+    user: { id },
+  } = useAuth();
+
+  return useQuery({
+    queryKey: ["myEventBookings"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("event_booking")
+        .select(
+          `
+          *,
+          event_venue (
+            name,
+            type,
+            location
+          )
+        `
+        )
+        .eq("user_id", id)
+        .order("created_at", { ascending: false });
+
+      if (error) {
+        throw new Error(
+          "An error occurred while fetching your event bookings: " +
+            error.message
+        );
+      }
+
+      return data;
+    },
+  });
+};
+
+export const updateEventBookingStatus = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    async mutationFn({
+      bookingId,
+      status,
+    }: {
+      bookingId: number;
+      status: string;
+    }) {
+      const { data, error } = await supabase
+        .from("event_booking")
+        .update({ status })
+        .eq("id", bookingId)
+        .select("*")
+        .single();
+
+      if (error) {
+        throw new Error(
+          "An error occurred while updating booking status: " + error.message
+        );
+      }
+
+      return data;
+    },
+
+    async onSuccess() {
+      await queryClient.invalidateQueries({ queryKey: ["eventBookings"] });
+      await queryClient.invalidateQueries({ queryKey: ["myEventBookings"] });
+    },
+  });
+};
+
+// ===== EVENTS AND TICKET SALES FUNCTIONS =====
+
+export const getEvents = () => {
+  return useQuery({
+    queryKey: ["events"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("events")
+        .select(
+          `
+          *,
+          event_venue (
+            id,
+            name,
+            location,
+            type
+          )
+        `
+        )
+        .eq("status", "active")
+        .order("event_date", { ascending: true });
+
+      if (error) {
+        throw new Error(
+          "An error occurred while fetching events: " + error.message
+        );
+      }
+
+      return data;
+    },
+  });
+};
+
+export const getEventsByCategory = (category?: string) => {
+  return useQuery({
+    queryKey: ["events", "category", category],
+    queryFn: async () => {
+      let query = supabase
+        .from("events")
+        .select(
+          `
+          *,
+          event_venue (
+            id,
+            name,
+            location,
+            type
+          )
+        `
+        )
+        .eq("status", "active")
+        .order("event_date", { ascending: true });
+
+      if (category && category !== "All") {
+        query = query.eq("category", category);
+      }
+
+      const { data, error } = await query;
+
+      if (error) {
+        throw new Error(
+          "An error occurred while fetching events: " + error.message
+        );
+      }
+
+      return data;
+    },
+  });
+};
+
+export const getEvent = (eventId: number) => {
+  return useQuery({
+    queryKey: ["event", eventId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("events")
+        .select(
+          `
+          *,
+          event_venue (
+            id,
+            name,
+            location,
+            type,
+            phone,
+            email
+          )
+        `
+        )
+        .eq("id", eventId)
+        .single();
+
+      if (error || !data) {
+        throw new Error(
+          "An error occurred while fetching event: " + error?.message
+        );
+      }
+
+      return data;
+    },
+  });
+};
+
+export const purchaseTickets = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      eventId,
+      quantity,
+      totalPrice,
+    }: {
+      eventId: number;
+      quantity: number;
+      totalPrice: number;
+    }) => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (!user) {
+        throw new Error("User must be authenticated to purchase tickets");
+      }
+
+      // Check if enough tickets are available
+      const { data: event, error: eventError } = await supabase
+        .from("events")
+        .select("available_tickets, status")
+        .eq("id", eventId)
+        .single();
+
+      if (eventError) {
+        throw new Error(
+          "Failed to check event availability: " + eventError.message
+        );
+      }
+
+      if (event.status !== "active") {
+        throw new Error("Event is not available for ticket purchase");
+      }
+
+      if (event.available_tickets < quantity) {
+        throw new Error("Not enough tickets available");
+      }
+
+      // Create ticket purchase
+      const { data, error } = await supabase
+        .from("ticket_purchases")
+        .insert({
+          event_id: eventId,
+          user_id: user.id,
+          quantity,
+          total_price: totalPrice,
+          status: "confirmed",
+        })
+        .select("*")
+        .single();
+
+      if (error) {
+        throw new Error(
+          "An error occurred while purchasing tickets: " + error.message
+        );
+      }
+
+      return data;
+    },
+
+    async onSuccess() {
+      await queryClient.invalidateQueries({ queryKey: ["events"] });
+      await queryClient.invalidateQueries({ queryKey: ["myTickets"] });
+    },
+  });
+};
+
+export const getMyTickets = () => {
+  const { user } = useAuth();
+
+  return useQuery({
+    queryKey: ["myTickets", user?.id],
+    queryFn: async () => {
+      if (!user) {
+        throw new Error("User must be authenticated");
+      }
+
+      const { data, error } = await supabase
+        .from("ticket_purchases")
+        .select(
+          `
+          *,
+          events (
+            id,
+            title,
+            description,
+            event_date,
+            start_time,
+            end_time,
+            image_url,
+            category,
+            event_venue (
+              name,
+              location
+            )
+          )
+        `
+        )
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false });
+
+      if (error) {
+        throw new Error(
+          "An error occurred while fetching your tickets: " + error.message
+        );
+      }
+
+      return data;
+    },
+    enabled: !!user,
+  });
+};
+
+export const cancelTicketPurchase = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ purchaseId }: { purchaseId: number }) => {
+      const { data, error } = await supabase
+        .from("ticket_purchases")
+        .update({ status: "cancelled" })
+        .eq("id", purchaseId)
+        .select("*")
+        .single();
+
+      if (error) {
+        throw new Error(
+          "An error occurred while cancelling ticket purchase: " + error.message
+        );
+      }
+
+      return data;
+    },
+
+    async onSuccess() {
+      await queryClient.invalidateQueries({ queryKey: ["events"] });
+      await queryClient.invalidateQueries({ queryKey: ["myTickets"] });
+    },
+  });
+};
