@@ -275,32 +275,6 @@ const Services = () => {
           </View>
         </View>
 
-        {/* Quick Stats */}
-        <View style={styles.statsSection}>
-          <Text style={styles.sectionTitle}>Why Choose Our Services</Text>
-          <View style={styles.statsGrid}>
-            <View style={styles.statCard}>
-              <MaterialIcons name="verified" size={32} color={COLORS.primary} />
-              <Text style={styles.statNumber}>500+</Text>
-              <Text style={styles.statLabel}>Verified Providers</Text>
-            </View>
-            <View style={styles.statCard}>
-              <MaterialIcons
-                name="schedule"
-                size={32}
-                color={COLORS.secondary}
-              />
-              <Text style={styles.statNumber}>24/7</Text>
-              <Text style={styles.statLabel}>Easy Booking</Text>
-            </View>
-            <View style={styles.statCard}>
-              <MaterialIcons name="star" size={32} color="#FFD700" />
-              <Text style={styles.statNumber}>4.8</Text>
-              <Text style={styles.statLabel}>Average Rating</Text>
-            </View>
-          </View>
-        </View>
-
         {/* Bottom Spacing */}
         <View style={styles.bottomSpacing} />
       </ScrollView>
