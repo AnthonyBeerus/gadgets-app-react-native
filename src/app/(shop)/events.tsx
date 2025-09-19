@@ -1,158 +1,133 @@
+import React, { useState } from "react";
 import {
   View,
   Text,
-  StyleSheet,
   ScrollView,
   TouchableOpacity,
   Image,
-  ActivityIndicator,
+  StyleSheet,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { MaterialIcons } from "@expo/vector-icons";
-import { useState } from "react";
 
 const COLORS = {
-  primary: "#1BC464",
-  secondary: "#FF6B6B",
-  tertiary: "#4ECDC4",
-  quaternary: "#45B7D1",
-  background: "#F8F9FA",
-  white: "#FFFFFF",
-  text: "#1D1D1F",
-  textSecondary: "#8E8E93",
-  border: "#E5E5E7",
-  purple: "#8B5CF6",
-  orange: "#F59E0B",
+  primary: "#007AFF",
+  secondary: "#5856D6",
   success: "#34C759",
+  warning: "#FF9500",
+  danger: "#FF3B30",
+  white: "#FFFFFF",
+  black: "#000000",
+  gray: "#8E8E93",
+  lightGray: "#F2F2F7",
+  border: "#E5E5EA",
+  text: "#1C1C1E",
+  secondaryText: "#6D6D80",
+  background: "#F8F9FA",
 };
 
-// Sample upcoming events at Molapo Crossing Mall
+// Mock data for events
 const upcomingEvents = [
   {
     id: 1,
     title: "Botswana Music Festival",
-    description: "Annual celebration featuring local and international artists",
-    venue: "Molapo Piazza",
-    date: "2025-10-15",
+    date: "2025-02-15",
     time: "18:00",
+    venue: "Main Arena",
     category: "Music",
-    image: require("../../../assets/images/hero.png"),
-    ticketPrice: 150,
-    availableTickets: 450,
+    price: 150,
+    image: "https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=800",
+    description:
+      "Experience the best of Botswana's music scene with top local and international artists.",
     totalTickets: 500,
+    availableTickets: 120,
     featured: true,
-    tags: ["Live Music", "Festival", "Local Artists"],
   },
   {
     id: 2,
-    title: "Comedy Night with Tebogo Lethabo",
-    description: "Stand-up comedy featuring Botswana's top comedians",
-    venue: "Theater",
-    date: "2025-09-25",
-    time: "20:00",
-    category: "Comedy",
-    image: require("../../../assets/images/hero.png"),
-    ticketPrice: 80,
-    availableTickets: 120,
-    totalTickets: 150,
+    title: "Art Exhibition Opening",
+    date: "2025-02-18",
+    time: "17:30",
+    venue: "Gallery Space",
+    category: "Art",
+    price: 75,
+    image: "https://images.unsplash.com/photo-1460661419201-fd4cecdf8a8b?w=800",
+    description:
+      "Discover contemporary African art from emerging and established artists.",
+    totalTickets: 100,
+    availableTickets: 45,
     featured: false,
-    tags: ["Comedy", "Stand-up", "Entertainment"],
   },
   {
     id: 3,
-    title: "Contemporary Art Exhibition Opening",
-    description: "Showcase of contemporary African art by emerging artists",
-    venue: "Art Gallery",
-    date: "2025-09-30",
-    time: "17:00",
-    category: "Art",
-    image: require("../../../assets/images/hero.png"),
-    ticketPrice: 50,
-    availableTickets: 75,
-    totalTickets: 80,
-    featured: true,
-    tags: ["Art", "Exhibition", "Culture"],
+    title: "Comedy Night",
+    date: "2025-02-20",
+    time: "20:00",
+    venue: "Entertainment Hall",
+    category: "Comedy",
+    price: 80,
+    image: "https://images.unsplash.com/photo-1527224857830-43a7acc85260?w=800",
+    description:
+      "A night of laughter with Botswana's funniest comedians and special guests.",
+    totalTickets: 200,
+    availableTickets: 0,
+    featured: false,
   },
   {
     id: 4,
-    title: "Business Summit 2025",
-    description: "Annual business conference featuring industry leaders",
-    venue: "Conference Room",
-    date: "2025-10-05",
-    time: "09:00",
-    category: "Business",
-    image: require("../../../assets/images/hero.png"),
-    ticketPrice: 250,
-    availableTickets: 45,
-    totalTickets: 60,
+    title: "Fashion Show",
+    date: "2025-02-22",
+    time: "19:00",
+    venue: "Central Court",
+    category: "Fashion",
+    price: 120,
+    image: "https://images.unsplash.com/photo-1469334031218-e382a71b716b?w=800",
+    description:
+      "Showcasing the latest collections from top African fashion designers.",
+    totalTickets: 150,
+    availableTickets: 15,
     featured: false,
-    tags: ["Business", "Conference", "Networking"],
   },
   {
     id: 5,
-    title: "Traditional Dance Performance",
-    description: "Cultural performance celebrating Botswana heritage",
-    venue: "Molapo Piazza",
-    date: "2025-10-20",
-    time: "16:00",
-    category: "Culture",
-    image: require("../../../assets/images/hero.png"),
-    ticketPrice: 60,
-    availableTickets: 200,
+    title: "Business Summit 2025",
+    date: "2025-02-25",
+    time: "08:00",
+    venue: "Conference Center",
+    category: "Business",
+    price: 200,
+    image: "https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=800",
+    description:
+      "Connect with industry leaders and explore business opportunities in Botswana.",
     totalTickets: 300,
-    featured: false,
-    tags: ["Culture", "Dance", "Traditional"],
-  },
-  {
-    id: 6,
-    title: "Movie Premiere: African Stories",
-    description: "Exclusive premiere of the latest African cinema",
-    venue: "Theater",
-    date: "2025-10-12",
-    time: "19:30",
-    category: "Film",
-    image: require("../../../assets/images/hero.png"),
-    ticketPrice: 70,
-    availableTickets: 100,
-    totalTickets: 120,
+    availableTickets: 180,
     featured: true,
-    tags: ["Film", "Premiere", "Cinema"],
   },
 ];
 
-const categories = [
-  { name: "All", icon: "event", color: COLORS.primary },
-  { name: "Music", icon: "music-note", color: COLORS.purple },
-  { name: "Comedy", icon: "theater-comedy", color: COLORS.secondary },
-  { name: "Art", icon: "palette", color: COLORS.tertiary },
-  { name: "Business", icon: "business", color: COLORS.quaternary },
-  { name: "Culture", icon: "groups", color: COLORS.orange },
-  { name: "Film", icon: "movie", color: "#DC2626" },
-];
+const categories = ["All", "Music", "Art", "Comedy", "Fashion", "Business"];
 
-const EventCard = ({
-  event,
-  onBuyTickets,
-}: {
-  event: any;
-  onBuyTickets: () => void;
-}) => {
+// Event Card Component
+const EventCard = ({ event, onPress }: { event: any; onPress: () => void }) => {
   const availabilityPercentage =
     (event.availableTickets / event.totalTickets) * 100;
   const isAlmostSoldOut = availabilityPercentage < 20;
   const isSoldOut = event.availableTickets === 0;
 
   return (
-    <View style={[styles.eventCard, event.featured && styles.featuredCard]}>
+    <TouchableOpacity
+      style={[styles.eventCard, event.featured && styles.featuredCard]}
+      onPress={onPress}>
       {event.featured && (
         <View style={styles.featuredBadge}>
           <MaterialIcons name="star" size={14} color={COLORS.white} />
+          <Text style={styles.featuredText}>Featured</Text>
         </View>
       )}
 
-      <Image source={event.image} style={styles.eventImage} />
+      <Image source={{ uri: event.image }} style={styles.eventImage} />
 
-      <View style={styles.eventContent}>
+      <View style={styles.eventInfo}>
         <View style={styles.eventHeader}>
           <Text style={styles.eventTitle} numberOfLines={2}>
             {event.title}
@@ -162,109 +137,75 @@ const EventCard = ({
           </View>
         </View>
 
+        <Text style={styles.eventDescription} numberOfLines={2}>
+          {event.description}
+        </Text>
+
         <View style={styles.eventDetails}>
           <View style={styles.detailRow}>
             <MaterialIcons
-              name="place"
-              size={14}
-              color={COLORS.textSecondary}
-            />
-            <Text style={styles.detailText}>{event.venue}</Text>
-          </View>
-          <View style={styles.detailRow}>
-            <MaterialIcons
-              name="schedule"
-              size={14}
-              color={COLORS.textSecondary}
+              name="calendar-today"
+              size={16}
+              color={COLORS.gray}
             />
             <Text style={styles.detailText}>
-              {new Date(event.date).toLocaleDateString("en-GB")} • {event.time}
+              {new Date(event.date).toLocaleDateString()} at {event.time}
             </Text>
           </View>
+          <View style={styles.detailRow}>
+            <MaterialIcons name="location-on" size={16} color={COLORS.gray} />
+            <Text style={styles.detailText}>{event.venue}</Text>
+          </View>
         </View>
 
-        <View style={styles.ticketInfo}>
-          <View>
-            <Text style={styles.ticketPrice}>P{event.ticketPrice}</Text>
-            {isAlmostSoldOut && !isSoldOut && (
-              <Text style={styles.urgencyText}>
-                Only {event.availableTickets} left!
-              </Text>
-            )}
+        <View style={styles.eventFooter}>
+          <View style={styles.priceContainer}>
+            <Text style={styles.currency}>P</Text>
+            <Text style={styles.price}>{event.price}</Text>
           </View>
 
-          <TouchableOpacity
-            style={[
-              styles.buyButton,
-              isSoldOut && styles.soldOutButton,
-              isAlmostSoldOut && !isSoldOut && styles.almostSoldOutButton,
-            ]}
-            onPress={onBuyTickets}
-            disabled={isSoldOut}>
+          <View style={styles.availabilityContainer}>
             {isSoldOut ? (
-              <Text style={styles.soldOutText}>Sold Out</Text>
+              <View style={styles.soldOutBadge}>
+                <Text style={styles.soldOutText}>SOLD OUT</Text>
+              </View>
             ) : (
               <>
-                <MaterialIcons
-                  name="confirmation-number"
-                  size={16}
-                  color={COLORS.white}
-                />
-                <Text style={styles.buyButtonText}>Buy</Text>
+                <Text
+                  style={[
+                    styles.availabilityText,
+                    isAlmostSoldOut && styles.lowAvailabilityText,
+                  ]}>
+                  {event.availableTickets} left
+                </Text>
+                {isAlmostSoldOut && (
+                  <MaterialIcons
+                    name="warning"
+                    size={16}
+                    color={COLORS.warning}
+                  />
+                )}
               </>
             )}
-          </TouchableOpacity>
+          </View>
         </View>
       </View>
-    </View>
+    </TouchableOpacity>
   );
 };
 
-const CategoryFilter = ({
-  categories,
-  selectedCategory,
-  onSelectCategory,
-}: any) => (
-  <ScrollView
-    horizontal
-    showsHorizontalScrollIndicator={false}
-    style={styles.categoryFilter}
-    contentContainerStyle={styles.categoryFilterContent}>
-    {categories.map((category: any, index: number) => (
-      <TouchableOpacity
-        key={index}
-        style={[
-          styles.categoryButton,
-          selectedCategory === category.name && styles.activeCategoryButton,
-        ]}
-        onPress={() => onSelectCategory(category.name)}>
-        <Text
-          style={[
-            styles.categoryButtonText,
-            selectedCategory === category.name && styles.activeCategoryText,
-          ]}>
-          {category.name}
-        </Text>
-      </TouchableOpacity>
-    ))}
-  </ScrollView>
-);
-
 export default function Events() {
   const [selectedCategory, setSelectedCategory] = useState("All");
-  const [selectedEvent, setSelectedEvent] = useState<any>(null);
 
   const filteredEvents =
     selectedCategory === "All"
       ? upcomingEvents
       : upcomingEvents.filter((event) => event.category === selectedCategory);
 
-  const featuredEvents = upcomingEvents.filter((event) => event.featured);
-  const totalEvents = upcomingEvents.length;
-  const totalAvailableTickets = upcomingEvents.reduce(
-    (sum, event) => sum + event.availableTickets,
-    0
-  );
+  const handleEventPress = (event: any) => {
+    // TODO: Open event details modal or navigate to event details
+    console.log("Selected event:", event.title);
+  };
 
   const handleBuyTickets = (event: any) => {
     // TODO: Open ticket purchase modal
@@ -278,26 +219,90 @@ export default function Events() {
         <View style={styles.header}>
           <Text style={styles.headerTitle}>Events & Shows</Text>
           <Text style={styles.headerSubtitle}>
-            {totalEvents} events • {totalAvailableTickets} tickets available
+            Discover exciting events happening at Molapo Crossing
           </Text>
         </View>
 
-        {/* Category Filter */}
-        <CategoryFilter
-          categories={categories}
-          selectedCategory={selectedCategory}
-          onSelectCategory={setSelectedCategory}
-        />
-
-        {/* Events Section */}
-        <View style={styles.eventsSection}>
-          {filteredEvents.map((event) => (
-            <EventCard
-              key={event.id}
-              event={event}
-              onBuyTickets={() => handleBuyTickets(event)}
+        {/* Quick Stats */}
+        <View style={styles.statsContainer}>
+          <View style={styles.statsCard}>
+            <MaterialIcons
+              name="event"
+              size={24}
+              color={COLORS.primary}
+              style={styles.statsIcon}
             />
-          ))}
+            <View>
+              <Text style={styles.statsNumber}>{upcomingEvents.length}</Text>
+              <Text style={styles.statsLabel}>Upcoming Events</Text>
+            </View>
+          </View>
+
+          <View style={styles.statsCard}>
+            <MaterialIcons
+              name="confirmation-number"
+              size={24}
+              color={COLORS.success}
+              style={styles.statsIcon}
+            />
+            <View>
+              <Text style={styles.statsNumber}>
+                {upcomingEvents.reduce(
+                  (sum, event) => sum + event.availableTickets,
+                  0
+                )}
+              </Text>
+              <Text style={styles.statsLabel}>Tickets Available</Text>
+            </View>
+          </View>
+        </View>
+
+        {/* Category Filter */}
+        <View style={styles.categoryContainer}>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.categoryScrollView}>
+            {categories.map((category) => (
+              <TouchableOpacity
+                key={category}
+                style={[
+                  styles.categoryButton,
+                  selectedCategory === category && styles.activeCategoryButton,
+                ]}
+                onPress={() => setSelectedCategory(category)}>
+                <Text
+                  style={[
+                    styles.categoryButtonText,
+                    selectedCategory === category && styles.activeCategoryText,
+                  ]}>
+                  {category}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+        </View>
+
+        {/* Events List */}
+        <View style={styles.eventsSection}>
+          {filteredEvents.length === 0 ? (
+            <View style={styles.emptyContainer}>
+              <MaterialIcons name="event-busy" size={64} color={COLORS.gray} />
+              <Text style={styles.emptyTitle}>No Events Found</Text>
+              <Text style={styles.emptyMessage}>
+                No events available in the {selectedCategory.toLowerCase()}{" "}
+                category at the moment.
+              </Text>
+            </View>
+          ) : (
+            filteredEvents.map((event) => (
+              <EventCard
+                key={event.id}
+                event={event}
+                onPress={() => handleEventPress(event)}
+              />
+            ))
+          )}
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -311,28 +316,25 @@ const styles = StyleSheet.create({
   },
   header: {
     paddingHorizontal: 20,
-    paddingVertical: 16,
+    paddingVertical: 24,
     backgroundColor: COLORS.white,
-    marginBottom: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.border,
   },
   headerTitle: {
-    fontSize: 24,
+    fontSize: 28,
     fontWeight: "bold",
     color: COLORS.text,
-    marginBottom: 2,
+    marginBottom: 4,
   },
   headerSubtitle: {
-    fontSize: 14,
-    color: COLORS.textSecondary,
+    fontSize: 16,
+    color: COLORS.secondaryText,
   },
-  headerIcon: {
-    backgroundColor: COLORS.background,
-    padding: 12,
-    borderRadius: 12,
-  },
-  statsSection: {
+  statsContainer: {
     flexDirection: "row",
     paddingHorizontal: 20,
+    marginTop: 20,
     marginBottom: 24,
     gap: 12,
   },
@@ -350,305 +352,29 @@ const styles = StyleSheet.create({
     elevation: 4,
   },
   statsIcon: {
-    padding: 8,
-    borderRadius: 8,
     marginRight: 12,
   },
-  statsContent: {
-    flex: 1,
-  },
-  statsValue: {
-    fontSize: 20,
+  statsNumber: {
+    fontSize: 24,
     fontWeight: "bold",
     color: COLORS.text,
   },
-  statsTitle: {
+  statsLabel: {
     fontSize: 12,
-    color: COLORS.textSecondary,
+    color: COLORS.secondaryText,
     marginTop: 2,
   },
-  venuesSection: {
-    paddingHorizontal: 20,
+  categoryContainer: {
+    marginBottom: 24,
   },
-  sectionTitle: {
-    fontSize: 20,
-    fontWeight: "bold",
-    color: COLORS.text,
-    marginBottom: 16,
-  },
-  venueCard: {
-    backgroundColor: COLORS.white,
-    borderRadius: 16,
-    marginBottom: 16,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 12,
-    elevation: 6,
-    overflow: "hidden",
-  },
-  venueImageContainer: {
-    position: "relative",
-    height: 160,
-  },
-  venueImage: {
-    width: "100%",
-    height: "100%",
-    resizeMode: "cover",
-  },
-  iconContainer: {
-    position: "absolute",
-    top: 12,
-    right: 12,
-    padding: 8,
-    borderRadius: 8,
-  },
-  venueContent: {
-    padding: 20,
-  },
-  venueHeader: {
-    marginBottom: 8,
-  },
-  venueName: {
-    fontSize: 20,
-    fontWeight: "bold",
-    color: COLORS.text,
-    marginBottom: 4,
-  },
-  venueType: {
-    fontSize: 14,
-    color: COLORS.textSecondary,
-    fontWeight: "500",
-  },
-  venueLocation: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 12,
-  },
-  locationText: {
-    fontSize: 14,
-    color: COLORS.textSecondary,
-    marginLeft: 4,
-  },
-  venueDescription: {
-    fontSize: 14,
-    color: COLORS.text,
-    lineHeight: 20,
-    marginBottom: 16,
-  },
-  venueDetails: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginBottom: 16,
-  },
-  amenitiesContainer: {
-    marginBottom: 20,
-  },
-  amenitiesTitle: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: COLORS.text,
-    marginBottom: 8,
-  },
-  amenitiesList: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 8,
-  },
-  amenityTag: {
-    backgroundColor: COLORS.background,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: COLORS.border,
-  },
-  amenityText: {
-    fontSize: 12,
-    color: COLORS.textSecondary,
-    fontWeight: "500",
-  },
-  bookButton: {
-    backgroundColor: COLORS.primary,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    paddingVertical: 14,
-    borderRadius: 12,
-    gap: 8,
-  },
-  bookButtonText: {
-    color: COLORS.white,
-    fontSize: 16,
-    fontWeight: "bold",
-  },
-  contactSection: {
-    margin: 20,
-    padding: 20,
-    backgroundColor: COLORS.white,
-    borderRadius: 16,
-    alignItems: "center",
-  },
-  contactTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: COLORS.text,
-    marginBottom: 8,
-    textAlign: "center",
-  },
-  contactText: {
-    fontSize: 14,
-    color: COLORS.textSecondary,
-    textAlign: "center",
-    lineHeight: 20,
-    marginBottom: 16,
-  },
-  contactButton: {
-    backgroundColor: COLORS.quaternary,
-    flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: 20,
-    paddingVertical: 12,
-    borderRadius: 12,
-    gap: 8,
-  },
-  contactButtonText: {
-    color: COLORS.white,
-    fontSize: 14,
-    fontWeight: "600",
-  },
-  // Event-specific styles
-  eventCard: {
-    backgroundColor: COLORS.white,
-    borderRadius: 12,
-    marginBottom: 16,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
-    elevation: 4,
-    overflow: "hidden",
-  },
-  featuredCard: {
-    borderWidth: 2,
-    borderColor: COLORS.secondary,
-  },
-  featuredBadge: {
-    position: "absolute",
-    top: 8,
-    left: 8,
-    backgroundColor: COLORS.secondary,
-    padding: 4,
-    borderRadius: 8,
-    zIndex: 1,
-  },
-  eventImage: {
-    width: "100%",
-    height: 160,
-    resizeMode: "cover",
-  },
-  eventContent: {
-    padding: 16,
-  },
-  eventHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "flex-start",
-    marginBottom: 8,
-  },
-  eventTitle: {
-    fontSize: 16,
-    fontWeight: "bold",
-    color: COLORS.text,
-    flex: 1,
-    marginRight: 8,
-  },
-  categoryBadge: {
-    backgroundColor: COLORS.background,
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: COLORS.border,
-  },
-  categoryText: {
-    fontSize: 12,
-    color: COLORS.textSecondary,
-    fontWeight: "500",
-  },
-  eventDescription: {
-    fontSize: 14,
-    color: COLORS.text,
-    lineHeight: 20,
-    marginBottom: 12,
-  },
-  eventDetails: {
-    marginBottom: 12,
-    gap: 4,
-  },
-  detailRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    flex: 1,
-  },
-  detailText: {
-    fontSize: 13,
-    color: COLORS.text,
-    marginLeft: 4,
-    fontWeight: "500",
-  },
-  ticketInfo: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  ticketPrice: {
-    fontSize: 20,
-    fontWeight: "bold",
-    color: COLORS.primary,
-  },
-  urgencyText: {
-    fontSize: 11,
-    color: COLORS.orange,
-    fontWeight: "600",
-    marginTop: 2,
-  },
-  buyButton: {
-    backgroundColor: COLORS.primary,
-    flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 8,
-    gap: 4,
-  },
-  buyButtonText: {
-    color: COLORS.white,
-    fontSize: 13,
-    fontWeight: "600",
-  },
-  soldOutButton: {
-    backgroundColor: COLORS.textSecondary,
-  },
-  soldOutText: {
-    color: COLORS.white,
-    fontSize: 13,
-    fontWeight: "600",
-  },
-  almostSoldOutButton: {
-    backgroundColor: COLORS.orange,
-  },
-  categoryFilter: {
-    marginBottom: 16,
-  },
-  categoryFilterContent: {
+  categoryScrollView: {
     paddingHorizontal: 20,
     gap: 8,
   },
   categoryButton: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 16,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
     backgroundColor: COLORS.white,
     borderWidth: 1,
     borderColor: COLORS.border,
@@ -658,7 +384,7 @@ const styles = StyleSheet.create({
     borderColor: COLORS.primary,
   },
   categoryButtonText: {
-    fontSize: 13,
+    fontSize: 14,
     fontWeight: "500",
     color: COLORS.text,
   },
@@ -668,5 +394,150 @@ const styles = StyleSheet.create({
   eventsSection: {
     paddingHorizontal: 20,
     paddingBottom: 80,
+  },
+  eventCard: {
+    backgroundColor: COLORS.white,
+    borderRadius: 16,
+    marginBottom: 20,
+    overflow: "hidden",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  featuredCard: {
+    borderWidth: 2,
+    borderColor: COLORS.primary,
+  },
+  featuredBadge: {
+    position: "absolute",
+    top: 12,
+    right: 12,
+    backgroundColor: COLORS.primary,
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+    zIndex: 1,
+    gap: 4,
+  },
+  featuredText: {
+    color: COLORS.white,
+    fontSize: 12,
+    fontWeight: "600",
+  },
+  eventImage: {
+    width: "100%",
+    height: 200,
+    resizeMode: "cover",
+  },
+  eventInfo: {
+    padding: 16,
+  },
+  eventHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
+    marginBottom: 8,
+  },
+  eventTitle: {
+    flex: 1,
+    fontSize: 18,
+    fontWeight: "bold",
+    color: COLORS.text,
+    marginRight: 12,
+  },
+  categoryBadge: {
+    backgroundColor: COLORS.lightGray,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 8,
+  },
+  categoryText: {
+    fontSize: 12,
+    fontWeight: "500",
+    color: COLORS.secondaryText,
+  },
+  eventDescription: {
+    fontSize: 14,
+    color: COLORS.secondaryText,
+    lineHeight: 20,
+    marginBottom: 12,
+  },
+  eventDetails: {
+    gap: 6,
+    marginBottom: 16,
+  },
+  detailRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  detailText: {
+    fontSize: 14,
+    color: COLORS.secondaryText,
+  },
+  eventFooter: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  priceContainer: {
+    flexDirection: "row",
+    alignItems: "baseline",
+  },
+  currency: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: COLORS.text,
+  },
+  price: {
+    fontSize: 24,
+    fontWeight: "bold",
+    color: COLORS.text,
+    marginLeft: 2,
+  },
+  availabilityContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+  },
+  availabilityText: {
+    fontSize: 14,
+    color: COLORS.secondaryText,
+  },
+  lowAvailabilityText: {
+    color: COLORS.warning,
+    fontWeight: "600",
+  },
+  soldOutBadge: {
+    backgroundColor: COLORS.danger,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 6,
+  },
+  soldOutText: {
+    color: COLORS.white,
+    fontSize: 12,
+    fontWeight: "600",
+  },
+  emptyContainer: {
+    alignItems: "center",
+    paddingVertical: 40,
+  },
+  emptyTitle: {
+    fontSize: 20,
+    fontWeight: "bold",
+    color: COLORS.text,
+    marginTop: 16,
+    marginBottom: 8,
+  },
+  emptyMessage: {
+    fontSize: 16,
+    color: COLORS.secondaryText,
+    textAlign: "center",
+    lineHeight: 22,
   },
 });

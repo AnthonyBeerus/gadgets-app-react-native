@@ -11,28 +11,40 @@ export type Database = {
     Tables: {
       category: {
         Row: {
+          appointment_booking: boolean | null;
+          collection: boolean | null;
           created_at: string;
+          delivery: boolean | null;
           id: number;
           imageUrl: string;
           name: string;
           products: number[] | null;
           slug: string;
+          virtual_try_on: boolean | null;
         };
         Insert: {
+          appointment_booking?: boolean | null;
+          collection?: boolean | null;
           created_at?: string;
+          delivery?: boolean | null;
           id?: number;
           imageUrl: string;
           name: string;
           products?: number[] | null;
           slug: string;
+          virtual_try_on?: boolean | null;
         };
         Update: {
+          appointment_booking?: boolean | null;
+          collection?: boolean | null;
           created_at?: string;
+          delivery?: boolean | null;
           id?: number;
           imageUrl?: string;
           name?: string;
           products?: number[] | null;
           slug?: string;
+          virtual_try_on?: boolean | null;
         };
         Relationships: [];
       };
@@ -775,6 +787,285 @@ export type Database = {
             columns: ["id"];
             isOneToOne: true;
             referencedRelation: "users";
+            referencedColumns: ["id"];
+          }
+        ];
+      };
+      appointments: {
+        Row: {
+          appointment_date: string;
+          appointment_time: string;
+          created_at: string;
+          customer_email: string | null;
+          customer_name: string;
+          customer_phone: string;
+          duration_minutes: number | null;
+          id: number;
+          notes: string | null;
+          price: number | null;
+          service_type: string;
+          shop_id: number;
+          special_requests: string | null;
+          status: string | null;
+          updated_at: string;
+          user_id: string;
+        };
+        Insert: {
+          appointment_date: string;
+          appointment_time: string;
+          created_at?: string;
+          customer_email?: string | null;
+          customer_name: string;
+          customer_phone: string;
+          duration_minutes?: number | null;
+          id?: number;
+          notes?: string | null;
+          price?: number | null;
+          service_type: string;
+          shop_id: number;
+          special_requests?: string | null;
+          status?: string | null;
+          updated_at?: string;
+          user_id: string;
+        };
+        Update: {
+          appointment_date?: string;
+          appointment_time?: string;
+          created_at?: string;
+          customer_email?: string | null;
+          customer_name?: string;
+          customer_phone?: string;
+          duration_minutes?: number | null;
+          id?: number;
+          notes?: string | null;
+          price?: number | null;
+          service_type?: string;
+          shop_id?: number;
+          special_requests?: string | null;
+          status?: string | null;
+          updated_at?: string;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "appointments_shop_id_fkey";
+            columns: ["shop_id"];
+            isOneToOne: false;
+            referencedRelation: "shops";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "appointments_user_id_fkey";
+            columns: ["user_id"];
+            isOneToOne: false;
+            referencedRelation: "users";
+            referencedColumns: ["id"];
+          }
+        ];
+      };
+      delivery_orders: {
+        Row: {
+          actual_delivery_time: string | null;
+          collection_time: string | null;
+          created_at: string;
+          delivery_address: string | null;
+          delivery_fee: number | null;
+          delivery_notes: string | null;
+          delivery_person_name: string | null;
+          delivery_person_phone: string | null;
+          delivery_phone: string;
+          delivery_type: string;
+          estimated_delivery_time: string | null;
+          id: number;
+          order_id: number;
+          shop_id: number;
+          status: string | null;
+          tracking_number: string | null;
+          updated_at: string;
+        };
+        Insert: {
+          actual_delivery_time?: string | null;
+          collection_time?: string | null;
+          created_at?: string;
+          delivery_address?: string | null;
+          delivery_fee?: number | null;
+          delivery_notes?: string | null;
+          delivery_person_name?: string | null;
+          delivery_person_phone?: string | null;
+          delivery_phone: string;
+          delivery_type: string;
+          estimated_delivery_time?: string | null;
+          id?: number;
+          order_id: number;
+          shop_id: number;
+          status?: string | null;
+          tracking_number?: string | null;
+          updated_at?: string;
+        };
+        Update: {
+          actual_delivery_time?: string | null;
+          collection_time?: string | null;
+          created_at?: string;
+          delivery_address?: string | null;
+          delivery_fee?: number | null;
+          delivery_notes?: string | null;
+          delivery_person_name?: string | null;
+          delivery_person_phone?: string | null;
+          delivery_phone?: string;
+          delivery_type?: string;
+          estimated_delivery_time?: string | null;
+          id?: number;
+          order_id?: number;
+          shop_id?: number;
+          status?: string | null;
+          tracking_number?: string | null;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "delivery_orders_order_id_fkey";
+            columns: ["order_id"];
+            isOneToOne: false;
+            referencedRelation: "order";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "delivery_orders_shop_id_fkey";
+            columns: ["shop_id"];
+            isOneToOne: false;
+            referencedRelation: "shops";
+            referencedColumns: ["id"];
+          }
+        ];
+      };
+      shop_reviews: {
+        Row: {
+          created_at: string;
+          id: number;
+          is_verified_purchase: boolean | null;
+          order_id: number | null;
+          rating: number;
+          review_text: string | null;
+          shop_id: number;
+          updated_at: string;
+          user_id: string;
+        };
+        Insert: {
+          created_at?: string;
+          id?: number;
+          is_verified_purchase?: boolean | null;
+          order_id?: number | null;
+          rating: number;
+          review_text?: string | null;
+          shop_id: number;
+          updated_at?: string;
+          user_id: string;
+        };
+        Update: {
+          created_at?: string;
+          id?: number;
+          is_verified_purchase?: boolean | null;
+          order_id?: number | null;
+          rating?: number;
+          review_text?: string | null;
+          shop_id?: number;
+          updated_at?: string;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "shop_reviews_order_id_fkey";
+            columns: ["order_id"];
+            isOneToOne: false;
+            referencedRelation: "order";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "shop_reviews_shop_id_fkey";
+            columns: ["shop_id"];
+            isOneToOne: false;
+            referencedRelation: "shops";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "shop_reviews_user_id_fkey";
+            columns: ["user_id"];
+            isOneToOne: false;
+            referencedRelation: "users";
+            referencedColumns: ["id"];
+          }
+        ];
+      };
+      shops: {
+        Row: {
+          category_id: number;
+          created_at: string;
+          delivery_fee: number | null;
+          description: string | null;
+          estimated_delivery_time: string | null;
+          has_appointment_booking: boolean | null;
+          has_collection: boolean | null;
+          has_delivery: boolean | null;
+          has_online_ordering: boolean | null;
+          has_virtual_try_on: boolean | null;
+          id: number;
+          image_url: string | null;
+          is_featured: boolean | null;
+          location: string | null;
+          minimum_order_amount: number | null;
+          name: string;
+          opening_hours: Json | null;
+          phone: string | null;
+          rating: number | null;
+        };
+        Insert: {
+          category_id: number;
+          created_at?: string;
+          delivery_fee?: number | null;
+          description?: string | null;
+          estimated_delivery_time?: string | null;
+          has_appointment_booking?: boolean | null;
+          has_collection?: boolean | null;
+          has_delivery?: boolean | null;
+          has_online_ordering?: boolean | null;
+          has_virtual_try_on?: boolean | null;
+          id?: number;
+          image_url?: string | null;
+          is_featured?: boolean | null;
+          location?: string | null;
+          minimum_order_amount?: number | null;
+          name: string;
+          opening_hours?: Json | null;
+          phone?: string | null;
+          rating?: number | null;
+        };
+        Update: {
+          category_id?: number;
+          created_at?: string;
+          delivery_fee?: number | null;
+          description?: string | null;
+          estimated_delivery_time?: string | null;
+          has_appointment_booking?: boolean | null;
+          has_collection?: boolean | null;
+          has_delivery?: boolean | null;
+          has_online_ordering?: boolean | null;
+          has_virtual_try_on?: boolean | null;
+          id?: number;
+          image_url?: string | null;
+          is_featured?: boolean | null;
+          location?: string | null;
+          minimum_order_amount?: number | null;
+          name?: string;
+          opening_hours?: Json | null;
+          phone?: string | null;
+          rating?: number | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "shops_category_id_fkey";
+            columns: ["category_id"];
+            isOneToOne: false;
+            referencedRelation: "category";
             referencedColumns: ["id"];
           }
         ];
