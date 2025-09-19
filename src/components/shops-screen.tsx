@@ -12,6 +12,7 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
 import {
   getShops,
   getCategoriesWithShopFeatures,
@@ -29,6 +30,7 @@ interface ShopWithCategory extends Shop {
 }
 
 export default function ShopsScreen() {
+  const router = useRouter();
   const [shops, setShops] = useState<ShopWithCategory[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
@@ -119,6 +121,10 @@ export default function ShopsScreen() {
     }
   };
 
+  const navigateToShop = (shopId: number) => {
+    router.push(`/shop/${shopId}`);
+  };
+
   const features = [
     { key: "has_delivery", label: "Delivery", icon: "bicycle" },
     { key: "has_collection", label: "Collection", icon: "bag-handle" },
@@ -127,7 +133,10 @@ export default function ShopsScreen() {
   ];
 
   const renderShopCard = ({ item }: { item: ShopWithCategory }) => (
-    <View style={styles.shopCard}>
+    <TouchableOpacity
+      style={styles.shopCard}
+      onPress={() => navigateToShop(item.id)}
+      activeOpacity={0.7}>
       {item.image_url && (
         <Image source={{ uri: item.image_url }} style={styles.shopImage} />
       )}
@@ -199,7 +208,7 @@ export default function ShopsScreen() {
           </Text>
         )}
       </View>
-    </View>
+    </TouchableOpacity>
   );
 
   const renderCategoryChip = ({ item }: { item: Category }) => (
@@ -249,15 +258,15 @@ export default function ShopsScreen() {
     <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.title}>Molapo Crossing Mall</Text>
-        <Text style={styles.subtitle}>{shops.length} shops available</Text>
+        <Text style={styles.title}>Molapo Crossing</Text>
+        <Text style={styles.subtitle}>{shops.length} shops</Text>
       </View>
 
       {/* Search Bar */}
       <View style={styles.searchContainer}>
         <Ionicons
           name="search"
-          size={20}
+          size={18}
           color="#666"
           style={styles.searchIcon}
         />
@@ -269,8 +278,9 @@ export default function ShopsScreen() {
         />
       </View>
 
-      {/* Feature Filters */}
-      <View style={styles.filtersContainer}>
+      {/* Filters Combined */}
+      <View style={styles.filtersWrapper}>
+        {/* Feature Filters */}
         <FlatList
           data={features}
           horizontal
@@ -279,10 +289,8 @@ export default function ShopsScreen() {
           keyExtractor={(item) => item.key}
           contentContainerStyle={styles.filtersContent}
         />
-      </View>
 
-      {/* Category Filters */}
-      <View style={styles.categoriesContainer}>
+        {/* Category Filters */}
         <FlatList
           data={categories}
           horizontal
@@ -346,21 +354,21 @@ const styles = StyleSheet.create({
   },
   header: {
     paddingHorizontal: 20,
-    paddingTop: 20,
-    paddingBottom: 16,
+    paddingTop: 16,
+    paddingBottom: 12,
     backgroundColor: "#fff",
     borderBottomWidth: 1,
     borderBottomColor: "#f0f0f0",
   },
   title: {
-    fontSize: 28,
+    fontSize: 24,
     fontWeight: "bold",
     color: "#212529",
   },
   subtitle: {
-    fontSize: 16,
+    fontSize: 14,
     color: "#6c757d",
-    marginTop: 4,
+    marginTop: 2,
     fontWeight: "400",
   },
   searchContainer: {
@@ -369,10 +377,10 @@ const styles = StyleSheet.create({
     backgroundColor: "#f8f9fa",
     marginHorizontal: 16,
     marginTop: 8,
-    marginBottom: 16,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderRadius: 16,
+    marginBottom: 8,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    borderRadius: 12,
     borderWidth: 1,
     borderColor: "#e9ecef",
   },
@@ -381,26 +389,29 @@ const styles = StyleSheet.create({
   },
   searchInput: {
     flex: 1,
-    fontSize: 16,
+    fontSize: 15,
     color: "#333",
   },
+  filtersWrapper: {
+    marginBottom: 16,
+  },
   filtersContainer: {
-    maxHeight: 60,
-    marginBottom: 12,
-    paddingVertical: 4,
+    maxHeight: 50,
+    marginBottom: 8,
+    paddingVertical: 2,
   },
   filtersContent: {
     paddingHorizontal: 16,
-    paddingVertical: 4,
+    paddingVertical: 2,
   },
   featureChip: {
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: "#fff",
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderRadius: 24,
-    marginRight: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 20,
+    marginRight: 8,
     borderWidth: 1.5,
     borderColor: "#e9ecef",
     shadowColor: "#000",
@@ -417,7 +428,7 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   featureChipText: {
-    fontSize: 12,
+    fontSize: 11,
     color: "#666",
     marginLeft: 4,
   },
@@ -425,20 +436,20 @@ const styles = StyleSheet.create({
     color: "#fff",
   },
   categoriesContainer: {
-    maxHeight: 60,
-    marginBottom: 20,
-    paddingVertical: 4,
+    maxHeight: 50,
+    marginBottom: 8,
+    paddingVertical: 2,
   },
   categoriesContent: {
     paddingHorizontal: 16,
-    paddingVertical: 4,
+    paddingVertical: 2,
   },
   categoryChip: {
     backgroundColor: "#fff",
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    borderRadius: 24,
-    marginRight: 10,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+    marginRight: 8,
     borderWidth: 1.5,
     borderColor: "#e9ecef",
     shadowColor: "#000",
@@ -455,7 +466,7 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   categoryChipText: {
-    fontSize: 14,
+    fontSize: 13,
     color: "#666",
   },
   selectedCategoryChipText: {
@@ -471,7 +482,7 @@ const styles = StyleSheet.create({
   shopCard: {
     backgroundColor: "#fff",
     borderRadius: 16,
-    marginBottom: 20,
+    marginBottom: 16,
     marginHorizontal: 4,
     overflow: "hidden",
     elevation: 3,
@@ -482,11 +493,11 @@ const styles = StyleSheet.create({
   },
   shopImage: {
     width: "100%",
-    height: 180,
+    height: 150,
     resizeMode: "cover",
   },
   shopInfo: {
-    padding: 20,
+    padding: 16,
   },
   shopHeader: {
     flexDirection: "row",
@@ -495,7 +506,7 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   shopName: {
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: "bold",
     color: "#212529",
     flex: 1,
@@ -515,16 +526,16 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   categoryName: {
-    fontSize: 14,
+    fontSize: 13,
     color: "#007AFF",
-    marginBottom: 8,
+    marginBottom: 6,
     fontWeight: "600",
   },
   description: {
-    fontSize: 15,
+    fontSize: 14,
     color: "#6c757d",
-    lineHeight: 22,
-    marginBottom: 16,
+    lineHeight: 20,
+    marginBottom: 12,
   },
   shopDetails: {
     flexDirection: "row",
