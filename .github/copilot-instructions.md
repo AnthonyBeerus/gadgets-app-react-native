@@ -49,9 +49,10 @@ Never modify this order - it ensures proper initialization dependencies.
 
 ### Supabase Integration
 
-- Custom encrypted storage: `src/lib/supabase.ts` uses AES encryption for large tokens
-- Database types: Auto-generated in `src/types/database.types.ts`
+- Custom encrypted storage: `src/lib/supabase.ts` uses AES encryption for large tokens via `LargeSecureStore` class
+- Database types: Auto-generated in `src/types/database.types.ts` from Supabase schema
 - Pattern: Always use `Tables<'table_name'>` type for database entities
+- Real-time subscriptions: Use Supabase channels for live updates (see `src/api/subscriptions.ts`)
 - API calls in `src/api/api.ts` follow React Query patterns with proper error handling
 
 ## Development Workflows
@@ -67,6 +68,7 @@ Never modify this order - it ensures proper initialization dependencies.
 - Development: `npm run android/ios` for emulators
 - EAS builds configured in `eas.json` with development/preview/production profiles
 - Uses `expo-router/entry` as main entry point in `package.json`
+- Environment variables must have `EXPO_PUBLIC_` prefix for client access
 
 ## Code Conventions
 
@@ -76,24 +78,26 @@ Never modify this order - it ensures proper initialization dependencies.
 - Props destructuring: `{ product }: { product: Tables<'product'> }`
 - Styling: StyleSheet.create() at component bottom
 - File naming: kebab-case for components (`product-list-item.tsx`)
+- Navigation: Use `Link` from `expo-router` with `asChild` prop for custom components
 
 ### API Integration
 
-- Use React Query hooks from `src/api/api.ts` (main products/services/events)
-- Shop-specific APIs in `src/api/shops.ts`
-- Pattern: `const { data, error, isLoading } = getProductsAndCategories()`
+- **React Query hooks** in `src/api/api.ts`: `const { data, error, isLoading } = getProductsAndCategories()`
+- **Async functions** in `src/api/shops.ts`: Direct Supabase calls for shop-specific operations
 - Multi-domain queries: Services (`getServiceCategories`, `getServicesByCategory`), Events (`getEvents`, `getEventsByCategory`), Shops (`getShops`, `getShopsByCategory`)
 - Always handle loading/error states in components
-- Mutations use `useMutation` with proper invalidation
+- Mutations use `useMutation` with proper invalidation: `queryClient.invalidateQueries({ queryKey: ["orders"] })`
 - Service bookings: `createServiceBooking()` mutation
 - Event tickets: `createTicketPurchase()` mutation
+- Real-time updates: Use `supabase.channel()` for live data subscriptions
 
 ### Cart Management
 
 - Global cart state via `useCartStore()` hook
 - Cart items include `maxQuantity` constraint checking
-- Price calculations return strings (formatted currency)
+- Price calculations return formatted strings (e.g., `"$29.99"`)
 - Cart operations: `addItem`, `removeItem`, `incrementItem`, `decrementItem`
+- Quantity validation: `Math.min(quantity, maxQuantity)` to respect inventory limits
 
 ### TypeScript Patterns
 
@@ -101,26 +105,29 @@ Never modify this order - it ensures proper initialization dependencies.
 - Asset types in `assets/types/` for static data structures
 - Use `Tables<'table_name'>` for Supabase entity types
 - Strict null checking - handle undefined/null explicitly
+- Extended types: `ProductWithShop = Tables<'product'> & { shops?: {...} }`
 
 ## Critical Integration Points
 
 ### Authentication Flow
 
-- Supabase auth with custom encrypted session storage
+- Supabase auth with custom encrypted session storage (`LargeSecureStore`)
 - Session management in `AuthProvider` with mounting state
 - Protected routes check session state, redirect to `/auth`
+- User profile data fetched separately from auth session
 
 ### Payment Processing
 
 - Stripe integration in checkout flow
 - Stripe functions in `supabase/functions/stripe-checkout/`
 - Payment methods handled server-side, not in React Native app
+- Customer IDs stored in user profiles (`stripe_customer_id`)
 
 ### Notifications
 
 - Expo notifications with device token storage
 - Notification provider wraps app for push notification handling
-- Tokens stored in Supabase user profiles
+- Tokens stored in Supabase user profiles (`expo_notification_token`)
 
 ### Service Booking System
 
@@ -150,10 +157,12 @@ Never modify this order - it ensures proper initialization dependencies.
 ## File Structure Guidelines
 
 - Components: `src/components/` - reusable UI components
-- Screens: `src/app/` - file-based routes
+- Screens: `src/app/` - file-based routes (Expo Router)
 - Logic: `src/api/` for data fetching, `src/store/` for state
 - Utils: `src/utils/` for helper functions
 - Assets: Local images in `assets/images/`, types in `assets/types/`
+- Providers: `src/providers/` for React context providers
+- Lib: `src/lib/` for external service configurations
 
 ## Common Pitfalls
 
@@ -162,3 +171,5 @@ Never modify this order - it ensures proper initialization dependencies.
 - Use `Tables<'table_name'>` not manual type definitions for Supabase data
 - Cart quantity changes must respect `maxQuantity` constraints
 - Always wrap async operations in try/catch with proper error handling
+- Shop APIs use direct async functions, not React Query hooks
+- Real-time subscriptions require proper cleanup in useEffect return functions
