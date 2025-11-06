@@ -123,11 +123,23 @@ export default function ResultOverlay({
           <Text style={styles.errorTitle}>❌ Processing Failed</Text>
           <Text style={styles.errorText}>{error}</Text>
           <View style={styles.buttonContainer}>
-            <TouchableOpacity style={styles.retryButton} onPress={onRetry}>
-              <Text style={styles.retryButtonText}>Try Again</Text>
+            <TouchableOpacity
+              style={styles.retryButton}
+              onPress={onRetry}
+              activeOpacity={0.8}>
+              <View style={styles.buttonContent}>
+                <Text style={styles.buttonIcon}>🔄</Text>
+                <Text style={styles.retryButtonText}>Try Again</Text>
+              </View>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.closeButton} onPress={onClose}>
-              <Text style={styles.closeButtonText}>Close</Text>
+            <TouchableOpacity
+              style={styles.closeButton}
+              onPress={onClose}
+              activeOpacity={0.8}>
+              <View style={styles.buttonContent}>
+                <Text style={styles.buttonIcon}>✕</Text>
+                <Text style={styles.closeButtonText}>Close</Text>
+              </View>
             </TouchableOpacity>
           </View>
         </View>
@@ -157,15 +169,28 @@ export default function ResultOverlay({
           <TouchableOpacity
             style={[styles.saveButton, isSaving && styles.disabledButton]}
             onPress={handleSaveImage}
-            disabled={isSaving}>
+            disabled={isSaving}
+            activeOpacity={0.8}>
             {isSaving ? (
-              <ActivityIndicator color="white" />
+              <View style={styles.buttonContent}>
+                <ActivityIndicator color="white" size="small" />
+                <Text style={styles.saveButtonText}>Saving...</Text>
+              </View>
             ) : (
-              <Text style={styles.saveButtonText}>💾 Save Image</Text>
+              <View style={styles.buttonContent}>
+                <Text style={styles.buttonIcon}>💾</Text>
+                <Text style={styles.saveButtonText}>Save</Text>
+              </View>
             )}
           </TouchableOpacity>
-          <TouchableOpacity style={styles.closeButton} onPress={onClose}>
-            <Text style={styles.closeButtonText}>Close</Text>
+          <TouchableOpacity
+            style={styles.closeButton}
+            onPress={onClose}
+            activeOpacity={0.8}>
+            <View style={styles.buttonContent}>
+              <Text style={styles.buttonIcon}>✕</Text>
+              <Text style={styles.closeButtonText}>Close</Text>
+            </View>
           </TouchableOpacity>
         </View>
       </View>
@@ -176,105 +201,146 @@ export default function ResultOverlay({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "rgba(0, 0, 0, 0.8)",
+    backgroundColor: "rgba(0, 0, 0, 0.85)",
     justifyContent: "center",
     alignItems: "center",
+    padding: 20,
   },
   content: {
     backgroundColor: "white",
-    borderRadius: 20,
-    padding: 20,
-    margin: 20,
+    borderRadius: 24,
+    padding: 24,
     alignItems: "center",
-    maxWidth: 400,
-    width: "90%",
+    maxWidth: 420,
+    width: "100%",
+    elevation: 10,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.3,
+    shadowRadius: 16,
   },
   processingText: {
-    fontSize: 18,
-    fontWeight: "600",
-    marginTop: 15,
+    fontSize: 20,
+    fontWeight: "700",
+    marginTop: 20,
     textAlign: "center",
+    color: "#333",
   },
   subText: {
-    fontSize: 14,
+    fontSize: 16,
     color: "#666",
-    marginTop: 5,
+    marginTop: 8,
     textAlign: "center",
+    lineHeight: 22,
   },
   errorTitle: {
-    fontSize: 20,
+    fontSize: 24,
     fontWeight: "bold",
     color: "#FF3B30",
-    marginBottom: 10,
+    marginBottom: 12,
     textAlign: "center",
   },
   errorText: {
     fontSize: 16,
     color: "#666",
     textAlign: "center",
-    marginBottom: 20,
+    marginBottom: 24,
+    lineHeight: 24,
+    paddingHorizontal: 8,
   },
   successTitle: {
-    fontSize: 20,
+    fontSize: 24,
     fontWeight: "bold",
-    color: "#34C759",
-    marginBottom: 15,
+    color: "#9C27B0",
+    marginBottom: 20,
     textAlign: "center",
   },
   resultImage: {
-    width: 300,
-    height: 400,
-    borderRadius: 15,
-    marginBottom: 15,
-    backgroundColor: "#f0f0f0", // Add background to see if component renders
+    width: "100%",
+    aspectRatio: 3 / 4,
+    borderRadius: 16,
+    marginBottom: 20,
+    backgroundColor: "#f5f5f5",
+    borderWidth: 2,
+    borderColor: "#9C27B0",
   },
   resultText: {
-    fontSize: 16,
-    marginBottom: 20,
+    fontSize: 18,
+    marginBottom: 24,
     textAlign: "center",
+    color: "#333",
+    fontWeight: "600",
   },
   buttonContainer: {
     flexDirection: "row",
-    gap: 10,
+    gap: 12,
     width: "100%",
+  },
+  buttonContent: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+  },
+  buttonIcon: {
+    fontSize: 20,
+    color: "white",
   },
   retryButton: {
     flex: 1,
-    backgroundColor: "#007AFF",
-    padding: 12,
-    borderRadius: 8,
+    backgroundColor: "#9C27B0",
+    paddingVertical: 16,
+    paddingHorizontal: 20,
+    borderRadius: 12,
     alignItems: "center",
+    elevation: 3,
+    shadowColor: "#9C27B0",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
   },
   retryButtonText: {
     color: "white",
     fontSize: 16,
-    fontWeight: "600",
+    fontWeight: "bold",
   },
   saveButton: {
     flex: 1,
     backgroundColor: "#34C759",
-    padding: 12,
-    borderRadius: 8,
+    paddingVertical: 16,
+    paddingHorizontal: 20,
+    borderRadius: 12,
     alignItems: "center",
+    elevation: 3,
+    shadowColor: "#34C759",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
   },
   saveButtonText: {
     color: "white",
     fontSize: 16,
-    fontWeight: "600",
+    fontWeight: "bold",
   },
   disabledButton: {
     opacity: 0.6,
   },
   closeButton: {
     flex: 1,
-    backgroundColor: "#8E8E93",
-    padding: 12,
-    borderRadius: 8,
+    backgroundColor: "#666",
+    paddingVertical: 16,
+    paddingHorizontal: 20,
+    borderRadius: 12,
     alignItems: "center",
+    elevation: 2,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
   },
   closeButtonText: {
     color: "white",
     fontSize: 16,
-    fontWeight: "600",
+    fontWeight: "bold",
   },
 });
