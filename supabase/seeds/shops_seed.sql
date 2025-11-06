@@ -198,8 +198,13 @@ INSERT INTO public.shops (
     'Affordable electronics, gadgets, and tech accessories at discounted prices',
     'Ground Floor, Central Court',
     '+267 123 4572',
+    'b4u@molapo.co.bw',
     '{"monday": "08:00-19:00", "tuesday": "08:00-19:00", "wednesday": "08:00-19:00", "thursday": "08:00-19:00", "friday": "08:00-20:00", "saturday": "08:00-20:00", "sunday": "09:00-18:00"}',
     'https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=800',
+    NULL,
+    NULL,
+    'b4u_discount',
+    NULL,
     TRUE,
     TRUE,
     TRUE,
@@ -209,7 +214,9 @@ INSERT INTO public.shops (
     150.00,
     '1-2 days',
     TRUE,
-    4.1
+    TRUE,
+    4.1,
+    52
 ),
 (
     'Viva Computers',
@@ -217,8 +224,13 @@ INSERT INTO public.shops (
     'Complete computer solutions, laptops, desktops, and IT support services',
     'First Floor, Tech Hub',
     '+267 123 4573',
+    'viva@molapo.co.bw',
     '{"monday": "08:00-18:00", "tuesday": "08:00-18:00", "wednesday": "08:00-18:00", "thursday": "08:00-18:00", "friday": "08:00-19:00", "saturday": "08:00-19:00", "sunday": "09:00-17:00"}',
     'https://images.unsplash.com/photo-1547394765-185e1e68f34e?w=800',
+    NULL,
+    NULL,
+    'viva_computers',
+    NULL,
     TRUE,
     TRUE,
     TRUE,
@@ -228,7 +240,9 @@ INSERT INTO public.shops (
     500.00,
     '2-3 days',
     FALSE,
-    4.5
+    TRUE,
+    4.5,
+    89
 ),
 (
     'Coupons',
@@ -236,8 +250,13 @@ INSERT INTO public.shops (
     'Mobile accessories, phone repairs, and telecommunications products',
     'Ground Floor, Mobile Zone',
     '+267 123 4574',
+    'coupons@molapo.co.bw',
     '{"monday": "08:00-19:00", "tuesday": "08:00-19:00", "wednesday": "08:00-19:00", "thursday": "08:00-19:00", "friday": "08:00-20:00", "saturday": "08:00-20:00", "sunday": "09:00-18:00"}',
     'https://images.unsplash.com/photo-1512054502232-10a0a035d672?w=800',
+    NULL,
+    NULL,
+    'coupons_molapo',
+    NULL,
     TRUE,
     TRUE,
     TRUE,
@@ -247,7 +266,9 @@ INSERT INTO public.shops (
     100.00,
     '1 day',
     FALSE,
-    4.0
+    TRUE,
+    4.0,
+    31
 ),
 
 -- HAIR CARE CATEGORY (ID: 4)
@@ -257,8 +278,13 @@ INSERT INTO public.shops (
     'Professional hair salon offering cuts, styling, coloring, and treatments',
     'First Floor, Beauty Wing',
     '+267 123 4575',
+    'hairstranz@molapo.co.bw',
     '{"monday": "09:00-18:00", "tuesday": "09:00-18:00", "wednesday": "09:00-18:00", "thursday": "09:00-18:00", "friday": "09:00-19:00", "saturday": "08:00-19:00", "sunday": "10:00-17:00"}',
     'https://images.unsplash.com/photo-1560066984-138dadb4c035?w=800',
+    NULL,
+    NULL,
+    'hairstranz_salon',
+    NULL,
     TRUE,
     FALSE,
     FALSE,
@@ -268,7 +294,9 @@ INSERT INTO public.shops (
     0,
     NULL,
     TRUE,
-    4.6
+    TRUE,
+    4.6,
+    142
 ),
 (
     'Doll Life',
@@ -276,8 +304,13 @@ INSERT INTO public.shops (
     'Full-service beauty salon specializing in hair styling, makeup, and beauty treatments',
     'First Floor, Beauty Wing',
     '+267 123 4576',
+    'dolllife@molapo.co.bw',
     '{"monday": "09:00-18:00", "tuesday": "09:00-18:00", "wednesday": "09:00-18:00", "thursday": "09:00-18:00", "friday": "09:00-19:00", "saturday": "08:00-19:00", "sunday": "10:00-17:00"}',
     'https://images.unsplash.com/photo-1562322140-8baeececf3df?w=800',
+    NULL,
+    NULL,
+    'dolllife_beauty',
+    NULL,
     TRUE,
     FALSE,
     FALSE,
@@ -287,7 +320,9 @@ INSERT INTO public.shops (
     0,
     NULL,
     FALSE,
-    4.4
+    TRUE,
+    4.4,
+    98
 ),
 (
     'Cutting Line Studio',
@@ -295,8 +330,13 @@ INSERT INTO public.shops (
     'Modern hair studio offering precision cuts, styling, and hair care services',
     'First Floor, Beauty Wing',
     '+267 123 4577',
+    'cuttingline@molapo.co.bw',
     '{"monday": "09:00-18:00", "tuesday": "09:00-18:00", "wednesday": "09:00-18:00", "thursday": "09:00-18:00", "friday": "09:00-19:00", "saturday": "08:00-19:00", "sunday": "10:00-17:00"}',
     'https://images.unsplash.com/photo-1521590832167-7bcbfaa6381f?w=800',
+    NULL,
+    NULL,
+    'cuttingline_studio',
+    NULL,
     TRUE,
     FALSE,
     FALSE,
@@ -306,7 +346,9 @@ INSERT INTO public.shops (
     0,
     NULL,
     FALSE,
-    4.3
+    TRUE,
+    4.3,
+    76
 ),
 
 -- HEALTH CATEGORY (ID: 5)
@@ -316,8 +358,13 @@ INSERT INTO public.shops (
     'Full-service pharmacy with prescription medications, health products, and wellness advice',
     'Ground Floor, Health Center',
     '+267 123 4578',
+    'clinicare@molapo.co.bw',
     '{"monday": "08:00-20:00", "tuesday": "08:00-20:00", "wednesday": "08:00-20:00", "thursday": "08:00-20:00", "friday": "08:00-20:00", "saturday": "08:00-20:00", "sunday": "09:00-18:00"}',
     'https://images.unsplash.com/photo-1576091160399-112ba8d25d1f?w=800',
+    NULL,
+    NULL,
+    'clinicare_pharmacy',
+    NULL,
     TRUE,
     TRUE,
     TRUE,
@@ -327,7 +374,9 @@ INSERT INTO public.shops (
     75.00,
     '30-60 minutes',
     TRUE,
-    4.5
+    TRUE,
+    4.5,
+    203
 ),
 (
     'Health Alternatives',
@@ -335,8 +384,13 @@ INSERT INTO public.shops (
     'Alternative health solutions, supplements, and natural wellness products',
     'Ground Floor, Health Center',
     '+267 123 4579',
+    'healthalt@molapo.co.bw',
     '{"monday": "08:00-18:00", "tuesday": "08:00-18:00", "wednesday": "08:00-18:00", "thursday": "08:00-18:00", "friday": "08:00-19:00", "saturday": "08:00-19:00", "sunday": "09:00-17:00"}',
     'https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=800',
+    NULL,
+    NULL,
+    'healthalternatives',
+    NULL,
     TRUE,
     TRUE,
     TRUE,
@@ -346,7 +400,9 @@ INSERT INTO public.shops (
     100.00,
     '45-60 minutes',
     FALSE,
-    4.2
+    TRUE,
+    4.2,
+    67
 ),
 (
     'Smile Time Dentist',
@@ -354,8 +410,13 @@ INSERT INTO public.shops (
     'Professional dental services including checkups, cleaning, and cosmetic dentistry',
     'First Floor, Medical Suite',
     '+267 123 4580',
+    'smiletime@molapo.co.bw',
     '{"monday": "08:00-17:00", "tuesday": "08:00-17:00", "wednesday": "08:00-17:00", "thursday": "08:00-17:00", "friday": "08:00-17:00", "saturday": "08:00-14:00", "sunday": "closed"}',
     'https://images.unsplash.com/photo-1629909613654-28e377c37b09?w=800',
+    NULL,
+    NULL,
+    'smiletime_dentist',
+    NULL,
     FALSE,
     FALSE,
     FALSE,
@@ -365,7 +426,9 @@ INSERT INTO public.shops (
     0,
     NULL,
     FALSE,
-    4.7
+    TRUE,
+    4.7,
+    154
 ),
 
 -- RESTAURANTS CATEGORY (ID: 6)
@@ -375,8 +438,13 @@ INSERT INTO public.shops (
     'Popular restaurant chain serving steaks, burgers, and family-friendly meals',
     'Ground Floor, Food Court',
     '+267 123 4581',
+    'dros@molapo.co.bw',
     '{"monday": "11:00-22:00", "tuesday": "11:00-22:00", "wednesday": "11:00-22:00", "thursday": "11:00-22:00", "friday": "11:00-23:00", "saturday": "11:00-23:00", "sunday": "11:00-22:00"}',
     'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800',
+    NULL,
+    NULL,
+    'dros_molapo',
+    NULL,
     TRUE,
     TRUE,
     TRUE,
@@ -386,7 +454,9 @@ INSERT INTO public.shops (
     150.00,
     '30-45 minutes',
     TRUE,
-    4.4
+    TRUE,
+    4.4,
+    312
 ),
 (
     'Cappello',
@@ -394,8 +464,13 @@ INSERT INTO public.shops (
     'Italian cuisine and fine dining with authentic pasta, pizza, and Mediterranean dishes',
     'First Floor, Premium Dining',
     '+267 123 4582',
+    'cappello@molapo.co.bw',
     '{"monday": "11:30-22:00", "tuesday": "11:30-22:00", "wednesday": "11:30-22:00", "thursday": "11:30-22:00", "friday": "11:30-23:00", "saturday": "11:30-23:00", "sunday": "11:30-22:00"}',
     'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=800',
+    NULL,
+    NULL,
+    'cappello_restaurant',
+    NULL,
     TRUE,
     TRUE,
     TRUE,
@@ -405,7 +480,9 @@ INSERT INTO public.shops (
     200.00,
     '45-60 minutes',
     TRUE,
-    4.6
+    TRUE,
+    4.6,
+    287
 ),
 (
     'La Parada',
@@ -413,8 +490,13 @@ INSERT INTO public.shops (
     'Casual dining with international cuisine, fresh salads, and contemporary dishes',
     'Ground Floor, Food Court',
     '+267 123 4583',
+    'laparada@molapo.co.bw',
     '{"monday": "11:00-22:00", "tuesday": "11:00-22:00", "wednesday": "11:00-22:00", "thursday": "11:00-22:00", "friday": "11:00-23:00", "saturday": "11:00-23:00", "sunday": "11:00-22:00"}',
     'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800',
+    NULL,
+    NULL,
+    'laparada_dining',
+    NULL,
     TRUE,
     TRUE,
     TRUE,
@@ -424,7 +506,9 @@ INSERT INTO public.shops (
     120.00,
     '30-45 minutes',
     FALSE,
-    4.3
+    TRUE,
+    4.3,
+    178
 ),
 
 -- SERVICE CATEGORY (ID: 7)
@@ -434,8 +518,13 @@ INSERT INTO public.shops (
     'Full-service travel agency offering flight bookings, tours, and travel planning',
     'First Floor, Business Center',
     '+267 123 4584',
+    'shineafrica@molapo.co.bw',
     '{"monday": "08:00-17:00", "tuesday": "08:00-17:00", "wednesday": "08:00-17:00", "thursday": "08:00-17:00", "friday": "08:00-17:00", "saturday": "09:00-14:00", "sunday": "closed"}',
     'https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=800',
+    NULL,
+    NULL,
+    'shineafrica_travels',
+    NULL,
     FALSE,
     FALSE,
     FALSE,
@@ -445,7 +534,9 @@ INSERT INTO public.shops (
     0,
     NULL,
     FALSE,
-    4.2
+    TRUE,
+    4.2,
+    45
 ),
 (
     'Premier Properties',
@@ -453,8 +544,13 @@ INSERT INTO public.shops (
     'Real estate services including property sales, rentals, and property management',
     'First Floor, Business Center',
     '+267 123 4585',
+    'premier@molapo.co.bw',
     '{"monday": "08:00-17:00", "tuesday": "08:00-17:00", "wednesday": "08:00-17:00", "thursday": "08:00-17:00", "friday": "08:00-17:00", "saturday": "09:00-14:00", "sunday": "closed"}',
     'https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=800',
+    NULL,
+    NULL,
+    'premier_properties',
+    NULL,
     FALSE,
     FALSE,
     FALSE,
@@ -464,7 +560,9 @@ INSERT INTO public.shops (
     0,
     NULL,
     FALSE,
-    4.1
+    TRUE,
+    4.1,
+    38
 ),
 (
     'Fun Ads Solutions',
@@ -472,8 +570,13 @@ INSERT INTO public.shops (
     'Marketing and advertising services, graphic design, and promotional solutions',
     'First Floor, Business Center',
     '+267 123 4586',
+    'funads@molapo.co.bw',
     '{"monday": "08:00-17:00", "tuesday": "08:00-17:00", "wednesday": "08:00-17:00", "thursday": "08:00-17:00", "friday": "08:00-17:00", "saturday": "09:00-14:00", "sunday": "closed"}',
     'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800',
+    NULL,
+    NULL,
+    'funads_solutions',
+    NULL,
     FALSE,
     FALSE,
     FALSE,
@@ -483,7 +586,9 @@ INSERT INTO public.shops (
     0,
     NULL,
     TRUE,
-    4.3
+    TRUE,
+    4.3,
+    56
 ),
 
 -- OTHERS CATEGORY (ID: 8)
@@ -493,8 +598,13 @@ INSERT INTO public.shops (
     'Professional shoe repair, cleaning, and leather care services',
     'Ground Floor, Service Area',
     '+267 123 4587',
+    'morula@molapo.co.bw',
     '{"monday": "08:00-18:00", "tuesday": "08:00-18:00", "wednesday": "08:00-18:00", "thursday": "08:00-18:00", "friday": "08:00-18:00", "saturday": "08:00-16:00", "sunday": "closed"}',
     'https://images.unsplash.com/photo-1549298916-b41d501d3772?w=800',
+    NULL,
+    NULL,
+    'morula_shoecare',
+    NULL,
     FALSE,
     TRUE,
     TRUE,
@@ -504,7 +614,9 @@ INSERT INTO public.shops (
     50.00,
     '1-3 days',
     FALSE,
-    4.2
+    TRUE,
+    4.2,
+    24
 ),
 (
     'Music Mania',
@@ -512,8 +624,13 @@ INSERT INTO public.shops (
     'Musical instruments, audio equipment, and music accessories',
     'First Floor, Entertainment Zone',
     '+267 123 4588',
+    'musicmania@molapo.co.bw',
     '{"monday": "09:00-18:00", "tuesday": "09:00-18:00", "wednesday": "09:00-18:00", "thursday": "09:00-18:00", "friday": "09:00-19:00", "saturday": "09:00-19:00", "sunday": "10:00-17:00"}',
     'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=800',
+    NULL,
+    NULL,
+    'musicmania_store',
+    NULL,
     TRUE,
     TRUE,
     TRUE,
@@ -523,7 +640,9 @@ INSERT INTO public.shops (
     200.00,
     '2-3 days',
     FALSE,
-    4.4
+    TRUE,
+    4.4,
+    82
 ),
 (
     'H2O International',
@@ -531,8 +650,13 @@ INSERT INTO public.shops (
     'Water treatment solutions, filtration systems, and water quality services',
     'Ground Floor, Utility Services',
     '+267 123 4589',
+    'h2o@molapo.co.bw',
     '{"monday": "08:00-17:00", "tuesday": "08:00-17:00", "wednesday": "08:00-17:00", "thursday": "08:00-17:00", "friday": "08:00-17:00", "saturday": "08:00-14:00", "sunday": "closed"}',
     'https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=800',
+    NULL,
+    NULL,
+    'h2o_international',
+    NULL,
     TRUE,
     TRUE,
     TRUE,
@@ -542,7 +666,9 @@ INSERT INTO public.shops (
     500.00,
     '3-5 days',
     FALSE,
-    4.0
+    TRUE,
+    4.0,
+    19
 );
 
 -- Update the sequences to continue from the highest ID

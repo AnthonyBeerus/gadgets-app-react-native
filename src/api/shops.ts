@@ -18,7 +18,8 @@ export const getShops = async () => {
         name,
         slug,
         "imageUrl"
-      )
+      ),
+      products:product(count)
     `
     )
     .order("is_featured", { ascending: false })
@@ -39,7 +40,8 @@ export const getShopsByCategory = async (categoryId: number) => {
         name,
         slug,
         "imageUrl"
-      )
+      ),
+      products:product(count)
     `
     )
     .eq("category_id", categoryId)
@@ -51,6 +53,8 @@ export const getShopsByCategory = async (categoryId: number) => {
 };
 
 export const getShopById = async (shopId: number) => {
+  console.log("getShopById called with ID:", shopId);
+
   const { data, error } = await supabase
     .from("shops")
     .select(
@@ -73,6 +77,11 @@ export const getShopById = async (shopId: number) => {
     )
     .eq("id", shopId)
     .single();
+
+  console.log("getShopById response:", {
+    data: data?.name,
+    error: error?.message,
+  });
 
   if (error) throw error;
   return data;
@@ -368,7 +377,8 @@ export const searchShops = async (query: string) => {
         name,
         slug,
         "imageUrl"
-      )
+      ),
+      products:product(count)
     `
     )
     .or(`name.ilike.%${query}%, description.ilike.%${query}%`)
@@ -395,7 +405,8 @@ export const getShopsWithFeature = async (
         name,
         slug,
         "imageUrl"
-      )
+      ),
+      products:product(count)
     `
     )
     .eq(feature, true)
@@ -407,60 +418,12 @@ export const getShopsWithFeature = async (
 
 // Get products by shop ID
 export const getShopProducts = async (shopId: number) => {
-  // Temporary mock data until we set up the proper database structure
-  const mockProducts = [
-    {
-      id: 1,
-      title: "Premium Product 1",
-      slug: "premium-product-1",
-      heroImage:
-        "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=500",
-      imagesUrl: [
-        "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=500",
-      ],
-      price: 999.99,
-      maxQuantity: 10,
-      category: 1,
-      created_at: new Date().toISOString(),
-    },
-    {
-      id: 2,
-      title: "Quality Item 2",
-      slug: "quality-item-2",
-      heroImage:
-        "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500",
-      imagesUrl: [
-        "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500",
-      ],
-      price: 599.99,
-      maxQuantity: 15,
-      category: 1,
-      created_at: new Date().toISOString(),
-    },
-    {
-      id: 3,
-      title: "Best Seller 3",
-      slug: "best-seller-3",
-      heroImage:
-        "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=500",
-      imagesUrl: [
-        "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=500",
-      ],
-      price: 299.99,
-      maxQuantity: 25,
-      category: 1,
-      created_at: new Date().toISOString(),
-    },
-  ];
+  console.log("getShopProducts called with shopId:", shopId);
 
-  // Return different products based on shop ID to simulate variety
-  const shopIndex = shopId % 3;
-  return mockProducts.slice(shopIndex, shopIndex + 2);
-
-  /* Real implementation - will be enabled once database structure is ready
   const { data, error } = await supabase
     .from("product")
-    .select(`
+    .select(
+      `
       id,
       title,
       slug,
@@ -470,11 +433,16 @@ export const getShopProducts = async (shopId: number) => {
       maxQuantity,
       category,
       created_at
-    `)
+    `
+    )
     .eq("shop_id", shopId)
     .order("title");
 
-  if (error) throw error;
+  if (error) {
+    console.error("getShopProducts error:", error);
+    throw error;
+  }
+
+  console.log("getShopProducts returned:", data?.length || 0, "products");
   return data || [];
-  */
 };

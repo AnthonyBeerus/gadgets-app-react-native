@@ -9,9 +9,7 @@ export const getProductsAndCategories = () => {
     queryKey: ["products", "categories"],
     queryFn: async () => {
       const [products, categories] = await Promise.all([
-        supabase
-          .from("product")
-          .select("*, shops:shop_id(id, name, description, image_url)"),
+        supabase.from("product").select("*"),
         supabase.from("category").select("*"),
       ]);
 
@@ -30,7 +28,7 @@ export const getProduct = (slug: string) => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("product")
-        .select("*, shops:shop_id(id, name, description, image_url)")
+        .select("*")
         .eq("slug", slug)
         .single();
 
@@ -61,7 +59,7 @@ export const getCategoryAndProducts = (categorySlug: string) => {
 
       const { data: products, error: productsError } = await supabase
         .from("product")
-        .select("*, shops:shop_id(id, name, description, logo_url)")
+        .select("*")
         .eq("category", category.id);
 
       if (productsError) {
@@ -120,10 +118,10 @@ export const getShopProducts = (shopId: number) => {
   return useQuery({
     queryKey: ["shopProducts", shopId],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("product")
-        .select("*, shops:shop_id(id, name, description)")
-        .eq("shop_id", shopId);
+      // Note: Product table doesn't have shop_id column
+      // This query won't work until the database schema is updated
+      const { data, error } = await supabase.from("product").select("*");
+      // .eq("shop_id", shopId); // Commented out until schema is fixed
 
       if (error) {
         throw new Error(
@@ -131,7 +129,7 @@ export const getShopProducts = (shopId: number) => {
         );
       }
 
-      return data;
+      return data || [];
     },
   });
 };
@@ -140,15 +138,16 @@ export const getProductsWithShops = () => {
   return useQuery({
     queryKey: ["productsWithShops"],
     queryFn: async () => {
+      // Note: Product table doesn't have shop_id column
+      // Returning all products for now until schema is updated
       const { data, error } = await supabase
         .from("product")
-        .select("*, shops:shop_id(id, name, description, image_url)")
+        .select("*")
         .order("created_at", { ascending: false });
 
       if (error) {
         throw new Error(
-          "An error occurred while fetching products with shops: " +
-            error.message
+          "An error occurred while fetching products: " + error.message
         );
       }
 

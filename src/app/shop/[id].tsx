@@ -15,6 +15,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { getShopById, getShopProducts } from "../../api/shops";
+import TryOnModal from "../../features/virtual-try-on/components/TryOnModal";
 
 export default function ShopDetails() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -23,9 +24,12 @@ export default function ShopDetails() {
   const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [productsLoading, setProductsLoading] = useState(true);
+  const [tryOnModalVisible, setTryOnModalVisible] = useState(false);
 
   useEffect(() => {
     if (id) {
+      console.log("Shop ID from URL:", id);
+      console.log("Parsed Shop ID:", parseInt(id));
       loadShopDetails();
       loadShopProducts();
     }
@@ -34,11 +38,24 @@ export default function ShopDetails() {
   const loadShopDetails = async () => {
     try {
       setLoading(true);
-      const shopData = await getShopById(parseInt(id!));
+      const shopId = parseInt(id!);
+      console.log("Fetching shop with ID:", shopId);
+
+      if (isNaN(shopId)) {
+        throw new Error(`Invalid shop ID: ${id}`);
+      }
+
+      const shopData = await getShopById(shopId);
+      console.log("Shop data received:", shopData?.name || "null");
       setShop(shopData);
     } catch (error) {
       console.error("Error loading shop details:", error);
-      Alert.alert("Error", "Failed to load shop details");
+      Alert.alert(
+        "Error",
+        `Failed to load shop details. Shop ID: ${id}\n\nError: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
     } finally {
       setLoading(false);
     }
@@ -87,6 +104,10 @@ export default function ShopDetails() {
         }
       });
     }
+  };
+
+  const handleVirtualTryOn = () => {
+    setTryOnModalVisible(true);
   };
 
   if (loading) {
@@ -324,10 +345,12 @@ export default function ShopDetails() {
               )}
 
               {shop.has_virtual_try_on && (
-                <View style={styles.featureCard}>
+                <TouchableOpacity
+                  style={styles.featureCard}
+                  onPress={handleVirtualTryOn}>
                   <Ionicons name="glasses" size={24} color="#9C27B0" />
                   <Text style={styles.featureLabel}>Virtual Try-On</Text>
-                </View>
+                </TouchableOpacity>
               )}
             </View>
           </View>
@@ -375,6 +398,12 @@ export default function ShopDetails() {
           )}
         </View>
       </ScrollView>
+
+      <TryOnModal
+        visible={tryOnModalVisible}
+        onClose={() => setTryOnModalVisible(false)}
+        shopProducts={products}
+      />
     </SafeAreaView>
   );
 }
