@@ -126,7 +126,7 @@ if (imageFile) {
 No changes needed! Still uses the same `GEMINI_API_KEY` from `.env`:
 
 ```
-GEMINI_API_KEY=AIzaSyCMhlD8E17dAe10z8GYPuO8AjUBwk1XUXw
+GEMINI_API_KEY=
 ```
 
 The AI SDK looks for `GOOGLE_GENERATIVE_AI_API_KEY` by default, which we set programmatically in the code.
