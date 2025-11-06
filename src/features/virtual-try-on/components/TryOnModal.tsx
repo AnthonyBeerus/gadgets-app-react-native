@@ -7,6 +7,8 @@ import { GenerationMode } from "../types/TryOnTypes";
 import ProductSelector from "./ProductSelector";
 import ImagePickerComponent from "./ImagePicker";
 import ResultOverlay from "./ResultOverlay";
+// Use cross-fetch to avoid whatwg-fetch issues
+import fetch from "cross-fetch";
 
 interface TryOnModalProps {
   visible: boolean;

@@ -1,5 +1,5 @@
 // filepath: src/features/virtual-try-on/components/ResultOverlay.tsx
-import React from "react";
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -7,8 +7,12 @@ import {
   TouchableOpacity,
   StyleSheet,
   ActivityIndicator,
+  Alert,
+  Platform,
 } from "react-native";
 import { useTryOnStore } from "../store/tryOnStore";
+import * as MediaLibrary from "expo-media-library";
+import { File, Paths } from "expo-file-system/next";
 
 interface ResultOverlayProps {
   onClose: () => void;
@@ -20,6 +24,83 @@ export default function ResultOverlay({
   onRetry,
 }: ResultOverlayProps) {
   const { resultImage, isProcessing, error } = useTryOnStore();
+  const [isSaving, setIsSaving] = useState(false);
+
+  console.log("ResultOverlay render:");
+  console.log("- isProcessing:", isProcessing);
+  console.log("- error:", error);
+  console.log("- resultImage exists:", !!resultImage);
+  console.log("- resultImage type:", typeof resultImage);
+  console.log("- resultImage length:", resultImage?.length);
+  console.log("- resultImage preview:", resultImage?.substring(0, 50));
+
+  const handleSaveImage = async () => {
+    if (!resultImage) return;
+
+    try {
+      setIsSaving(true);
+      console.log("🔵 Starting save process...");
+
+      // Request permissions
+      const { status } = await MediaLibrary.requestPermissionsAsync();
+      console.log("🔵 Permission status:", status);
+      if (status !== "granted") {
+        Alert.alert(
+          "Permission Required",
+          "Please grant permission to save images to your gallery."
+        );
+        setIsSaving(false);
+        return;
+      }
+
+      // Create a unique filename in cache directory
+      const filename = `virtual-tryon-${Date.now()}.png`;
+      const file = new File(Paths.cache, filename);
+      console.log("🔵 File URI:", file.uri);
+
+      // Extract base64 data from data URI
+      const base64Data = resultImage.replace(/^data:image\/\w+;base64,/, "");
+      console.log("🔵 Base64 data length:", base64Data.length);
+
+      // Convert base64 to Uint8Array
+      const binaryString = atob(base64Data);
+      const bytes = new Uint8Array(binaryString.length);
+      for (let i = 0; i < binaryString.length; i++) {
+        bytes[i] = binaryString.charCodeAt(i);
+      }
+      console.log("🔵 Binary data size:", bytes.length);
+
+      // Write the image data to file using writable stream
+      console.log("🔵 Writing to file...");
+      const writer = file.writableStream().getWriter();
+      await writer.write(bytes);
+      await writer.close();
+      console.log("🔵 File written successfully");
+
+      // Save to media library
+      console.log("🔵 Saving to media library...");
+      await MediaLibrary.saveToLibraryAsync(file.uri);
+      console.log("✅ Saved to media library successfully!");
+
+      Alert.alert(
+        "Success! 🎉",
+        "Your virtual try-on image has been saved to your gallery.",
+        [{ text: "OK" }]
+      );
+    } catch (error) {
+      console.error("❌ Failed to save image:", error);
+      console.error("❌ Error details:", JSON.stringify(error, null, 2));
+      Alert.alert(
+        "Save Failed",
+        `Could not save the image: ${
+          error instanceof Error ? error.message : "Unknown error"
+        }`,
+        [{ text: "OK" }]
+      );
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   if (isProcessing) {
     return (
@@ -62,15 +143,26 @@ export default function ResultOverlay({
     <View style={styles.container}>
       <View style={styles.content}>
         <Text style={styles.successTitle}>✨ Virtual Try-On Complete!</Text>
-        <Image source={{ uri: resultImage }} style={styles.resultImage} />
+        <Image
+          source={{ uri: resultImage }}
+          style={styles.resultImage}
+          resizeMode="contain"
+          onLoad={() => console.log("✅ Image loaded successfully")}
+          onError={(error) =>
+            console.error("❌ Image load error:", error.nativeEvent)
+          }
+        />
         <Text style={styles.resultText}>How does it look?</Text>
         <View style={styles.buttonContainer}>
           <TouchableOpacity
-            style={styles.saveButton}
-            onPress={() => {
-              /* TODO: Save to gallery */
-            }}>
-            <Text style={styles.saveButtonText}>💾 Save Image</Text>
+            style={[styles.saveButton, isSaving && styles.disabledButton]}
+            onPress={handleSaveImage}
+            disabled={isSaving}>
+            {isSaving ? (
+              <ActivityIndicator color="white" />
+            ) : (
+              <Text style={styles.saveButtonText}>💾 Save Image</Text>
+            )}
           </TouchableOpacity>
           <TouchableOpacity style={styles.closeButton} onPress={onClose}>
             <Text style={styles.closeButtonText}>Close</Text>
@@ -130,10 +222,11 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   resultImage: {
-    width: 250,
-    height: 250,
+    width: 300,
+    height: 400,
     borderRadius: 15,
     marginBottom: 15,
+    backgroundColor: "#f0f0f0", // Add background to see if component renders
   },
   resultText: {
     fontSize: 16,
@@ -168,6 +261,9 @@ const styles = StyleSheet.create({
     color: "white",
     fontSize: 16,
     fontWeight: "600",
+  },
+  disabledButton: {
+    opacity: 0.6,
   },
   closeButton: {
     flex: 1,

@@ -1,3 +1,6 @@
+import { generateText } from "ai";
+import { createGoogleGenerativeAI } from "@ai-sdk/google";
+
 // Define types locally for the API route (kept in sync with client types)
 interface ImageData {
   base64: string;
@@ -13,9 +16,6 @@ interface GenerationResult {
   image: string | null;
   text: string | null;
 }
-
-const GEMINI_IMAGE_MODEL = "gemini-2.5-flash-image-preview";
-const GEMINI_ENDPOINT = "https://generativelanguage.googleapis.com/v1beta";
 
 const stripDataUri = (value: string) => {
   if (!value) return value;
@@ -77,94 +77,89 @@ const generateStyledImage = async (
     fitPrompt
   );
 
-  const parts: Array<
-    { text: string } | { inlineData: { mimeType: string; data: string } }
+  // Build messages with multi-modal content
+  const content: Array<
+    | { type: "text"; text: string }
+    | { type: "image"; image: string; mimeType?: string }
   > = [
-    { text: prompt },
+    { type: "text", text: prompt },
     {
-      inlineData: {
-        mimeType: targetImage.mimeType,
-        data: stripDataUri(targetImage.base64),
-      },
+      type: "image",
+      image: targetImage.base64,
+      mimeType: targetImage.mimeType,
     },
     {
-      inlineData: {
-        mimeType: sourceImage.mimeType,
-        data: stripDataUri(sourceImage.base64),
-      },
+      type: "image",
+      image: sourceImage.base64,
+      mimeType: sourceImage.mimeType,
     },
   ];
 
   if (maskImage) {
-    parts.push({
-      inlineData: {
-        mimeType: maskImage.mimeType,
-        data: stripDataUri(maskImage.base64),
-      },
+    content.push({
+      type: "image",
+      image: maskImage.base64,
+      mimeType: maskImage.mimeType,
     });
   }
 
   if (logoImage) {
-    parts.push({
-      inlineData: {
-        mimeType: logoImage.mimeType,
-        data: stripDataUri(logoImage.base64),
-      },
+    content.push({
+      type: "image",
+      image: logoImage.base64,
+      mimeType: logoImage.mimeType,
     });
   }
 
-  const body = {
-    contents: [
-      {
-        role: "user",
-        parts,
-      },
-    ],
-    responseModalities: ["IMAGE", "TEXT"],
-  };
+  try {
+    // Create Google provider with API key
+    const googleProvider = createGoogleGenerativeAI({
+      apiKey,
+    });
 
-  const url = `${GEMINI_ENDPOINT}/models/${GEMINI_IMAGE_MODEL}:generateContent?key=${apiKey}`;
+    const result = await generateText({
+      model: googleProvider("gemini-2.5-flash-image-preview"),
+      messages: [
+        {
+          role: "user",
+          content,
+        },
+      ],
+      abortSignal: AbortSignal.timeout(60000), // 60 second timeout
+    });
 
-  const response = await fetch(url, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(body),
-  });
+    // Extract generated images from files
+    let imageBase64: string | null = null;
+    let outputText: string | null = result.text || null;
 
-  if (!response.ok) {
-    const errorPayload = await response.json().catch(() => null);
-    const message = errorPayload?.error?.message || response.statusText;
-    throw new Error(`Gemini request failed: ${message}`);
-  }
-
-  const json = await response.json();
-  const candidates = json?.candidates ?? [];
-  if (!Array.isArray(candidates) || candidates.length === 0) {
-    throw new Error("Gemini did not return any candidates");
-  }
-
-  let imageBase64: string | null = null;
-  let outputText: string | null = null;
-
-  for (const candidate of candidates) {
-    const partsList = candidate?.content?.parts ?? [];
-    for (const part of partsList) {
-      if (part?.inlineData?.mimeType?.startsWith("image/")) {
-        imageBase64 = `data:${part.inlineData.mimeType};base64,${part.inlineData.data}`;
-      }
-      if (typeof part?.text === "string" && part.text.trim().length > 0) {
-        outputText = part.text.trim();
+    // Check for generated images in the files array
+    if (result.files && result.files.length > 0) {
+      for (const file of result.files) {
+        if (file.mediaType.startsWith("image/")) {
+          // file.base64 from AI SDK is already a data URL, but if not, construct it
+          if (file.base64.startsWith("data:")) {
+            imageBase64 = file.base64;
+          } else {
+            // Construct proper data URL with mediaType
+            imageBase64 = `data:${file.mediaType};base64,${file.base64}`;
+          }
+          console.log("Image found - mediaType:", file.mediaType);
+          console.log("Image base64 preview:", imageBase64?.substring(0, 100));
+          break;
+        }
       }
     }
-  }
 
-  if (!imageBase64) {
-    throw new Error("Gemini did not return an image");
-  }
+    if (!imageBase64) {
+      throw new Error("Gemini did not return an image");
+    }
 
-  return { image: imageBase64, text: outputText };
+    console.log("Returning image to client, length:", imageBase64.length);
+    return { image: imageBase64, text: outputText };
+  } catch (error) {
+    console.error("Gemini API error:", error);
+    throw error;
+  }
 };
 
 export async function POST(request: Request) {

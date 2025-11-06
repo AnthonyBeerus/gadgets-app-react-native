@@ -6,14 +6,26 @@ import {
   ProcessTryOnParams,
 } from "../types/TryOnTypes";
 import { useTryOnStore } from "../store/tryOnStore";
+// Use cross-fetch directly to avoid whatwg-fetch polyfill issues
+import fetch from "cross-fetch";
+import Constants from "expo-constants";
+
+// Get the API URL from Expo dev server
+const getApiUrl = () => {
+  const debuggerHost = Constants.expoConfig?.hostUri;
+  if (debuggerHost) {
+    const host = debuggerHost.split(":")[0];
+    return `http://${host}:8081`;
+  }
+  return "http://localhost:8081";
+};
 
 const processTryOn = async (params: ProcessTryOnParams): Promise<string> => {
-  // Use relative fetch - Expo Router handles the origin automatically in development
-  // In production, set the origin in app.json plugins > expo-router > origin
-  console.log("Making request to /virtual-try-on API route...");
+  const apiUrl = getApiUrl();
+  console.log("Making request to virtual-try-on API route at:", apiUrl);
 
   try {
-    const response = await fetch("/virtual-try-on", {
+    const response = await fetch(`${apiUrl}/virtual-try-on`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -34,6 +46,9 @@ const processTryOn = async (params: ProcessTryOnParams): Promise<string> => {
 
     const data = await response.json();
     console.log("API response received, has image:", !!data.image);
+    console.log("Image data type:", typeof data.image);
+    console.log("Image data length:", data.image?.length);
+    console.log("Image data preview:", data.image?.substring(0, 50));
 
     if (!data.image) throw new Error("No image generated");
     return data.image; // Base64 result
@@ -49,14 +64,20 @@ export const useProcessTryOn = () => {
   return useMutation({
     mutationFn: processTryOn,
     onMutate: () => {
+      console.log("🔄 Starting try-on mutation...");
       setProcessing(true);
       setError(null);
     },
     onSuccess: (image) => {
+      console.log("✅ Try-on mutation success!");
+      console.log("Setting result image, length:", image?.length);
+      console.log("Image preview:", image?.substring(0, 50));
       setResultImage(image);
       setProcessing(false);
+      console.log("Store updated - processing set to false");
     },
     onError: (error: Error) => {
+      console.error("❌ Try-on mutation error:", error.message);
       setError(error.message);
       setProcessing(false);
     },

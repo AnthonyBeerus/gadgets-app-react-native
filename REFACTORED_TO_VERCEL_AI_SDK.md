@@ -1,6 +1,14 @@
-> **Update (2025-11-05):** The Vercel AI SDK integration was removed due to persistent runtime crashes in the Expo client. The virtual try-on API now calls the Gemini REST endpoint directly. The notes below are retained for historical reference only.
+✅ Refactored to Vercel AI SDK - Virtual Try-On Feature (v2)
 
-✅ Refactored to Vercel AI SDK - Virtual Try-On Feature
+## Latest Update (2025-11-06)
+
+**Successfully re-integrated the Vercel AI SDK!** After resolving the `whatwg-fetch` compatibility issues with Metro bundler configuration, the virtual try-on feature now properly uses the Vercel AI SDK with `generateText()` for multi-modal image generation.
+
+### Key Fixes
+
+1. **Metro Configuration** - Blocked `whatwg-fetch` and redirected to `cross-fetch`
+2. **Package Configuration** - Added npm overrides to replace `whatwg-fetch` with `cross-fetch`
+3. **AI SDK Integration** - Using `createGoogleGenerativeAI()` with proper API key configuration
 
 ## What Changed
 
