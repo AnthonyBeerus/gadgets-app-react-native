@@ -31,6 +31,13 @@ enum BackgroundScene {
   URBAN = "urban",
 }
 
+enum ServiceType {
+  CLOTHING = "clothing",
+  HAIRSTYLE = "hairstyle",
+  NAILS = "nails",
+  MAKEUP = "makeup",
+}
+
 interface GenerationResult {
   image: string | null;
   text: string | null;
@@ -46,11 +53,19 @@ const buildPrompt = (
   mode: GenerationMode,
   hasMask: boolean,
   hasLogo: boolean,
+  serviceType: ServiceType = ServiceType.CLOTHING,
   stylePrompt?: string,
   fitPrompt?: string,
   pose?: PoseOption,
   background?: BackgroundScene
 ) => {
+  // Determine if this is a beauty service
+  const isBeautyService = [
+    ServiceType.HAIRSTYLE,
+    ServiceType.NAILS,
+    ServiceType.MAKEUP,
+  ].includes(serviceType);
+
   // Build pose instruction
   const poseInstruction =
     pose && pose !== PoseOption.ORIGINAL
@@ -58,7 +73,9 @@ const buildPrompt = (
           pose === PoseOption.SELFIE
             ? "selfie-style angle with a natural, close-up perspective as if taking a self-portrait"
             : pose.replace("_", " ")
-        } pose while maintaining their identity and the garment fit.`
+        } pose while maintaining their identity${
+          isBeautyService ? " and facial features" : " and the garment fit"
+        }.`
       : "";
 
   // Build background instruction
@@ -92,12 +109,67 @@ const buildPrompt = (
         }Ensure these directions are reflected realistically.\n`
       : "";
 
+  // Build service-specific instructions
+  const getServiceInstructions = () => {
+    switch (serviceType) {
+      case ServiceType.HAIRSTYLE:
+        return {
+          productName: "hairstyle",
+          preserveInstructions:
+            "Preserve the person's facial features, skin tone, face shape, and body exactly.",
+          applicationInstructions:
+            "Apply the hairstyle naturally, matching the person's head shape, hairline, and style. Ensure realistic hair texture, color, volume, and flow. Blend seamlessly with lighting and shadows.",
+        };
+      case ServiceType.NAILS:
+        return {
+          productName: "nail design",
+          preserveInstructions:
+            "Preserve the person's hands, fingers, skin tone, and overall appearance exactly.",
+          applicationInstructions:
+            "Apply the nail design to the person's fingernails naturally. Match hand position and lighting. Ensure realistic nail shape, polish texture, and design details.",
+        };
+      case ServiceType.MAKEUP:
+        return {
+          productName: "makeup look",
+          preserveInstructions:
+            "Preserve the person's facial structure, features, skin tone, and hair exactly.",
+          applicationInstructions:
+            "Apply the makeup look naturally to the person's face. Match skin tone, lighting, and facial contours. Ensure realistic makeup application with proper blending and color matching.",
+        };
+      case ServiceType.CLOTHING:
+      default:
+        return {
+          productName: "product",
+          preserveInstructions:
+            "Preserve the model's identity, hair, and facial features exactly.",
+          applicationInstructions:
+            "Seamlessly match scale, lighting, shadow, and texture.",
+        };
+    }
+  };
+
+  const serviceInstructions = getServiceInstructions();
+
   switch (mode) {
     case GenerationMode.PRODUCT_TO_MODEL:
       if (hasMask) {
-        return `You are a virtual try-on assistant. Combine a product image with a model using the provided mask.\n\nInputs:\n- Image 1: the model photo\n- Image 2: the product to apply\n- Image 3: the mask defining the application region\n\nInstructions:\n1. Apply the product strictly within the white mask region.\n2. Preserve everything outside the mask exactly as the original model photo.\n3. Seamlessly blend scale, lighting, shadow, and texture.${poseInstruction}${backgroundInstruction}\n${styleInstructionBlock}4. Return only the final edited model image.`;
+        return `You are a virtual try-on assistant. Combine a ${serviceInstructions.productName} image with a person's photo using the provided mask.\n\nInputs:\n- Image 1: the person's photo\n- Image 2: the ${serviceInstructions.productName} to apply\n- Image 3: the mask defining the application region\n\nInstructions:\n1. Apply the ${serviceInstructions.productName} strictly within the white mask region.\n2. Preserve everything outside the mask exactly as the original photo.\n3. ${serviceInstructions.applicationInstructions}${poseInstruction}${backgroundInstruction}\n${styleInstructionBlock}4. Return only the final edited photo.`;
       }
-      return `You are a virtual try-on assistant. Place the product onto the model photo.\n\nInputs:\n- Image 1: the model photo\n- Image 2: the product to apply\n\nInstructions:\n1. Identify and isolate the product.\n2. Replace any similar garment on the model, or add the product naturally.\n3. Preserve the model's identity, hair, and facial features exactly.${poseInstruction}${backgroundInstruction}\n4. Seamlessly match scale, lighting, shadow, and texture.\n${styleInstructionBlock}5. Return only the final edited model image.`;
+      return `You are a virtual try-on assistant. Apply the ${
+        serviceInstructions.productName
+      } onto the person's photo.\n\nInputs:\n- Image 1: the person's photo\n- Image 2: the ${
+        serviceInstructions.productName
+      } to apply\n\nInstructions:\n1. Identify and isolate the ${
+        serviceInstructions.productName
+      }.\n2. ${
+        isBeautyService
+          ? `Apply the ${serviceInstructions.productName} to the appropriate area of the person.`
+          : "Replace any similar garment on the model, or add the product naturally."
+      }\n3. ${
+        serviceInstructions.preserveInstructions
+      }${poseInstruction}${backgroundInstruction}\n4. ${
+        serviceInstructions.applicationInstructions
+      }\n${styleInstructionBlock}5. Return only the final edited photo.`;
     case GenerationMode.MODEL_TO_MODEL:
       if (hasLogo) {
         return `You are an expert fashion retoucher. Swap clothing from a source model onto a target model and apply a logo.\n\nInputs:\n- Image 1: target model\n- Image 2: source model (garment reference)\n- Image 3: logo to apply\n\nInstructions:\n1. Transfer only the garment from the source model.\n2. Preserve the target model's appearance and facial features exactly.${poseInstruction}${backgroundInstruction}\n3. Integrate the garment with realistic draping, lighting, and shadows.\n4. Place the logo naturally on the garment, respecting folds and lighting.\n${styleInstructionBlock}5. Return only the finished target model image.`;
@@ -114,6 +186,7 @@ const generateStyledImage = async (
   mode: GenerationMode,
   logoImage?: ImageData | null,
   maskImage?: ImageData | null,
+  serviceType?: ServiceType,
   stylePrompt?: string,
   fitPrompt?: string,
   pose?: PoseOption,
@@ -128,6 +201,7 @@ const generateStyledImage = async (
     mode,
     Boolean(maskImage),
     Boolean(logoImage),
+    serviceType || ServiceType.CLOTHING,
     stylePrompt,
     fitPrompt,
     pose,
@@ -229,6 +303,7 @@ export async function POST(request: Request) {
       body.mode,
       body.logoImage,
       body.maskImage,
+      body.serviceType,
       body.stylePrompt,
       body.fitPrompt,
       body.pose,

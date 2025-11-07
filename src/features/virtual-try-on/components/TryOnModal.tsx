@@ -3,12 +3,64 @@ import React, { useEffect } from "react";
 import { Modal, View, StyleSheet, Text, TouchableOpacity } from "react-native";
 import { useTryOnStore } from "../store/tryOnStore";
 import { useProcessTryOn } from "../api/processTryOn";
-import { GenerationMode } from "../types/TryOnTypes";
+import {
+  GenerationMode,
+  PoseOption,
+  BackgroundScene,
+  ServiceType,
+} from "../types/TryOnTypes";
 import ProductSelector from "./ProductSelector";
 import ImagePickerComponent from "./ImagePicker";
 import ResultOverlay from "./ResultOverlay";
 // Use cross-fetch to avoid whatwg-fetch issues
 import fetch from "cross-fetch";
+
+// Helper function to detect service type from product
+const detectServiceType = (product: any): ServiceType => {
+  // Check category - 4 is Beauty & Health
+  if (product.category === 4) {
+    const title = product.title?.toLowerCase() || "";
+
+    // Check for hairstyle keywords
+    if (
+      title.includes("hair") ||
+      title.includes("cut") ||
+      title.includes("style") ||
+      title.includes("braid") ||
+      title.includes("curl") ||
+      title.includes("color") ||
+      title.includes("dreadlock") ||
+      title.includes("afro") ||
+      title.includes("beard")
+    ) {
+      return ServiceType.HAIRSTYLE;
+    }
+
+    // Check for nail keywords
+    if (
+      title.includes("nail") ||
+      title.includes("manicure") ||
+      title.includes("pedicure") ||
+      title.includes("gel") ||
+      title.includes("acrylic")
+    ) {
+      return ServiceType.NAILS;
+    }
+
+    // Check for makeup keywords
+    if (
+      title.includes("makeup") ||
+      title.includes("glam") ||
+      title.includes("foundation") ||
+      title.includes("lipstick")
+    ) {
+      return ServiceType.MAKEUP;
+    }
+  }
+
+  // Default to clothing
+  return ServiceType.CLOTHING;
+};
 
 interface TryOnModalProps {
   visible: boolean;
@@ -77,6 +129,7 @@ export default function TryOnModal({
 
           reader.onloadend = () => {
             const productBase64 = (reader.result as string).split("base64,")[1];
+            const serviceType = detectServiceType(selectedProduct);
 
             processTryOnMutation.mutate({
               targetImage: {
@@ -88,6 +141,7 @@ export default function TryOnModal({
                 mimeType: "image/jpeg",
               },
               mode: GenerationMode.PRODUCT_TO_MODEL,
+              serviceType,
               pose,
               background,
             });
@@ -133,6 +187,7 @@ export default function TryOnModal({
 
         reader.onloadend = () => {
           const productBase64 = (reader.result as string).split("base64,")[1];
+          const serviceType = detectServiceType(selectedProduct);
 
           processTryOnMutation.mutate({
             targetImage: {
@@ -144,6 +199,7 @@ export default function TryOnModal({
               mimeType: "image/jpeg",
             },
             mode: GenerationMode.PRODUCT_TO_MODEL,
+            serviceType,
             pose,
             background,
           });

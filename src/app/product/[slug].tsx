@@ -98,8 +98,10 @@ const ProductDetails = () => {
     });
   };
 
-  // Check if product is clothing (category 2) for virtual try-on
+  // Check if product supports virtual try-on (clothing category 2, or beauty services category 4)
   const isClothing = product.category === 2;
+  const isBeautyService = product.category === 4;
+  const supportsVirtualTryOn = isClothing || isBeautyService;
   const SIZES = ["S", "M", "L", "XL", "2XL"];
 
   const handleGoBack = () => {
@@ -139,7 +141,7 @@ const ProductDetails = () => {
         </View>
 
         {/* Virtual Try-On Button - Below Hero Image */}
-        {isClothing && (
+        {supportsVirtualTryOn && (
           <View style={styles.tryOnButtonContainer}>
             <TouchableOpacity
               style={styles.tryOnButtonProminent}
@@ -174,10 +176,10 @@ const ProductDetails = () => {
           </View>
 
           {/* Color Variant Images */}
-          {isClothing && colorVariants.length > 0 && (
+          {supportsVirtualTryOn && colorVariants.length > 0 && (
             <View style={styles.section}>
               <Text style={styles.sectionTitle}>
-                Available Colors{" "}
+                {isBeautyService ? "Available Styles" : "Available Colors"}{" "}
                 {selectedColor && `- ${selectedColor.color_name}`}
               </Text>
               <ScrollView

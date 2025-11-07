@@ -28,6 +28,13 @@ export enum BackgroundScene {
   URBAN = "urban",
 }
 
+export enum ServiceType {
+  CLOTHING = "clothing",
+  HAIRSTYLE = "hairstyle",
+  NAILS = "nails",
+  MAKEUP = "makeup",
+}
+
 export interface GenerationResult {
   image: string | null;
   text: string | null;
@@ -39,6 +46,7 @@ export interface ProcessTryOnParams {
   mode: GenerationMode;
   logoImage?: ImageData;
   maskImage?: ImageData;
+  serviceType?: ServiceType;
   stylePrompt?: string;
   fitPrompt?: string;
   pose?: PoseOption;
