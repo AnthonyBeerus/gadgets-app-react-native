@@ -12,13 +12,15 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
+import { useRouter, useLocalSearchParams } from "expo-router";
 import {
   getShops,
   getCategoriesWithShopFeatures,
   searchShops,
   getShopsWithFeature,
   getShopsByCategory,
+  getMalls,
+  getShopsByMall,
 } from "../api/shops";
 import {
   getShopsWithProductCount,
@@ -41,12 +43,24 @@ interface ShopWithCategory extends Shop {
 
 export default function ShopsScreen() {
   const router = useRouter();
+  const params = useLocalSearchParams<{ selectedMall?: string }>();
   const [shops, setShops] = useState<ShopWithCategory[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
+  const [malls, setMalls] = useState<any[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
+  const [selectedMall, setSelectedMall] = useState<number | null>(1); // Default to Molapo Crossing
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedFeature, setSelectedFeature] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+
+  // Listen for mall selection from modal
+  useEffect(() => {
+    if (params.selectedMall !== undefined) {
+      const mallId =
+        params.selectedMall === "" ? null : parseInt(params.selectedMall);
+      handleMallFilter(mallId);
+    }
+  }, [params.selectedMall]);
 
   useEffect(() => {
     loadData();
@@ -55,12 +69,15 @@ export default function ShopsScreen() {
   const loadData = async () => {
     try {
       setLoading(true);
-      const [shopsData, categoriesData] = await Promise.all([
-        getShops(),
+      const [shopsData, categoriesData, mallsData] = await Promise.all([
+        // Load shops filtered by default mall (Molapo Crossing)
+        selectedMall ? getShopsByMall(selectedMall) : getShops(),
         getCategoriesWithShopFeatures(),
+        getMalls(),
       ]);
       setShops(shopsData as any);
       setCategories(categoriesData);
+      setMalls(mallsData || []);
     } catch (error) {
       console.error("Error loading shops:", error);
       Alert.alert("Error", "Failed to load shops data");
@@ -75,7 +92,15 @@ export default function ShopsScreen() {
       try {
         setLoading(true);
         const results = await searchShops(query);
-        setShops(results as any);
+        // Apply mall filter if one is selected
+        if (selectedMall) {
+          const filteredResults = (results as any[]).filter(
+            (shop) => shop.mall_id === selectedMall
+          );
+          setShops(filteredResults as any);
+        } else {
+          setShops(results as any);
+        }
       } catch (error) {
         console.error("Search error:", error);
         Alert.alert("Error", "Failed to search shops");
@@ -83,7 +108,12 @@ export default function ShopsScreen() {
         setLoading(false);
       }
     } else {
-      loadData();
+      // If search is cleared, reload with current mall filter
+      if (selectedMall) {
+        handleMallFilter(selectedMall);
+      } else {
+        loadData();
+      }
     }
   };
 
@@ -97,8 +127,19 @@ export default function ShopsScreen() {
       let results;
       if (feature) {
         results = await getShopsWithFeature(feature as any);
+        // Apply mall filter if one is selected
+        if (selectedMall) {
+          results = (results as any[]).filter(
+            (shop) => shop.mall_id === selectedMall
+          );
+        }
       } else {
-        results = await getShops();
+        // If feature is cleared, reload with current mall filter
+        if (selectedMall) {
+          results = await getShopsByMall(selectedMall);
+        } else {
+          results = await getShops();
+        }
       }
       setShops(results as ShopWithCategory[]);
     } catch (error) {
@@ -113,14 +154,26 @@ export default function ShopsScreen() {
     setSelectedCategory(categoryId);
     setSelectedFeature(null);
     setSearchQuery("");
+    // Don't clear mall filter - respect current mall selection
 
     try {
       setLoading(true);
       let results;
       if (categoryId) {
         results = await getShopsByCategory(categoryId);
+        // Apply mall filter if one is selected
+        if (selectedMall) {
+          results = (results as any[]).filter(
+            (shop) => shop.mall_id === selectedMall
+          );
+        }
       } else {
-        results = await getShops();
+        // If category is cleared, reload with current mall filter
+        if (selectedMall) {
+          results = await getShopsByMall(selectedMall);
+        } else {
+          results = await getShops();
+        }
       }
       setShops(results as any);
     } catch (error) {
@@ -131,9 +184,34 @@ export default function ShopsScreen() {
     }
   };
 
+  const handleMallFilter = async (mallId: number | null) => {
+    setSelectedMall(mallId);
+    setSelectedCategory(null);
+    setSelectedFeature(null);
+    setSearchQuery("");
+
+    try {
+      setLoading(true);
+      let results;
+      if (mallId) {
+        results = await getShopsByMall(mallId);
+      } else {
+        results = await getShops();
+      }
+      setShops(results as any);
+    } catch (error) {
+      console.error("Mall filter error:", error);
+      Alert.alert("Error", "Failed to filter shops by mall");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const navigateToShop = (shopId: number) => {
     router.push(`/shop/${shopId}`);
   };
+
+  const selectedMallData = malls.find((m) => m.id === selectedMall);
 
   const features = [
     { key: "has_virtual_try_on", label: "Virtual Try-On", icon: "glasses" },
@@ -148,21 +226,50 @@ export default function ShopsScreen() {
 
   return (
     <View style={styles.container}>
-      {/* Premium Header */}
+      {/* Custom Header with Mall Selector */}
       <View style={styles.header}>
-        <View style={styles.headerContent}>
-          <View>
-            <Text style={styles.title}>Molapo Crossing</Text>
-            <View style={styles.subtitleRow}>
-              <Ionicons name="location" size={14} color="#9C27B0" />
-              <Text style={styles.subtitle}>Premium Shopping Mall</Text>
+        <TouchableOpacity
+          style={styles.mallSelectorButton}
+          onPress={() =>
+            router.push({
+              pathname: "/mall-selector",
+              params: { selectedMallId: String(selectedMall || "") },
+            })
+          }
+          activeOpacity={0.7}>
+          <View style={styles.headerLeft}>
+            <View style={styles.mallIconSmall}>
+              <Ionicons
+                name={
+                  selectedMallData?.is_physical === false
+                    ? "globe"
+                    : selectedMall
+                    ? "storefront"
+                    : "apps"
+                }
+                size={20}
+                color="#9C27B0"
+              />
+            </View>
+            <View>
+              <Text style={styles.title}>
+                {selectedMallData?.name || "All Locations"}
+              </Text>
+              <View style={styles.subtitleRow}>
+                <Ionicons name="location" size={12} color="#9C27B0" />
+                <Text style={styles.subtitle}>
+                  {selectedMallData?.location || "Browse all shops"}
+                </Text>
+              </View>
             </View>
           </View>
-          <View style={styles.shopsBadge}>
-            <Text style={styles.shopsBadgeNumber}>{shops.length}</Text>
-            <Text style={styles.shopsBadgeLabel}>Shops</Text>
+          <View style={styles.headerRight}>
+            <View style={styles.shopsBadge}>
+              <Text style={styles.shopsBadgeNumber}>{shops.length}</Text>
+            </View>
+            <Ionicons name="chevron-down" size={20} color="#9C27B0" />
           </View>
-        </View>
+        </TouchableOpacity>
       </View>
 
       {/* Premium Search Bar */}
@@ -339,7 +446,7 @@ const styles = StyleSheet.create({
   header: {
     backgroundColor: "#fff",
     paddingTop: 6,
-    paddingBottom: 6,
+    paddingBottom: 12,
     paddingHorizontal: 20,
     borderBottomWidth: 1,
     borderBottomColor: "#F0F0F0",
@@ -349,17 +456,41 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.05,
     shadowRadius: 8,
   },
+  mallSelectorButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  headerLeft: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    flex: 1,
+  },
+  headerRight: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+  },
+  mallIconSmall: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    backgroundColor: "#F3E5F5",
+    alignItems: "center",
+    justifyContent: "center",
+  },
   headerContent: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
   },
   title: {
-    fontSize: 26,
+    fontSize: 20,
     fontWeight: "700",
     color: "#1A1A1A",
     letterSpacing: -0.5,
-    marginBottom: 4,
+    marginBottom: 2,
   },
   subtitleRow: {
     flexDirection: "row",
@@ -367,7 +498,7 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   subtitle: {
-    fontSize: 14,
+    fontSize: 12,
     color: "#666",
     fontWeight: "500",
     letterSpacing: 0.2,
@@ -375,14 +506,14 @@ const styles = StyleSheet.create({
   shopsBadge: {
     backgroundColor: "#F3E5F5",
     paddingHorizontal: 12,
-    paddingVertical: 8,
+    paddingVertical: 6,
     borderRadius: 12,
     alignItems: "center",
     borderWidth: 1,
     borderColor: "#E1BEE7",
   },
   shopsBadgeNumber: {
-    fontSize: 20,
+    fontSize: 16,
     fontWeight: "700",
     color: "#9C27B0",
     letterSpacing: -0.5,
@@ -613,6 +744,7 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     letterSpacing: 0.5,
   },
+  // Remove old mall section styles - no longer needed
   shopCard: {
     backgroundColor: "#fff",
     borderRadius: 16,

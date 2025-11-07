@@ -37,6 +37,13 @@ export default function RootLayout() {
                     title: "Shopping Cart",
                   }}
                 />
+                <Stack.Screen
+                  name="mall-selector"
+                  options={{
+                    presentation: "formSheet",
+                    headerShown: false,
+                  }}
+                />
                 <Stack.Screen name="auth" options={{ headerShown: false }} />
               </Stack>
             </NotificationProvider>

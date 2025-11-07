@@ -5,6 +5,80 @@ export type Shop = Tables<"shops">;
 export type ShopReview = Tables<"shop_reviews">;
 export type Appointment = Tables<"appointments">;
 export type DeliveryOrder = Tables<"delivery_orders">;
+export type Mall = Tables<"malls">;
+
+// Mall Functions
+export const getMalls = async () => {
+  const { data, error } = await supabase
+    .from("malls")
+    .select(
+      `
+      *,
+      shops:shops(count)
+    `
+    )
+    .order("is_featured", { ascending: false })
+    .order("name");
+
+  if (error) throw error;
+  return data;
+};
+
+export const getMallById = async (mallId: number) => {
+  const { data, error } = await supabase
+    .from("malls")
+    .select("*")
+    .eq("id", mallId)
+    .single();
+
+  if (error) throw error;
+  return data;
+};
+
+export const getMallBySlug = async (slug: string) => {
+  const { data, error } = await supabase
+    .from("malls")
+    .select("*")
+    .eq("slug", slug)
+    .single();
+
+  if (error) throw error;
+  return data;
+};
+
+export const getFeaturedMalls = async () => {
+  const { data, error } = await supabase
+    .from("malls")
+    .select("*")
+    .eq("is_featured", true)
+    .order("name");
+
+  if (error) throw error;
+  return data;
+};
+
+export const getShopsByMall = async (mallId: number) => {
+  const { data, error } = await supabase
+    .from("shops")
+    .select(
+      `
+      *,
+      category:category_id (
+        id,
+        name,
+        slug,
+        "imageUrl"
+      ),
+      products:product(count)
+    `
+    )
+    .eq("mall_id", mallId)
+    .order("is_featured", { ascending: false })
+    .order("rating", { ascending: false });
+
+  if (error) throw error;
+  return data;
+};
 
 // Shop Functions
 export const getShops = async () => {
@@ -18,6 +92,11 @@ export const getShops = async () => {
         name,
         slug,
         "imageUrl"
+      ),
+      mall:mall_id (
+        id,
+        name,
+        slug
       ),
       products:product(count)
     `

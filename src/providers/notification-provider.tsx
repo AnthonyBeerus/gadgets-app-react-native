@@ -33,6 +33,7 @@ const NotificationProvider = ({ children }: PropsWithChildren) => {
     await supabase
       .from("users")
       .update({
+        // @ts-ignore - expo_notification_token field may not be in schema yet
         expo_notification_token: token,
       })
       .eq("id", session.user.id);

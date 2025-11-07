@@ -38,7 +38,7 @@ const ProductDetails = () => {
   const [tryOnModalVisible, setTryOnModalVisible] = useState(false);
 
   // Get color variants from JSONB column
-  const colorVariants = product?.color_variants || [];
+  const colorVariants = (product?.color_variants as any[]) || [];
   const [selectedColor, setSelectedColor] = useState<any>(null);
   const [selectedSize, setSelectedSize] = useState("M");
 
