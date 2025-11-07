@@ -1,7 +1,12 @@
 // filepath: src/features/virtual-try-on/store/tryOnStore.ts
 import { create } from "zustand";
 import { Tables } from "../../../types/database.types";
-import { ImageData, GenerationMode } from "../types/TryOnTypes";
+import {
+  ImageData,
+  GenerationMode,
+  PoseOption,
+  BackgroundScene,
+} from "../types/TryOnTypes";
 
 interface TryOnState {
   selectedProduct: Tables<"product"> | null;
@@ -12,6 +17,8 @@ interface TryOnState {
   mode: GenerationMode;
   stylePrompt?: string;
   fitPrompt?: string;
+  pose: PoseOption;
+  background: BackgroundScene;
   setSelectedProduct: (product: Tables<"product">) => void;
   setUserImage: (image: string) => void;
   setResultImage: (image: string) => void;
@@ -20,6 +27,8 @@ interface TryOnState {
   setMode: (mode: GenerationMode) => void;
   setStylePrompt: (prompt?: string) => void;
   setFitPrompt: (prompt?: string) => void;
+  setPose: (pose: PoseOption) => void;
+  setBackground: (background: BackgroundScene) => void;
   reset: () => void;
 }
 
@@ -32,6 +41,8 @@ export const useTryOnStore = create<TryOnState>((set) => ({
   mode: GenerationMode.PRODUCT_TO_MODEL,
   stylePrompt: undefined,
   fitPrompt: undefined,
+  pose: PoseOption.ORIGINAL,
+  background: BackgroundScene.ORIGINAL,
   setSelectedProduct: (product) => set({ selectedProduct: product }),
   setUserImage: (image) => set({ userImage: image }),
   setResultImage: (image) => set({ resultImage: image }),
@@ -40,6 +51,8 @@ export const useTryOnStore = create<TryOnState>((set) => ({
   setMode: (mode) => set({ mode }),
   setStylePrompt: (prompt) => set({ stylePrompt: prompt }),
   setFitPrompt: (prompt) => set({ fitPrompt: prompt }),
+  setPose: (pose) => set({ pose }),
+  setBackground: (background) => set({ background }),
   reset: () =>
     set({
       selectedProduct: null,
@@ -50,5 +63,7 @@ export const useTryOnStore = create<TryOnState>((set) => ({
       mode: GenerationMode.PRODUCT_TO_MODEL,
       stylePrompt: undefined,
       fitPrompt: undefined,
+      pose: PoseOption.ORIGINAL,
+      background: BackgroundScene.ORIGINAL,
     }),
 }));

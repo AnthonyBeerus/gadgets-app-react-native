@@ -9,6 +9,25 @@ export enum GenerationMode {
   MODEL_TO_MODEL = "MODEL_TO_MODEL",
 }
 
+export enum PoseOption {
+  ORIGINAL = "original",
+  SELFIE = "selfie",
+  STANDING = "standing",
+  CASUAL = "casual",
+  PROFESSIONAL = "professional",
+  WALKING = "walking",
+}
+
+export enum BackgroundScene {
+  ORIGINAL = "original",
+  STUDIO = "studio",
+  PARTY = "party",
+  COFFEE_DATE = "coffee_date",
+  RESTAURANT = "restaurant",
+  OUTDOOR = "outdoor",
+  URBAN = "urban",
+}
+
 export interface GenerationResult {
   image: string | null;
   text: string | null;
@@ -22,4 +41,6 @@ export interface ProcessTryOnParams {
   maskImage?: ImageData;
   stylePrompt?: string;
   fitPrompt?: string;
+  pose?: PoseOption;
+  background?: BackgroundScene;
 }

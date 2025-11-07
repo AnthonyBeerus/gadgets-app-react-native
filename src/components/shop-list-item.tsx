@@ -1,9 +1,14 @@
 import { Image, Pressable, StyleSheet, Text, View } from "react-native";
 import { Link } from "expo-router";
+import { Ionicons } from "@expo/vector-icons";
 import { Tables } from "../types/database.types";
 
 type ShopWithProductCount = Tables<"shops"> & {
   products?: { count: number }[];
+  category?: {
+    id: number;
+    name: string;
+  };
 };
 
 export const ShopListItem = ({ shop }: { shop: ShopWithProductCount }) => {
@@ -12,22 +17,45 @@ export const ShopListItem = ({ shop }: { shop: ShopWithProductCount }) => {
   return (
     <Link asChild href={`/shop/${shop.id}`}>
       <Pressable style={styles.item}>
-        <View style={styles.shopImageContainer}>
+        {/* Hero Image */}
+        <View style={styles.imageWrapper}>
           <Image
             source={{
-              uri: shop.image_url || "https://via.placeholder.com/150",
+              uri: shop.image_url || "https://via.placeholder.com/400x200",
             }}
             style={styles.shopImage}
           />
+          {/* Category Badge */}
+          {shop.category && (
+            <View style={styles.categoryBadge}>
+              <Text style={styles.categoryBadgeText}>{shop.category.name}</Text>
+            </View>
+          )}
         </View>
-        <View style={styles.shopTextContainer}>
-          <Text style={styles.shopName}>{shop.name}</Text>
+
+        {/* Content Section */}
+        <View style={styles.contentContainer}>
+          <View style={styles.headerRow}>
+            <Text style={styles.shopName} numberOfLines={1}>
+              {shop.name}
+            </Text>
+            <Ionicons name="chevron-forward" size={20} color="#9C27B0" />
+          </View>
+
           <Text style={styles.shopDescription} numberOfLines={2}>
             {shop.description}
           </Text>
-          <Text style={styles.productCount}>
-            {productCount} product{productCount !== 1 ? "s" : ""}
-          </Text>
+
+          {/* Footer Row */}
+          <View style={styles.footerRow}>
+            <View style={styles.productCountContainer}>
+              <Ionicons name="pricetag-outline" size={14} color="#9C27B0" />
+              <Text style={styles.productCount}>
+                {productCount} {productCount !== 1 ? "products" : "product"}
+              </Text>
+            </View>
+            <Text style={styles.exploreText}>Explore →</Text>
+          </View>
         </View>
       </Pressable>
     </Link>
@@ -36,49 +64,91 @@ export const ShopListItem = ({ shop }: { shop: ShopWithProductCount }) => {
 
 const styles = StyleSheet.create({
   item: {
-    backgroundColor: "white",
-    marginVertical: 8,
-    marginHorizontal: 16,
-    borderRadius: 12,
+    backgroundColor: "#FFFFFF",
+    marginHorizontal: 20,
+    marginVertical: 10,
+    borderRadius: 16,
     overflow: "hidden",
-    flexDirection: "row",
-    elevation: 2,
+    elevation: 4,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
   },
-  shopImageContainer: {
-    width: 80,
-    height: 80,
-    margin: 12,
+  imageWrapper: {
+    width: "100%",
+    height: 200,
+    position: "relative",
   },
   shopImage: {
     width: "100%",
     height: "100%",
     resizeMode: "cover",
-    borderRadius: 8,
   },
-  shopTextContainer: {
-    flex: 1,
-    padding: 12,
-    paddingLeft: 0,
-    justifyContent: "center",
-    gap: 4,
+  categoryBadge: {
+    position: "absolute",
+    top: 12,
+    right: 12,
+    backgroundColor: "rgba(156, 39, 176, 0.95)",
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
+    elevation: 2,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
+  },
+  categoryBadgeText: {
+    fontSize: 11,
+    fontWeight: "700",
+    color: "#FFFFFF",
+    textTransform: "uppercase",
+    letterSpacing: 0.8,
+  },
+  contentContainer: {
+    padding: 16,
+    gap: 10,
+  },
+  headerRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
   },
   shopName: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: "#333",
+    flex: 1,
+    fontSize: 20,
+    fontWeight: "700",
+    color: "#1A1A1A",
+    letterSpacing: -0.3,
   },
   shopDescription: {
     fontSize: 14,
-    color: "#666",
+    color: "#666666",
     lineHeight: 20,
+    letterSpacing: 0.2,
+  },
+  footerRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingTop: 4,
+  },
+  productCountContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
   },
   productCount: {
-    fontSize: 12,
-    color: "#888",
-    fontWeight: "500",
+    fontSize: 13,
+    fontWeight: "600",
+    color: "#9C27B0",
+    letterSpacing: 0.2,
+  },
+  exploreText: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#9C27B0",
+    letterSpacing: 0.3,
   },
 });

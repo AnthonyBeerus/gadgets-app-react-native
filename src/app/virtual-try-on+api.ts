@@ -12,6 +12,25 @@ enum GenerationMode {
   MODEL_TO_MODEL = "MODEL_TO_MODEL",
 }
 
+enum PoseOption {
+  ORIGINAL = "original",
+  SELFIE = "selfie",
+  STANDING = "standing",
+  CASUAL = "casual",
+  PROFESSIONAL = "professional",
+  WALKING = "walking",
+}
+
+enum BackgroundScene {
+  ORIGINAL = "original",
+  STUDIO = "studio",
+  PARTY = "party",
+  COFFEE_DATE = "coffee_date",
+  RESTAURANT = "restaurant",
+  OUTDOOR = "outdoor",
+  URBAN = "urban",
+}
+
 interface GenerationResult {
   image: string | null;
   text: string | null;
@@ -28,8 +47,42 @@ const buildPrompt = (
   hasMask: boolean,
   hasLogo: boolean,
   stylePrompt?: string,
-  fitPrompt?: string
+  fitPrompt?: string,
+  pose?: PoseOption,
+  background?: BackgroundScene
 ) => {
+  // Build pose instruction
+  const poseInstruction =
+    pose && pose !== PoseOption.ORIGINAL
+      ? `\n**Pose Adjustment:** Transform the model's pose to a ${
+          pose === PoseOption.SELFIE
+            ? "selfie-style angle with a natural, close-up perspective as if taking a self-portrait"
+            : pose.replace("_", " ")
+        } pose while maintaining their identity and the garment fit.`
+      : "";
+
+  // Build background instruction
+  let backgroundInstruction = "";
+  if (background && background !== BackgroundScene.ORIGINAL) {
+    const backgroundDescriptions: Record<BackgroundScene, string> = {
+      [BackgroundScene.ORIGINAL]: "",
+      [BackgroundScene.STUDIO]:
+        "professional photography studio with clean backdrop, soft lighting, and minimal shadows",
+      [BackgroundScene.PARTY]:
+        "vibrant party atmosphere with colorful lights, festive decorations, and social ambiance",
+      [BackgroundScene.COFFEE_DATE]:
+        "cozy coffee shop interior with warm lighting, wooden furniture, and casual cafe atmosphere",
+      [BackgroundScene.RESTAURANT]:
+        "elegant restaurant setting with fine dining ambiance, warm lighting, and sophisticated decor",
+      [BackgroundScene.OUTDOOR]:
+        "natural outdoor environment with soft daylight, greenery, and open space",
+      [BackgroundScene.URBAN]:
+        "modern urban street scene with city architecture, street elements, and contemporary vibe",
+    };
+
+    backgroundInstruction = `\n**Background Scene:** Replace the background with a realistic ${backgroundDescriptions[background]}. Ensure proper lighting consistency and natural integration.`;
+  }
+
   const styleInstructionBlock =
     stylePrompt || fitPrompt
       ? `\n**Style & Fit Guidance:**\n${
@@ -42,14 +95,14 @@ const buildPrompt = (
   switch (mode) {
     case GenerationMode.PRODUCT_TO_MODEL:
       if (hasMask) {
-        return `You are a virtual try-on assistant. Combine a product image with a model using the provided mask.\n\nInputs:\n- Image 1: the model photo\n- Image 2: the product to apply\n- Image 3: the mask defining the application region\n\nInstructions:\n1. Apply the product strictly within the white mask region.\n2. Preserve everything outside the mask exactly as the original model photo.\n3. Seamlessly blend scale, lighting, shadow, and texture.\n${styleInstructionBlock}4. Return only the final edited model image.`;
+        return `You are a virtual try-on assistant. Combine a product image with a model using the provided mask.\n\nInputs:\n- Image 1: the model photo\n- Image 2: the product to apply\n- Image 3: the mask defining the application region\n\nInstructions:\n1. Apply the product strictly within the white mask region.\n2. Preserve everything outside the mask exactly as the original model photo.\n3. Seamlessly blend scale, lighting, shadow, and texture.${poseInstruction}${backgroundInstruction}\n${styleInstructionBlock}4. Return only the final edited model image.`;
       }
-      return `You are a virtual try-on assistant. Place the product onto the model photo.\n\nInputs:\n- Image 1: the model photo\n- Image 2: the product to apply\n\nInstructions:\n1. Identify and isolate the product.\n2. Replace any similar garment on the model, or add the product naturally.\n3. Preserve the model's identity, pose, hair, and background.\n4. Seamlessly match scale, lighting, shadow, and texture.\n${styleInstructionBlock}5. Return only the final edited model image.`;
+      return `You are a virtual try-on assistant. Place the product onto the model photo.\n\nInputs:\n- Image 1: the model photo\n- Image 2: the product to apply\n\nInstructions:\n1. Identify and isolate the product.\n2. Replace any similar garment on the model, or add the product naturally.\n3. Preserve the model's identity, hair, and facial features exactly.${poseInstruction}${backgroundInstruction}\n4. Seamlessly match scale, lighting, shadow, and texture.\n${styleInstructionBlock}5. Return only the final edited model image.`;
     case GenerationMode.MODEL_TO_MODEL:
       if (hasLogo) {
-        return `You are an expert fashion retoucher. Swap clothing from a source model onto a target model and apply a logo.\n\nInputs:\n- Image 1: target model\n- Image 2: source model (garment reference)\n- Image 3: logo to apply\n\nInstructions:\n1. Transfer only the garment from the source model.\n2. Preserve the target model's appearance, pose, and background exactly.\n3. Integrate the garment with realistic draping, lighting, and shadows.\n4. Place the logo naturally on the garment, respecting folds and lighting.\n${styleInstructionBlock}5. Return only the finished target model image.`;
+        return `You are an expert fashion retoucher. Swap clothing from a source model onto a target model and apply a logo.\n\nInputs:\n- Image 1: target model\n- Image 2: source model (garment reference)\n- Image 3: logo to apply\n\nInstructions:\n1. Transfer only the garment from the source model.\n2. Preserve the target model's appearance and facial features exactly.${poseInstruction}${backgroundInstruction}\n3. Integrate the garment with realistic draping, lighting, and shadows.\n4. Place the logo naturally on the garment, respecting folds and lighting.\n${styleInstructionBlock}5. Return only the finished target model image.`;
       }
-      return `You are an expert fashion retoucher. Swap clothing from a source model onto a target model.\n\nInputs:\n- Image 1: target model\n- Image 2: source model (garment reference)\n\nInstructions:\n1. Transfer only the garment from the source model.\n2. Preserve the target model's appearance, pose, and background exactly.\n3. Integrate the garment with realistic draping, lighting, and shadows.\n${styleInstructionBlock}4. Return only the finished target model image.`;
+      return `You are an expert fashion retoucher. Swap clothing from a source model onto a target model.\n\nInputs:\n- Image 1: target model\n- Image 2: source model (garment reference)\n\nInstructions:\n1. Transfer only the garment from the source model.\n2. Preserve the target model's appearance and facial features exactly.${poseInstruction}${backgroundInstruction}\n3. Integrate the garment with realistic draping, lighting, and shadows.\n${styleInstructionBlock}4. Return only the finished target model image.`;
     default:
       throw new Error("Unsupported generation mode");
   }
@@ -62,7 +115,9 @@ const generateStyledImage = async (
   logoImage?: ImageData | null,
   maskImage?: ImageData | null,
   stylePrompt?: string,
-  fitPrompt?: string
+  fitPrompt?: string,
+  pose?: PoseOption,
+  background?: BackgroundScene
 ): Promise<GenerationResult> => {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
@@ -74,7 +129,9 @@ const generateStyledImage = async (
     Boolean(maskImage),
     Boolean(logoImage),
     stylePrompt,
-    fitPrompt
+    fitPrompt,
+    pose,
+    background
   );
 
   // Build messages with multi-modal content
@@ -173,7 +230,9 @@ export async function POST(request: Request) {
       body.logoImage,
       body.maskImage,
       body.stylePrompt,
-      body.fitPrompt
+      body.fitPrompt,
+      body.pose,
+      body.background
     );
 
     return Response.json(result);

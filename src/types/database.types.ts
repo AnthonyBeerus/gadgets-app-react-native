@@ -6,6 +6,15 @@ export type Json =
   | { [key: string]: Json | undefined }
   | Json[];
 
+// Color variant type for JSONB column
+export type ColorVariant = {
+  color_name: string;
+  color_hex: string;
+  image_url: string;
+  stock_quantity: number;
+  is_available: boolean;
+};
+
 export type Database = {
   public: {
     Tables: {
@@ -136,6 +145,8 @@ export type Database = {
           price: number;
           slug: string;
           title: string;
+          shop_id: number | null;
+          color_variants: ColorVariant[];
         };
         Insert: {
           category: number;
@@ -147,6 +158,8 @@ export type Database = {
           price: number;
           slug: string;
           title: string;
+          shop_id?: number | null;
+          color_variants?: ColorVariant[];
         };
         Update: {
           category?: number;
@@ -158,6 +171,8 @@ export type Database = {
           price?: number;
           slug?: string;
           title?: string;
+          shop_id?: number | null;
+          color_variants?: ColorVariant[];
         };
         Relationships: [
           {
@@ -165,6 +180,50 @@ export type Database = {
             columns: ["category"];
             isOneToOne: false;
             referencedRelation: "category";
+            referencedColumns: ["id"];
+          }
+        ];
+      };
+      product_variants: {
+        Row: {
+          id: number;
+          product_id: number;
+          color_name: string;
+          color_hex: string;
+          image_url: string | null;
+          stock_quantity: number;
+          is_available: boolean;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: number;
+          product_id: number;
+          color_name: string;
+          color_hex: string;
+          image_url?: string | null;
+          stock_quantity?: number;
+          is_available?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: number;
+          product_id?: number;
+          color_name?: string;
+          color_hex?: string;
+          image_url?: string | null;
+          stock_quantity?: number;
+          is_available?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "product_variants_product_id_fkey";
+            columns: ["product_id"];
+            isOneToOne: false;
+            referencedRelation: "product";
             referencedColumns: ["id"];
           }
         ];

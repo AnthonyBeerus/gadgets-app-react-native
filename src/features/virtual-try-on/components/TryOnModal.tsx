@@ -29,14 +29,18 @@ export default function TryOnModal({
     error,
     reset,
     setSelectedProduct,
+    pose,
+    background,
   } = useTryOnStore();
   const processTryOnMutation = useProcessTryOn();
   const [hasAttempted, setHasAttempted] = React.useState(false);
+  const [readyToGenerate, setReadyToGenerate] = React.useState(false);
 
   // Reset attempt flag when modal visibility or images change
   useEffect(() => {
     if (!visible) {
       setHasAttempted(false);
+      setReadyToGenerate(false);
     }
   }, [visible]);
 
@@ -47,9 +51,10 @@ export default function TryOnModal({
     }
   }, [visible, shopProducts, selectedProduct]);
 
-  // Auto-trigger try-on when both product and user image are selected
+  // Trigger try-on when user clicks generate button
   useEffect(() => {
     if (
+      readyToGenerate &&
       selectedProduct &&
       userImage &&
       !resultImage &&
@@ -83,6 +88,8 @@ export default function TryOnModal({
                 mimeType: "image/jpeg",
               },
               mode: GenerationMode.PRODUCT_TO_MODEL,
+              pose,
+              background,
             });
           };
 
@@ -95,12 +102,15 @@ export default function TryOnModal({
       processProductImage();
     }
   }, [
+    readyToGenerate,
     selectedProduct,
     userImage,
     resultImage,
     isProcessing,
     error,
     hasAttempted,
+    pose,
+    background,
   ]);
 
   const handleClose = () => {
@@ -110,6 +120,7 @@ export default function TryOnModal({
 
   const handleRetry = async () => {
     setHasAttempted(false); // Reset the flag to allow retry
+    setReadyToGenerate(false); // Reset ready flag
     if (selectedProduct && userImage) {
       const userBase64 = userImage.includes("base64,")
         ? userImage.split("base64,")[1]
@@ -133,6 +144,8 @@ export default function TryOnModal({
               mimeType: "image/jpeg",
             },
             mode: GenerationMode.PRODUCT_TO_MODEL,
+            pose,
+            background,
           });
         };
 
@@ -143,13 +156,17 @@ export default function TryOnModal({
     }
   };
 
+  const handleReadyToGenerate = () => {
+    setReadyToGenerate(true);
+  };
+
   const renderContent = () => {
     if (!selectedProduct) {
       return <ProductSelector products={shopProducts} />;
     }
 
-    if (!userImage) {
-      return <ImagePickerComponent />;
+    if (!userImage || !readyToGenerate) {
+      return <ImagePickerComponent onReadyToGenerate={handleReadyToGenerate} />;
     }
 
     return <ResultOverlay onClose={handleClose} onRetry={handleRetry} />;

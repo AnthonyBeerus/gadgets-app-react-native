@@ -104,14 +104,9 @@ export default function ResultOverlay({
 
   if (isProcessing) {
     return (
-      <View style={styles.container}>
-        <View style={styles.content}>
-          <ActivityIndicator size="large" color="#007AFF" />
-          <Text style={styles.processingText}>
-            Processing your virtual try-on...
-          </Text>
-          <Text style={styles.subText}>This may take a few moments</Text>
-        </View>
+      <View style={styles.processingContainer}>
+        <ActivityIndicator size="large" color="#9C27B0" />
+        <Text style={styles.processingText}>Creating your look...</Text>
       </View>
     );
   }
@@ -199,6 +194,13 @@ export default function ResultOverlay({
 }
 
 const styles = StyleSheet.create({
+  processingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#f8f9fa",
+    gap: 20,
+  },
   container: {
     flex: 1,
     backgroundColor: "rgba(0, 0, 0, 0.85)",
@@ -220,9 +222,8 @@ const styles = StyleSheet.create({
     shadowRadius: 16,
   },
   processingText: {
-    fontSize: 20,
-    fontWeight: "700",
-    marginTop: 20,
+    fontSize: 18,
+    fontWeight: "600",
     textAlign: "center",
     color: "#333",
   },

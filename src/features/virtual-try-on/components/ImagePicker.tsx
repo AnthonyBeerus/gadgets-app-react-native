@@ -7,16 +7,21 @@ import {
   Image,
   StyleSheet,
   Alert,
+  ScrollView,
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import { useTryOnStore } from "../store/tryOnStore";
+import PoseSelector from "./PoseSelector";
+import BackgroundSelector from "./BackgroundSelector";
 
 interface ImagePickerProps {
   onImageSelected?: (uri: string) => void;
+  onReadyToGenerate?: () => void;
 }
 
 export default function ImagePickerComponent({
   onImageSelected,
+  onReadyToGenerate,
 }: ImagePickerProps) {
   const { setUserImage } = useTryOnStore();
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
@@ -93,7 +98,9 @@ export default function ImagePickerComponent({
   };
 
   return (
-    <View style={styles.container}>
+    <ScrollView
+      style={styles.scrollContainer}
+      contentContainerStyle={styles.container}>
       <Text style={styles.instruction}>Upload a photo of yourself:</Text>
 
       {selectedImage ? (
@@ -103,6 +110,23 @@ export default function ImagePickerComponent({
             style={styles.changeButton}
             onPress={() => setSelectedImage(null)}>
             <Text style={styles.changeButtonText}>Change Photo</Text>
+          </TouchableOpacity>
+
+          {/* Pose Selector */}
+          <View style={styles.selectorSection}>
+            <PoseSelector />
+          </View>
+
+          {/* Background Selector */}
+          <View style={styles.selectorSection}>
+            <BackgroundSelector />
+          </View>
+
+          {/* Generate Button */}
+          <TouchableOpacity
+            style={styles.generateButton}
+            onPress={onReadyToGenerate}>
+            <Text style={styles.generateButtonText}>✨ Generate Try-On</Text>
           </TouchableOpacity>
         </View>
       ) : (
@@ -116,16 +140,17 @@ export default function ImagePickerComponent({
           </TouchableOpacity>
         </View>
       )}
-    </View>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  scrollContainer: {
     flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
+  },
+  container: {
     padding: 24,
+    alignItems: "center",
   },
   instruction: {
     fontSize: 20,
@@ -159,6 +184,7 @@ const styles = StyleSheet.create({
   imageContainer: {
     alignItems: "center",
     gap: 20,
+    width: "100%",
   },
   selectedImage: {
     width: 280,
@@ -181,6 +207,28 @@ const styles = StyleSheet.create({
   changeButtonText: {
     color: "white",
     fontSize: 16,
+    fontWeight: "bold",
+  },
+  selectorSection: {
+    width: "100%",
+    marginTop: 8,
+  },
+  generateButton: {
+    backgroundColor: "#9C27B0",
+    paddingVertical: 18,
+    paddingHorizontal: 48,
+    borderRadius: 12,
+    alignItems: "center",
+    marginTop: 16,
+    elevation: 4,
+    shadowColor: "#9C27B0",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.4,
+    shadowRadius: 6,
+  },
+  generateButtonText: {
+    color: "white",
+    fontSize: 18,
     fontWeight: "bold",
   },
 });

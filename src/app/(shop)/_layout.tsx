@@ -5,7 +5,7 @@ import { FontAwesome, MaterialIcons } from "@expo/vector-icons";
 import { useAuth } from "../../providers/auth-provider";
 
 const COLORS = {
-  primary: "#1BC464",
+  primary: "#9C27B0",
   inactive: "#8E8E93",
   background: "#FFFFFF",
   shadow: "#000000",
