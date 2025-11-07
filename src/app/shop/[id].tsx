@@ -122,7 +122,7 @@ export default function ShopDetails() {
           <Text style={styles.headerTitle}>Loading...</Text>
         </View>
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#007AFF" />
+          <ActivityIndicator size="large" color="#9C27B0" />
           <Text style={styles.loadingText}>Loading shop details...</Text>
         </View>
       </SafeAreaView>
@@ -197,7 +197,7 @@ export default function ShopDetails() {
                 <TouchableOpacity
                   style={styles.secondaryActionButton}
                   onPress={handleBookAppointment}>
-                  <Ionicons name="calendar" size={20} color="#007AFF" />
+                  <Ionicons name="calendar" size={20} color="#9C27B0" />
                   <Text style={styles.secondaryActionText}>
                     Book Appointment
                   </Text>
@@ -208,7 +208,7 @@ export default function ShopDetails() {
                 <TouchableOpacity
                   style={styles.secondaryActionButton}
                   onPress={handleCallShop}>
-                  <Ionicons name="call" size={20} color="#007AFF" />
+                  <Ionicons name="call" size={20} color="#9C27B0" />
                   <Text style={styles.secondaryActionText}>Call Shop</Text>
                 </TouchableOpacity>
               )}
@@ -224,14 +224,14 @@ export default function ShopDetails() {
                   <Text style={styles.viewAllText}>
                     View All ({products.length})
                   </Text>
-                  <Ionicons name="arrow-forward" size={16} color="#007AFF" />
+                  <Ionicons name="arrow-forward" size={16} color="#9C27B0" />
                 </TouchableOpacity>
               )}
             </View>
 
             {productsLoading ? (
               <View style={styles.productsLoadingContainer}>
-                <ActivityIndicator size="small" color="#007AFF" />
+                <ActivityIndicator size="small" color="#9C27B0" />
                 <Text style={styles.loadingText}>Loading products...</Text>
               </View>
             ) : products.length > 0 ? (
@@ -248,7 +248,7 @@ export default function ShopDetails() {
                           style={styles.productPreviewImage}
                         />
                       ) : (
-                        <Ionicons name="cube" size={32} color="#007AFF" />
+                        <Ionicons name="cube" size={32} color="#9C27B0" />
                       )}
                       <Text
                         style={styles.productPreviewTitle}
@@ -292,7 +292,7 @@ export default function ShopDetails() {
             ) : (
               <View style={styles.productsHighlight}>
                 <View style={styles.productCardPreview}>
-                  <Ionicons name="cube" size={32} color="#007AFF" />
+                  <Ionicons name="cube" size={32} color="#9C27B0" />
                   <Text style={styles.productPreviewTitle}>
                     Quality Products
                   </Text>
@@ -483,7 +483,7 @@ const styles = StyleSheet.create({
   },
   categoryName: {
     fontSize: 16,
-    color: "#007AFF",
+    color: "#9C27B0",
     marginBottom: 16,
     fontWeight: "600",
     marginTop: 4,
@@ -571,7 +571,7 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   primaryActionButton: {
-    backgroundColor: "#007AFF",
+    backgroundColor: "#9C27B0",
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
@@ -605,7 +605,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: "#007AFF",
+    borderColor: "#9C27B0",
     flex: 1,
     elevation: 1,
     shadowColor: "#000",
@@ -616,7 +616,7 @@ const styles = StyleSheet.create({
   secondaryActionText: {
     fontSize: 14,
     fontWeight: "600",
-    color: "#007AFF",
+    color: "#9C27B0",
     marginLeft: 6,
   },
   // Enhanced Products Section Styles
@@ -633,7 +633,7 @@ const styles = StyleSheet.create({
   viewAllText: {
     fontSize: 14,
     fontWeight: "600",
-    color: "#007AFF",
+    color: "#9C27B0",
     marginRight: 4,
   },
   productsHighlight: {
@@ -708,7 +708,7 @@ const styles = StyleSheet.create({
   productPreviewPrice: {
     fontSize: 14,
     fontWeight: "bold",
-    color: "#007AFF",
+    color: "#9C27B0",
     marginTop: 4,
   },
 });

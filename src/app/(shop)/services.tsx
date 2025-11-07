@@ -20,7 +20,7 @@ import { Tables } from "../../types/database.types";
 import BookingModal from "../../components/booking-modal";
 
 const COLORS = {
-  primary: "#1BC464",
+  primary: "#9C27B0",
   secondary: "#FF6B6B",
   tertiary: "#4ECDC4",
   quaternary: "#45B7D1",

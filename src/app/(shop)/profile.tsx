@@ -12,7 +12,7 @@ import { useAuth } from "../../providers/auth-provider";
 import { supabase } from "../../lib/supabase";
 
 const COLORS = {
-  primary: "#1BC464",
+  primary: "#9C27B0",
   background: "#F8F9FA",
   white: "#FFFFFF",
   text: "#1D1D1F",

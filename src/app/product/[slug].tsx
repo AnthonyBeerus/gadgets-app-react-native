@@ -53,7 +53,7 @@ const ProductDetails = () => {
   if (isLoading)
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#5B21B6" />
+        <ActivityIndicator size="large" color="#9C27B0" />
       </View>
     );
   if (error) return <Text>Error: {error.message}</Text>;
@@ -208,7 +208,7 @@ const ProductDetails = () => {
                           <Ionicons
                             name="checkmark-circle"
                             size={24}
-                            color="#5B21B6"
+                            color="#9C27B0"
                           />
                         </View>
                       )}
@@ -357,7 +357,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#F8F9FA",
   },
   heroContainer: {
-    backgroundColor: "#5B21B6",
+    backgroundColor: "#9C27B0",
     borderBottomLeftRadius: 32,
     borderBottomRightRadius: 32,
     overflow: "hidden",
@@ -389,7 +389,7 @@ const styles = StyleSheet.create({
   price: {
     fontSize: 32,
     fontWeight: "bold",
-    color: "#5B21B6",
+    color: "#9C27B0",
   },
   ratingContainer: {
     flexDirection: "row",
@@ -428,7 +428,7 @@ const styles = StyleSheet.create({
     position: "relative",
   },
   selectedVariantBox: {
-    borderColor: "#5B21B6",
+    borderColor: "#9C27B0",
     borderWidth: 3,
   },
   variantImage: {
@@ -463,8 +463,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   selectedSize: {
-    backgroundColor: "#5B21B6",
-    borderColor: "#5B21B6",
+    backgroundColor: "#9C27B0",
+    borderColor: "#9C27B0",
   },
   sizeText: {
     fontSize: 16,
@@ -585,7 +585,7 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 10,
-    backgroundColor: "#5B21B6",
+    backgroundColor: "#9C27B0",
     alignItems: "center",
     justifyContent: "center",
   },
@@ -602,13 +602,13 @@ const styles = StyleSheet.create({
   },
   buyButton: {
     flex: 1,
-    backgroundColor: "#5B21B6",
+    backgroundColor: "#9C27B0",
     paddingVertical: 16,
     borderRadius: 12,
     alignItems: "center",
     justifyContent: "center",
     elevation: 4,
-    shadowColor: "#5B21B6",
+    shadowColor: "#9C27B0",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.3,
     shadowRadius: 4,

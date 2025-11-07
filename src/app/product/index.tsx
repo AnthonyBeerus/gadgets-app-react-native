@@ -51,7 +51,7 @@ const ProductsPage = () => {
           }}
         />
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#007AFF" />
+          <ActivityIndicator size="large" color="#9C27B0" />
           <Text style={styles.loadingText}>Loading products...</Text>
         </View>
       </SafeAreaView>
@@ -142,7 +142,7 @@ const styles = StyleSheet.create({
     marginBottom: 32,
   },
   backButton: {
-    backgroundColor: "#007AFF",
+    backgroundColor: "#9C27B0",
     paddingHorizontal: 24,
     paddingVertical: 12,
     borderRadius: 8,
