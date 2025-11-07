@@ -10,21 +10,30 @@ import {
   ActivityIndicator,
   Alert,
   Linking,
+  Modal,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { getShopById, getShopProducts } from "../../api/shops";
+import { supabase } from "../../lib/supabase";
 import TryOnModal from "../../features/virtual-try-on/components/TryOnModal";
+import BookingModal from "../../components/booking-modal";
+import { useBookingStore } from "../../store/booking-store";
 
 export default function ShopDetails() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
+  const { openBookingModal } = useBookingStore();
+
   const [shop, setShop] = useState<any>(null);
   const [products, setProducts] = useState<any[]>([]);
+  const [services, setServices] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [productsLoading, setProductsLoading] = useState(true);
+  const [servicesLoading, setServicesLoading] = useState(false);
   const [tryOnModalVisible, setTryOnModalVisible] = useState(false);
+  const [serviceSelectionVisible, setServiceSelectionVisible] = useState(false);
 
   useEffect(() => {
     if (id) {
@@ -75,6 +84,43 @@ export default function ShopDetails() {
     }
   };
 
+  const loadShopServices = async () => {
+    try {
+      console.log("Loading services for shop ID:", id);
+      setServicesLoading(true);
+      // Fetch services associated with this shop through service_provider
+      const { data, error } = await supabase
+        .from("service")
+        .select(
+          `
+          *,
+          service_provider!inner (
+            id,
+            name,
+            rating,
+            total_reviews,
+            is_verified,
+            shop_id
+          )
+        `
+        )
+        .eq("service_provider.shop_id", parseInt(id!))
+        .eq("is_active", true)
+        .order("name");
+
+      console.log("Services query result:", { data, error });
+      console.log("Number of services found:", data?.length || 0);
+
+      if (error) throw error;
+      setServices(data || []);
+    } catch (error) {
+      console.error("Error loading shop services:", error);
+      setServices([]);
+    } finally {
+      setServicesLoading(false);
+    }
+  };
+
   const handleBrowseProducts = () => {
     if (products.length > 0) {
       // Navigate to product listing page with shop filter
@@ -90,7 +136,29 @@ export default function ShopDetails() {
   };
 
   const handleBookAppointment = () => {
-    Alert.alert("Book Appointment", "Appointment booking feature coming soon!");
+    console.log("Book Appointment clicked for shop:", shop.name);
+    // Load services when user clicks book appointment
+    loadShopServices();
+    setServiceSelectionVisible(true);
+  };
+
+  const handleServiceSelect = (service: any) => {
+    setServiceSelectionVisible(false);
+
+    // Create shop context for booking modal
+    const shopContext = {
+      id: shop.id,
+      name: shop.name,
+      logo_url: shop.logo_url,
+      image_url: shop.image_url,
+      location: shop.location,
+      phone: shop.phone,
+    };
+
+    console.log("Shop Detail - Selected service:", service);
+    console.log("Shop Detail - Shop context:", shopContext);
+
+    openBookingModal(service, shopContext);
   };
 
   const handleCallShop = () => {
@@ -404,6 +472,90 @@ export default function ShopDetails() {
         onClose={() => setTryOnModalVisible(false)}
         shopProducts={products}
       />
+
+      {/* Service Selection Modal */}
+      <Modal
+        visible={serviceSelectionVisible}
+        animationType="slide"
+        presentationStyle="pageSheet"
+        onRequestClose={() => setServiceSelectionVisible(false)}>
+        <SafeAreaView style={styles.modalContainer}>
+          <View style={styles.modalHeader}>
+            <Text style={styles.modalTitle}>Select a Service</Text>
+            <TouchableOpacity
+              onPress={() => setServiceSelectionVisible(false)}
+              style={styles.closeButton}>
+              <Ionicons name="close" size={28} color="#333" />
+            </TouchableOpacity>
+          </View>
+
+          {servicesLoading ? (
+            <View style={styles.loadingContainer}>
+              <ActivityIndicator size="large" color="#9C27B0" />
+              <Text style={styles.loadingText}>Loading services...</Text>
+            </View>
+          ) : services.length > 0 ? (
+            <ScrollView style={styles.servicesList}>
+              {services.map((service) => (
+                <TouchableOpacity
+                  key={service.id}
+                  style={styles.serviceCard}
+                  onPress={() => handleServiceSelect(service)}>
+                  <View style={styles.serviceInfo}>
+                    <Text style={styles.serviceName}>{service.name}</Text>
+                    {service.description && (
+                      <Text style={styles.serviceDescription} numberOfLines={2}>
+                        {service.description}
+                      </Text>
+                    )}
+                    <View style={styles.serviceDetails}>
+                      <View style={styles.serviceDetailItem}>
+                        <Ionicons name="time-outline" size={16} color="#666" />
+                        <Text style={styles.serviceDetailText}>
+                          {service.duration_minutes} min
+                        </Text>
+                      </View>
+                      {service.service_provider && (
+                        <View style={styles.serviceDetailItem}>
+                          <Ionicons
+                            name="person-outline"
+                            size={16}
+                            color="#666"
+                          />
+                          <Text style={styles.serviceDetailText}>
+                            {service.service_provider.name}
+                          </Text>
+                        </View>
+                      )}
+                    </View>
+                  </View>
+                  <View style={styles.servicePriceContainer}>
+                    <Text style={styles.servicePrice}>
+                      P{service.price.toFixed(2)}
+                    </Text>
+                    <Ionicons
+                      name="chevron-forward"
+                      size={20}
+                      color="#9C27B0"
+                    />
+                  </View>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+          ) : (
+            <View style={styles.emptyContainer}>
+              <Ionicons name="calendar-outline" size={64} color="#ccc" />
+              <Text style={styles.emptyTitle}>No Services Available</Text>
+              <Text style={styles.emptySubtitle}>
+                This shop doesn't have any bookable services at the moment.
+              </Text>
+            </View>
+          )}
+        </SafeAreaView>
+      </Modal>
+
+      {/* Booking Modal - controlled by Zustand store */}
+      <BookingModal />
     </SafeAreaView>
   );
 }
@@ -710,5 +862,84 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     color: "#9C27B0",
     marginTop: 4,
+  },
+  // Service Selection Modal Styles
+  modalContainer: {
+    flex: 1,
+    backgroundColor: "#f8f9fa",
+  },
+  modalHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    padding: 20,
+    backgroundColor: "#fff",
+    borderBottomWidth: 1,
+    borderBottomColor: "#e0e0e0",
+  },
+  modalTitle: {
+    fontSize: 24,
+    fontWeight: "bold",
+    color: "#333",
+  },
+  closeButton: {
+    padding: 8,
+  },
+  servicesList: {
+    flex: 1,
+    padding: 16,
+  },
+  serviceCard: {
+    backgroundColor: "#fff",
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 12,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    elevation: 2,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+  },
+  serviceInfo: {
+    flex: 1,
+    marginRight: 12,
+  },
+  serviceName: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#333",
+    marginBottom: 4,
+  },
+  serviceDescription: {
+    fontSize: 14,
+    color: "#666",
+    marginBottom: 8,
+    lineHeight: 20,
+  },
+  serviceDetails: {
+    flexDirection: "row",
+    gap: 16,
+  },
+  serviceDetailItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+  },
+  serviceDetailText: {
+    fontSize: 13,
+    color: "#666",
+  },
+  servicePriceContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  servicePrice: {
+    fontSize: 20,
+    fontWeight: "bold",
+    color: "#9C27B0",
   },
 });

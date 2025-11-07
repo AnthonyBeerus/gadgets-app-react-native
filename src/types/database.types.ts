@@ -1,4 +1,3 @@
-
 export type Json =
   | string
   | number
@@ -819,6 +818,7 @@ export type Database = {
           name: string
           phone: string | null
           rating: number | null
+          shop_id: number | null
           total_reviews: number | null
         }
         Insert: {
@@ -833,6 +833,7 @@ export type Database = {
           name: string
           phone?: string | null
           rating?: number | null
+          shop_id?: number | null
           total_reviews?: number | null
         }
         Update: {
@@ -847,9 +848,25 @@ export type Database = {
           name?: string
           phone?: string | null
           rating?: number | null
+          shop_id?: number | null
           total_reviews?: number | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "service_provider_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "shops"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_provider_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "shops_with_product_count"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       service_review: {
         Row: {

@@ -17,7 +17,7 @@ import {
   getAllServices,
 } from "../../api/api";
 import { Tables } from "../../types/database.types";
-import BookingModal from "../../components/booking-modal";
+import BookingModal from "../../features/appointments/components/BookingModal";
 
 const COLORS = {
   primary: "#9C27B0",

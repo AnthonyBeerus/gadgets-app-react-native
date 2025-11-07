@@ -9,12 +9,11 @@ import {
   Alert,
   ActivityIndicator,
   TextInput,
-  Image,
 } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 import DateTimePicker from "@react-native-community/datetimepicker";
-import { createServiceBooking } from "../api/api";
-import { useBookingStore } from "../store/booking-store";
+import { createServiceBooking } from "../../../api/api";
+import { Tables } from "../../../types/database.types";
 
 const COLORS = {
   primary: "#1BC464",
@@ -28,36 +27,46 @@ const COLORS = {
   border: "#E5E5E7",
 };
 
-const BookingModal: React.FC = () => {
-  const {
-    isModalVisible,
-    selectedService: service,
-    shopContext: shop,
-    selectedDate,
-    selectedTime,
-    notes,
-    closeBookingModal,
-    setSelectedDate,
-    setSelectedTime,
-    setNotes,
-    resetBookingForm,
-    getMinDate,
-    getMaxDate,
-    formatDate,
-    generateTimeSlots,
-  } = useBookingStore();
+interface BookingModalProps {
+  visible: boolean;
+  onClose: () => void;
+  service: {
+    id: number;
+    name: string;
+    price: number;
+    duration_minutes: number;
+    service_provider: {
+      id: number;
+      name: string;
+    };
+  } | null;
+}
 
+const BookingModal: React.FC<BookingModalProps> = ({
+  visible,
+  onClose,
+  service,
+}) => {
+  const [selectedDate, setSelectedDate] = useState(new Date());
+  const [selectedTime, setSelectedTime] = useState<string | null>(null);
   const [showDatePicker, setShowDatePicker] = useState(false);
+  const [notes, setNotes] = useState("");
+
   const createBookingMutation = createServiceBooking();
 
-  // Debug logging
-  React.useEffect(() => {
-    if (isModalVisible) {
-      console.log("BookingModal - Modal opened");
-      console.log("BookingModal - Service:", service);
-      console.log("BookingModal - Shop:", shop);
+  // Generate available time slots (9 AM to 5 PM, every 30 minutes)
+  const generateTimeSlots = () => {
+    const slots = [];
+    for (let hour = 9; hour < 17; hour++) {
+      for (let minute = 0; minute < 60; minute += 30) {
+        const timeString = `${hour.toString().padStart(2, "0")}:${minute
+          .toString()
+          .padStart(2, "0")}`;
+        slots.push(timeString);
+      }
     }
-  }, [isModalVisible, service, shop]);
+    return slots;
+  };
 
   const timeSlots = generateTimeSlots();
 
@@ -66,6 +75,15 @@ const BookingModal: React.FC = () => {
     if (date) {
       setSelectedDate(date);
     }
+  };
+
+  const formatDate = (date: Date) => {
+    return date.toLocaleDateString("en-US", {
+      weekday: "long",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
   };
 
   const handleBooking = async () => {
@@ -94,8 +112,10 @@ const BookingModal: React.FC = () => {
           {
             text: "OK",
             onPress: () => {
-              closeBookingModal();
-              resetBookingForm();
+              onClose();
+              // Reset form
+              setSelectedTime(null);
+              setNotes("");
             },
           },
         ]
@@ -105,25 +125,30 @@ const BookingModal: React.FC = () => {
     }
   };
 
-  if (!service) {
-    console.log("BookingModal - No service data, returning null");
-    return null;
-  }
+  const getMinDate = () => {
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    return tomorrow;
+  };
 
-  console.log("BookingModal - Rendering modal with service:", service.name);
+  const getMaxDate = () => {
+    const maxDate = new Date();
+    maxDate.setDate(maxDate.getDate() + 30); // 30 days advance booking
+    return maxDate;
+  };
+
+  if (!service) return null;
 
   return (
     <Modal
-      visible={isModalVisible}
+      visible={visible}
       animationType="slide"
       presentationStyle="pageSheet"
-      onRequestClose={closeBookingModal}>
+      onRequestClose={onClose}>
       <View style={styles.container}>
         {/* Header */}
         <View style={styles.header}>
-          <TouchableOpacity
-            onPress={closeBookingModal}
-            style={styles.closeButton}>
+          <TouchableOpacity onPress={onClose} style={styles.closeButton}>
             <MaterialIcons name="close" size={24} color={COLORS.text} />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>Book Appointment</Text>
@@ -131,39 +156,11 @@ const BookingModal: React.FC = () => {
         </View>
 
         <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-          {/* Shop Info */}
-          {shop && (
-            <View style={styles.shopInfo}>
-              {shop.logo_url && (
-                <Image
-                  source={{ uri: shop.logo_url }}
-                  style={styles.shopLogo}
-                  resizeMode="contain"
-                />
-              )}
-              <View style={styles.shopDetails}>
-                <Text style={styles.shopName}>{shop.name}</Text>
-                {shop.location && (
-                  <View style={styles.shopLocationRow}>
-                    <MaterialIcons
-                      name="location-on"
-                      size={14}
-                      color={COLORS.textSecondary}
-                    />
-                    <Text style={styles.shopLocation}>{shop.location}</Text>
-                  </View>
-                )}
-              </View>
-            </View>
-          )}
-
           {/* Service Info */}
           <View style={styles.serviceInfo}>
-            <Text style={styles.serviceName}>
-              {service?.name || "Unknown Service"}
-            </Text>
+            <Text style={styles.serviceName}>{service.name}</Text>
             <Text style={styles.providerName}>
-              {service?.service_provider?.name || "Unknown Provider"}
+              {service.service_provider.name}
             </Text>
             <View style={styles.serviceDetails}>
               <View style={styles.detailItem}>
@@ -173,7 +170,7 @@ const BookingModal: React.FC = () => {
                   color={COLORS.textSecondary}
                 />
                 <Text style={styles.detailText}>
-                  {service?.duration_minutes || 0} min
+                  {service.duration_minutes} min
                 </Text>
               </View>
               <View style={styles.detailItem}>
@@ -182,7 +179,7 @@ const BookingModal: React.FC = () => {
                   size={16}
                   color={COLORS.textSecondary}
                 />
-                <Text style={styles.detailText}>${service?.price || 0}</Text>
+                <Text style={styles.detailText}>${service.price}</Text>
               </View>
             </View>
           </View>
@@ -236,38 +233,23 @@ const BookingModal: React.FC = () => {
           {/* Notes Section */}
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Additional Notes (Optional)</Text>
-            <View style={styles.notesContainer}>
-              <TextInput
-                style={styles.notesInput}
-                placeholder="Add any special requests or notes..."
-                placeholderTextColor={COLORS.textSecondary}
-                value={notes}
-                onChangeText={setNotes}
-                multiline
-                numberOfLines={3}
-                textAlignVertical="top"
-              />
-            </View>
+            <TextInput
+              style={styles.notesInput}
+              placeholder="Add any special requests or notes..."
+              placeholderTextColor={COLORS.textSecondary}
+              multiline
+              numberOfLines={3}
+              value={notes}
+              onChangeText={setNotes}
+            />
           </View>
 
           {/* Booking Summary */}
           <View style={styles.summary}>
             <Text style={styles.summaryTitle}>Booking Summary</Text>
-            {shop && (
-              <View style={styles.summaryRow}>
-                <Text style={styles.summaryLabel}>Shop:</Text>
-                <Text style={styles.summaryValue}>{shop.name}</Text>
-              </View>
-            )}
             <View style={styles.summaryRow}>
               <Text style={styles.summaryLabel}>Service:</Text>
-              <Text style={styles.summaryValue}>{service?.name || "N/A"}</Text>
-            </View>
-            <View style={styles.summaryRow}>
-              <Text style={styles.summaryLabel}>Provider:</Text>
-              <Text style={styles.summaryValue}>
-                {service?.service_provider?.name || "N/A"}
-              </Text>
+              <Text style={styles.summaryValue}>{service.name}</Text>
             </View>
             <View style={styles.summaryRow}>
               <Text style={styles.summaryLabel}>Date:</Text>
@@ -284,12 +266,12 @@ const BookingModal: React.FC = () => {
             <View style={styles.summaryRow}>
               <Text style={styles.summaryLabel}>Duration:</Text>
               <Text style={styles.summaryValue}>
-                {service?.duration_minutes || 0} minutes
+                {service.duration_minutes} minutes
               </Text>
             </View>
             <View style={[styles.summaryRow, styles.totalRow]}>
               <Text style={styles.totalLabel}>Total:</Text>
-              <Text style={styles.totalValue}>${service?.price || 0}</Text>
+              <Text style={styles.totalValue}>${service.price}</Text>
             </View>
           </View>
         </ScrollView>
@@ -358,41 +340,6 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
     paddingHorizontal: 20,
-  },
-  shopInfo: {
-    backgroundColor: COLORS.white,
-    borderRadius: 16,
-    padding: 16,
-    marginTop: 20,
-    marginBottom: 12,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-    borderWidth: 1,
-    borderColor: COLORS.border,
-  },
-  shopLogo: {
-    width: 50,
-    height: 50,
-    borderRadius: 8,
-  },
-  shopDetails: {
-    flex: 1,
-  },
-  shopName: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: COLORS.text,
-    marginBottom: 4,
-  },
-  shopLocationRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 4,
-  },
-  shopLocation: {
-    fontSize: 13,
-    color: COLORS.textSecondary,
   },
   serviceInfo: {
     backgroundColor: COLORS.white,
@@ -474,19 +421,16 @@ const styles = StyleSheet.create({
   timeSlotTextSelected: {
     color: COLORS.white,
   },
-  notesContainer: {
+  notesInput: {
     backgroundColor: COLORS.white,
     borderRadius: 12,
     padding: 16,
-    minHeight: 100,
-    borderWidth: 1,
-    borderColor: COLORS.border,
-  },
-  notesInput: {
     fontSize: 16,
     color: COLORS.text,
-    lineHeight: 20,
-    minHeight: 60,
+    minHeight: 100,
+    textAlignVertical: "top",
+    borderWidth: 1,
+    borderColor: COLORS.border,
   },
   summary: {
     backgroundColor: COLORS.white,
