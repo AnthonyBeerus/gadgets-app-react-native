@@ -11,41 +11,27 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { useState, useEffect } from "react";
-import { getMalls, Mall } from "../api/shops";
+import { useShopStore } from "../store/shop-store";
 
 const { height } = Dimensions.get("window");
 
 export default function MallSelectorModal() {
   const router = useRouter();
-  const params = useLocalSearchParams<{ selectedMallId?: string }>();
-  const [malls, setMalls] = useState<Mall[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
 
-  const selectedMallId = params.selectedMallId
-    ? parseInt(params.selectedMallId)
-    : null;
+  // Get data directly from Zustand store
+  const { malls, selectedMall, setSelectedMall } = useShopStore();
 
-  useEffect(() => {
-    loadMalls();
-  }, []);
+  const handleSelectMall = async (mallId: number | null) => {
+    setLoading(true);
 
-  const loadMalls = async () => {
-    try {
-      const mallsData = await getMalls();
-      setMalls(mallsData || []);
-    } catch (error) {
-      console.error("Error loading malls:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+    // Update the store directly - this will trigger data fetching
+    await setSelectedMall(mallId);
 
-  const handleSelectMall = (mallId: number | null) => {
-    // Navigate back to the shops tab with the selected mall ID
-    router.navigate({
-      pathname: "/(shop)",
-      params: { selectedMall: String(mallId ?? "") },
-    });
+    setLoading(false);
+
+    // Navigate back without params - store already has the data
+    router.back();
   };
 
   return (
@@ -71,20 +57,21 @@ export default function MallSelectorModal() {
         <TouchableOpacity
           style={[
             styles.mallCard,
-            selectedMallId === null && styles.selectedMallCard,
+            selectedMall === null && styles.selectedMallCard,
           ]}
           onPress={() => handleSelectMall(null)}
-          activeOpacity={0.7}>
+          activeOpacity={0.7}
+          disabled={loading}>
           <View style={styles.mallCardLeft}>
             <View
               style={[
                 styles.mallIconContainer,
-                selectedMallId === null && styles.selectedMallIcon,
+                selectedMall === null && styles.selectedMallIcon,
               ]}>
               <Ionicons
                 name="apps"
                 size={32}
-                color={selectedMallId === null ? "#fff" : "#9C27B0"}
+                color={selectedMall === null ? "#fff" : "#9C27B0"}
               />
             </View>
             <View style={styles.mallInfo}>
@@ -95,7 +82,7 @@ export default function MallSelectorModal() {
               </Text>
             </View>
           </View>
-          {selectedMallId === null && (
+          {selectedMall === null && (
             <Ionicons name="checkmark-circle" size={28} color="#9C27B0" />
           )}
         </TouchableOpacity>
@@ -106,15 +93,16 @@ export default function MallSelectorModal() {
             key={mall.id}
             style={[
               styles.mallCard,
-              selectedMallId === mall.id && styles.selectedMallCard,
+              selectedMall === mall.id && styles.selectedMallCard,
             ]}
             onPress={() => handleSelectMall(mall.id)}
-            activeOpacity={0.7}>
+            activeOpacity={0.7}
+            disabled={loading}>
             <View style={styles.mallCardLeft}>
               <View
                 style={[
                   styles.mallIconContainer,
-                  selectedMallId === mall.id && styles.selectedMallIcon,
+                  selectedMall === mall.id && styles.selectedMallIcon,
                 ]}>
                 {mall.image_url ? (
                   <Image
@@ -125,7 +113,7 @@ export default function MallSelectorModal() {
                   <Ionicons
                     name={mall.is_physical ? "storefront" : "globe"}
                     size={32}
-                    color={selectedMallId === mall.id ? "#fff" : "#9C27B0"}
+                    color={selectedMall === mall.id ? "#fff" : "#9C27B0"}
                   />
                 )}
               </View>
@@ -154,7 +142,7 @@ export default function MallSelectorModal() {
                 )}
               </View>
             </View>
-            {selectedMallId === mall.id && (
+            {selectedMall === mall.id && (
               <Ionicons name="checkmark-circle" size={28} color="#9C27B0" />
             )}
           </TouchableOpacity>

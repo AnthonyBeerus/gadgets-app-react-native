@@ -13,199 +13,41 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter, useLocalSearchParams } from "expo-router";
-import {
-  getShops,
-  getCategoriesWithShopFeatures,
-  searchShops,
-  getShopsWithFeature,
-  getShopsByCategory,
-  getMalls,
-  getShopsByMall,
-} from "../api/shops";
-import {
-  getShopsWithProductCount,
-  fetchShopsWithProductCount,
-} from "../api/api";
-import { Tables } from "../types/database.types";
 import { ShopListItem } from "./shop-list-item";
-
-type Shop = Tables<"shops">;
-type Category = Tables<"category">;
-
-interface ShopWithCategory extends Shop {
-  category: {
-    id: number;
-    name: string;
-    slug: string;
-    imageUrl: string;
-  };
-}
+import { useShopStore } from "../store/shop-store";
 
 export default function ShopsScreen() {
   const router = useRouter();
-  const params = useLocalSearchParams<{ selectedMall?: string }>();
-  const [shops, setShops] = useState<ShopWithCategory[]>([]);
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [malls, setMalls] = useState<any[]>([]);
-  const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
-  const [selectedMall, setSelectedMall] = useState<number | null>(1); // Default to Molapo Crossing
-  const [searchQuery, setSearchQuery] = useState("");
-  const [selectedFeature, setSelectedFeature] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
 
-  // Listen for mall selection from modal
-  useEffect(() => {
-    if (params.selectedMall !== undefined) {
-      const mallId =
-        params.selectedMall === "" ? null : parseInt(params.selectedMall);
-      handleMallFilter(mallId);
-    }
-  }, [params.selectedMall]);
+  // Global Zustand store for all shop data and filters
+  const {
+    shops,
+    categories,
+    malls,
+    selectedMall,
+    selectedCategory,
+    selectedFeature,
+    searchQuery,
+    loading,
+    error,
+    loadInitialData,
+    setSelectedCategory,
+    setSelectedFeature,
+    setSearchQuery,
+    clearAllExceptMall,
+  } = useShopStore();
 
+  // Load initial data on mount
   useEffect(() => {
-    loadData();
+    loadInitialData();
   }, []);
 
-  const loadData = async () => {
-    try {
-      setLoading(true);
-      const [shopsData, categoriesData, mallsData] = await Promise.all([
-        // Load shops filtered by default mall (Molapo Crossing)
-        selectedMall ? getShopsByMall(selectedMall) : getShops(),
-        getCategoriesWithShopFeatures(),
-        getMalls(),
-      ]);
-      setShops(shopsData as any);
-      setCategories(categoriesData);
-      setMalls(mallsData || []);
-    } catch (error) {
-      console.error("Error loading shops:", error);
-      Alert.alert("Error", "Failed to load shops data");
-    } finally {
-      setLoading(false);
+  // Show error alerts
+  useEffect(() => {
+    if (error) {
+      Alert.alert("Error", error);
     }
-  };
-
-  const handleSearch = async (query: string) => {
-    setSearchQuery(query);
-    if (query.trim()) {
-      try {
-        setLoading(true);
-        const results = await searchShops(query);
-        // Apply mall filter if one is selected
-        if (selectedMall) {
-          const filteredResults = (results as any[]).filter(
-            (shop) => shop.mall_id === selectedMall
-          );
-          setShops(filteredResults as any);
-        } else {
-          setShops(results as any);
-        }
-      } catch (error) {
-        console.error("Search error:", error);
-        Alert.alert("Error", "Failed to search shops");
-      } finally {
-        setLoading(false);
-      }
-    } else {
-      // If search is cleared, reload with current mall filter
-      if (selectedMall) {
-        handleMallFilter(selectedMall);
-      } else {
-        loadData();
-      }
-    }
-  };
-
-  const handleFeatureFilter = async (feature: string | null) => {
-    setSelectedFeature(feature);
-    setSelectedCategory(null);
-    setSearchQuery("");
-
-    try {
-      setLoading(true);
-      let results;
-      if (feature) {
-        results = await getShopsWithFeature(feature as any);
-        // Apply mall filter if one is selected
-        if (selectedMall) {
-          results = (results as any[]).filter(
-            (shop) => shop.mall_id === selectedMall
-          );
-        }
-      } else {
-        // If feature is cleared, reload with current mall filter
-        if (selectedMall) {
-          results = await getShopsByMall(selectedMall);
-        } else {
-          results = await getShops();
-        }
-      }
-      setShops(results as ShopWithCategory[]);
-    } catch (error) {
-      console.error("Feature filter error:", error);
-      Alert.alert("Error", "Failed to filter shops by feature");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleCategoryFilter = async (categoryId: number | null) => {
-    setSelectedCategory(categoryId);
-    setSelectedFeature(null);
-    setSearchQuery("");
-    // Don't clear mall filter - respect current mall selection
-
-    try {
-      setLoading(true);
-      let results;
-      if (categoryId) {
-        results = await getShopsByCategory(categoryId);
-        // Apply mall filter if one is selected
-        if (selectedMall) {
-          results = (results as any[]).filter(
-            (shop) => shop.mall_id === selectedMall
-          );
-        }
-      } else {
-        // If category is cleared, reload with current mall filter
-        if (selectedMall) {
-          results = await getShopsByMall(selectedMall);
-        } else {
-          results = await getShops();
-        }
-      }
-      setShops(results as any);
-    } catch (error) {
-      console.error("Category filter error:", error);
-      Alert.alert("Error", "Failed to filter shops by category");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleMallFilter = async (mallId: number | null) => {
-    setSelectedMall(mallId);
-    setSelectedCategory(null);
-    setSelectedFeature(null);
-    setSearchQuery("");
-
-    try {
-      setLoading(true);
-      let results;
-      if (mallId) {
-        results = await getShopsByMall(mallId);
-      } else {
-        results = await getShops();
-      }
-      setShops(results as any);
-    } catch (error) {
-      console.error("Mall filter error:", error);
-      Alert.alert("Error", "Failed to filter shops by mall");
-    } finally {
-      setLoading(false);
-    }
-  };
+  }, [error]);
 
   const navigateToShop = (shopId: number) => {
     router.push(`/shop/${shopId}`);
@@ -220,7 +62,7 @@ export default function ShopsScreen() {
     { key: "has_appointment_booking", label: "Appointments", icon: "calendar" },
   ];
 
-  const renderShopCard = ({ item }: { item: ShopWithCategory }) => (
+  const renderShopCard = ({ item }: { item: any }) => (
     <ShopListItem shop={item} />
   );
 
@@ -230,12 +72,7 @@ export default function ShopsScreen() {
       <View style={styles.header}>
         <TouchableOpacity
           style={styles.mallSelectorButton}
-          onPress={() =>
-            router.push({
-              pathname: "/mall-selector",
-              params: { selectedMallId: String(selectedMall || "") },
-            })
-          }
+          onPress={() => router.push("/mall-selector")}
           activeOpacity={0.7}>
           <View style={styles.headerLeft}>
             <View style={styles.mallIconSmall}>
@@ -286,10 +123,10 @@ export default function ShopsScreen() {
             placeholder="Search luxury brands..."
             placeholderTextColor="#999"
             value={searchQuery}
-            onChangeText={handleSearch}
+            onChangeText={setSearchQuery}
           />
           {searchQuery ? (
-            <TouchableOpacity onPress={() => handleSearch("")}>
+            <TouchableOpacity onPress={() => setSearchQuery("")}>
               <Ionicons name="close-circle" size={20} color="#999" />
             </TouchableOpacity>
           ) : null}
@@ -307,7 +144,7 @@ export default function ShopsScreen() {
                 selectedFeature === item.key && styles.selectedFeaturePill,
               ]}
               onPress={() =>
-                handleFeatureFilter(
+                setSelectedFeature(
                   selectedFeature === item.key ? null : item.key
                 )
               }
@@ -336,7 +173,7 @@ export default function ShopsScreen() {
                 selectedCategory === item.id && styles.selectedCategoryTab,
               ]}
               onPress={() =>
-                handleCategoryFilter(
+                setSelectedCategory(
                   selectedCategory === item.id ? null : item.id
                 )
               }
@@ -388,12 +225,7 @@ export default function ShopsScreen() {
           {(searchQuery || selectedCategory || selectedFeature) && (
             <TouchableOpacity
               style={styles.resetButton}
-              onPress={() => {
-                setSearchQuery("");
-                setSelectedCategory(null);
-                setSelectedFeature(null);
-                loadData();
-              }}
+              onPress={clearAllExceptMall}
               activeOpacity={0.8}>
               <Text style={styles.resetButtonText}>Reset Filters</Text>
             </TouchableOpacity>
@@ -407,7 +239,7 @@ export default function ShopsScreen() {
           contentContainerStyle={styles.shopsContainer}
           showsVerticalScrollIndicator={false}
           refreshing={loading}
-          onRefresh={loadData}
+          onRefresh={loadInitialData}
           style={styles.shopsList}
         />
       )}
