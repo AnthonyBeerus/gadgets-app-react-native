@@ -296,13 +296,9 @@ export default function ShopsScreen() {
         </View>
       </View>
 
-      {/* Premium Feature Pills */}
+      {/* Compact Feature Pills */}
       <View style={styles.featuresSection}>
-        <Text style={styles.sectionTitle}>Services</Text>
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.featuresContent}>
+        <View style={styles.featuresContent}>
           {features.map((item) => (
             <TouchableOpacity
               key={item.key}
@@ -316,34 +312,18 @@ export default function ShopsScreen() {
                 )
               }
               activeOpacity={0.7}>
-              <View
-                style={[
-                  styles.featurePillIconContainer,
-                  selectedFeature === item.key &&
-                    styles.selectedFeaturePillIcon,
-                ]}>
-                <Ionicons
-                  name={item.icon as any}
-                  size={18}
-                  color={selectedFeature === item.key ? "#fff" : "#9C27B0"}
-                />
-              </View>
-              <Text
-                style={[
-                  styles.featurePillText,
-                  selectedFeature === item.key &&
-                    styles.selectedFeaturePillText,
-                ]}>
-                {item.label}
-              </Text>
+              <Ionicons
+                name={item.icon as any}
+                size={18}
+                color={selectedFeature === item.key ? "#fff" : "#9C27B0"}
+              />
             </TouchableOpacity>
           ))}
-        </ScrollView>
+        </View>
       </View>
 
-      {/* Premium Category Tabs */}
+      {/* Compact Category Tabs */}
       <View style={styles.categoriesSection}>
-        <Text style={styles.sectionTitle}>Categories</Text>
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
@@ -369,9 +349,6 @@ export default function ShopsScreen() {
                 ]}>
                 {item.name}
               </Text>
-              {selectedCategory === item.id && (
-                <View style={styles.categoryTabIndicator} />
-              )}
             </TouchableOpacity>
           ))}
         </ScrollView>
@@ -486,7 +463,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   title: {
-    fontSize: 20,
+    fontSize: 16,
     fontWeight: "700",
     color: "#1A1A1A",
     letterSpacing: -0.5,
@@ -498,7 +475,7 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   subtitle: {
-    fontSize: 12,
+    fontSize: 11,
     color: "#666",
     fontWeight: "500",
     letterSpacing: 0.2,
@@ -513,7 +490,7 @@ const styles = StyleSheet.create({
     borderColor: "#E1BEE7",
   },
   shopsBadgeNumber: {
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: "700",
     color: "#9C27B0",
     letterSpacing: -0.5,
@@ -547,108 +524,62 @@ const styles = StyleSheet.create({
   },
   searchInput: {
     flex: 1,
-    fontSize: 16,
+    fontSize: 14,
     color: "#1A1A1A",
     fontWeight: "500",
   },
   featuresSection: {
-    paddingTop: 6,
-    paddingBottom: 6,
+    paddingVertical: 8,
+    paddingHorizontal: 16,
     backgroundColor: "#fff",
   },
-  sectionTitle: {
-    fontSize: 16,
-    fontWeight: "700",
-    color: "#1A1A1A",
-    paddingHorizontal: 20,
-    marginBottom: 10,
-    letterSpacing: -0.3,
-  },
   featuresContent: {
-    paddingHorizontal: 20,
-    gap: 8,
+    flexDirection: "row",
+    gap: 6,
   },
   featurePill: {
-    flexDirection: "row",
+    flex: 1,
     alignItems: "center",
+    justifyContent: "center",
     backgroundColor: "#FAFAFA",
-    paddingVertical: 10,
-    paddingHorizontal: 16,
-    borderRadius: 20,
-    borderWidth: 2,
-    borderColor: "#F0F0F0",
-    gap: 8,
+    height: 44,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: "#E0E0E0",
   },
   selectedFeaturePill: {
     backgroundColor: "#9C27B0",
     borderColor: "#9C27B0",
-    elevation: 4,
-    shadowColor: "#9C27B0",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-  },
-  featurePillIconContainer: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: "#F3E5F5",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  selectedFeaturePillIcon: {
-    backgroundColor: "rgba(255, 255, 255, 0.25)",
-  },
-  featurePillText: {
-    fontSize: 14,
-    color: "#1A1A1A",
-    fontWeight: "600",
-    letterSpacing: 0.2,
-  },
-  selectedFeaturePillText: {
-    color: "#fff",
   },
   categoriesSection: {
-    paddingTop: 6,
-    paddingBottom: 6,
+    paddingVertical: 8,
+    paddingHorizontal: 16,
     backgroundColor: "#fff",
     borderBottomWidth: 1,
     borderBottomColor: "#F0F0F0",
   },
   categoriesContent: {
-    paddingHorizontal: 20,
-    gap: 8,
+    gap: 6,
   },
   categoryTab: {
-    paddingVertical: 8,
-    paddingHorizontal: 18,
-    borderRadius: 12,
+    paddingVertical: 6,
+    paddingHorizontal: 14,
+    borderRadius: 16,
     backgroundColor: "#FAFAFA",
-    borderWidth: 2,
-    borderColor: "#F0F0F0",
-    position: "relative",
+    borderWidth: 1,
+    borderColor: "#E0E0E0",
   },
   selectedCategoryTab: {
-    backgroundColor: "#F3E5F5",
+    backgroundColor: "#9C27B0",
     borderColor: "#9C27B0",
   },
   categoryTabText: {
-    fontSize: 14,
+    fontSize: 12,
     color: "#666",
     fontWeight: "600",
-    letterSpacing: 0.2,
   },
   selectedCategoryTabText: {
-    color: "#9C27B0",
-  },
-  categoryTabIndicator: {
-    position: "absolute",
-    bottom: 0,
-    left: 0,
-    right: 0,
-    height: 3,
-    backgroundColor: "#9C27B0",
-    borderRadius: 2,
+    color: "#fff",
   },
   shopsHeader: {
     paddingHorizontal: 20,
@@ -660,13 +591,13 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   shopsHeaderTitle: {
-    fontSize: 20,
+    fontSize: 16,
     fontWeight: "700",
     color: "#1A1A1A",
     letterSpacing: -0.3,
   },
   shopsHeaderCount: {
-    fontSize: 14,
+    fontSize: 12,
     fontWeight: "600",
     color: "#9C27B0",
     letterSpacing: 0.2,
@@ -687,7 +618,7 @@ const styles = StyleSheet.create({
   },
   loadingText: {
     marginTop: 20,
-    fontSize: 17,
+    fontSize: 14,
     color: "#666",
     fontWeight: "600",
     letterSpacing: 0.2,
@@ -711,17 +642,17 @@ const styles = StyleSheet.create({
     borderColor: "#E0E0E0",
   },
   emptyTitle: {
-    fontSize: 24,
+    fontSize: 18,
     fontWeight: "700",
     color: "#1A1A1A",
     marginBottom: 12,
     letterSpacing: -0.5,
   },
   emptySubtitle: {
-    fontSize: 16,
+    fontSize: 13,
     color: "#666",
     textAlign: "center",
-    lineHeight: 24,
+    lineHeight: 20,
     marginBottom: 12,
     paddingHorizontal: 24,
     fontWeight: "500",
@@ -740,7 +671,7 @@ const styles = StyleSheet.create({
   },
   resetButtonText: {
     color: "#fff",
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: "700",
     letterSpacing: 0.5,
   },
