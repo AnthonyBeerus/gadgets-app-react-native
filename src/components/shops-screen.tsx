@@ -136,10 +136,10 @@ export default function ShopsScreen() {
   };
 
   const features = [
+    { key: "has_virtual_try_on", label: "Virtual Try-On", icon: "glasses" },
     { key: "has_delivery", label: "Delivery", icon: "bicycle" },
     { key: "has_collection", label: "Collection", icon: "bag-handle" },
     { key: "has_appointment_booking", label: "Appointments", icon: "calendar" },
-    { key: "has_virtual_try_on", label: "Virtual Try-On", icon: "glasses" },
   ];
 
   const renderShopCard = ({ item }: { item: ShopWithCategory }) => (
