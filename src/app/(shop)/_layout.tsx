@@ -1,12 +1,13 @@
 import { Redirect, Tabs } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { ActivityIndicator, StyleSheet, Platform } from "react-native";
+import { ActivityIndicator, StyleSheet, Platform, View } from "react-native";
 import { FontAwesome, MaterialIcons } from "@expo/vector-icons";
 import { useAuth } from "../../providers/auth-provider";
 
 const COLORS = {
   primary: "#9C27B0",
-  inactive: "#8E8E93",
+  primaryLight: "#E1BEE7",
+  inactive: "#9E9E9E",
   background: "#FFFFFF",
   shadow: "#000000",
   text: "#1D1D1F",
@@ -21,14 +22,17 @@ function TabBarIcon(props: {
   type?: "FontAwesome" | "MaterialIcons";
 }) {
   const { name, color, focused, type = "FontAwesome" } = props;
-  const size = focused ? 26 : 24;
+  const size = focused ? 28 : 24;
   const iconColor = focused ? COLORS.primary : COLORS.inactive;
 
-  if (type === "MaterialIcons") {
-    return <MaterialIcons name={name as any} size={size} color={iconColor} />;
-  }
+  const IconComponent = type === "MaterialIcons" ? MaterialIcons : FontAwesome;
 
-  return <FontAwesome name={name as any} size={size} color={iconColor} />;
+  return (
+    <View style={[styles.iconContainer, focused && styles.iconContainerActive]}>
+      <IconComponent name={name as any} size={size} color={iconColor} />
+      {focused && <View style={styles.activeIndicator} />}
+    </View>
+  );
 }
 
 const TabsLayout = () => {
@@ -43,27 +47,23 @@ const TabsLayout = () => {
         screenOptions={{
           tabBarActiveTintColor: COLORS.primary,
           tabBarInactiveTintColor: COLORS.inactive,
-          tabBarLabelStyle: {
-            fontSize: 12,
-            fontWeight: "600",
-            marginTop: 4,
-          },
+          tabBarShowLabel: false,
           tabBarStyle: {
             backgroundColor: COLORS.background,
-            borderTopLeftRadius: 24,
-            borderTopRightRadius: 24,
-            paddingTop: 12,
-            paddingBottom: Platform.OS === "ios" ? 20 : 12,
-            height: Platform.OS === "ios" ? 88 : 72,
+            borderTopLeftRadius: 28,
+            borderTopRightRadius: 28,
+            paddingTop: 14,
+            paddingBottom: Platform.OS === "ios" ? 28 : 20,
+            height: Platform.OS === "ios" ? 88 : 76,
             borderTopWidth: 0,
-            elevation: 20,
+            elevation: 24,
             shadowColor: COLORS.shadow,
             shadowOffset: {
               width: 0,
-              height: -4,
+              height: -8,
             },
-            shadowOpacity: 0.1,
-            shadowRadius: 12,
+            shadowOpacity: 0.12,
+            shadowRadius: 16,
             position: "absolute",
           },
           tabBarItemStyle: {
@@ -162,5 +162,24 @@ const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
     backgroundColor: "#F8F9FA",
+  },
+  iconContainer: {
+    alignItems: "center",
+    justifyContent: "center",
+    width: 56,
+    height: 40,
+    borderRadius: 16,
+    position: "relative",
+  },
+  iconContainerActive: {
+    backgroundColor: COLORS.primaryLight,
+  },
+  activeIndicator: {
+    position: "absolute",
+    bottom: -2,
+    width: 32,
+    height: 3,
+    backgroundColor: COLORS.primary,
+    borderRadius: 2,
   },
 });
