@@ -13,6 +13,7 @@ import * as ImagePicker from "expo-image-picker";
 import { useTryOnStore } from "../store/tryOnStore";
 import PoseSelector from "./PoseSelector";
 import BackgroundSelector from "./BackgroundSelector";
+import { NEO_THEME } from "../../../constants/neobrutalism";
 
 interface ImagePickerProps {
   onImageSelected?: (uri: string) => void;
@@ -101,7 +102,7 @@ export default function ImagePickerComponent({
     <ScrollView
       style={styles.scrollContainer}
       contentContainerStyle={styles.container}>
-      <Text style={styles.instruction}>Upload a photo of yourself:</Text>
+      <Text style={styles.instruction}>UPLOAD A PHOTO OF YOURSELF:</Text>
 
       {selectedImage ? (
         <View style={styles.imageContainer}>
@@ -109,7 +110,7 @@ export default function ImagePickerComponent({
           <TouchableOpacity
             style={styles.changeButton}
             onPress={() => setSelectedImage(null)}>
-            <Text style={styles.changeButtonText}>Change Photo</Text>
+            <Text style={styles.changeButtonText}>CHANGE PHOTO</Text>
           </TouchableOpacity>
 
           {/* Pose Selector */}
@@ -126,17 +127,17 @@ export default function ImagePickerComponent({
           <TouchableOpacity
             style={styles.generateButton}
             onPress={onReadyToGenerate}>
-            <Text style={styles.generateButtonText}>✨ Generate Try-On</Text>
+            <Text style={styles.generateButtonText}>✨ GENERATE TRY-ON</Text>
           </TouchableOpacity>
         </View>
       ) : (
         <View style={styles.buttonContainer}>
           <TouchableOpacity style={styles.button} onPress={pickImage}>
-            <Text style={styles.buttonText}>📁 Choose from Gallery</Text>
+            <Text style={styles.buttonText}>📁 CHOOSE FROM GALLERY</Text>
           </TouchableOpacity>
 
           <TouchableOpacity style={styles.button} onPress={takePhoto}>
-            <Text style={styles.buttonText}>📷 Take Photo</Text>
+            <Text style={styles.buttonText}>📷 TAKE PHOTO</Text>
           </TouchableOpacity>
         </View>
       )}
@@ -144,9 +145,11 @@ export default function ImagePickerComponent({
   );
 }
 
+
 const styles = StyleSheet.create({
   scrollContainer: {
     flex: 1,
+    backgroundColor: NEO_THEME.colors.backgroundLight,
   },
   container: {
     padding: 24,
@@ -156,8 +159,10 @@ const styles = StyleSheet.create({
     fontSize: 20,
     marginBottom: 32,
     textAlign: "center",
-    fontWeight: "600",
-    color: "#333",
+    fontWeight: "900",
+    color: NEO_THEME.colors.black,
+    fontFamily: NEO_THEME.fonts.black,
+    textTransform: "uppercase",
   },
   buttonContainer: {
     width: "100%",
@@ -165,21 +170,24 @@ const styles = StyleSheet.create({
     gap: 16,
   },
   button: {
-    backgroundColor: "#9C27B0",
+    backgroundColor: NEO_THEME.colors.primary,
     paddingVertical: 18,
     paddingHorizontal: 24,
-    borderRadius: 12,
+    borderRadius: NEO_THEME.borders.radius,
     alignItems: "center",
-    elevation: 3,
-    shadowColor: "#9C27B0",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
+    borderWidth: NEO_THEME.borders.width,
+    borderColor: NEO_THEME.colors.black,
+    shadowColor: NEO_THEME.colors.black,
+    shadowOffset: { width: 4, height: 4 },
+    shadowOpacity: 1,
+    shadowRadius: 0,
+    elevation: 0,
   },
   buttonText: {
-    color: "white",
+    color: NEO_THEME.colors.white,
     fontSize: 18,
-    fontWeight: "bold",
+    fontWeight: "900",
+    fontFamily: NEO_THEME.fonts.black,
   },
   imageContainer: {
     alignItems: "center",
@@ -189,46 +197,52 @@ const styles = StyleSheet.create({
   selectedImage: {
     width: 280,
     height: 280,
-    borderRadius: 16,
-    borderWidth: 3,
-    borderColor: "#9C27B0",
+    borderRadius: NEO_THEME.borders.radius,
+    borderWidth: NEO_THEME.borders.width,
+    borderColor: NEO_THEME.colors.black,
   },
   changeButton: {
-    backgroundColor: "#FF3B30",
+    backgroundColor: NEO_THEME.colors.yellow,
     paddingHorizontal: 32,
     paddingVertical: 14,
-    borderRadius: 10,
-    elevation: 2,
-    shadowColor: "#FF3B30",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 3,
+    borderRadius: NEO_THEME.borders.radius,
+    borderWidth: NEO_THEME.borders.width,
+    borderColor: NEO_THEME.colors.black,
+    shadowColor: NEO_THEME.colors.black,
+    shadowOffset: { width: 3, height: 3 },
+    shadowOpacity: 1,
+    shadowRadius: 0,
+    elevation: 0,
   },
   changeButtonText: {
-    color: "white",
+    color: NEO_THEME.colors.black,
     fontSize: 16,
-    fontWeight: "bold",
+    fontWeight: "900",
+    fontFamily: NEO_THEME.fonts.black,
   },
   selectorSection: {
     width: "100%",
     marginTop: 8,
   },
   generateButton: {
-    backgroundColor: "#9C27B0",
+    backgroundColor: NEO_THEME.colors.primary,
     paddingVertical: 18,
     paddingHorizontal: 48,
-    borderRadius: 12,
+    borderRadius: NEO_THEME.borders.radius,
     alignItems: "center",
     marginTop: 16,
-    elevation: 4,
-    shadowColor: "#9C27B0",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.4,
-    shadowRadius: 6,
+    borderWidth: NEO_THEME.borders.width,
+    borderColor: NEO_THEME.colors.black,
+    shadowColor: NEO_THEME.colors.black,
+    shadowOffset: { width: 5, height: 5 },
+    shadowOpacity: 1,
+    shadowRadius: 0,
+    elevation: 0,
   },
   generateButtonText: {
-    color: "white",
+    color: NEO_THEME.colors.white,
     fontSize: 18,
-    fontWeight: "bold",
+    fontWeight: "900",
+    fontFamily: NEO_THEME.fonts.black,
   },
 });

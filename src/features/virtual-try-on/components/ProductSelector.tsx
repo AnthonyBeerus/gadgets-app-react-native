@@ -10,6 +10,7 @@ import {
 } from "react-native";
 import { useTryOnStore } from "../store/tryOnStore";
 import { Tables } from "../../../types/database.types";
+import { NEO_THEME } from "../../../constants/neobrutalism";
 
 interface ProductSelectorProps {
   products?: Tables<"product">[]; // Clothing products from shop
@@ -38,7 +39,9 @@ export default function ProductSelector({
 
   return (
     <View style={styles.container}>
-      <Text style={styles.instruction}>Select a clothing item to try on:</Text>
+        <Text style={styles.instruction}>
+          SELECT A CLOTHING ITEM TO TRY ON:
+        </Text>
       <FlatList
         data={clothingProducts}
         keyExtractor={(item) => item.id.toString()}
@@ -59,22 +62,26 @@ export default function ProductSelector({
   );
 }
 
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 16,
+    backgroundColor: NEO_THEME.colors.backgroundLight,
   },
   instruction: {
     fontSize: 20,
     marginBottom: 24,
     marginTop: 16,
     textAlign: "center",
-    fontWeight: "600",
-    color: "#333",
+    fontWeight: "900",
+    color: NEO_THEME.colors.black,
+    fontFamily: NEO_THEME.fonts.black,
+    textTransform: "uppercase",
   },
   emptyText: {
     fontSize: 16,
-    color: "#666",
+    color: NEO_THEME.colors.grey,
     textAlign: "center",
     marginTop: 12,
     paddingHorizontal: 32,
@@ -83,34 +90,47 @@ const styles = StyleSheet.create({
   item: {
     flex: 1,
     margin: 8,
-    backgroundColor: "#fff",
-    borderRadius: 12,
+    backgroundColor: NEO_THEME.colors.white,
+    borderRadius: NEO_THEME.borders.radius,
     padding: 12,
     alignItems: "center",
-    elevation: 2,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
     maxWidth: "48%",
+    borderWidth: NEO_THEME.borders.width,
+    borderColor: NEO_THEME.colors.black,
+    shadowColor: NEO_THEME.colors.black,
+    shadowOffset: { width: 4, height: 4 },
+    shadowOpacity: 1,
+    shadowRadius: 0,
+    elevation: 0,
   },
   image: {
     width: "100%",
     aspectRatio: 1,
-    borderRadius: 8,
+    borderRadius: NEO_THEME.borders.radius,
     marginBottom: 8,
+    borderWidth: 2,
+    borderColor: NEO_THEME.colors.black,
   },
   title: {
     fontSize: 14,
-    fontWeight: "600",
+    fontWeight: "700",
     marginTop: 8,
     textAlign: "center",
-    color: "#333",
+    color: NEO_THEME.colors.black,
+    fontFamily: NEO_THEME.fonts.bold,
+    textTransform: "uppercase",
   },
   price: {
     fontSize: 16,
-    color: "#9C27B0",
-    fontWeight: "bold",
+    color: NEO_THEME.colors.black,
+    fontWeight: "900",
     marginTop: 4,
+    backgroundColor: NEO_THEME.colors.yellow,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: NEO_THEME.borders.radius,
+    borderWidth: 2,
+    borderColor: NEO_THEME.colors.black,
+    fontFamily: NEO_THEME.fonts.black,
   },
 });

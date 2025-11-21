@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Challenge } from '../types/challenge';
+import { NEO_THEME } from '../constants/neobrutalism';
 
 interface ChallengeCardProps {
   challenge: Challenge;
@@ -29,7 +30,7 @@ export const ChallengeCard = ({ challenge, onPress }: ChallengeCardProps) => {
         </View>
         
         <View style={styles.footer}>
-          <Text style={styles.title} numberOfLines={2}>{challenge.title}</Text>
+          <Text style={styles.title} numberOfLines={2}>{challenge.title.toUpperCase()}</Text>
           <View style={styles.rewardContainer}>
             <Ionicons name="trophy" size={14} color="#FFD700" />
             <Text style={styles.rewardText}>{challenge.reward}</Text>
@@ -47,15 +48,17 @@ export const ChallengeCard = ({ challenge, onPress }: ChallengeCardProps) => {
 const styles = StyleSheet.create({
   card: {
     height: 280,
-    borderRadius: 16,
+    borderRadius: NEO_THEME.borders.radius,
     overflow: 'hidden',
-    backgroundColor: '#f0f0f0',
+    backgroundColor: NEO_THEME.colors.backgroundLight,
     marginBottom: 16,
-    elevation: 4,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.15,
-    shadowRadius: 8,
+    borderWidth: NEO_THEME.borders.width,
+    borderColor: NEO_THEME.colors.black,
+    shadowColor: NEO_THEME.colors.black,
+    shadowOffset: { width: 5, height: 5 },
+    shadowOpacity: 1,
+    shadowRadius: 0,
+    elevation: 0,
   },
   image: {
     width: '100%',
@@ -76,58 +79,73 @@ const styles = StyleSheet.create({
   brandContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(0,0,0,0.6)',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 8,
+    backgroundColor: NEO_THEME.colors.black,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: NEO_THEME.borders.radius,
     gap: 4,
+    borderWidth: 2,
+    borderColor: NEO_THEME.colors.white,
   },
   brandName: {
-    color: '#fff',
+    color: NEO_THEME.colors.white,
     fontSize: 12,
-    fontWeight: '600',
+    fontWeight: '900',
+    fontFamily: NEO_THEME.fonts.black,
+    textTransform: 'uppercase',
   },
   participantsBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(0,0,0,0.6)',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 8,
+    backgroundColor: NEO_THEME.colors.primary,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: NEO_THEME.borders.radius,
     gap: 4,
+    borderWidth: 2,
+    borderColor: NEO_THEME.colors.white,
   },
   participantsText: {
-    color: '#fff',
+    color: NEO_THEME.colors.white,
     fontSize: 12,
-    fontWeight: '600',
+    fontWeight: '900',
+    fontFamily: NEO_THEME.fonts.black,
   },
   footer: {
-    gap: 6,
+    gap: 8,
   },
   title: {
-    color: '#fff',
-    fontSize: 22,
-    fontWeight: 'bold',
-    textShadowColor: 'rgba(0,0,0,0.5)',
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 4,
+    color: NEO_THEME.colors.white,
+    fontSize: 24,
+    fontWeight: '900',
+    fontFamily: NEO_THEME.fonts.black,
+    textShadowColor: 'rgba(0,0,0,0.8)',
+    textShadowOffset: { width: 2, height: 2 },
+    textShadowRadius: 0,
+    textTransform: 'uppercase',
   },
   rewardContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
-    backgroundColor: 'rgba(255, 215, 0, 0.2)',
+    backgroundColor: NEO_THEME.colors.yellow,
     alignSelf: 'flex-start',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 215, 0, 0.5)',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: NEO_THEME.borders.radius,
+    borderWidth: 2,
+    borderColor: NEO_THEME.colors.black,
+    shadowColor: NEO_THEME.colors.black,
+    shadowOffset: { width: 2, height: 2 },
+    shadowOpacity: 1,
+    shadowRadius: 0,
   },
   rewardText: {
-    color: '#FFD700',
-    fontSize: 13,
-    fontWeight: '700',
+    color: NEO_THEME.colors.black,
+    fontSize: 14,
+    fontWeight: '900',
+    fontFamily: NEO_THEME.fonts.black,
+    textTransform: 'uppercase',
   },
   deadlineContainer: {
     flexDirection: 'row',
@@ -136,8 +154,12 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   deadlineText: {
-    color: '#E0E0E0',
+    color: NEO_THEME.colors.white,
     fontSize: 12,
-    fontWeight: '500',
+    fontWeight: '700',
+    fontFamily: NEO_THEME.fonts.bold,
+    textShadowColor: 'rgba(0,0,0,0.8)',
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 0,
   },
 });

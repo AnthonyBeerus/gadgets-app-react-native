@@ -18,18 +18,7 @@ import {
 } from "../../api/api";
 import { Tables } from "../../types/database.types";
 import BookingModal from "../../features/appointments/components/BookingModal";
-
-const COLORS = {
-  primary: "#9C27B0",
-  secondary: "#FF6B6B",
-  tertiary: "#4ECDC4",
-  quaternary: "#45B7D1",
-  background: "#F8F9FA",
-  white: "#FFFFFF",
-  text: "#1D1D1F",
-  textSecondary: "#8E8E93",
-  border: "#E5E5E7",
-};
+import { NEO_THEME } from "../../constants/neobrutalism";
 
 const ServiceCard = ({
   service,
@@ -42,20 +31,20 @@ const ServiceCard = ({
     <View style={styles.serviceHeader}>
       <Text style={styles.serviceName}>{service.name}</Text>
       <View style={styles.ratingContainer}>
-        <MaterialIcons name="star" size={16} color="#FFD700" />
+        <MaterialIcons name="star" size={16} color={NEO_THEME.colors.black} />
         <Text style={styles.rating}>{service.rating}</Text>
       </View>
     </View>
     <Text style={styles.serviceProvider}>{service.provider}</Text>
     <View style={styles.serviceDetails}>
       <View style={styles.serviceInfo}>
-        <MaterialIcons name="schedule" size={16} color={COLORS.textSecondary} />
+        <MaterialIcons name="schedule" size={16} color={NEO_THEME.colors.grey} />
         <Text style={styles.serviceDuration}>{service.duration}</Text>
       </View>
       <Text style={styles.servicePrice}>${service.price}</Text>
     </View>
     <TouchableOpacity style={styles.bookButton} onPress={onBook}>
-      <Text style={styles.bookButtonText}>Book Now</Text>
+      <Text style={styles.bookButtonText}>BOOK NOW</Text>
     </TouchableOpacity>
   </View>
 );
@@ -131,8 +120,8 @@ const Services = () => {
     return (
       <SafeAreaView style={styles.container}>
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color={COLORS.primary} />
-          <Text style={styles.loadingText}>Loading services...</Text>
+          <ActivityIndicator size="large" color={NEO_THEME.colors.primary} />
+          <Text style={styles.loadingText}>LOADING SERVICES...</Text>
         </View>
       </SafeAreaView>
     );
@@ -146,10 +135,10 @@ const Services = () => {
           <MaterialIcons
             name="error-outline"
             size={48}
-            color={COLORS.secondary}
+            color={NEO_THEME.colors.yellow}
           />
-          <Text style={styles.errorText}>Failed to load services</Text>
-          <Text style={styles.errorSubtext}>Please try again later</Text>
+          <Text style={styles.errorText}>FAILED TO LOAD SERVICES</Text>
+          <Text style={styles.errorSubtext}>PLEASE TRY AGAIN LATER</Text>
         </View>
       </SafeAreaView>
     );
@@ -162,7 +151,7 @@ const Services = () => {
           <TouchableOpacity
             style={styles.backButton}
             onPress={handleBackToCategories}>
-            <MaterialIcons name="arrow-back" size={24} color={COLORS.text} />
+            <MaterialIcons name="arrow-back" size={24} color={NEO_THEME.colors.black} />
           </TouchableOpacity>
           <View style={styles.headerContent}>
             <View
@@ -189,17 +178,17 @@ const Services = () => {
 
         {servicesLoading ? (
           <View style={styles.loadingContainer}>
-            <ActivityIndicator size="large" color={COLORS.primary} />
-            <Text style={styles.loadingText}>Loading services...</Text>
+            <ActivityIndicator size="large" color={NEO_THEME.colors.primary} />
+            <Text style={styles.loadingText}>LOADING SERVICES...</Text>
           </View>
         ) : servicesError ? (
           <View style={styles.errorContainer}>
             <MaterialIcons
               name="error-outline"
               size={48}
-              color={COLORS.secondary}
+              color={NEO_THEME.colors.yellow}
             />
-            <Text style={styles.errorText}>Failed to load services</Text>
+            <Text style={styles.errorText}>FAILED TO LOAD SERVICES</Text>
           </View>
         ) : (
           <FlatList
@@ -242,7 +231,7 @@ const Services = () => {
       <ScrollView showsVerticalScrollIndicator={false}>
         {/* Header */}
         <View style={styles.mainHeader}>
-          <Text style={styles.mainTitle}>Book Services</Text>
+          <Text style={styles.mainTitle}>BOOK SERVICES</Text>
           <Text style={styles.mainSubtitle}>
             Find and book appointments for beauty, health, sports, and more
           </Text>
@@ -256,7 +245,7 @@ const Services = () => {
 
         {/* Service Categories */}
         <View style={styles.categoriesSection}>
-          <Text style={styles.sectionTitle}>Service Categories</Text>
+          <Text style={styles.sectionTitle}>SERVICE CATEGORIES</Text>
           <View style={styles.categoriesGrid}>
             {categories?.map((category) => (
               <CategoryCard
@@ -291,19 +280,25 @@ const Services = () => {
 
 export default Services;
 
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.background,
+    backgroundColor: NEO_THEME.colors.backgroundLight,
   },
   header: {
     flexDirection: "row",
     alignItems: "center",
     paddingHorizontal: 20,
     paddingVertical: 16,
-    backgroundColor: COLORS.white,
-    borderBottomWidth: 1,
-    borderBottomColor: COLORS.border,
+    backgroundColor: NEO_THEME.colors.white,
+    borderBottomWidth: NEO_THEME.borders.width,
+    borderBottomColor: NEO_THEME.colors.black,
+    shadowColor: NEO_THEME.colors.black,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 1,
+    shadowRadius: 0,
+    elevation: 0,
   },
   backButton: {
     marginRight: 16,
@@ -315,15 +310,19 @@ const styles = StyleSheet.create({
   categoryIconSmall: {
     width: 32,
     height: 32,
-    borderRadius: 16,
+    borderRadius: NEO_THEME.borders.radius,
     alignItems: "center",
     justifyContent: "center",
     marginRight: 12,
+    borderWidth: 2,
+    borderColor: NEO_THEME.colors.black,
   },
   headerTitle: {
     fontSize: 20,
-    fontWeight: "600",
-    color: COLORS.text,
+    fontWeight: "900",
+    color: NEO_THEME.colors.black,
+    fontFamily: NEO_THEME.fonts.black,
+    textTransform: "uppercase",
   },
   mainHeader: {
     paddingHorizontal: 20,
@@ -331,32 +330,43 @@ const styles = StyleSheet.create({
   },
   mainTitle: {
     fontSize: 28,
-    fontWeight: "700",
-    color: COLORS.text,
+    fontWeight: "900",
+    color: NEO_THEME.colors.black,
     marginBottom: 8,
+    fontFamily: NEO_THEME.fonts.black,
+    textTransform: "uppercase",
   },
   mainSubtitle: {
     fontSize: 16,
-    color: COLORS.textSecondary,
+    color: NEO_THEME.colors.grey,
     lineHeight: 22,
   },
   featuredBanner: {
-    backgroundColor: COLORS.primary,
+    backgroundColor: NEO_THEME.colors.yellow,
     marginHorizontal: 20,
-    borderRadius: 16,
+    borderRadius: NEO_THEME.borders.radius,
     padding: 20,
     marginBottom: 24,
+    borderWidth: NEO_THEME.borders.width,
+    borderColor: NEO_THEME.colors.black,
+    shadowColor: NEO_THEME.colors.black,
+    shadowOffset: { width: 4, height: 4 },
+    shadowOpacity: 1,
+    shadowRadius: 0,
+    elevation: 0,
   },
   bannerTitle: {
     fontSize: 18,
-    fontWeight: "600",
-    color: COLORS.white,
+    fontWeight: "900",
+    color: NEO_THEME.colors.black,
     marginBottom: 4,
+    fontFamily: NEO_THEME.fonts.black,
   },
   bannerText: {
     fontSize: 14,
-    color: COLORS.white,
-    opacity: 0.9,
+    color: NEO_THEME.colors.black,
+    fontWeight: "700",
+    fontFamily: NEO_THEME.fonts.bold,
   },
   categoriesSection: {
     paddingHorizontal: 20,
@@ -364,9 +374,11 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 20,
-    fontWeight: "600",
-    color: COLORS.text,
+    fontWeight: "900",
+    color: NEO_THEME.colors.black,
     marginBottom: 16,
+    fontFamily: NEO_THEME.fonts.black,
+    textTransform: "uppercase",
   },
   categoriesGrid: {
     flexDirection: "row",
@@ -375,30 +387,41 @@ const styles = StyleSheet.create({
   },
   categoryCard: {
     width: "48%",
-    backgroundColor: COLORS.white,
-    borderRadius: 16,
+    backgroundColor: NEO_THEME.colors.white,
+    borderRadius: NEO_THEME.borders.radius,
     padding: 20,
     marginBottom: 16,
     alignItems: "center",
+    borderWidth: NEO_THEME.borders.width,
+    borderColor: NEO_THEME.colors.black,
+    shadowColor: NEO_THEME.colors.black,
+    shadowOffset: { width: 4, height: 4 },
+    shadowOpacity: 1,
+    shadowRadius: 0,
+    elevation: 0,
   },
   categoryIcon: {
     width: 60,
     height: 60,
-    borderRadius: 30,
+    borderRadius: NEO_THEME.borders.radius,
     alignItems: "center",
     justifyContent: "center",
     marginBottom: 12,
+    borderWidth: 2,
+    borderColor: NEO_THEME.colors.black,
   },
   categoryName: {
     fontSize: 16,
-    fontWeight: "600",
-    color: COLORS.text,
+    fontWeight: "900",
+    color: NEO_THEME.colors.black,
     textAlign: "center",
     marginBottom: 4,
+    fontFamily: NEO_THEME.fonts.black,
+    textTransform: "uppercase",
   },
   categoryDescription: {
     fontSize: 12,
-    color: COLORS.textSecondary,
+    color: NEO_THEME.colors.grey,
     textAlign: "center",
     lineHeight: 16,
   },
@@ -411,34 +434,51 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
   },
   statCard: {
-    backgroundColor: COLORS.white,
-    borderRadius: 16,
+    backgroundColor: NEO_THEME.colors.white,
+    borderRadius: NEO_THEME.borders.radius,
     padding: 16,
     alignItems: "center",
     flex: 1,
     marginHorizontal: 4,
+    borderWidth: NEO_THEME.borders.width,
+    borderColor: NEO_THEME.colors.black,
+    shadowColor: NEO_THEME.colors.black,
+    shadowOffset: { width: 3, height: 3 },
+    shadowOpacity: 1,
+    shadowRadius: 0,
+    elevation: 0,
   },
   statNumber: {
     fontSize: 20,
-    fontWeight: "700",
-    color: COLORS.text,
+    fontWeight: "900",
+    color: NEO_THEME.colors.black,
     marginTop: 8,
+    fontFamily: NEO_THEME.fonts.black,
   },
   statLabel: {
     fontSize: 12,
-    color: COLORS.textSecondary,
+    color: NEO_THEME.colors.grey,
     textAlign: "center",
     marginTop: 4,
+    fontWeight: "700",
+    fontFamily: NEO_THEME.fonts.bold,
   },
   servicesList: {
     paddingHorizontal: 20,
     paddingBottom: 100,
   },
   serviceCard: {
-    backgroundColor: COLORS.white,
-    borderRadius: 16,
+    backgroundColor: NEO_THEME.colors.white,
+    borderRadius: NEO_THEME.borders.radius,
     padding: 16,
     marginBottom: 16,
+    borderWidth: NEO_THEME.borders.width,
+    borderColor: NEO_THEME.colors.black,
+    shadowColor: NEO_THEME.colors.black,
+    shadowOffset: { width: 4, height: 4 },
+    shadowOpacity: 1,
+    shadowRadius: 0,
+    elevation: 0,
   },
   serviceHeader: {
     flexDirection: "row",
@@ -448,25 +488,36 @@ const styles = StyleSheet.create({
   },
   serviceName: {
     fontSize: 18,
-    fontWeight: "600",
-    color: COLORS.text,
+    fontWeight: "900",
+    color: NEO_THEME.colors.black,
     flex: 1,
     marginRight: 12,
+    fontFamily: NEO_THEME.fonts.black,
+    textTransform: "uppercase",
   },
   ratingContainer: {
     flexDirection: "row",
     alignItems: "center",
+    backgroundColor: NEO_THEME.colors.yellow,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: NEO_THEME.borders.radius,
+    borderWidth: 2,
+    borderColor: NEO_THEME.colors.black,
   },
   rating: {
     fontSize: 14,
-    fontWeight: "500",
-    color: COLORS.text,
+    fontWeight: "900",
+    color: NEO_THEME.colors.black,
     marginLeft: 4,
+    fontFamily: NEO_THEME.fonts.black,
   },
   serviceProvider: {
     fontSize: 14,
-    color: COLORS.textSecondary,
+    color: NEO_THEME.colors.grey,
     marginBottom: 12,
+    fontWeight: "700",
+    fontFamily: NEO_THEME.fonts.bold,
   },
   serviceDetails: {
     flexDirection: "row",
@@ -480,24 +531,41 @@ const styles = StyleSheet.create({
   },
   serviceDuration: {
     fontSize: 14,
-    color: COLORS.textSecondary,
+    color: NEO_THEME.colors.grey,
     marginLeft: 4,
+    fontWeight: "700",
+    fontFamily: NEO_THEME.fonts.bold,
   },
   servicePrice: {
     fontSize: 18,
-    fontWeight: "700",
-    color: COLORS.primary,
+    fontWeight: "900",
+    color: NEO_THEME.colors.black,
+    backgroundColor: NEO_THEME.colors.yellow,
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    borderRadius: NEO_THEME.borders.radius,
+    borderWidth: 2,
+    borderColor: NEO_THEME.colors.black,
+    fontFamily: NEO_THEME.fonts.black,
   },
   bookButton: {
-    backgroundColor: COLORS.primary,
-    borderRadius: 12,
+    backgroundColor: NEO_THEME.colors.primary,
+    borderRadius: NEO_THEME.borders.radius,
     paddingVertical: 12,
     alignItems: "center",
+    borderWidth: NEO_THEME.borders.width,
+    borderColor: NEO_THEME.colors.black,
+    shadowColor: NEO_THEME.colors.black,
+    shadowOffset: { width: 3, height: 3 },
+    shadowOpacity: 1,
+    shadowRadius: 0,
+    elevation: 0,
   },
   bookButtonText: {
     fontSize: 16,
-    fontWeight: "600",
-    color: COLORS.white,
+    fontWeight: "900",
+    color: NEO_THEME.colors.white,
+    fontFamily: NEO_THEME.fonts.black,
   },
   bottomSpacing: {
     height: 100,
@@ -510,8 +578,11 @@ const styles = StyleSheet.create({
   },
   loadingText: {
     fontSize: 16,
-    color: COLORS.textSecondary,
+    color: NEO_THEME.colors.grey,
     marginTop: 12,
+    fontWeight: "700",
+    fontFamily: NEO_THEME.fonts.bold,
+    textTransform: "uppercase",
   },
   errorContainer: {
     flex: 1,
@@ -521,23 +592,28 @@ const styles = StyleSheet.create({
   },
   errorText: {
     fontSize: 18,
-    fontWeight: "600",
-    color: COLORS.text,
+    fontWeight: "900",
+    color: NEO_THEME.colors.black,
     marginTop: 12,
     textAlign: "center",
+    fontFamily: NEO_THEME.fonts.black,
+    textTransform: "uppercase",
   },
   errorSubtext: {
     fontSize: 14,
-    color: COLORS.textSecondary,
+    color: NEO_THEME.colors.grey,
     marginTop: 4,
     textAlign: "center",
+    fontWeight: "700",
+    fontFamily: NEO_THEME.fonts.bold,
+    textTransform: "uppercase",
   },
   headerTextContainer: {
     flex: 1,
   },
   headerSubtitle: {
     fontSize: 14,
-    color: COLORS.textSecondary,
+    color: NEO_THEME.colors.grey,
     marginTop: 2,
   },
 });

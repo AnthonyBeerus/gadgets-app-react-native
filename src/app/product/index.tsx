@@ -12,6 +12,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { ProductListItem } from "../../components/product-list-item";
 import { getShopProducts } from "../../api/shops";
+import { NEO_THEME } from "../../constants/neobrutalism";
 
 const ProductsPage = () => {
   const { shop, shopName } = useLocalSearchParams<{
@@ -51,8 +52,8 @@ const ProductsPage = () => {
           }}
         />
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#9C27B0" />
-          <Text style={styles.loadingText}>Loading products...</Text>
+          <ActivityIndicator size="large" color={NEO_THEME.colors.primary} />
+          <Text style={styles.loadingText}>LOADING PRODUCTS...</Text>
         </View>
       </SafeAreaView>
     );
@@ -63,9 +64,9 @@ const ProductsPage = () => {
       <Stack.Screen
         options={{
           title: shopName
-            ? `${decodeURIComponent(shopName)} Products`
-            : "Products",
-          headerBackTitle: "Back",
+            ? `${decodeURIComponent(shopName).toUpperCase()} PRODUCTS`
+            : "PRODUCTS",
+          headerBackTitle: "BACK",
         }}
       />
 
@@ -81,15 +82,15 @@ const ProductsPage = () => {
         />
       ) : (
         <View style={styles.emptyContainer}>
-          <Ionicons name="storefront-outline" size={64} color="#ccc" />
-          <Text style={styles.emptyTitle}>No Products Found</Text>
+          <Ionicons name="storefront-outline" size={64} color={NEO_THEME.colors.grey} />
+          <Text style={styles.emptyTitle}>NO PRODUCTS FOUND</Text>
           <Text style={styles.emptySubtitle}>
             This shop doesn't have any products listed yet.
           </Text>
           <TouchableOpacity
             style={styles.backButton}
             onPress={() => router.back()}>
-            <Text style={styles.backButtonText}>Go Back</Text>
+            <Text style={styles.backButtonText}>GO BACK</Text>
           </TouchableOpacity>
         </View>
       )}
@@ -102,7 +103,7 @@ export default ProductsPage;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff",
+    backgroundColor: NEO_THEME.colors.backgroundLight,
   },
   loadingContainer: {
     flex: 1,
@@ -113,7 +114,10 @@ const styles = StyleSheet.create({
   loadingText: {
     marginTop: 16,
     fontSize: 16,
-    color: "#666",
+    fontWeight: "700",
+    color: NEO_THEME.colors.black,
+    fontFamily: NEO_THEME.fonts.bold,
+    textTransform: "uppercase",
   },
   productRow: {
     justifyContent: "space-between",
@@ -130,26 +134,38 @@ const styles = StyleSheet.create({
   },
   emptyTitle: {
     fontSize: 20,
-    fontWeight: "bold",
-    color: "#333",
+    fontWeight: "900",
+    color: NEO_THEME.colors.black,
     marginTop: 16,
     marginBottom: 8,
+    fontFamily: NEO_THEME.fonts.black,
+    textTransform: "uppercase",
   },
   emptySubtitle: {
     fontSize: 16,
-    color: "#666",
+    color: NEO_THEME.colors.grey,
     textAlign: "center",
     marginBottom: 32,
   },
   backButton: {
-    backgroundColor: "#9C27B0",
+    backgroundColor: NEO_THEME.colors.primary,
     paddingHorizontal: 24,
     paddingVertical: 12,
-    borderRadius: 8,
+    borderRadius: NEO_THEME.borders.radius,
+    borderWidth: NEO_THEME.borders.width,
+    borderColor: NEO_THEME.colors.black,
+    // Hard shadow
+    shadowColor: NEO_THEME.colors.black,
+    shadowOffset: { width: 5, height: 5 },
+    shadowOpacity: 1,
+    shadowRadius: 0,
+    elevation: 0,
   },
   backButtonText: {
-    color: "#fff",
+    color: NEO_THEME.colors.white,
     fontSize: 16,
-    fontWeight: "600",
+    fontWeight: "900",
+    fontFamily: NEO_THEME.fonts.black,
+    textTransform: "uppercase",
   },
 });

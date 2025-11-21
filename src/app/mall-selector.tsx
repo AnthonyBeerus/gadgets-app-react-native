@@ -12,6 +12,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { useState, useEffect } from "react";
 import { useShopStore } from "../store/shop-store";
+import { NEO_THEME } from "../constants/neobrutalism";
 
 const { height } = Dimensions.get("window");
 
@@ -41,11 +42,11 @@ export default function MallSelectorModal() {
 
       {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.title}>Select Location</Text>
+        <Text style={styles.title}>SELECT LOCATION</Text>
         <TouchableOpacity
           onPress={() => router.back()}
           style={styles.closeButton}>
-          <Ionicons name="close" size={24} color="#666" />
+          <Ionicons name="close" size={24} color={NEO_THEME.colors.black} />
         </TouchableOpacity>
       </View>
 
@@ -71,19 +72,19 @@ export default function MallSelectorModal() {
               <Ionicons
                 name="apps"
                 size={32}
-                color={selectedMall === null ? "#fff" : "#9C27B0"}
+                color={selectedMall === null ? NEO_THEME.colors.white : NEO_THEME.colors.primary}
               />
             </View>
             <View style={styles.mallInfo}>
-              <Text style={styles.mallName}>All Locations</Text>
-              <Text style={styles.mallLocation}>Browse all shops</Text>
+              <Text style={styles.mallName}>ALL LOCATIONS</Text>
+              <Text style={styles.mallLocation}>BROWSE ALL SHOPS</Text>
               <Text style={styles.mallDescription}>
                 View shops from all malls and marketplaces
               </Text>
             </View>
           </View>
           {selectedMall === null && (
-            <Ionicons name="checkmark-circle" size={28} color="#9C27B0" />
+            <Ionicons name="checkmark-circle" size={28} color={NEO_THEME.colors.primary} />
           )}
         </TouchableOpacity>
 
@@ -113,7 +114,7 @@ export default function MallSelectorModal() {
                   <Ionicons
                     name={mall.is_physical ? "storefront" : "globe"}
                     size={32}
-                    color={selectedMall === mall.id ? "#fff" : "#9C27B0"}
+                    color={selectedMall === mall.id ? NEO_THEME.colors.white : NEO_THEME.colors.primary}
                   />
                 )}
               </View>
@@ -122,8 +123,8 @@ export default function MallSelectorModal() {
                   <Text style={styles.mallName}>{mall.name}</Text>
                   {mall.is_featured && (
                     <View style={styles.featuredBadge}>
-                      <Ionicons name="star" size={12} color="#FFD700" />
-                      <Text style={styles.featuredText}>Featured</Text>
+                      <Ionicons name="star" size={12} color={NEO_THEME.colors.black} />
+                      <Text style={styles.featuredText}>FEATURED</Text>
                     </View>
                   )}
                 </View>
@@ -131,7 +132,7 @@ export default function MallSelectorModal() {
                   <Ionicons
                     name={mall.is_physical ? "location" : "globe"}
                     size={14}
-                    color="#9C27B0"
+                    color={NEO_THEME.colors.primary}
                   />
                   <Text style={styles.mallLocation}>{mall.location}</Text>
                 </View>
@@ -143,7 +144,7 @@ export default function MallSelectorModal() {
               </View>
             </View>
             {selectedMall === mall.id && (
-              <Ionicons name="checkmark-circle" size={28} color="#9C27B0" />
+              <Ionicons name="checkmark-circle" size={28} color={NEO_THEME.colors.primary} />
             )}
           </TouchableOpacity>
         ))}
@@ -155,66 +156,75 @@ export default function MallSelectorModal() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff",
+    backgroundColor: NEO_THEME.colors.backgroundLight,
   },
   handleBar: {
-    width: 40,
-    height: 4,
-    backgroundColor: "#D1D5DB",
-    borderRadius: 2,
+    width: 60,
+    height: 6,
+    backgroundColor: NEO_THEME.colors.black,
+    borderRadius: 0,
     alignSelf: "center",
-    marginTop: 12,
-    marginBottom: 8,
+    marginTop: 16,
+    marginBottom: 12,
   },
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
     paddingHorizontal: 24,
-    paddingVertical: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: "#F0F0F0",
+    paddingVertical: 20,
+    borderBottomWidth: NEO_THEME.borders.width,
+    borderBottomColor: NEO_THEME.colors.black,
+    backgroundColor: NEO_THEME.colors.white,
   },
   title: {
-    fontSize: 24,
-    fontWeight: "700",
-    color: "#1A1A1A",
-    letterSpacing: -0.5,
+    fontSize: 28,
+    fontWeight: "900",
+    color: NEO_THEME.colors.black,
+    fontFamily: NEO_THEME.fonts.black,
+    textTransform: "uppercase",
   },
   closeButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: "#F5F5F5",
+    width: 44,
+    height: 44,
+    borderRadius: NEO_THEME.borders.radius,
+    backgroundColor: NEO_THEME.colors.backgroundLight,
     alignItems: "center",
     justifyContent: "center",
+    borderWidth: 2,
+    borderColor: NEO_THEME.colors.black,
   },
   scrollView: {
     flex: 1,
   },
   scrollContent: {
     padding: 20,
-    gap: 12,
+    gap: 16,
   },
   mallCard: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    backgroundColor: "#FAFAFA",
+    backgroundColor: NEO_THEME.colors.white,
     padding: 16,
-    borderRadius: 20,
-    borderWidth: 2,
-    borderColor: "#F0F0F0",
+    borderRadius: NEO_THEME.borders.radius,
+    borderWidth: NEO_THEME.borders.width,
+    borderColor: NEO_THEME.colors.black,
     marginBottom: 4,
+    shadowColor: NEO_THEME.colors.black,
+    shadowOffset: { width: 3, height: 3 },
+    shadowOpacity: 1,
+    shadowRadius: 0,
+    elevation: 0,
   },
   selectedMallCard: {
-    backgroundColor: "#F3E5F5",
-    borderColor: "#9C27B0",
-    elevation: 4,
-    shadowColor: "#9C27B0",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
+    backgroundColor: NEO_THEME.colors.yellow,
+    borderColor: NEO_THEME.colors.black,
+    shadowColor: NEO_THEME.colors.black,
+    shadowOffset: { width: 5, height: 5 },
+    shadowOpacity: 1,
+    shadowRadius: 0,
+    elevation: 0,
   },
   mallCardLeft: {
     flexDirection: "row",
@@ -224,15 +234,17 @@ const styles = StyleSheet.create({
   mallIconContainer: {
     width: 64,
     height: 64,
-    borderRadius: 16,
-    backgroundColor: "#F3E5F5",
+    borderRadius: NEO_THEME.borders.radius,
+    backgroundColor: NEO_THEME.colors.backgroundLight,
     alignItems: "center",
     justifyContent: "center",
     marginRight: 16,
     overflow: "hidden",
+    borderWidth: 2,
+    borderColor: NEO_THEME.colors.black,
   },
   selectedMallIcon: {
-    backgroundColor: "#9C27B0",
+    backgroundColor: NEO_THEME.colors.primary,
   },
   mallImage: {
     width: "100%",
@@ -245,30 +257,37 @@ const styles = StyleSheet.create({
   mallNameRow: {
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 6,
+    marginBottom: 8,
     gap: 8,
   },
   mallName: {
     fontSize: 18,
-    fontWeight: "700",
-    color: "#1A1A1A",
-    letterSpacing: -0.3,
+    fontWeight: "900",
+    color: NEO_THEME.colors.black,
+    fontFamily: NEO_THEME.fonts.black,
+    textTransform: "uppercase",
   },
   featuredBadge: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "rgba(255, 215, 0, 0.15)",
-    paddingHorizontal: 8,
+    backgroundColor: NEO_THEME.colors.yellow,
+    paddingHorizontal: 10,
     paddingVertical: 4,
-    borderRadius: 8,
+    borderRadius: NEO_THEME.borders.radius,
     gap: 4,
+    borderWidth: 2,
+    borderColor: NEO_THEME.colors.black,
+    shadowColor: NEO_THEME.colors.black,
+    shadowOffset: { width: 2, height: 2 },
+    shadowOpacity: 1,
+    shadowRadius: 0,
   },
   featuredText: {
     fontSize: 11,
-    fontWeight: "600",
-    color: "#D97706",
+    fontWeight: "900",
+    color: NEO_THEME.colors.black,
+    fontFamily: NEO_THEME.fonts.black,
     textTransform: "uppercase",
-    letterSpacing: 0.5,
   },
   locationRow: {
     flexDirection: "row",
@@ -278,12 +297,14 @@ const styles = StyleSheet.create({
   },
   mallLocation: {
     fontSize: 14,
-    color: "#666",
-    fontWeight: "500",
+    color: NEO_THEME.colors.grey,
+    fontWeight: "700",
+    fontFamily: NEO_THEME.fonts.bold,
+    textTransform: "uppercase",
   },
   mallDescription: {
     fontSize: 13,
-    color: "#888",
+    color: NEO_THEME.colors.grey,
     lineHeight: 18,
     marginTop: 4,
   },

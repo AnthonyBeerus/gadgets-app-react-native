@@ -20,6 +20,8 @@ import { supabase } from "../../lib/supabase";
 import TryOnModal from "../../features/virtual-try-on/components/TryOnModal";
 import BookingModal from "../../components/booking-modal";
 import { useBookingStore } from "../../store/booking-store";
+import { NeoView } from "../../components/ui/neo-view";
+import { NEO_THEME } from "../../constants/neobrutalism";
 
 export default function ShopDetails() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -185,13 +187,13 @@ export default function ShopDetails() {
           <TouchableOpacity
             onPress={() => router.back()}
             style={styles.backButton}>
-            <Ionicons name="arrow-back" size={24} color="#333" />
+            <Ionicons name="arrow-back" size={24} color={NEO_THEME.colors.black} />
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>Loading...</Text>
+          <Text style={styles.headerTitle}>LOADING...</Text>
         </View>
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#9C27B0" />
-          <Text style={styles.loadingText}>Loading shop details...</Text>
+          <ActivityIndicator size="large" color={NEO_THEME.colors.primary} />
+          <Text style={styles.loadingText}>LOADING SHOP DETAILS...</Text>
         </View>
       </SafeAreaView>
     );
@@ -204,13 +206,13 @@ export default function ShopDetails() {
           <TouchableOpacity
             onPress={() => router.back()}
             style={styles.backButton}>
-            <Ionicons name="arrow-back" size={24} color="#333" />
+            <Ionicons name="arrow-back" size={24} color={NEO_THEME.colors.black} />
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>Shop Not Found</Text>
+          <Text style={styles.headerTitle}>SHOP NOT FOUND</Text>
         </View>
         <View style={styles.emptyContainer}>
-          <Ionicons name="storefront-outline" size={64} color="#ccc" />
-          <Text style={styles.emptyTitle}>Shop not found</Text>
+          <Ionicons name="storefront-outline" size={64} color={NEO_THEME.colors.grey} />
+          <Text style={styles.emptyTitle}>SHOP NOT FOUND</Text>
           <Text style={styles.emptySubtitle}>
             The shop you're looking for could not be found.
           </Text>
@@ -225,14 +227,14 @@ export default function ShopDetails() {
         <TouchableOpacity
           onPress={() => router.back()}
           style={styles.backButton}>
-          <Ionicons name="arrow-back" size={24} color="#333" />
+          <Ionicons name="arrow-back" size={24} color={NEO_THEME.colors.black} />
         </TouchableOpacity>
         <Text style={styles.headerTitle} numberOfLines={1}>
-          {shop?.name || "Shop Details"}
+          {shop?.name?.toUpperCase() || "SHOP DETAILS"}
         </Text>
         {shop?.is_featured && (
           <View style={styles.featuredBadge}>
-            <Ionicons name="star" size={16} color="#FFD700" />
+            <Ionicons name="star" size={16} color={NEO_THEME.colors.black} />
           </View>
         )}
       </View>
@@ -245,7 +247,7 @@ export default function ShopDetails() {
 
         {/* Shop Info */}
         <View style={styles.shopInfo}>
-          <Text style={styles.categoryName}>{shop.category?.name}</Text>
+          <Text style={styles.categoryName}>{shop.category?.name?.toUpperCase() || "SHOP"}</Text>
 
           {shop.description && (
             <Text style={styles.description}>{shop.description}</Text>
@@ -256,8 +258,8 @@ export default function ShopDetails() {
             <TouchableOpacity
               style={styles.primaryActionButton}
               onPress={handleBrowseProducts}>
-              <Ionicons name="storefront" size={24} color="#fff" />
-              <Text style={styles.primaryActionText}>Browse Products</Text>
+              <Ionicons name="storefront" size={24} color={NEO_THEME.colors.white} />
+              <Text style={styles.primaryActionText}>BROWSE PRODUCTS</Text>
             </TouchableOpacity>
 
             <View style={styles.secondaryActions}>
@@ -265,9 +267,9 @@ export default function ShopDetails() {
                 <TouchableOpacity
                   style={styles.secondaryActionButton}
                   onPress={handleBookAppointment}>
-                  <Ionicons name="calendar" size={20} color="#9C27B0" />
+                  <Ionicons name="calendar" size={20} color={NEO_THEME.colors.black} />
                   <Text style={styles.secondaryActionText}>
-                    Book Appointment
+                    BOOK
                   </Text>
                 </TouchableOpacity>
               )}
@@ -276,8 +278,8 @@ export default function ShopDetails() {
                 <TouchableOpacity
                   style={styles.secondaryActionButton}
                   onPress={handleCallShop}>
-                  <Ionicons name="call" size={20} color="#9C27B0" />
-                  <Text style={styles.secondaryActionText}>Call Shop</Text>
+                  <Ionicons name="call" size={20} color={NEO_THEME.colors.black} />
+                  <Text style={styles.secondaryActionText}>CALL</Text>
                 </TouchableOpacity>
               )}
             </View>
@@ -286,21 +288,21 @@ export default function ShopDetails() {
           {/* Products & Services Section - Priority placement */}
           <View style={styles.productsSection}>
             <View style={styles.productsSectionHeader}>
-              <Text style={styles.sectionTitle}>Products & Services</Text>
+              <Text style={styles.sectionTitle}>PRODUCTS & SERVICES</Text>
               {products.length > 0 && (
                 <TouchableOpacity style={styles.viewAllButton}>
                   <Text style={styles.viewAllText}>
-                    View All ({products.length})
+                    VIEW ALL ({products.length})
                   </Text>
-                  <Ionicons name="arrow-forward" size={16} color="#9C27B0" />
+                  <Ionicons name="arrow-forward" size={16} color={NEO_THEME.colors.primary} />
                 </TouchableOpacity>
               )}
             </View>
 
             {productsLoading ? (
               <View style={styles.productsLoadingContainer}>
-                <ActivityIndicator size="small" color="#9C27B0" />
-                <Text style={styles.loadingText}>Loading products...</Text>
+                <ActivityIndicator size="small" color={NEO_THEME.colors.primary} />
+                <Text style={styles.loadingText}>LOADING PRODUCTS...</Text>
               </View>
             ) : products.length > 0 ? (
               <>
@@ -316,7 +318,7 @@ export default function ShopDetails() {
                           style={styles.productPreviewImage}
                         />
                       ) : (
-                        <Ionicons name="cube" size={32} color="#9C27B0" />
+                        <Ionicons name="cube" size={32} color={NEO_THEME.colors.grey} />
                       )}
                       <Text
                         style={styles.productPreviewTitle}
@@ -336,7 +338,7 @@ export default function ShopDetails() {
 
                   {products.length === 1 && (
                     <View style={styles.productCardPreview}>
-                      <Ionicons name="construct" size={32} color="#4CAF50" />
+                      <Ionicons name="construct" size={32} color={NEO_THEME.colors.primary} />
                       <Text style={styles.productPreviewTitle}>
                         Expert Services
                       </Text>
@@ -351,18 +353,18 @@ export default function ShopDetails() {
                   style={styles.exploreProductsButton}
                   onPress={handleBrowseProducts}>
                   <Text style={styles.exploreProductsText}>
-                    Explore All {products.length} Product
-                    {products.length !== 1 ? "s" : ""}
+                    EXPLORE ALL {products.length} PRODUCT
+                    {products.length !== 1 ? "S" : ""}
                   </Text>
-                  <Ionicons name="arrow-forward" size={20} color="#fff" />
+                  <Ionicons name="arrow-forward" size={20} color={NEO_THEME.colors.white} />
                 </TouchableOpacity>
               </>
             ) : (
               <View style={styles.productsHighlight}>
                 <View style={styles.productCardPreview}>
-                  <Ionicons name="cube" size={32} color="#9C27B0" />
+                  <Ionicons name="cube" size={32} color={NEO_THEME.colors.primary} />
                   <Text style={styles.productPreviewTitle}>
-                    Quality Products
+                    QUALITY PRODUCTS
                   </Text>
                   <Text style={styles.productPreviewSubtitle}>
                     Carefully selected items
@@ -370,7 +372,7 @@ export default function ShopDetails() {
                 </View>
 
                 <View style={styles.productCardPreview}>
-                  <Ionicons name="construct" size={32} color="#4CAF50" />
+                  <Ionicons name="construct" size={32} color={NEO_THEME.colors.grey} />
                   <Text style={styles.productPreviewTitle}>
                     Expert Services
                   </Text>
@@ -384,15 +386,15 @@ export default function ShopDetails() {
 
           {/* Available Services */}
           <View style={styles.featuresSection}>
-            <Text style={styles.sectionTitle}>Delivery & Services</Text>
+            <Text style={styles.sectionTitle}>SERVICES</Text>
             <View style={styles.featuresGrid}>
               {shop.has_delivery && (
                 <View style={styles.featureCard}>
-                  <Ionicons name="bicycle" size={24} color="#4CAF50" />
-                  <Text style={styles.featureLabel}>Delivery</Text>
+                  <Ionicons name="bicycle" size={24} color={NEO_THEME.colors.black} />
+                  <Text style={styles.featureLabel}>DELIVERY</Text>
                   {shop.delivery_fee && (
                     <Text style={styles.featureDetail}>
-                      From P{shop.delivery_fee}
+                      FROM P{shop.delivery_fee}
                     </Text>
                   )}
                 </View>
@@ -400,15 +402,15 @@ export default function ShopDetails() {
 
               {shop.has_collection && (
                 <View style={styles.featureCard}>
-                  <Ionicons name="bag-handle" size={24} color="#2196F3" />
-                  <Text style={styles.featureLabel}>Collection</Text>
+                  <Ionicons name="bag-handle" size={24} color={NEO_THEME.colors.black} />
+                  <Text style={styles.featureLabel}>COLLECTION</Text>
                 </View>
               )}
 
               {shop.has_appointment_booking && (
                 <View style={styles.featureCard}>
-                  <Ionicons name="calendar" size={24} color="#FF9800" />
-                  <Text style={styles.featureLabel}>Appointments</Text>
+                  <Ionicons name="calendar" size={24} color={NEO_THEME.colors.black} />
+                  <Text style={styles.featureLabel}>APPOINTMENTS</Text>
                 </View>
               )}
 
@@ -416,8 +418,8 @@ export default function ShopDetails() {
                 <TouchableOpacity
                   style={styles.featureCard}
                   onPress={handleVirtualTryOn}>
-                  <Ionicons name="glasses" size={24} color="#9C27B0" />
-                  <Text style={styles.featureLabel}>Virtual Try-On</Text>
+                  <Ionicons name="glasses" size={24} color={NEO_THEME.colors.black} />
+                  <Text style={styles.featureLabel}>TRY-ON</Text>
                 </TouchableOpacity>
               )}
             </View>
@@ -425,27 +427,27 @@ export default function ShopDetails() {
 
           {/* Shop Details */}
           <View style={styles.detailsSection}>
-            <Text style={styles.sectionTitle}>Shop Information</Text>
+            <Text style={styles.sectionTitle}>DETAILS</Text>
 
             {shop.location && (
               <View style={styles.detailRow}>
-                <Ionicons name="location" size={20} color="#666" />
+                <Ionicons name="location" size={20} color={NEO_THEME.colors.black} />
                 <Text style={styles.detailText}>{shop.location}</Text>
               </View>
             )}
 
             {shop.phone && (
               <View style={styles.detailRow}>
-                <Ionicons name="call" size={20} color="#666" />
+                <Ionicons name="call" size={20} color={NEO_THEME.colors.black} />
                 <Text style={styles.detailText}>{shop.phone}</Text>
               </View>
             )}
 
             {shop.rating && shop.rating > 0 && (
               <View style={styles.detailRow}>
-                <Ionicons name="star" size={20} color="#FFD700" />
+                <Ionicons name="star" size={20} color={NEO_THEME.colors.yellow} />
                 <Text style={styles.detailText}>
-                  {shop.rating.toFixed(1)} Rating
+                  {shop.rating.toFixed(1)} RATING
                 </Text>
               </View>
             )}
@@ -481,18 +483,18 @@ export default function ShopDetails() {
         onRequestClose={() => setServiceSelectionVisible(false)}>
         <SafeAreaView style={styles.modalContainer}>
           <View style={styles.modalHeader}>
-            <Text style={styles.modalTitle}>Select a Service</Text>
+            <Text style={styles.modalTitle}>SELECT SERVICE</Text>
             <TouchableOpacity
               onPress={() => setServiceSelectionVisible(false)}
               style={styles.closeButton}>
-              <Ionicons name="close" size={28} color="#333" />
+              <Ionicons name="close" size={28} color={NEO_THEME.colors.black} />
             </TouchableOpacity>
           </View>
 
           {servicesLoading ? (
             <View style={styles.loadingContainer}>
-              <ActivityIndicator size="large" color="#9C27B0" />
-              <Text style={styles.loadingText}>Loading services...</Text>
+              <ActivityIndicator size="large" color={NEO_THEME.colors.primary} />
+              <Text style={styles.loadingText}>LOADING SERVICES...</Text>
             </View>
           ) : services.length > 0 ? (
             <ScrollView style={styles.servicesList}>
@@ -502,7 +504,7 @@ export default function ShopDetails() {
                   style={styles.serviceCard}
                   onPress={() => handleServiceSelect(service)}>
                   <View style={styles.serviceInfo}>
-                    <Text style={styles.serviceName}>{service.name}</Text>
+                    <Text style={styles.serviceName}>{service.name?.toUpperCase() || "SERVICE"}</Text>
                     {service.description && (
                       <Text style={styles.serviceDescription} numberOfLines={2}>
                         {service.description}
@@ -510,9 +512,9 @@ export default function ShopDetails() {
                     )}
                     <View style={styles.serviceDetails}>
                       <View style={styles.serviceDetailItem}>
-                        <Ionicons name="time-outline" size={16} color="#666" />
+                        <Ionicons name="time-outline" size={16} color={NEO_THEME.colors.grey} />
                         <Text style={styles.serviceDetailText}>
-                          {service.duration_minutes} min
+                          {service.duration_minutes} MIN
                         </Text>
                       </View>
                       {service.service_provider && (
@@ -520,7 +522,7 @@ export default function ShopDetails() {
                           <Ionicons
                             name="person-outline"
                             size={16}
-                            color="#666"
+                            color={NEO_THEME.colors.grey}
                           />
                           <Text style={styles.serviceDetailText}>
                             {service.service_provider.name}
@@ -536,7 +538,7 @@ export default function ShopDetails() {
                     <Ionicons
                       name="chevron-forward"
                       size={20}
-                      color="#9C27B0"
+                      color={NEO_THEME.colors.black}
                     />
                   </View>
                 </TouchableOpacity>
@@ -544,8 +546,8 @@ export default function ShopDetails() {
             </ScrollView>
           ) : (
             <View style={styles.emptyContainer}>
-              <Ionicons name="calendar-outline" size={64} color="#ccc" />
-              <Text style={styles.emptyTitle}>No Services Available</Text>
+              <Ionicons name="calendar-outline" size={64} color={NEO_THEME.colors.grey} />
+              <Text style={styles.emptyTitle}>NO SERVICES</Text>
               <Text style={styles.emptySubtitle}>
                 This shop doesn't have any bookable services at the moment.
               </Text>
@@ -563,16 +565,16 @@ export default function ShopDetails() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f8f9fa",
+    backgroundColor: NEO_THEME.colors.backgroundLight,
   },
   header: {
     flexDirection: "row",
     alignItems: "center",
     paddingHorizontal: 16,
     paddingVertical: 12,
-    backgroundColor: "#fff",
-    borderBottomWidth: 1,
-    borderBottomColor: "#e0e0e0",
+    backgroundColor: NEO_THEME.colors.white,
+    borderBottomWidth: NEO_THEME.borders.width,
+    borderBottomColor: NEO_THEME.colors.black,
     gap: 8,
   },
   backButton: {
@@ -580,10 +582,12 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     fontSize: 18,
-    fontWeight: "bold",
-    color: "#333",
+    fontWeight: "900",
+    color: NEO_THEME.colors.black,
     flex: 1,
     marginRight: 8,
+    fontFamily: NEO_THEME.fonts.black,
+    textTransform: "uppercase",
   },
   loadingContainer: {
     flex: 1,
@@ -594,7 +598,10 @@ const styles = StyleSheet.create({
   loadingText: {
     marginTop: 16,
     fontSize: 16,
-    color: "#666",
+    fontWeight: "700",
+    color: NEO_THEME.colors.black,
+    fontFamily: NEO_THEME.fonts.bold,
+    textTransform: "uppercase",
   },
   emptyContainer: {
     flex: 1,
@@ -604,14 +611,16 @@ const styles = StyleSheet.create({
   },
   emptyTitle: {
     fontSize: 20,
-    fontWeight: "bold",
-    color: "#333",
+    fontWeight: "900",
+    color: NEO_THEME.colors.black,
     marginTop: 16,
     marginBottom: 8,
+    fontFamily: NEO_THEME.fonts.black,
+    textTransform: "uppercase",
   },
   emptySubtitle: {
     fontSize: 14,
-    color: "#666",
+    color: NEO_THEME.colors.grey,
     textAlign: "center",
     lineHeight: 20,
   },
@@ -627,22 +636,26 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   featuredBadge: {
-    backgroundColor: "#FFD700",
+    backgroundColor: NEO_THEME.colors.yellow,
     padding: 6,
-    borderRadius: 12,
+    borderRadius: NEO_THEME.borders.radius,
+    borderWidth: NEO_THEME.borders.width,
+    borderColor: NEO_THEME.colors.black,
     alignItems: "center",
     justifyContent: "center",
   },
   categoryName: {
     fontSize: 16,
-    color: "#9C27B0",
+    color: NEO_THEME.colors.primary,
     marginBottom: 16,
-    fontWeight: "600",
+    fontWeight: "700",
     marginTop: 4,
+    fontFamily: NEO_THEME.fonts.bold,
+    textTransform: "uppercase",
   },
   description: {
     fontSize: 16,
-    color: "#666",
+    color: NEO_THEME.colors.black,
     lineHeight: 24,
     marginBottom: 24,
   },
@@ -651,9 +664,11 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 20,
-    fontWeight: "bold",
-    color: "#333",
+    fontWeight: "900",
+    color: NEO_THEME.colors.black,
     marginBottom: 16,
+    fontFamily: NEO_THEME.fonts.black,
+    textTransform: "uppercase",
   },
   detailRow: {
     flexDirection: "row",
@@ -662,8 +677,9 @@ const styles = StyleSheet.create({
   },
   detailText: {
     fontSize: 16,
-    color: "#666",
+    color: NEO_THEME.colors.black,
     marginLeft: 12,
+    fontWeight: "600",
   },
   featuresSection: {
     marginBottom: 24,
@@ -674,45 +690,55 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
   },
   featureCard: {
-    backgroundColor: "#fff",
+    backgroundColor: NEO_THEME.colors.white,
     padding: 16,
-    borderRadius: 12,
+    borderRadius: NEO_THEME.borders.radius,
+    borderWidth: NEO_THEME.borders.width,
+    borderColor: NEO_THEME.colors.black,
     alignItems: "center",
     width: "48%",
     marginBottom: 12,
-    elevation: 2,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
+    // Hard shadow
+    shadowColor: NEO_THEME.colors.black,
+    shadowOffset: { width: 5, height: 5 },
+    shadowOpacity: 1,
+    shadowRadius: 0,
+    elevation: 0,
   },
   featureLabel: {
     fontSize: 14,
-    fontWeight: "600",
-    color: "#333",
+    fontWeight: "700",
+    color: NEO_THEME.colors.black,
     marginTop: 8,
+    fontFamily: NEO_THEME.fonts.bold,
+    textTransform: "uppercase",
   },
   featureDetail: {
     fontSize: 12,
-    color: "#666",
+    color: NEO_THEME.colors.grey,
     marginTop: 4,
+    fontWeight: "600",
+    textTransform: "uppercase",
   },
   hoursSection: {
     marginBottom: 24,
   },
   hoursContainer: {
-    backgroundColor: "#fff",
+    backgroundColor: NEO_THEME.colors.white,
     padding: 16,
-    borderRadius: 12,
-    elevation: 1,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
+    borderRadius: NEO_THEME.borders.radius,
+    borderWidth: NEO_THEME.borders.width,
+    borderColor: NEO_THEME.colors.black,
+    // Hard shadow
+    shadowColor: NEO_THEME.colors.black,
+    shadowOffset: { width: 3, height: 3 },
+    shadowOpacity: 1,
+    shadowRadius: 0,
+    elevation: 0,
   },
   hoursText: {
     fontSize: 14,
-    color: "#666",
+    color: NEO_THEME.colors.black,
     lineHeight: 20,
   },
   productsSection: {
@@ -723,25 +749,30 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   primaryActionButton: {
-    backgroundColor: "#9C27B0",
+    backgroundColor: NEO_THEME.colors.blue,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
     paddingVertical: 16,
     paddingHorizontal: 24,
-    borderRadius: 12,
+    borderRadius: NEO_THEME.borders.radius,
+    borderWidth: NEO_THEME.borders.width,
+    borderColor: NEO_THEME.colors.black,
     marginBottom: 16,
-    elevation: 3,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
+    // Hard shadow
+    shadowColor: NEO_THEME.colors.black,
+    shadowOffset: { width: 5, height: 5 },
+    shadowOpacity: 1,
+    shadowRadius: 0,
+    elevation: 0,
   },
   primaryActionText: {
     fontSize: 18,
-    fontWeight: "bold",
-    color: "#fff",
+    fontWeight: "900",
+    color: NEO_THEME.colors.white,
     marginLeft: 8,
+    fontFamily: NEO_THEME.fonts.black,
+    textTransform: "uppercase",
   },
   secondaryActions: {
     flexDirection: "row",
@@ -749,27 +780,30 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   secondaryActionButton: {
-    backgroundColor: "#fff",
+    backgroundColor: NEO_THEME.colors.white,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
     paddingVertical: 12,
     paddingHorizontal: 20,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: "#9C27B0",
+    borderRadius: NEO_THEME.borders.radius,
+    borderWidth: NEO_THEME.borders.width,
+    borderColor: NEO_THEME.colors.black,
     flex: 1,
-    elevation: 1,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
+    // Hard shadow
+    shadowColor: NEO_THEME.colors.black,
+    shadowOffset: { width: 4, height: 4 },
+    shadowOpacity: 1,
+    shadowRadius: 0,
+    elevation: 0,
   },
   secondaryActionText: {
     fontSize: 14,
-    fontWeight: "600",
-    color: "#9C27B0",
+    fontWeight: "700",
+    color: NEO_THEME.colors.black,
     marginLeft: 6,
+    fontFamily: NEO_THEME.fonts.bold,
+    textTransform: "uppercase",
   },
   // Enhanced Products Section Styles
   productsSectionHeader: {
@@ -784,9 +818,11 @@ const styles = StyleSheet.create({
   },
   viewAllText: {
     fontSize: 14,
-    fontWeight: "600",
-    color: "#9C27B0",
+    fontWeight: "700",
+    color: NEO_THEME.colors.primary,
     marginRight: 4,
+    fontFamily: NEO_THEME.fonts.bold,
+    textTransform: "uppercase",
   },
   productsHighlight: {
     flexDirection: "row",
@@ -795,50 +831,60 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   productCardPreview: {
-    backgroundColor: "#fff",
+    backgroundColor: NEO_THEME.colors.white,
     padding: 20,
-    borderRadius: 12,
+    borderRadius: NEO_THEME.borders.radius,
+    borderWidth: NEO_THEME.borders.width,
+    borderColor: NEO_THEME.colors.black,
     alignItems: "center",
     flex: 1,
-    elevation: 2,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
+    // Hard shadow
+    shadowColor: NEO_THEME.colors.black,
+    shadowOffset: { width: 4, height: 4 },
+    shadowOpacity: 1,
+    shadowRadius: 0,
+    elevation: 0,
   },
   productPreviewTitle: {
     fontSize: 16,
-    fontWeight: "bold",
-    color: "#333",
+    fontWeight: "700",
+    color: NEO_THEME.colors.black,
     marginTop: 12,
     marginBottom: 4,
     textAlign: "center",
+    fontFamily: NEO_THEME.fonts.bold,
+    textTransform: "uppercase",
   },
   productPreviewSubtitle: {
     fontSize: 12,
-    color: "#666",
+    color: NEO_THEME.colors.grey,
     textAlign: "center",
     lineHeight: 16,
   },
   exploreProductsButton: {
-    backgroundColor: "#34C759",
+    backgroundColor: NEO_THEME.colors.primary,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
     paddingVertical: 16,
     paddingHorizontal: 24,
-    borderRadius: 12,
-    elevation: 3,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
+    borderRadius: NEO_THEME.borders.radius,
+    borderWidth: NEO_THEME.borders.width,
+    borderColor: NEO_THEME.colors.black,
+    // Hard shadow
+    shadowColor: NEO_THEME.colors.black,
+    shadowOffset: { width: 5, height: 5 },
+    shadowOpacity: 1,
+    shadowRadius: 0,
+    elevation: 0,
   },
   exploreProductsText: {
     fontSize: 16,
-    fontWeight: "bold",
-    color: "#fff",
+    fontWeight: "900",
+    color: NEO_THEME.colors.white,
     marginRight: 8,
+    fontFamily: NEO_THEME.fonts.black,
+    textTransform: "uppercase",
   },
   // Additional product display styles
   productsLoadingContainer: {
@@ -846,41 +892,51 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     padding: 20,
-    backgroundColor: "#fff",
-    borderRadius: 12,
+    backgroundColor: NEO_THEME.colors.white,
+    borderRadius: NEO_THEME.borders.radius,
+    borderWidth: NEO_THEME.borders.width,
+    borderColor: NEO_THEME.colors.black,
     marginBottom: 16,
   },
   productPreviewImage: {
     width: 48,
     height: 48,
-    borderRadius: 8,
+    borderRadius: NEO_THEME.borders.radius,
+    borderWidth: NEO_THEME.borders.width,
+    borderColor: NEO_THEME.colors.black,
     resizeMode: "cover",
     marginBottom: 8,
   },
   productPreviewPrice: {
     fontSize: 14,
-    fontWeight: "bold",
-    color: "#9C27B0",
+    fontWeight: "700",
+    color: NEO_THEME.colors.black,
     marginTop: 4,
+    backgroundColor: NEO_THEME.colors.yellow,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    fontFamily: NEO_THEME.fonts.bold,
   },
   // Service Selection Modal Styles
   modalContainer: {
     flex: 1,
-    backgroundColor: "#f8f9fa",
+    backgroundColor: NEO_THEME.colors.backgroundLight,
   },
   modalHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
     padding: 20,
-    backgroundColor: "#fff",
-    borderBottomWidth: 1,
-    borderBottomColor: "#e0e0e0",
+    backgroundColor: NEO_THEME.colors.white,
+    borderBottomWidth: NEO_THEME.borders.width,
+    borderBottomColor: NEO_THEME.colors.black,
   },
   modalTitle: {
     fontSize: 24,
-    fontWeight: "bold",
-    color: "#333",
+    fontWeight: "900",
+    color: NEO_THEME.colors.black,
+    fontFamily: NEO_THEME.fonts.black,
+    textTransform: "uppercase",
   },
   closeButton: {
     padding: 8,
@@ -890,18 +946,21 @@ const styles = StyleSheet.create({
     padding: 16,
   },
   serviceCard: {
-    backgroundColor: "#fff",
-    borderRadius: 12,
+    backgroundColor: NEO_THEME.colors.white,
+    borderRadius: NEO_THEME.borders.radius,
+    borderWidth: NEO_THEME.borders.width,
+    borderColor: NEO_THEME.colors.black,
     padding: 16,
     marginBottom: 12,
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    elevation: 2,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
+    // Hard shadow
+    shadowColor: NEO_THEME.colors.black,
+    shadowOffset: { width: 4, height: 4 },
+    shadowOpacity: 1,
+    shadowRadius: 0,
+    elevation: 0,
   },
   serviceInfo: {
     flex: 1,
@@ -909,13 +968,15 @@ const styles = StyleSheet.create({
   },
   serviceName: {
     fontSize: 18,
-    fontWeight: "bold",
-    color: "#333",
+    fontWeight: "700",
+    color: NEO_THEME.colors.black,
     marginBottom: 4,
+    fontFamily: NEO_THEME.fonts.bold,
+    textTransform: "uppercase",
   },
   serviceDescription: {
     fontSize: 14,
-    color: "#666",
+    color: NEO_THEME.colors.grey,
     marginBottom: 8,
     lineHeight: 20,
   },
@@ -930,7 +991,9 @@ const styles = StyleSheet.create({
   },
   serviceDetailText: {
     fontSize: 13,
-    color: "#666",
+    color: NEO_THEME.colors.grey,
+    fontWeight: "600",
+    textTransform: "uppercase",
   },
   servicePriceContainer: {
     flexDirection: "row",
@@ -939,7 +1002,11 @@ const styles = StyleSheet.create({
   },
   servicePrice: {
     fontSize: 20,
-    fontWeight: "bold",
-    color: "#9C27B0",
+    fontWeight: "900",
+    color: NEO_THEME.colors.black,
+    backgroundColor: NEO_THEME.colors.yellow,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    fontFamily: NEO_THEME.fonts.black,
   },
 });

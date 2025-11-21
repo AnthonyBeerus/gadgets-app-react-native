@@ -10,6 +10,7 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { PoseOption } from "../types/TryOnTypes";
 import { useTryOnStore } from "../store/tryOnStore";
+import { NEO_THEME } from "../../../constants/neobrutalism";
 
 const POSE_OPTIONS = [
   {
@@ -55,7 +56,7 @@ export default function PoseSelector() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Pose</Text>
+      <Text style={styles.title}>POSE</Text>
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
@@ -85,7 +86,7 @@ export default function PoseSelector() {
                 styles.optionLabel,
                 pose === option.value && styles.selectedLabel,
               ]}>
-              {option.label}
+              {option.label.toUpperCase()}
             </Text>
           </TouchableOpacity>
         ))}
@@ -94,16 +95,19 @@ export default function PoseSelector() {
   );
 }
 
+
 const styles = StyleSheet.create({
   container: {
     marginBottom: 16,
   },
   title: {
     fontSize: 16,
-    fontWeight: "600",
-    color: "#333",
+    fontWeight: "900",
+    color: NEO_THEME.colors.black,
     marginBottom: 10,
     paddingHorizontal: 4,
+    fontFamily: NEO_THEME.fonts.black,
+    textTransform: "uppercase",
   },
   scrollContent: {
     gap: 10,
@@ -111,41 +115,45 @@ const styles = StyleSheet.create({
   optionCard: {
     width: 90,
     padding: 12,
-    backgroundColor: "#fff",
-    borderRadius: 12,
+    backgroundColor: NEO_THEME.colors.white,
+    borderRadius: NEO_THEME.borders.radius,
     alignItems: "center",
-    borderWidth: 2,
-    borderColor: "#E5E7EB",
-    elevation: 1,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
+    borderWidth: NEO_THEME.borders.width,
+    borderColor: NEO_THEME.colors.black,
+    shadowColor: NEO_THEME.colors.black,
+    shadowOffset: { width: 3, height: 3 },
+    shadowOpacity: 1,
+    shadowRadius: 0,
+    elevation: 0,
   },
   selectedCard: {
-    borderColor: "#5B21B6",
-    backgroundColor: "#F9FAFB",
+    borderColor: NEO_THEME.colors.black,
+    backgroundColor: NEO_THEME.colors.yellow,
   },
   iconContainer: {
     width: 48,
     height: 48,
-    borderRadius: 24,
-    backgroundColor: "#F3F4F6",
+    borderRadius: NEO_THEME.borders.radius,
+    backgroundColor: NEO_THEME.colors.backgroundLight,
     alignItems: "center",
     justifyContent: "center",
     marginBottom: 6,
+    borderWidth: 2,
+    borderColor: NEO_THEME.colors.black,
   },
   selectedIcon: {
-    backgroundColor: "#5B21B6",
+    backgroundColor: NEO_THEME.colors.primary,
   },
   optionLabel: {
-    fontSize: 12,
-    fontWeight: "600",
-    color: "#333",
+    fontSize: 11,
+    fontWeight: "700",
+    color: NEO_THEME.colors.black,
     textAlign: "center",
+    fontFamily: NEO_THEME.fonts.bold,
   },
   selectedLabel: {
-    color: "#5B21B6",
-    fontWeight: "bold",
+    color: NEO_THEME.colors.black,
+    fontWeight: "900",
+    fontFamily: NEO_THEME.fonts.black,
   },
 });

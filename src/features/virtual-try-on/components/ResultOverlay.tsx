@@ -13,6 +13,7 @@ import {
 import { useTryOnStore } from "../store/tryOnStore";
 import * as MediaLibrary from "expo-media-library";
 import { File, Paths } from "expo-file-system/next";
+import { NEO_THEME } from "../../../constants/neobrutalism";
 
 interface ResultOverlayProps {
   onClose: () => void;
@@ -106,7 +107,7 @@ export default function ResultOverlay({
     return (
       <View style={styles.processingContainer}>
         <ActivityIndicator size="large" color="#9C27B0" />
-        <Text style={styles.processingText}>Creating your look...</Text>
+        <Text style={styles.processingText}>CREATING YOUR LOOK...</Text>
       </View>
     );
   }
@@ -115,7 +116,7 @@ export default function ResultOverlay({
     return (
       <View style={styles.container}>
         <View style={styles.content}>
-          <Text style={styles.errorTitle}>❌ Processing Failed</Text>
+          <Text style={styles.errorTitle}>❌ PROCESSING FAILED</Text>
           <Text style={styles.errorText}>{error}</Text>
           <View style={styles.buttonContainer}>
             <TouchableOpacity
@@ -124,7 +125,7 @@ export default function ResultOverlay({
               activeOpacity={0.8}>
               <View style={styles.buttonContent}>
                 <Text style={styles.buttonIcon}>🔄</Text>
-                <Text style={styles.retryButtonText}>Try Again</Text>
+                <Text style={styles.retryButtonText}>TRY AGAIN</Text>
               </View>
             </TouchableOpacity>
             <TouchableOpacity
@@ -133,7 +134,7 @@ export default function ResultOverlay({
               activeOpacity={0.8}>
               <View style={styles.buttonContent}>
                 <Text style={styles.buttonIcon}>✕</Text>
-                <Text style={styles.closeButtonText}>Close</Text>
+                <Text style={styles.closeButtonText}>CLOSE</Text>
               </View>
             </TouchableOpacity>
           </View>
@@ -149,7 +150,7 @@ export default function ResultOverlay({
   return (
     <View style={styles.container}>
       <View style={styles.content}>
-        <Text style={styles.successTitle}>✨ Virtual Try-On Complete!</Text>
+        <Text style={styles.successTitle}>✨ VIRTUAL TRY-ON COMPLETE!</Text>
         <Image
           source={{ uri: resultImage }}
           style={styles.resultImage}
@@ -159,7 +160,7 @@ export default function ResultOverlay({
             console.error("❌ Image load error:", error.nativeEvent)
           }
         />
-        <Text style={styles.resultText}>How does it look?</Text>
+        <Text style={styles.resultText}>HOW DOES IT LOOK?</Text>
         <View style={styles.buttonContainer}>
           <TouchableOpacity
             style={[styles.saveButton, isSaving && styles.disabledButton]}
@@ -169,12 +170,12 @@ export default function ResultOverlay({
             {isSaving ? (
               <View style={styles.buttonContent}>
                 <ActivityIndicator color="white" size="small" />
-                <Text style={styles.saveButtonText}>Saving...</Text>
+                <Text style={styles.saveButtonText}>SAVING...</Text>
               </View>
             ) : (
               <View style={styles.buttonContent}>
                 <Text style={styles.buttonIcon}>💾</Text>
-                <Text style={styles.saveButtonText}>Save</Text>
+                <Text style={styles.saveButtonText}>SAVE</Text>
               </View>
             )}
           </TouchableOpacity>
@@ -184,7 +185,7 @@ export default function ResultOverlay({
             activeOpacity={0.8}>
             <View style={styles.buttonContent}>
               <Text style={styles.buttonIcon}>✕</Text>
-              <Text style={styles.closeButtonText}>Close</Text>
+              <Text style={styles.closeButtonText}>CLOSE</Text>
             </View>
           </TouchableOpacity>
         </View>
@@ -193,12 +194,13 @@ export default function ResultOverlay({
   );
 }
 
+
 const styles = StyleSheet.create({
   processingContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#f8f9fa",
+    backgroundColor: NEO_THEME.colors.backgroundLight,
     gap: 20,
   },
   container: {
@@ -209,41 +211,47 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   content: {
-    backgroundColor: "white",
-    borderRadius: 24,
+    backgroundColor: NEO_THEME.colors.white,
+    borderRadius: NEO_THEME.borders.radius,
     padding: 24,
     alignItems: "center",
     maxWidth: 420,
     width: "100%",
-    elevation: 10,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.3,
-    shadowRadius: 16,
+    borderWidth: NEO_THEME.borders.width,
+    borderColor: NEO_THEME.colors.black,
+    shadowColor: NEO_THEME.colors.black,
+    shadowOffset: { width: 8, height: 8 },
+    shadowOpacity: 1,
+    shadowRadius: 0,
+    elevation: 0,
   },
   processingText: {
     fontSize: 18,
-    fontWeight: "600",
+    fontWeight: "900",
     textAlign: "center",
-    color: "#333",
+    color: NEO_THEME.colors.black,
+    fontFamily: NEO_THEME.fonts.black,
+    textTransform: "uppercase",
   },
   subText: {
     fontSize: 16,
-    color: "#666",
+    color: NEO_THEME.colors.grey,
     marginTop: 8,
     textAlign: "center",
     lineHeight: 22,
   },
   errorTitle: {
     fontSize: 24,
-    fontWeight: "bold",
-    color: "#FF3B30",
+    fontWeight: "900",
+    color: NEO_THEME.colors.black,
     marginBottom: 12,
     textAlign: "center",
+    fontFamily: NEO_THEME.fonts.black,
+    textTransform: "uppercase",
   },
   errorText: {
     fontSize: 16,
-    color: "#666",
+    color: NEO_THEME.colors.grey,
     textAlign: "center",
     marginBottom: 24,
     lineHeight: 24,
@@ -251,26 +259,30 @@ const styles = StyleSheet.create({
   },
   successTitle: {
     fontSize: 24,
-    fontWeight: "bold",
-    color: "#9C27B0",
+    fontWeight: "900",
+    color: NEO_THEME.colors.black,
     marginBottom: 20,
     textAlign: "center",
+    fontFamily: NEO_THEME.fonts.black,
+    textTransform: "uppercase",
   },
   resultImage: {
     width: "100%",
     aspectRatio: 3 / 4,
-    borderRadius: 16,
+    borderRadius: NEO_THEME.borders.radius,
     marginBottom: 20,
-    backgroundColor: "#f5f5f5",
-    borderWidth: 2,
-    borderColor: "#9C27B0",
+    backgroundColor: NEO_THEME.colors.backgroundLight,
+    borderWidth: NEO_THEME.borders.width,
+    borderColor: NEO_THEME.colors.black,
   },
   resultText: {
     fontSize: 18,
     marginBottom: 24,
     textAlign: "center",
-    color: "#333",
-    fontWeight: "600",
+    color: NEO_THEME.colors.black,
+    fontWeight: "900",
+    fontFamily: NEO_THEME.fonts.black,
+    textTransform: "uppercase",
   },
   buttonContainer: {
     flexDirection: "row",
@@ -285,63 +297,72 @@ const styles = StyleSheet.create({
   },
   buttonIcon: {
     fontSize: 20,
-    color: "white",
+    color: NEO_THEME.colors.white,
   },
   retryButton: {
     flex: 1,
-    backgroundColor: "#9C27B0",
+    backgroundColor: NEO_THEME.colors.primary,
     paddingVertical: 16,
     paddingHorizontal: 20,
-    borderRadius: 12,
+    borderRadius: NEO_THEME.borders.radius,
     alignItems: "center",
-    elevation: 3,
-    shadowColor: "#9C27B0",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
+    borderWidth: NEO_THEME.borders.width,
+    borderColor: NEO_THEME.colors.black,
+    shadowColor: NEO_THEME.colors.black,
+    shadowOffset: { width: 4, height: 4 },
+    shadowOpacity: 1,
+    shadowRadius: 0,
+    elevation: 0,
   },
   retryButtonText: {
-    color: "white",
+    color: NEO_THEME.colors.white,
     fontSize: 16,
-    fontWeight: "bold",
+    fontWeight: "900",
+    fontFamily: NEO_THEME.fonts.black,
   },
   saveButton: {
     flex: 1,
-    backgroundColor: "#34C759",
+    backgroundColor: NEO_THEME.colors.yellow,
     paddingVertical: 16,
     paddingHorizontal: 20,
-    borderRadius: 12,
+    borderRadius: NEO_THEME.borders.radius,
     alignItems: "center",
-    elevation: 3,
-    shadowColor: "#34C759",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
+    borderWidth: NEO_THEME.borders.width,
+    borderColor: NEO_THEME.colors.black,
+    shadowColor: NEO_THEME.colors.black,
+    shadowOffset: { width: 4, height: 4 },
+    shadowOpacity: 1,
+    shadowRadius: 0,
+    elevation: 0,
   },
   saveButtonText: {
-    color: "white",
+    color: NEO_THEME.colors.black,
     fontSize: 16,
-    fontWeight: "bold",
+    fontWeight: "900",
+    fontFamily: NEO_THEME.fonts.black,
   },
   disabledButton: {
     opacity: 0.6,
   },
   closeButton: {
     flex: 1,
-    backgroundColor: "#666",
+    backgroundColor: NEO_THEME.colors.grey,
     paddingVertical: 16,
     paddingHorizontal: 20,
-    borderRadius: 12,
+    borderRadius: NEO_THEME.borders.radius,
     alignItems: "center",
-    elevation: 2,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 3,
+    borderWidth: NEO_THEME.borders.width,
+    borderColor: NEO_THEME.colors.black,
+    shadowColor: NEO_THEME.colors.black,
+    shadowOffset: { width: 3, height: 3 },
+    shadowOpacity: 1,
+    shadowRadius: 0,
+    elevation: 0,
   },
   closeButtonText: {
-    color: "white",
+    color: NEO_THEME.colors.white,
     fontSize: 16,
-    fontWeight: "bold",
+    fontWeight: "900",
+    fontFamily: NEO_THEME.fonts.black,
   },
 });

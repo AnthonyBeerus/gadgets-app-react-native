@@ -18,6 +18,7 @@ import { useCartStore } from "../../store/cart-store";
 import { getProduct } from "../../api/api";
 import { ActivityIndicator } from "react-native";
 import TryOnModal from "../../features/virtual-try-on/components/TryOnModal";
+import { NEO_THEME } from "../../constants/neobrutalism";
 
 const { width } = Dimensions.get("window");
 
@@ -53,7 +54,7 @@ const ProductDetails = () => {
   if (isLoading)
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#9C27B0" />
+        <ActivityIndicator size="large" color={NEO_THEME.colors.primary} />
       </View>
     );
   if (error) return <Text>Error: {error.message}</Text>;
@@ -124,7 +125,7 @@ const ProductDetails = () => {
               onPress={handleGoBack}
               style={styles.backButton}
               activeOpacity={0.7}>
-              <Ionicons name="arrow-back" size={24} color="#fff" />
+              <Ionicons name="arrow-back" size={24} color={NEO_THEME.colors.black} />
             </TouchableOpacity>
           ),
         }}
@@ -151,12 +152,12 @@ const ProductDetails = () => {
                 <Ionicons name="camera" size={28} color="#fff" />
               </View>
               <View style={styles.tryOnTextContainer}>
-                <Text style={styles.tryOnButtonTitle}>Virtual Try-On</Text>
+                <Text style={styles.tryOnButtonTitle}>VIRTUAL TRY-ON</Text>
                 <Text style={styles.tryOnButtonSubtitle}>
                   See how it looks on you!
                 </Text>
               </View>
-              <Ionicons name="chevron-forward" size={24} color="#fff" />
+              <Ionicons name="chevron-forward" size={24} color={NEO_THEME.colors.black} />
             </TouchableOpacity>
           </View>
         )}
@@ -165,11 +166,13 @@ const ProductDetails = () => {
         <View style={styles.detailsContainer}>
           {/* Title and Price */}
           <View style={styles.headerSection}>
-            <Text style={styles.productTitle}>{product.title}</Text>
+            <Text style={styles.productTitle}>{product.title.toUpperCase()}</Text>
             <View style={styles.priceRow}>
-              <Text style={styles.price}>${product.price.toFixed(2)}</Text>
+              <View style={styles.priceTag}>
+                <Text style={styles.price}>P{product.price.toFixed(2)}</Text>
+              </View>
               <View style={styles.ratingContainer}>
-                <Ionicons name="star" size={16} color="#FFA500" />
+                <Ionicons name="star" size={16} color={NEO_THEME.colors.black} />
                 <Text style={styles.ratingText}>4.5</Text>
               </View>
             </View>
@@ -179,8 +182,8 @@ const ProductDetails = () => {
           {supportsVirtualTryOn && colorVariants.length > 0 && (
             <View style={styles.section}>
               <Text style={styles.sectionTitle}>
-                {isBeautyService ? "Available Styles" : "Available Colors"}{" "}
-                {selectedColor && `- ${selectedColor.color_name}`}
+                {isBeautyService ? "AVAILABLE STYLES" : "AVAILABLE COLORS"}{" "}
+                {selectedColor && `- ${selectedColor.color_name.toUpperCase()}`}
               </Text>
               <ScrollView
                 horizontal
@@ -208,7 +211,7 @@ const ProductDetails = () => {
                           <Ionicons
                             name="checkmark-circle"
                             size={24}
-                            color="#9C27B0"
+                            color={NEO_THEME.colors.primary}
                           />
                         </View>
                       )}
@@ -218,8 +221,8 @@ const ProductDetails = () => {
               {selectedColor && (
                 <Text style={styles.stockText}>
                   {selectedColor.stock_quantity > 0
-                    ? `${selectedColor.stock_quantity} in stock`
-                    : "Out of stock"}
+                    ? `${selectedColor.stock_quantity} IN STOCK`
+                    : "OUT OF STOCK"}
                 </Text>
               )}
             </View>
@@ -228,7 +231,7 @@ const ProductDetails = () => {
           {/* Size Selection */}
           {isClothing && (
             <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Size</Text>
+              <Text style={styles.sectionTitle}>SIZE</Text>
               <View style={styles.sizeContainer}>
                 {SIZES.map((size) => (
                   <TouchableOpacity
@@ -254,7 +257,7 @@ const ProductDetails = () => {
 
           {/* Description */}
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Details</Text>
+            <Text style={styles.sectionTitle}>DETAILS</Text>
             <Text style={styles.description}>
               A stylish and comfortable {product.title.toLowerCase()}. Made with
               high-quality materials for maximum durability and comfort. Perfect
@@ -265,7 +268,7 @@ const ProductDetails = () => {
           {/* Additional Images */}
           {product.imagesUrl.length > 0 && (
             <View style={styles.section}>
-              <Text style={styles.sectionTitle}>More Images</Text>
+              <Text style={styles.sectionTitle}>MORE IMAGES</Text>
               <FlatList
                 data={product.imagesUrl}
                 keyExtractor={(item, index) => index.toString()}
@@ -293,7 +296,7 @@ const ProductDetails = () => {
             onPress={decreaseQuantity}
             disabled={quantity <= 1}
             activeOpacity={0.7}>
-            <Ionicons name="remove" size={20} color="#fff" />
+            <Ionicons name="remove" size={20} color={NEO_THEME.colors.white} />
           </TouchableOpacity>
 
           <Text style={styles.quantityText}>{quantity}</Text>
@@ -306,7 +309,7 @@ const ProductDetails = () => {
             onPress={increaseQuantity}
             disabled={quantity >= product.maxQuantity}
             activeOpacity={0.7}>
-            <Ionicons name="add" size={20} color="#fff" />
+            <Ionicons name="add" size={20} color={NEO_THEME.colors.white} />
           </TouchableOpacity>
         </View>
 
@@ -315,7 +318,7 @@ const ProductDetails = () => {
           style={styles.buyButton}
           onPress={addToCart}
           activeOpacity={0.8}>
-          <Text style={styles.buyButtonText}>Buy Now</Text>
+          <Text style={styles.buyButtonText}>BUY NOW</Text>
         </TouchableOpacity>
       </View>
 
@@ -339,29 +342,33 @@ export default ProductDetails;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F8F9FA",
+    backgroundColor: NEO_THEME.colors.backgroundLight,
   },
   backButton: {
     width: 40,
     height: 40,
-    borderRadius: 20,
-    backgroundColor: "rgba(0, 0, 0, 0.3)",
+    borderRadius: NEO_THEME.borders.radius,
+    backgroundColor: NEO_THEME.colors.yellow,
     alignItems: "center",
     justifyContent: "center",
     marginLeft: 16,
+    borderWidth: NEO_THEME.borders.width,
+    borderColor: NEO_THEME.colors.black,
   },
   loadingContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#F8F9FA",
+    backgroundColor: NEO_THEME.colors.backgroundLight,
   },
   heroContainer: {
-    backgroundColor: "#9C27B0",
-    borderBottomLeftRadius: 32,
-    borderBottomRightRadius: 32,
+    backgroundColor: NEO_THEME.colors.primary,
+    borderBottomLeftRadius: 0,
+    borderBottomRightRadius: 0,
     overflow: "hidden",
     height: width * 1.1,
+    borderBottomWidth: NEO_THEME.borders.width,
+    borderBottomColor: NEO_THEME.colors.black,
   },
   heroImage: {
     width: "100%",
@@ -376,43 +383,63 @@ const styles = StyleSheet.create({
   },
   productTitle: {
     fontSize: 28,
-    fontWeight: "bold",
-    color: "#1F2937",
-    marginBottom: 8,
+    fontWeight: "900",
+    color: NEO_THEME.colors.black,
+    marginBottom: 12,
     lineHeight: 36,
+    fontFamily: NEO_THEME.fonts.black,
+    textTransform: "uppercase",
   },
   priceRow: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
   },
+  priceTag: {
+    backgroundColor: NEO_THEME.colors.yellow,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderWidth: NEO_THEME.borders.width,
+    borderColor: NEO_THEME.colors.black,
+    shadowColor: NEO_THEME.colors.black,
+    shadowOffset: { width: 4, height: 4 },
+    shadowOpacity: 1,
+    shadowRadius: 0,
+    elevation: 0,
+  },
   price: {
-    fontSize: 32,
-    fontWeight: "bold",
-    color: "#9C27B0",
+    fontSize: 28,
+    fontWeight: "900",
+    color: NEO_THEME.colors.black,
+    fontFamily: NEO_THEME.fonts.black,
   },
   ratingContainer: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#FFF7ED",
+    backgroundColor: NEO_THEME.colors.yellow,
     paddingHorizontal: 12,
     paddingVertical: 6,
-    borderRadius: 20,
+    borderRadius: NEO_THEME.borders.radius,
+    borderWidth: 2,
+    borderColor: NEO_THEME.colors.black,
     gap: 4,
   },
   ratingText: {
     fontSize: 14,
-    fontWeight: "600",
-    color: "#F59E0B",
+    fontWeight: "700",
+    color: NEO_THEME.colors.black,
+    fontFamily: NEO_THEME.fonts.bold,
   },
   section: {
     marginBottom: 24,
   },
   sectionTitle: {
     fontSize: 18,
-    fontWeight: "bold",
-    color: "#1F2937",
+    fontWeight: "900",
+    color: NEO_THEME.colors.black,
     marginBottom: 12,
+    fontFamily: NEO_THEME.fonts.black,
+    textTransform: "uppercase",
   },
   variantContainer: {
     gap: 12,
@@ -421,15 +448,15 @@ const styles = StyleSheet.create({
   variantImageBox: {
     width: 80,
     height: 80,
-    borderRadius: 12,
-    borderWidth: 3,
-    borderColor: "#E5E7EB",
+    borderRadius: NEO_THEME.borders.radius,
+    borderWidth: NEO_THEME.borders.width,
+    borderColor: NEO_THEME.colors.grey,
     overflow: "hidden",
     position: "relative",
   },
   selectedVariantBox: {
-    borderColor: "#9C27B0",
-    borderWidth: 3,
+    borderColor: NEO_THEME.colors.primary,
+    borderWidth: NEO_THEME.borders.width,
   },
   variantImage: {
     width: "100%",
@@ -439,14 +466,16 @@ const styles = StyleSheet.create({
     position: "absolute",
     top: 2,
     right: 2,
-    backgroundColor: "#fff",
+    backgroundColor: NEO_THEME.colors.white,
     borderRadius: 12,
   },
   stockText: {
     fontSize: 14,
-    color: "#6B7280",
+    color: NEO_THEME.colors.black,
     marginTop: 8,
-    fontWeight: "500",
+    fontWeight: "700",
+    fontFamily: NEO_THEME.fonts.bold,
+    textTransform: "uppercase",
   },
   sizeContainer: {
     flexDirection: "row",
@@ -455,28 +484,34 @@ const styles = StyleSheet.create({
   sizeOption: {
     paddingHorizontal: 20,
     paddingVertical: 12,
-    borderRadius: 12,
-    backgroundColor: "#fff",
-    borderWidth: 2,
-    borderColor: "#E5E7EB",
+    borderRadius: NEO_THEME.borders.radius,
+    backgroundColor: NEO_THEME.colors.white,
+    borderWidth: NEO_THEME.borders.width,
+    borderColor: NEO_THEME.colors.black,
     minWidth: 60,
     alignItems: "center",
+    shadowColor: NEO_THEME.colors.black,
+    shadowOffset: { width: 3, height: 3 },
+    shadowOpacity: 1,
+    shadowRadius: 0,
+    elevation: 0,
   },
   selectedSize: {
-    backgroundColor: "#9C27B0",
-    borderColor: "#9C27B0",
+    backgroundColor: NEO_THEME.colors.primary,
+    borderColor: NEO_THEME.colors.black,
   },
   sizeText: {
     fontSize: 16,
-    fontWeight: "600",
-    color: "#6B7280",
+    fontWeight: "700",
+    color: NEO_THEME.colors.black,
+    fontFamily: NEO_THEME.fonts.bold,
   },
   selectedSizeText: {
-    color: "#fff",
+    color: NEO_THEME.colors.white,
   },
   description: {
     fontSize: 16,
-    color: "#6B7280",
+    color: NEO_THEME.colors.grey,
     lineHeight: 24,
   },
   tryOnButtonContainer: {
@@ -489,23 +524,23 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    backgroundColor: "#9C27B0",
+    backgroundColor: NEO_THEME.colors.yellow,
     paddingVertical: 20,
     paddingHorizontal: 20,
-    borderRadius: 20,
-    elevation: 8,
-    shadowColor: "#9C27B0",
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.4,
-    shadowRadius: 12,
-    borderWidth: 2,
-    borderColor: "#D946EF",
+    borderRadius: NEO_THEME.borders.radius,
+    borderWidth: NEO_THEME.borders.width,
+    borderColor: NEO_THEME.colors.black,
+    shadowColor: NEO_THEME.colors.black,
+    shadowOffset: { width: 5, height: 5 },
+    shadowOpacity: 1,
+    shadowRadius: 0,
+    elevation: 0,
   },
   tryOnIconContainer: {
     width: 56,
     height: 56,
-    borderRadius: 28,
-    backgroundColor: "rgba(255, 255, 255, 0.2)",
+    borderRadius: NEO_THEME.borders.radius,
+    backgroundColor: NEO_THEME.colors.black,
     alignItems: "center",
     justifyContent: "center",
   },
@@ -514,36 +549,42 @@ const styles = StyleSheet.create({
     marginLeft: 16,
   },
   tryOnButtonTitle: {
-    color: "#fff",
+    color: NEO_THEME.colors.black,
     fontSize: 18,
-    fontWeight: "bold",
+    fontWeight: "900",
     marginBottom: 4,
+    fontFamily: NEO_THEME.fonts.black,
+    textTransform: "uppercase",
   },
   tryOnButtonSubtitle: {
-    color: "rgba(255, 255, 255, 0.9)",
+    color: NEO_THEME.colors.black,
     fontSize: 13,
-    fontWeight: "500",
+    fontWeight: "600",
   },
   tryOnButton: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#9C27B0",
+    backgroundColor: NEO_THEME.colors.primary,
     paddingVertical: 16,
     paddingHorizontal: 24,
-    borderRadius: 16,
+    borderRadius: NEO_THEME.borders.radius,
     marginBottom: 16,
     gap: 8,
-    elevation: 4,
-    shadowColor: "#9C27B0",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
+    borderWidth: NEO_THEME.borders.width,
+    borderColor: NEO_THEME.colors.black,
+    shadowColor: NEO_THEME.colors.black,
+    shadowOffset: { width: 4, height: 4 },
+    shadowOpacity: 1,
+    shadowRadius: 0,
+    elevation: 0,
   },
   tryOnButtonText: {
-    color: "#fff",
+    color: NEO_THEME.colors.white,
     fontSize: 16,
-    fontWeight: "bold",
+    fontWeight: "900",
+    fontFamily: NEO_THEME.fonts.black,
+    textTransform: "uppercase",
   },
   thumbnailContainer: {
     gap: 12,
@@ -551,71 +592,82 @@ const styles = StyleSheet.create({
   thumbnailImage: {
     width: 80,
     height: 80,
-    borderRadius: 12,
-    backgroundColor: "#E5E7EB",
+    borderRadius: NEO_THEME.borders.radius,
+    backgroundColor: NEO_THEME.colors.grey,
+    borderWidth: NEO_THEME.borders.width,
+    borderColor: NEO_THEME.colors.black,
   },
   bottomBar: {
     position: "absolute",
     bottom: 0,
     left: 0,
     right: 0,
-    backgroundColor: "#fff",
+    backgroundColor: NEO_THEME.colors.white,
     flexDirection: "row",
     alignItems: "center",
     paddingHorizontal: 20,
     paddingVertical: 16,
     gap: 12,
-    borderTopWidth: 1,
-    borderTopColor: "#E5E7EB",
-    elevation: 10,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: -4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
+    borderTopWidth: NEO_THEME.borders.width,
+    borderTopColor: NEO_THEME.colors.black,
+    shadowColor: NEO_THEME.colors.black,
+    shadowOffset: { width: 0, height: -5 },
+    shadowOpacity: 1,
+    shadowRadius: 0,
+    elevation: 0,
   },
   quantityControl: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#F3F4F6",
-    borderRadius: 12,
+    backgroundColor: NEO_THEME.colors.backgroundLight,
+    borderRadius: NEO_THEME.borders.radius,
     padding: 4,
     gap: 12,
+    borderWidth: NEO_THEME.borders.width,
+    borderColor: NEO_THEME.colors.black,
   },
   quantityButton: {
     width: 36,
     height: 36,
-    borderRadius: 10,
-    backgroundColor: "#9C27B0",
+    borderRadius: NEO_THEME.borders.radius,
+    backgroundColor: NEO_THEME.colors.primary,
     alignItems: "center",
     justifyContent: "center",
+    borderWidth: 2,
+    borderColor: NEO_THEME.colors.black,
   },
   disabledButton: {
-    backgroundColor: "#D1D5DB",
+    backgroundColor: NEO_THEME.colors.grey,
     opacity: 0.6,
   },
   quantityText: {
     fontSize: 18,
-    fontWeight: "bold",
-    color: "#1F2937",
+    fontWeight: "900",
+    color: NEO_THEME.colors.black,
     minWidth: 24,
     textAlign: "center",
+    fontFamily: NEO_THEME.fonts.black,
   },
   buyButton: {
     flex: 1,
-    backgroundColor: "#9C27B0",
+    backgroundColor: NEO_THEME.colors.primary,
     paddingVertical: 16,
-    borderRadius: 12,
+    borderRadius: NEO_THEME.borders.radius,
     alignItems: "center",
     justifyContent: "center",
-    elevation: 4,
-    shadowColor: "#9C27B0",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
+    borderWidth: NEO_THEME.borders.width,
+    borderColor: NEO_THEME.colors.black,
+    shadowColor: NEO_THEME.colors.black,
+    shadowOffset: { width: 4, height: 4 },
+    shadowOpacity: 1,
+    shadowRadius: 0,
+    elevation: 0,
   },
   buyButtonText: {
-    color: "#fff",
+    color: NEO_THEME.colors.white,
     fontSize: 18,
-    fontWeight: "bold",
+    fontWeight: "900",
+    fontFamily: NEO_THEME.fonts.black,
+    textTransform: "uppercase",
   },
 });

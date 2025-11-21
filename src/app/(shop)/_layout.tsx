@@ -6,6 +6,7 @@ import {
 import { ActivityIndicator, StyleSheet, Platform, View } from "react-native";
 import { FontAwesome, MaterialIcons } from "@expo/vector-icons";
 import { useAuth } from "../../providers/auth-provider";
+import { NEO_THEME } from "../../constants/neobrutalism";
 
 const COLORS = {
   primary: "#9C27B0",
@@ -26,7 +27,7 @@ function TabBarIcon(props: {
 }) {
   const { name, color, focused, type = "FontAwesome" } = props;
   const size = focused ? 28 : 24;
-  const iconColor = focused ? COLORS.primary : COLORS.inactive;
+  const iconColor = focused ? NEO_THEME.colors.black : NEO_THEME.colors.grey;
 
   const IconComponent = type === "MaterialIcons" ? MaterialIcons : FontAwesome;
 
@@ -49,25 +50,27 @@ const TabsLayout = () => {
     <SafeAreaView edges={["top"]} style={styles.safeArea}>
       <Tabs
         screenOptions={{
-          tabBarActiveTintColor: COLORS.primary,
-          tabBarInactiveTintColor: COLORS.inactive,
+          tabBarActiveTintColor: NEO_THEME.colors.primary,
+          tabBarInactiveTintColor: NEO_THEME.colors.grey,
           tabBarShowLabel: false,
           tabBarStyle: {
-            backgroundColor: COLORS.background,
-            borderTopLeftRadius: 28,
-            borderTopRightRadius: 28,
+            backgroundColor: NEO_THEME.colors.white,
+            borderTopLeftRadius: 0,
+            borderTopRightRadius: 0,
             paddingTop: 14,
             paddingBottom: Platform.OS === "ios" ? insets.bottom + 14 : 20,
             height: Platform.OS === "ios" ? 74 + insets.bottom : 76,
-            borderTopWidth: 0,
-            elevation: 24,
-            shadowColor: COLORS.shadow,
+            borderTopWidth: NEO_THEME.borders.width,
+            borderTopColor: NEO_THEME.colors.black,
+            // Hard shadow
+            elevation: 0,
+            shadowColor: NEO_THEME.colors.black,
             shadowOffset: {
               width: 0,
-              height: -8,
+              height: -5,
             },
-            shadowOpacity: 0.12,
-            shadowRadius: 16,
+            shadowOpacity: 1,
+            shadowRadius: 0,
             position: "absolute",
           },
           tabBarItemStyle: {
@@ -181,25 +184,27 @@ export default TabsLayout;
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: "#F8F9FA",
+    backgroundColor: NEO_THEME.colors.backgroundLight,
   },
   iconContainer: {
     alignItems: "center",
     justifyContent: "center",
     width: 56,
     height: 40,
-    borderRadius: 16,
+    borderRadius: NEO_THEME.borders.radius,
     position: "relative",
   },
   iconContainerActive: {
-    backgroundColor: COLORS.primaryLight,
+    backgroundColor: NEO_THEME.colors.yellow,
+    borderWidth: NEO_THEME.borders.width,
+    borderColor: NEO_THEME.colors.black,
   },
   activeIndicator: {
     position: "absolute",
     bottom: -2,
     width: 32,
-    height: 3,
-    backgroundColor: COLORS.primary,
-    borderRadius: 2,
+    height: 4,
+    backgroundColor: NEO_THEME.colors.black,
+    borderRadius: NEO_THEME.borders.radius,
   },
 });

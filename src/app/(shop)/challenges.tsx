@@ -4,6 +4,7 @@ import { useChallengeStore } from '../../store/challenge-store';
 import { ChallengeCard } from '../../components/challenge-card';
 import { Challenge } from '../../types/challenge';
 import { useRouter } from 'expo-router';
+import { NEO_THEME } from '../../constants/neobrutalism';
 
 export default function ChallengesScreen() {
   const { challenges, loading, fetchChallenges } = useChallengeStore();
@@ -21,7 +22,7 @@ export default function ChallengesScreen() {
   if (loading && challenges.length === 0) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#9C27B0" />
+        <ActivityIndicator size="large" color={NEO_THEME.colors.primary} />
       </View>
     );
   }
@@ -29,8 +30,8 @@ export default function ChallengesScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>Challenges</Text>
-        <Text style={styles.headerSubtitle}>Create content, win rewards</Text>
+        <Text style={styles.headerTitle}>CHALLENGES</Text>
+        <Text style={styles.headerSubtitle}>CREATE CONTENT, WIN REWARDS</Text>
       </View>
       
       <FlatList
@@ -51,7 +52,7 @@ export default function ChallengesScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: NEO_THEME.colors.backgroundLight,
   },
   loadingContainer: {
     flex: 1,
@@ -60,19 +61,30 @@ const styles = StyleSheet.create({
   },
   header: {
     paddingHorizontal: 20,
-    paddingVertical: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
+    paddingVertical: 20,
+    backgroundColor: NEO_THEME.colors.white,
+    borderBottomWidth: NEO_THEME.borders.width,
+    borderBottomColor: NEO_THEME.colors.black,
+    shadowColor: NEO_THEME.colors.black,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 1,
+    shadowRadius: 0,
+    elevation: 0,
   },
   headerTitle: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: '#1A1A1A',
+    fontSize: 32,
+    fontWeight: '900',
+    color: NEO_THEME.colors.black,
+    fontFamily: NEO_THEME.fonts.black,
+    textTransform: 'uppercase',
   },
   headerSubtitle: {
     fontSize: 14,
-    color: '#666',
+    color: NEO_THEME.colors.grey,
     marginTop: 4,
+    fontWeight: '700',
+    fontFamily: NEO_THEME.fonts.bold,
+    textTransform: 'uppercase',
   },
   listContent: {
     padding: 20,

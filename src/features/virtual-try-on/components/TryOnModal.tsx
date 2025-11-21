@@ -12,6 +12,7 @@ import {
 import ProductSelector from "./ProductSelector";
 import ImagePickerComponent from "./ImagePicker";
 import ResultOverlay from "./ResultOverlay";
+import { NEO_THEME } from "../../../constants/neobrutalism";
 // Use cross-fetch to avoid whatwg-fetch issues
 import fetch from "cross-fetch";
 
@@ -232,8 +233,8 @@ export default function TryOnModal({
     <Modal visible={visible} animationType="slide" onRequestClose={handleClose}>
       <View style={styles.container}>
         <View style={styles.header}>
-          <Text style={styles.title}>Virtual Try-On</Text>
-          <TouchableOpacity onPress={handleClose}>
+          <Text style={styles.title}>VIRTUAL TRY-ON</Text>
+          <TouchableOpacity onPress={handleClose} style={styles.closeButtonContainer}>
             <Text style={styles.closeButton}>✕</Text>
           </TouchableOpacity>
         </View>
@@ -244,10 +245,11 @@ export default function TryOnModal({
   );
 }
 
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f8f9fa",
+    backgroundColor: NEO_THEME.colors.backgroundLight,
   },
   header: {
     flexDirection: "row",
@@ -255,23 +257,40 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingHorizontal: 20,
     paddingVertical: 16,
-    backgroundColor: "#fff",
-    borderBottomWidth: 1,
-    borderBottomColor: "#e0e0e0",
-    elevation: 2,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
+    backgroundColor: NEO_THEME.colors.white,
+    borderBottomWidth: NEO_THEME.borders.width,
+    borderBottomColor: NEO_THEME.colors.black,
+    shadowColor: NEO_THEME.colors.black,
+    shadowOffset: { width: 0, height: 5 },
+    shadowOpacity: 1,
+    shadowRadius: 0,
+    elevation: 0,
   },
   title: {
     fontSize: 22,
-    fontWeight: "bold",
-    color: "#333",
+    fontWeight: "900",
+    color: NEO_THEME.colors.black,
+    fontFamily: NEO_THEME.fonts.black,
+    textTransform: "uppercase",
+  },
+  closeButtonContainer: {
+    width: 40,
+    height: 40,
+    backgroundColor: NEO_THEME.colors.yellow,
+    borderRadius: NEO_THEME.borders.radius,
+    borderWidth: NEO_THEME.borders.width,
+    borderColor: NEO_THEME.colors.black,
+    alignItems: "center",
+    justifyContent: "center",
+    shadowColor: NEO_THEME.colors.black,
+    shadowOffset: { width: 3, height: 3 },
+    shadowOpacity: 1,
+    shadowRadius: 0,
+    elevation: 0,
   },
   closeButton: {
-    fontSize: 28,
-    color: "#666",
-    paddingHorizontal: 8,
+    fontSize: 24,
+    color: NEO_THEME.colors.black,
+    fontWeight: "900",
   },
 });

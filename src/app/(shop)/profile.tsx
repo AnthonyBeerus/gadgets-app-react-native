@@ -10,16 +10,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { MaterialIcons, FontAwesome } from "@expo/vector-icons";
 import { useAuth } from "../../providers/auth-provider";
 import { supabase } from "../../lib/supabase";
-
-const COLORS = {
-  primary: "#9C27B0",
-  background: "#F8F9FA",
-  white: "#FFFFFF",
-  text: "#1D1D1F",
-  textSecondary: "#8E8E93",
-  border: "#E5E5E7",
-  red: "#FF3B30",
-};
+import { NEO_THEME } from "../../constants/neobrutalism";
 
 const ProfileOption = ({
   icon,
@@ -43,7 +34,7 @@ const ProfileOption = ({
     <TouchableOpacity style={styles.optionItem} onPress={onPress}>
       <View style={styles.optionLeft}>
         <View style={styles.iconContainer}>
-          <IconComponent name={icon as any} size={20} color={COLORS.primary} />
+          <IconComponent name={icon as any} size={20} color={NEO_THEME.colors.white} />
         </View>
         <View style={styles.optionText}>
           <Text style={styles.optionTitle}>{title}</Text>
@@ -54,7 +45,7 @@ const ProfileOption = ({
         <MaterialIcons
           name="chevron-right"
           size={24}
-          color={COLORS.textSecondary}
+          color={NEO_THEME.colors.black}
         />
       )}
     </TouchableOpacity>
@@ -96,23 +87,23 @@ const Profile = () => {
 
         {/* Account Section */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Account</Text>
+          <Text style={styles.sectionTitle}>ACCOUNT</Text>
           <View style={styles.optionsContainer}>
             <ProfileOption
               icon="person"
-              title="Edit Profile"
+              title="EDIT PROFILE"
               subtitle="Update your personal information"
               onPress={() => {}}
             />
             <ProfileOption
               icon="notifications"
-              title="Notifications"
+              title="NOTIFICATIONS"
               subtitle="Manage your notification preferences"
               onPress={() => {}}
             />
             <ProfileOption
               icon="security"
-              title="Privacy & Security"
+              title="PRIVACY & SECURITY"
               subtitle="Password, two-factor authentication"
               onPress={() => {}}
             />
@@ -121,23 +112,23 @@ const Profile = () => {
 
         {/* Shopping Section */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Shopping</Text>
+          <Text style={styles.sectionTitle}>SHOPPING</Text>
           <View style={styles.optionsContainer}>
             <ProfileOption
               icon="favorite"
-              title="Wishlist"
+              title="WISHLIST"
               subtitle="Items you want to buy later"
               onPress={() => {}}
             />
             <ProfileOption
               icon="location-on"
-              title="Addresses"
+              title="ADDRESSES"
               subtitle="Manage your delivery addresses"
               onPress={() => {}}
             />
             <ProfileOption
               icon="payment"
-              title="Payment Methods"
+              title="PAYMENT METHODS"
               subtitle="Credit cards, PayPal, and more"
               onPress={() => {}}
             />
@@ -146,23 +137,23 @@ const Profile = () => {
 
         {/* Support Section */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Support</Text>
+          <Text style={styles.sectionTitle}>SUPPORT</Text>
           <View style={styles.optionsContainer}>
             <ProfileOption
               icon="help"
-              title="Help Center"
+              title="HELP CENTER"
               subtitle="Get help and support"
               onPress={() => {}}
             />
             <ProfileOption
               icon="feedback"
-              title="Send Feedback"
+              title="SEND FEEDBACK"
               subtitle="Tell us how we can improve"
               onPress={() => {}}
             />
             <ProfileOption
               icon="info"
-              title="About"
+              title="ABOUT"
               subtitle="App version and legal information"
               onPress={() => {}}
             />
@@ -174,7 +165,7 @@ const Profile = () => {
           <View style={styles.optionsContainer}>
             <ProfileOption
               icon="logout"
-              title="Sign Out"
+              title="SIGN OUT"
               onPress={handleSignOut}
               showArrow={false}
             />
@@ -190,16 +181,24 @@ const Profile = () => {
 
 export default Profile;
 
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.background,
+    backgroundColor: NEO_THEME.colors.backgroundLight,
   },
   header: {
-    backgroundColor: COLORS.white,
+    backgroundColor: NEO_THEME.colors.white,
     paddingHorizontal: 20,
     paddingVertical: 24,
     marginBottom: 20,
+    borderBottomWidth: NEO_THEME.borders.width,
+    borderBottomColor: NEO_THEME.colors.black,
+    shadowColor: NEO_THEME.colors.black,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 1,
+    shadowRadius: 0,
+    elevation: 0,
   },
   profileInfo: {
     flexDirection: "row",
@@ -208,50 +207,71 @@ const styles = StyleSheet.create({
   avatar: {
     width: 80,
     height: 80,
-    borderRadius: 40,
+    borderRadius: NEO_THEME.borders.radius,
     marginRight: 16,
+    borderWidth: NEO_THEME.borders.width,
+    borderColor: NEO_THEME.colors.black,
   },
   userInfo: {
     flex: 1,
   },
   userName: {
     fontSize: 24,
-    fontWeight: "700",
-    color: COLORS.text,
+    fontWeight: "900",
+    color: NEO_THEME.colors.black,
     marginBottom: 4,
+    fontFamily: NEO_THEME.fonts.black,
+    textTransform: "uppercase",
   },
   userEmail: {
     fontSize: 16,
-    color: COLORS.textSecondary,
+    color: NEO_THEME.colors.grey,
     marginBottom: 8,
   },
   userTypeBadge: {
-    backgroundColor: COLORS.primary,
+    backgroundColor: NEO_THEME.colors.yellow,
     paddingHorizontal: 12,
-    paddingVertical: 4,
-    borderRadius: 12,
+    paddingVertical: 6,
+    borderRadius: NEO_THEME.borders.radius,
     alignSelf: "flex-start",
+    borderWidth: 2,
+    borderColor: NEO_THEME.colors.black,
+    shadowColor: NEO_THEME.colors.black,
+    shadowOffset: { width: 2, height: 2 },
+    shadowOpacity: 1,
+    shadowRadius: 0,
   },
   userTypeText: {
-    color: COLORS.white,
+    color: NEO_THEME.colors.black,
     fontSize: 12,
-    fontWeight: "600",
+    fontWeight: "900",
+    fontFamily: NEO_THEME.fonts.black,
+    textTransform: "uppercase",
   },
   section: {
     marginBottom: 20,
   },
   sectionTitle: {
     fontSize: 18,
-    fontWeight: "600",
-    color: COLORS.text,
+    fontWeight: "900",
+    color: NEO_THEME.colors.black,
     marginHorizontal: 20,
     marginBottom: 12,
+    fontFamily: NEO_THEME.fonts.black,
+    textTransform: "uppercase",
   },
   optionsContainer: {
-    backgroundColor: COLORS.white,
+    backgroundColor: NEO_THEME.colors.white,
     marginHorizontal: 20,
-    borderRadius: 16,
+    borderRadius: NEO_THEME.borders.radius,
     overflow: "hidden",
+    borderWidth: NEO_THEME.borders.width,
+    borderColor: NEO_THEME.colors.black,
+    shadowColor: NEO_THEME.colors.black,
+    shadowOffset: { width: 4, height: 4 },
+    shadowOpacity: 1,
+    shadowRadius: 0,
+    elevation: 0,
   },
   optionItem: {
     flexDirection: "row",
@@ -259,8 +279,8 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     paddingHorizontal: 16,
     paddingVertical: 16,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: COLORS.border,
+    borderBottomWidth: 2,
+    borderBottomColor: NEO_THEME.colors.black,
   },
   optionLeft: {
     flexDirection: "row",
@@ -270,26 +290,31 @@ const styles = StyleSheet.create({
   iconContainer: {
     width: 40,
     height: 40,
-    borderRadius: 20,
-    backgroundColor: `${COLORS.primary}15`,
+    borderRadius: NEO_THEME.borders.radius,
+    backgroundColor: NEO_THEME.colors.primary,
     alignItems: "center",
     justifyContent: "center",
     marginRight: 12,
+    borderWidth: 2,
+    borderColor: NEO_THEME.colors.black,
   },
   optionText: {
     flex: 1,
   },
   optionTitle: {
     fontSize: 16,
-    fontWeight: "500",
-    color: COLORS.text,
+    fontWeight: "900",
+    color: NEO_THEME.colors.black,
     marginBottom: 2,
+    fontFamily: NEO_THEME.fonts.black,
   },
   optionSubtitle: {
     fontSize: 14,
-    color: COLORS.textSecondary,
+    color: NEO_THEME.colors.grey,
+    fontWeight: "700",
+    fontFamily: NEO_THEME.fonts.bold,
   },
   bottomSpacing: {
-    height: 100, // Extra space for bottom tab bar
+    height: 100,
   },
 });
