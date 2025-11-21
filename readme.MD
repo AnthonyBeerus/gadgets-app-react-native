@@ -1,53 +1,80 @@
-# Ultimate Gadgets Mobile App
+# Ultimate Gadgets Mobile App (rn-shop)
 
-Welcome to the Ultimate Gadgets Mobile App! This React Native application, built with Expo, Zustand, and Supabase, is a complete gadgets-selling platform. This README will guide you through setting up the mobile application, running it locally, and understanding its structure.
+Welcome to the Ultimate Gadgets Mobile App! This is a comprehensive, multi-mall e-commerce platform built with React Native, Expo, and Supabase. It goes beyond simple shopping by offering a multi-location experience, AI-powered virtual try-on, service bookings, and event ticketing.
 
-## Prerequisites
+## 🚀 Key Features
 
-Before you begin, ensure you have the following installed:
+### 🏢 Multi-Mall Experience
+- **Multiple Locations**: Switch between different shopping environments like "Molapo Crossing" (Physical Mall) and "Indie Marketplace" (Online Sellers).
+- **Context-Aware**: The entire app experience (shops, products, services) adapts to the selected location.
 
-- Node.js (v14 or later)
-- npm (latest version)
-- Expo CLI
-- Git
+### 🛍️ Advanced Shopping
+- **Shop Discovery**: Browse shops with advanced filtering (Categories, Features like Delivery/Collection).
+- **Premium Search**: Find products and brands instantly.
+- **Interactive Feed**: TikTok-style product discovery feed with social interactions (Like, Save, AI Help).
 
-## Getting Started
+### 🤖 AI & Innovation
+- **Virtual Try-On**: Visualize products on yourself using **Google Gemini AI** (via Vercel AI SDK).
+- **AI Assistance**: Smart help for product queries.
 
-Follow these steps to set up and run the mobile application:
+### 📅 Services & Events
+- **Service Booking**: Book appointments for services (Tech Support, Beauty, etc.) directly with shops.
+- **Event Ticketing**: Discover and buy tickets for events hosted at the malls.
 
-1. **Clone the Repository:**
+### 💳 E-Commerce Essentials
+- **Secure Payments**: Integrated Stripe checkout.
+- **Order Management**: Track orders and view history.
+- **Cart System**: Robust cart with inventory management.
 
-   ```bash
-   git clone https://github.com/laribright/gadgets-app-react-native.git
-   cd gadgets-app-react-native
-   ```
+## 🛠️ Tech Stack
 
-2. **Install Dependencies:**
+- **Framework**: React Native (Expo Managed Workflow)
+- **Navigation**: Expo Router (File-based routing)
+- **State Management**: Zustand (Client state) & TanStack Query (Server state)
+- **Backend**: Supabase (PostgreSQL, Auth, Realtime)
+- **AI**: Vercel AI SDK + Google Gemini
+- **Payments**: Stripe React Native SDK
 
-   ```bash
-   npm install
-   ```
+## 📂 Project Structure
 
-3. **Set Up Environment Variables:**
+- **`src/app`**: Navigation routes (Expo Router). Main flow in `(shop)`.
+- **`src/features`**: Complex feature logic (e.g., `virtual-try-on`, `appointments`).
+- **`src/components`**: Reusable UI components.
+- **`src/store`**: Global state stores (Zustand).
+- **`src/api`**: Data fetching logic (Supabase & React Query).
+- **`src/providers`**: Context providers (Auth, Toast, Stripe).
 
-   - Rename the `.env.example` file to `.env.local` and fill in the required environment variables.
+## 🏁 Getting Started
 
-   ```bash
-   mv .env.example .env.local
-   ```
+1.  **Clone the Repository:**
+    ```bash
+    git clone https://github.com/laribright/gadgets-app-react-native.git
+    cd gadgets-app-react-native
+    ```
 
-4. **Run the Development Server:**
+2.  **Install Dependencies:**
+    ```bash
+    npm install
+    ```
 
-   ```bash
-   npm start (choose your preferred emulator)
-   ```
+3.  **Set Up Environment Variables:**
+    - Rename `.env.example` to `.env.local` and fill in the required keys:
+        - `EXPO_PUBLIC_SUPABASE_URL`
+        - `EXPO_PUBLIC_SUPABASE_ANON_KEY`
+        - `EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY`
+        - `GEMINI_API_KEY` (for Virtual Try-On)
 
-   Your app should now be running on your emulator.
+4.  **Run the Development Server:**
+    ```bash
+    npm start
+    ```
 
-### Environment Variables
+## 📚 Documentation
 
-Make sure to properly configure your environment variables by referring to the `.env.example` file. This file contains example values and instructions on what needs to be filled in.
+- [Virtual Try-On Implementation](VIRTUAL_TRYON_EXPLANATION.md)
+- [Malls Feature Guide](MALLS_IMPLEMENTATION.md)
+- [Vercel AI SDK Integration](REFACTORED_TO_VERCEL_AI_SDK.md)
 
-## Course Video
+## 🎥 Course Video
 
 Watch the full course on YouTube: [Fullstack Gadgets App: React Native Expo & NextJs Admin](https://youtu.be/26opRFPU0a8)

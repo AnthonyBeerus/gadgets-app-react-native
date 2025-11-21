@@ -2,174 +2,71 @@
 
 ## Project Overview
 
-This is a comprehensive React Native shopping mall app built with Expo, featuring file-based routing, Supabase backend, Stripe payments, and Zustand state management. The app integrates four main business models:
+This is a comprehensive, multi-mall e-commerce platform built with React Native (Expo), Supabase, and Vercel AI SDK. It goes beyond standard e-commerce by integrating:
 
-1. **E-commerce** - Gadget sales with cart management and order processing
-2. **Services Marketplace** - Appointment-based services (hair, beauty, tech support)
-3. **Event Ticketing** - Venue-based events with ticket sales
-4. **Mall Directory** - Individual shop listings with their own products and features
-
-This multi-modal architecture requires understanding cross-domain data flows and shared UI patterns.
+1.  **Multi-Mall Architecture**: Support for multiple shopping locations (Physical Malls vs. Online Marketplaces).
+2.  **AI-Powered Features**: Virtual Try-On using Google Gemini via Vercel AI SDK.
+3.  **Interactive Feed**: TikTok-style product discovery with social interactions.
+4.  **Service & Event Booking**: Integrated scheduling and ticketing systems.
 
 ## Architecture & Key Patterns
 
 ### File-Based Routing (Expo Router)
 
-- Main entry point: `src/app/_layout.tsx` (not `App.tsx` which is unused)
-- Route structure:
-  - `src/app/(shop)/` - Main tab navigation (index, services, events, profile, orders)
-  - `src/app/categories/` - Product categories
-  - `src/app/product/` - Individual product details
-  - `src/app/shop/` - Individual mall shop details
-- Use `Link` from `expo-router` for navigation, not React Navigation components
-- Route groups in parentheses like `(shop)` don't appear in URL paths
-- Dynamic routes use `[slug].tsx` or `[id].tsx` pattern
+-   **Entry Point**: `src/app/_layout.tsx` (Root layout with providers).
+-   **Main Flow**: `src/app/(shop)/` - Tab navigation (Shop, Services, Events, Orders, Profile).
+-   **Feature Routes**:
+    -   `src/app/mall-selector.tsx` - Modal for switching malls.
+    -   `src/app/virtual-try-on/` - AI feature routes.
+    -   `src/app/shop/[id].tsx` - Shop details.
+-   **Navigation**: Use `Link` from `expo-router` or `router.push()`.
 
-### Provider Architecture Stack
+### State Management
 
-Critical provider order in `src/app/_layout.tsx`:
+-   **Client State (Zustand)**:
+    -   `shop-store.ts`: Shops, categories, mall selection, filters.
+    -   `cart-store.ts`: Shopping cart logic.
+    -   `booking-store.ts`: Service appointment state.
+-   **Server State (TanStack Query)**:
+    -   Used for data fetching in `src/api/`.
+    -   Keys should be consistent (e.g., `['shops', mallId]`).
 
-```tsx
-ToastProvider >
-  AuthProvider >
-  QueryProvider >
-  StripeProvider >
-  NotificationProvider >
-  Stack;
-```
+### AI Integration (Virtual Try-On)
 
-Never modify this order - it ensures proper initialization dependencies.
+-   **SDK**: Vercel AI SDK (`ai`, `@ai-sdk/google`).
+-   **Pattern**:
+    -   UI: `src/features/virtual-try-on/components/TryOnModal.tsx`
+    -   API: `src/app/virtual-try-on+api.ts` (Expo API Route).
+    -   Model: Gemini 2.5 Flash Image Preview (`responseModalities: ['IMAGE']`).
 
-### State Management Patterns
+### Database & Backend (Supabase)
 
-- **Global state**: Zustand store in `src/store/cart-store.ts`
-- **Server state**: TanStack Query in `src/api/api.ts`
-- **Auth state**: Context provider in `src/providers/auth-provider.tsx`
-- Pattern: Use Zustand for client state, React Query for server data
+-   **Types**: Use `Tables<'table_name'>` from `src/types/database.types.ts`.
+-   **Malls**: `malls` table links to `shops`. All queries should respect the currently selected `mall_id`.
+-   **Realtime**: Use Supabase channels for live updates (e.g., order status).
 
-### Supabase Integration
+## Coding Standards
 
-- Custom encrypted storage: `src/lib/supabase.ts` uses AES encryption for large tokens via `LargeSecureStore` class
-- Database types: Auto-generated in `src/types/database.types.ts` from Supabase schema
-- Pattern: Always use `Tables<'table_name'>` type for database entities
-- Real-time subscriptions: Use Supabase channels for live updates (see `src/api/subscriptions.ts`)
-- API calls in `src/api/api.ts` follow React Query patterns with proper error handling
+### Component Structure
+-   **Functional Components**: Use TypeScript interfaces for props.
+-   **Styling**: `StyleSheet.create()` at the bottom. Use consistent colors from a constants file if available, or standard hex codes matching the design system (Primary: `#9C27B0`).
+-   **Imports**: Group imports: React/RN -> External Libs -> Internal Components -> Stores/Hooks.
 
-## Development Workflows
+### Data Fetching
+-   **Shops**: `useShopStore` handles fetching and filtering of shops.
+-   **Products**: Fetch products based on `shop_id`.
+-   **Optimistic Updates**: Use `onMutate` in React Query mutations for immediate UI feedback.
 
-### Environment Setup
+### Critical Flows
+1.  **Mall Selection**: Changing a mall updates the global `selectedMall` in `shop-store.ts` and refreshes the shop list.
+2.  **Checkout**: Stripe payment flow handled in `cart.tsx` and server-side functions.
+3.  **Virtual Try-On**:
+    -   User uploads photo -> Selects product -> API call to Gemini -> Returns generated image.
+    -   **Note**: This uses a server-side API route to keep keys secure.
 
-1. Copy `.env.example` to `.env.local` (not `.env`)
-2. Required vars: `EXPO_PUBLIC_SUPABASE_URL`, `EXPO_PUBLIC_SUPABASE_ANON_KEY`, `EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY`
-3. Run: `npm start` (not `expo start` directly)
+## Common Pitfalls to Avoid
+-   **Do NOT** use `App.tsx`. The entry is `src/app/_layout.tsx`.
+-   **Do NOT** use `react-navigation` directly; use `expo-router`.
+-   **Environment Variables**: Must be prefixed with `EXPO_PUBLIC_` for client-side access (except `GEMINI_API_KEY` which is server-only).
+-   **Mall Context**: Always check if a feature needs to be filtered by the selected mall.
 
-### Build & Deploy
-
-- Development: `npm run android/ios` for emulators
-- EAS builds configured in `eas.json` with development/preview/production profiles
-- Uses `expo-router/entry` as main entry point in `package.json`
-- Environment variables must have `EXPO_PUBLIC_` prefix for client access
-
-## Code Conventions
-
-### Component Patterns
-
-- Functional components with TypeScript interfaces
-- Props destructuring: `{ product }: { product: Tables<'product'> }`
-- Styling: StyleSheet.create() at component bottom
-- File naming: kebab-case for components (`product-list-item.tsx`)
-- Navigation: Use `Link` from `expo-router` with `asChild` prop for custom components
-
-### API Integration
-
-- **React Query hooks** in `src/api/api.ts`: `const { data, error, isLoading } = getProductsAndCategories()`
-- **Async functions** in `src/api/shops.ts`: Direct Supabase calls for shop-specific operations
-- Multi-domain queries: Services (`getServiceCategories`, `getServicesByCategory`), Events (`getEvents`, `getEventsByCategory`), Shops (`getShops`, `getShopsByCategory`)
-- Always handle loading/error states in components
-- Mutations use `useMutation` with proper invalidation: `queryClient.invalidateQueries({ queryKey: ["orders"] })`
-- Service bookings: `createServiceBooking()` mutation
-- Event tickets: `createTicketPurchase()` mutation
-- Real-time updates: Use `supabase.channel()` for live data subscriptions
-
-### Cart Management
-
-- Global cart state via `useCartStore()` hook
-- Cart items include `maxQuantity` constraint checking
-- Price calculations return formatted strings (e.g., `"$29.99"`)
-- Cart operations: `addItem`, `removeItem`, `incrementItem`, `decrementItem`
-- Quantity validation: `Math.min(quantity, maxQuantity)` to respect inventory limits
-
-### TypeScript Patterns
-
-- Database types from Supabase in `src/types/database.types.ts`
-- Asset types in `assets/types/` for static data structures
-- Use `Tables<'table_name'>` for Supabase entity types
-- Strict null checking - handle undefined/null explicitly
-- Extended types: `ProductWithShop = Tables<'product'> & { shops?: {...} }`
-
-## Critical Integration Points
-
-### Authentication Flow
-
-- Supabase auth with custom encrypted session storage (`LargeSecureStore`)
-- Session management in `AuthProvider` with mounting state
-- Protected routes check session state, redirect to `/auth`
-- User profile data fetched separately from auth session
-
-### Payment Processing
-
-- Stripe integration in checkout flow
-- Stripe functions in `supabase/functions/stripe-checkout/`
-- Payment methods handled server-side, not in React Native app
-- Customer IDs stored in user profiles (`stripe_customer_id`)
-
-### Notifications
-
-- Expo notifications with device token storage
-- Notification provider wraps app for push notification handling
-- Tokens stored in Supabase user profiles (`expo_notification_token`)
-
-### Service Booking System
-
-- Service categories, providers, and bookings managed in Supabase
-- Booking flow: Select service → Choose provider → Pick date/time → Confirm
-- Modal components: `BookingModal` for service appointments
-- API pattern: `createServiceBooking()` returns mutation for appointment creation
-- Database tables: `service`, `service_category`, `service_provider`, `service_booking`
-
-### Event Ticketing System
-
-- Events linked to venues with capacity management
-- Categories: Music, Comedy, Art, Business, Culture, Film
-- Ticket purchasing flow with quantity selection and payment
-- Components: `EventBookingModal` for ticket purchases
-- API pattern: `createTicketPurchase()` for ticket sales
-- Database tables: `events`, `event_venue`, `ticket_purchases`
-
-### Mall Shop Directory
-
-- Individual shops with their own products and features
-- Shop-specific APIs in `src/api/shops.ts` separate from main product APIs
-- Features per shop: delivery, collection, appointments, virtual try-on
-- Route: `/shop/[id]` for individual shop details with product listings
-- Database tables: `shops`, `shop_reviews`, enhanced `product` table with `shop_id`
-
-## File Structure Guidelines
-
-- Components: `src/components/` - reusable UI components
-- Screens: `src/app/` - file-based routes (Expo Router)
-- Logic: `src/api/` for data fetching, `src/store/` for state
-- Utils: `src/utils/` for helper functions
-- Assets: Local images in `assets/images/`, types in `assets/types/`
-- Providers: `src/providers/` for React context providers
-- Lib: `src/lib/` for external service configurations
-
-## Common Pitfalls
-
-- Don't use `App.tsx` - routing starts from `src/app/_layout.tsx`
-- Environment variables must have `EXPO_PUBLIC_` prefix for client access
-- Use `Tables<'table_name'>` not manual type definitions for Supabase data
-- Cart quantity changes must respect `maxQuantity` constraints
-- Always wrap async operations in try/catch with proper error handling
-- Shop APIs use direct async functions, not React Query hooks
-- Real-time subscriptions require proper cleanup in useEffect return functions
