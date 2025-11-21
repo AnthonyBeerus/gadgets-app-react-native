@@ -155,6 +155,22 @@ const TabsLayout = () => {
             },
           }}
         />
+        <Tabs.Screen
+          name="challenges"
+          options={{
+            title: "Challenges",
+            tabBarIcon({ focused }) {
+              return (
+                <TabBarIcon
+                  name="trophy"
+                  type="FontAwesome"
+                  focused={focused}
+                  color={""}
+                />
+              );
+            },
+          }}
+        />
       </Tabs>
     </SafeAreaView>
   );

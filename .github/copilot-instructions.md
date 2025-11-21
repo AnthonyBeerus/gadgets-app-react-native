@@ -1,4 +1,4 @@
-# Copilot Instructions for Ultimate Gadgets Mobile App
+# Copilot Instructions for Project Muse
 
 ## Project Overview
 

@@ -1,8 +1,13 @@
-# Ultimate Gadgets Mobile App (rn-shop)
+# Project Muse (formerly Ultimate Gadgets Mobile App)
 
 Welcome to the Ultimate Gadgets Mobile App! This is a comprehensive, multi-mall e-commerce platform built with React Native, Expo, and Supabase. It goes beyond simple shopping by offering a multi-location experience, AI-powered virtual try-on, service bookings, and event ticketing.
 
 ## 🚀 Key Features
+
+### 🏆 Challenges & UGC
+- **Brand Challenges**: Participate in challenges set by businesses to create content.
+- **User Generated Content**: Create and submit content to fulfill brand needs.
+- **Rewards**: Earn recognition and rewards for winning submissions.
 
 ### 🏢 Multi-Mall Experience
 - **Multiple Locations**: Switch between different shopping environments like "Molapo Crossing" (Physical Mall) and "Indie Marketplace" (Online Sellers).
