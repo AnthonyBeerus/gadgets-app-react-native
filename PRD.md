@@ -32,13 +32,15 @@ Two marketplace contexts:
 Booking interface for in-mall and creative services.
 
 **Current Status**:
+* ✅ **Migrated to FDD**: `src/features/services/`.
+* ✅ **Neobrutalist Design**: Applied to all screens and modals.
+* ✅ **Routing**: Modals render correctly over tab bar.
 * ✅ `service`, `service_provider`, `service_booking` tables exist.
 * ✅ `appointments` table exists for legacy support.
-* ✅ Booking modal UI implemented.
 
 **Required Functionality**:
 * Service listing & details (Implemented).
-* Time-slot booking (Implemented).
+* Time-slot booking (Implemented via Neobrutalist Modal).
 * Provider profiles (Implemented).
 
 ---
@@ -63,6 +65,8 @@ Platform for discovering and purchasing tickets.
 Tracking system for all purchases and bookings.
 
 **Current Status**:
+* ✅ **Migrated to FDD**: `src/features/orders/`.
+* ✅ **Neobrutalist Design**: Applied to Order Details screen.
 * ✅ `order`, `order_item`, `delivery_orders` tables exist.
 * ✅ Orders tab exists.
 
