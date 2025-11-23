@@ -43,7 +43,10 @@ Welcome to the Ultimate Gadgets Mobile App! This is a comprehensive, multi-mall 
 ## 📂 Project Structure
 
 - **`src/app`**: Navigation routes (Expo Router). Main flow in `(shop)`.
-- **`src/features`**: Complex feature logic (e.g., `virtual-try-on`, `appointments`).
+- **`src/features`**: Complex feature logic.
+  - `challenges`, `events`, `profile`, `services`, `orders`
+  - `product`, `shop-details`, `cart`, `location-selector`
+  - `virtual-try-on`, `appointments`
 - **`src/components`**: Reusable UI components.
 - **`src/store`**: Global state stores (Zustand).
 - **`src/api`**: Data fetching logic (Supabase & React Query).

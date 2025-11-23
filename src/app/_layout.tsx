@@ -53,6 +53,12 @@ export default function RootLayout() {
                       title: "Appointments",
                     }}
                   />
+                  <Stack.Screen
+                    name="services"
+                    options={{
+                      headerShown: false,
+                    }}
+                  />
                   <Stack.Screen name="auth" options={{ headerShown: false }} />
                 </Stack>
               </NotificationProvider>
