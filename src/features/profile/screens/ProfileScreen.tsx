@@ -10,6 +10,7 @@ import { supabase } from "../../../shared/lib/supabase";
 import { NEO_THEME } from "../../../shared/constants/neobrutalism";
 import { ProfileOption } from "../components/ProfileOption";
 import { AnimatedHeaderLayout } from "../../../shared/components/layout/AnimatedHeaderLayout";
+import { router } from "expo-router";
 
 const ProfileScreen = () => {
   const { user } = useAuth();
@@ -80,6 +81,12 @@ const ProfileScreen = () => {
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>SHOPPING</Text>
         <View style={styles.optionsContainer}>
+          <ProfileOption
+            icon="receipt-long"
+            title="MY ORDERS"
+            subtitle="Track your purchases"
+            onPress={() => router.push("/orders")}
+          />
           <ProfileOption
             icon="favorite"
             title="WISHLIST"
