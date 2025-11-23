@@ -127,22 +127,7 @@ const TabsLayout = () => {
             },
           }}
         />
-        <Tabs.Screen
-          name="orders"
-          options={{
-            title: "Orders",
-            tabBarIcon({ focused }) {
-              return (
-                <TabBarIcon
-                  name="receipt-long"
-                  type="MaterialIcons"
-                  focused={focused}
-                  color={""}
-                />
-              );
-            },
-          }}
-        />
+        
         <Tabs.Screen
           name="challenges"
           options={{
@@ -152,6 +137,22 @@ const TabsLayout = () => {
                 <TabBarIcon
                   name="trophy"
                   type="FontAwesome"
+                  focused={focused}
+                  color={""}
+                />
+              );
+            },
+          }}
+        />
+        <Tabs.Screen
+          name="orders"
+          options={{
+            title: "Orders",
+            tabBarIcon({ focused }) {
+              return (
+                <TabBarIcon
+                  name="receipt-long"
+                  type="MaterialIcons"
                   focused={focused}
                   color={""}
                 />
