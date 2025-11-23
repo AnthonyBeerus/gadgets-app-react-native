@@ -259,6 +259,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginBottom: 8,
     gap: 8,
+    flexWrap: "wrap",
+    marginRight: 8,
   },
   mallName: {
     fontSize: 18,
@@ -277,10 +279,6 @@ const styles = StyleSheet.create({
     gap: 4,
     borderWidth: 2,
     borderColor: NEO_THEME.colors.black,
-    shadowColor: NEO_THEME.colors.black,
-    shadowOffset: { width: 2, height: 2 },
-    shadowOpacity: 1,
-    shadowRadius: 0,
   },
   featuredText: {
     fontSize: 11,

@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
-import { View, Text, StyleSheet, FlatList, ActivityIndicator, SafeAreaView } from 'react-native';
+import { View, Text, StyleSheet, FlatList, ActivityIndicator } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useChallengeStore } from '../../store/challenge-store';
 import { ChallengeCard } from '../../components/challenge-card';
 import { Challenge } from '../../types/challenge';

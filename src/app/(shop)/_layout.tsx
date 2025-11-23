@@ -59,6 +59,7 @@ const TabsLayout = () => {
             borderTopRightRadius: 0,
             paddingTop: 14,
             paddingBottom: Platform.OS === "ios" ? insets.bottom + 14 : 20,
+            paddingHorizontal: Math.max(insets.left, insets.right, 8),
             height: Platform.OS === "ios" ? 74 + insets.bottom : 76,
             borderTopWidth: NEO_THEME.borders.width,
             borderTopColor: NEO_THEME.colors.black,

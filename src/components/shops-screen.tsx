@@ -74,7 +74,7 @@ export default function ShopsScreen() {
       <View style={styles.header}>
         {/* Mall Selector Button */}
         <TouchableOpacity onPress={() => router.push("/mall-selector")} activeOpacity={0.8}>
-          <NeoView style={styles.mallSelector} shadowOffset={3}>
+          <NeoView style={styles.mallSelector} shadowOffset={3} containerStyle={{ alignSelf: 'stretch' }}>
             <Text style={styles.mallSelectorText}>
               {selectedMallData?.name?.toUpperCase() || "MALL OF METROPOLIS"}
             </Text>
@@ -180,6 +180,7 @@ const styles = StyleSheet.create({
     gap: 16,
   },
   mallSelector: {
+    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     gap: 12,
