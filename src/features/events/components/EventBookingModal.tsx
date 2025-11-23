@@ -12,7 +12,7 @@ import {
 } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 import DateTimePicker from "@react-native-community/datetimepicker";
-import { createEventBooking } from "../shared/api/api";
+import { createEventBooking } from "../../../shared/api/api";
 
 const COLORS = {
   primary: "#1BC464",
