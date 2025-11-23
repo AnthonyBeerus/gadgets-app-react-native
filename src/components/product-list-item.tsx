@@ -1,8 +1,8 @@
 import { Image, Pressable, StyleSheet, Text, View } from "react-native";
 
 import { Link } from "expo-router";
-import { Tables } from "../types/database.types";
-import { NEO_THEME } from "../constants/neobrutalism";
+import { Tables } from "../shared/types/database.types";
+import { NEO_THEME } from "../shared/constants/neobrutalism";
 
 type ProductWithShop = Tables<"product"> & {
   shops?: {

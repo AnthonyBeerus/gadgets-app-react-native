@@ -10,7 +10,7 @@ import {
   Dimensions,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { NEO_THEME } from "../constants/neobrutalism";
+import { NEO_THEME } from "../shared/constants/neobrutalism";
 
 const { height } = Dimensions.get("window");
 

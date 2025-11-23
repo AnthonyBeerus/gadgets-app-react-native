@@ -11,8 +11,8 @@ import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { ProductListItem } from "../../components/product-list-item";
-import { getShopProducts } from "../../api/shops";
-import { NEO_THEME } from "../../constants/neobrutalism";
+import { getShopProducts } from "../../shared/api/shops";
+import { NEO_THEME } from "../../shared/constants/neobrutalism";
 
 const ProductsPage = () => {
   const { shop, shopName } = useLocalSearchParams<{

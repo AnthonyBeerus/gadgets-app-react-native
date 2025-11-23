@@ -15,10 +15,10 @@ import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { useCartStore } from "../../store/cart-store";
-import { getProduct } from "../../api/api";
+import { getProduct } from "../../shared/api/api";
 import { ActivityIndicator } from "react-native";
 import TryOnModal from "../../features/virtual-try-on/components/TryOnModal";
-import { NEO_THEME } from "../../constants/neobrutalism";
+import { NEO_THEME } from "../../shared/constants/neobrutalism";
 
 const { width } = Dimensions.get("window");
 

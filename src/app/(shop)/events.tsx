@@ -9,7 +9,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { MaterialIcons } from "@expo/vector-icons";
-import { NEO_THEME } from "../../constants/neobrutalism";
+import { NEO_THEME } from "../../shared/constants/neobrutalism";
 
 // Mock data for events
 const upcomingEvents = [

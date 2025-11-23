@@ -1,8 +1,8 @@
 import React from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { Challenge } from '../types/challenge';
-import { NEO_THEME } from '../constants/neobrutalism';
+import { Challenge } from '../shared/types/challenge';
+import { NEO_THEME } from '../shared/constants/neobrutalism';
 
 interface ChallengeCardProps {
   challenge: Challenge;

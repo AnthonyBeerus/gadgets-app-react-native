@@ -1,6 +1,6 @@
 import { Stack } from 'expo-router';
 
-import { useOrderUpdateSubscription } from '../../../api/subscriptions';
+import { useOrderUpdateSubscription } from '../../../shared/api/subscriptions';
 
 export default function OrdersLayout() {
   useOrderUpdateSubscription();

@@ -5,8 +5,8 @@ import {
 } from "react-native-safe-area-context";
 import { ActivityIndicator, StyleSheet, Platform, View } from "react-native";
 import { FontAwesome, MaterialIcons } from "@expo/vector-icons";
-import { useAuth } from "../../providers/auth-provider";
-import { NEO_THEME } from "../../constants/neobrutalism";
+import { useAuth } from "../../shared/providers/auth-provider";
+import { NEO_THEME } from "../../shared/constants/neobrutalism";
 
 const COLORS = {
   primary: "#9C27B0",
@@ -47,7 +47,7 @@ const TabsLayout = () => {
   if (!session) return <Redirect href="/auth" />;
 
   return (
-    <SafeAreaView edges={["top"]} style={styles.safeArea}>
+    
       <Tabs
         screenOptions={{
           tabBarActiveTintColor: NEO_THEME.colors.primary,
@@ -144,22 +144,6 @@ const TabsLayout = () => {
           }}
         />
         <Tabs.Screen
-          name="profile"
-          options={{
-            title: "Profile",
-            tabBarIcon({ focused }) {
-              return (
-                <TabBarIcon
-                  name="person"
-                  type="MaterialIcons"
-                  focused={focused}
-                  color={""}
-                />
-              );
-            },
-          }}
-        />
-        <Tabs.Screen
           name="challenges"
           options={{
             title: "Challenges",
@@ -175,8 +159,24 @@ const TabsLayout = () => {
             },
           }}
         />
+        <Tabs.Screen
+          name="profile"
+          options={{
+            title: "Profile",
+            tabBarIcon({ focused }) {
+              return (
+                <TabBarIcon
+                  name="person"
+                  type="MaterialIcons"
+                  focused={focused}
+                  color={""}
+                />
+              );
+            },
+          }}
+        />
+        
       </Tabs>
-    </SafeAreaView>
   );
 };
 

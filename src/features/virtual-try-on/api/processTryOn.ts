@@ -4,7 +4,7 @@ import {
   ImageData,
   GenerationMode,
   ProcessTryOnParams,
-} from "../types/TryOnTypes";
+} from '../types/TryOnTypes';
 import { useTryOnStore } from "../store/tryOnStore";
 // Use cross-fetch directly to avoid whatwg-fetch polyfill issues
 import fetch from "cross-fetch";

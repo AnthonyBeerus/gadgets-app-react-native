@@ -15,10 +15,10 @@ import {
   getServiceCategories,
   getServicesByCategory,
   getAllServices,
-} from "../../api/api";
-import { Tables } from "../../types/database.types";
+} from "../../shared/api/api";
+import { Tables } from "../../shared/types/database.types";
 import BookingModal from "../../features/appointments/components/BookingModal";
-import { NEO_THEME } from "../../constants/neobrutalism";
+import { NEO_THEME } from "../../shared/constants/neobrutalism";
 
 const ServiceCard = ({
   service,

@@ -12,7 +12,7 @@ import {
 import ProductSelector from "./ProductSelector";
 import ImagePickerComponent from "./ImagePicker";
 import ResultOverlay from "./ResultOverlay";
-import { NEO_THEME } from "../../../constants/neobrutalism";
+import { NEO_THEME } from "../../../shared/constants/neobrutalism";
 // Use cross-fetch to avoid whatwg-fetch issues
 import fetch from "cross-fetch";
 

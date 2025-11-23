@@ -1,12 +1,12 @@
-// filepath: src/features/virtual-try-on/store/tryOnStore.ts
+
 import { create } from "zustand";
-import { Tables } from "../../../types/database.types";
+import { Tables } from '../../../shared/types/database.types';
 import {
   ImageData,
   GenerationMode,
   PoseOption,
   BackgroundScene,
-} from "../types/TryOnTypes";
+} from '../types/TryOnTypes';
 
 interface TryOnState {
   selectedProduct: Tables<"product"> | null;

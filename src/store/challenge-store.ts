@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { Challenge } from '../types/challenge';
+import { Challenge } from '../shared/types/challenge';
 
 interface ChallengeState {
   challenges: Challenge[];

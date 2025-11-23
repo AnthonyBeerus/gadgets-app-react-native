@@ -12,8 +12,8 @@ import {
 } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 import DateTimePicker from "@react-native-community/datetimepicker";
-import { createServiceBooking } from "../../../api/api";
-import { Tables } from "../../../types/database.types";
+import { createServiceBooking } from "../../../shared/api/api";
+import { Tables } from "../../../shared/types/database.types";
 
 const COLORS = {
   primary: "#1BC464",

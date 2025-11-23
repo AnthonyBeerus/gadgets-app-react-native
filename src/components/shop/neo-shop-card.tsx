@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, Image, StyleSheet, TouchableOpacity } from 'react-native';
-import { NeoView } from '../ui/neo-view';
-import { NEO_THEME } from '../../constants/neobrutalism';
+import { NeoView } from '../../shared/components/ui/neo-view';
+import { NEO_THEME } from '../../shared/constants/neobrutalism';
 import { Ionicons } from '@expo/vector-icons';
 
 interface NeoShopCardProps {

@@ -10,8 +10,8 @@ import {
 } from 'react-native';
 import { useCartStore } from '../store/cart-store';
 import { StatusBar } from 'expo-status-bar';
-import { createOrder, createOrderItem } from '../api/api';
-import { openStripeCheckout, setupStripePaymentSheet } from '../lib/stripe';
+import { createOrder, createOrderItem } from '../shared/api/api';
+import { openStripeCheckout, setupStripePaymentSheet } from '../shared/lib/stripe';
 
 type CartItemType = {
   id: number;

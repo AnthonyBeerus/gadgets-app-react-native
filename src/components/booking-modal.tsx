@@ -13,7 +13,7 @@ import {
 } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 import DateTimePicker from "@react-native-community/datetimepicker";
-import { createServiceBooking } from "../api/api";
+import { createServiceBooking } from "../shared/api/api";
 import { useBookingStore } from "../store/booking-store";
 
 const COLORS = {

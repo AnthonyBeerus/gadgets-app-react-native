@@ -13,7 +13,7 @@ import * as ImagePicker from "expo-image-picker";
 import { useTryOnStore } from "../store/tryOnStore";
 import PoseSelector from "./PoseSelector";
 import BackgroundSelector from "./BackgroundSelector";
-import { NEO_THEME } from "../../../constants/neobrutalism";
+import { NEO_THEME } from '../../../shared/constants/neobrutalism';
 
 interface ImagePickerProps {
   onImageSelected?: (uri: string) => void;

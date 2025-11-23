@@ -1,9 +1,9 @@
 import { Stack } from "expo-router";
 import { ToastProvider } from "react-native-toast-notifications";
-import AuthProvider from "../providers/auth-provider";
-import QueryProvider from "../providers/query-provider";
+import AuthProvider from "../shared/providers/auth-provider";
+import QueryProvider from "../shared/providers/query-provider";
 import { StripeProvider } from "@stripe/stripe-react-native";
-import NotificationProvider from "../providers/notification-provider";
+import NotificationProvider from "../shared/providers/notification-provider";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
 export default function RootLayout() {

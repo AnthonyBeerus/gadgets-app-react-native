@@ -11,8 +11,8 @@ import {
 import { FontAwesome } from '@expo/vector-icons';
 
 import { useCartStore } from '../store/cart-store';
-import { supabase } from '../lib/supabase';
-import { Tables } from '../types/database.types';
+import { supabase } from '../shared/lib/supabase';
+import { Tables } from '../shared/types/database.types';
 
 export const ListHeader = ({
   categories,
@@ -78,7 +78,7 @@ export const ListHeader = ({
             <Link asChild href={`/categories/${item.slug}`}>
               <Pressable style={styles.category}>
                 <Image
-                  source={{ uri: item.imageUrl }}
+                  source={{ uri: item.imageUrl || undefined }}
                   style={styles.categoryImage}
                 />
                 <Text style={styles.categoryText}>{item.name}</Text>

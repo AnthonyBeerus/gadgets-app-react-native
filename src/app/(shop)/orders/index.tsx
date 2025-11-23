@@ -10,8 +10,8 @@ import {
 import { Link, Stack } from 'expo-router';
 import { format } from 'date-fns';
 
-import { Tables } from '../../../types/database.types';
-import { getMyOrders } from '../../../api/api';
+import { Tables } from '../../../shared/types/database.types';
+import { getMyOrders } from '../../../shared/api/api';
 
 const renderItem: ListRenderItem<Tables<'order'>> = ({ item }) => (
   <Link href={`/orders/${item.slug}`} asChild>

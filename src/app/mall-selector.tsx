@@ -12,7 +12,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { useState, useEffect } from "react";
 import { useShopStore } from "../store/shop-store";
-import { NEO_THEME } from "../constants/neobrutalism";
+import { NEO_THEME } from "../shared/constants/neobrutalism";
 
 const { height } = Dimensions.get("window");
 

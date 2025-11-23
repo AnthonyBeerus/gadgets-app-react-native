@@ -1,7 +1,7 @@
 import { Image, Pressable, StyleSheet, Text, View } from "react-native";
 import { Link } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-import { Tables } from "../types/database.types";
+import { Tables } from "../shared/types/database.types";
 
 type ShopWithProductCount = Tables<"shops"> & {
   products?: { count: number }[];

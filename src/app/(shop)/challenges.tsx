@@ -3,9 +3,9 @@ import { View, Text, StyleSheet, FlatList, ActivityIndicator } from 'react-nativ
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useChallengeStore } from '../../store/challenge-store';
 import { ChallengeCard } from '../../components/challenge-card';
-import { Challenge } from '../../types/challenge';
+import { Challenge } from '../../shared/types/challenge';
 import { useRouter } from 'expo-router';
-import { NEO_THEME } from '../../constants/neobrutalism';
+import { NEO_THEME } from '../../shared/constants/neobrutalism';
 
 export default function ChallengesScreen() {
   const { challenges, loading, fetchChallenges } = useChallengeStore();

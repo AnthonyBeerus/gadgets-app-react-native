@@ -10,8 +10,8 @@ import {
 import { Stack, useRouter } from "expo-router";
 import { MaterialIcons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useAuth } from "../../providers/auth-provider";
-import { getShopAppointments } from "../../api/shops";
+import { useAuth } from "../../shared/providers/auth-provider";
+import { getShopAppointments } from "../../shared/api/shops";
 import { format } from "date-fns";
 
 const COLORS = {

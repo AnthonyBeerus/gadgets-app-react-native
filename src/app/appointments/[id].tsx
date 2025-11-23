@@ -9,8 +9,8 @@ import {
   TouchableOpacity,
 } from "react-native";
 import { useLocalSearchParams, Stack, router } from "expo-router";
-import { supabase } from "../../lib/supabase";
-import { Tables } from "../../types/database.types";
+import { supabase } from "../../shared/lib/supabase";
+import { Tables } from "../../shared/types/database.types";
 
 type AppointmentWithDetails = Tables<"service_booking"> & {
   service?: Tables<"service">;

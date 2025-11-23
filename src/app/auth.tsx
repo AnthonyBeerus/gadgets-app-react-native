@@ -10,9 +10,9 @@ import { useForm, Controller } from 'react-hook-form';
 import * as zod from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Redirect, Stack } from 'expo-router';
-import { supabase } from '../lib/supabase';
+import { supabase } from '../shared/lib/supabase';
 import { Toast } from 'react-native-toast-notifications';
-import { useAuth } from '../providers/auth-provider';
+import { useAuth } from '../shared/providers/auth-provider';
 
 const authSchema = zod.object({
   email: zod.string().email({ message: 'Invalid email address' }),

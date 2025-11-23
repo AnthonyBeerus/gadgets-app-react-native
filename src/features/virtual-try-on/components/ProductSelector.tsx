@@ -9,8 +9,8 @@ import {
   View,
 } from "react-native";
 import { useTryOnStore } from "../store/tryOnStore";
-import { Tables } from "../../../types/database.types";
-import { NEO_THEME } from "../../../constants/neobrutalism";
+import { Tables } from '../../../shared/types/database.types';
+import { NEO_THEME } from '../../../shared/constants/neobrutalism';
 
 interface ProductSelectorProps {
   products?: Tables<"product">[]; // Clothing products from shop

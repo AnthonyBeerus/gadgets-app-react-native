@@ -8,9 +8,9 @@ import {
   ScrollView,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { PoseOption } from "../types/TryOnTypes";
+import { PoseOption } from '../types/TryOnTypes';
 import { useTryOnStore } from "../store/tryOnStore";
-import { NEO_THEME } from "../../../constants/neobrutalism";
+import { NEO_THEME } from '../../../shared/constants/neobrutalism';
 
 const POSE_OPTIONS = [
   {

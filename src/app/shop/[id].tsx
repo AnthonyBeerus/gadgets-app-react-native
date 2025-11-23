@@ -15,13 +15,13 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-import { getShopById, getShopProducts } from "../../api/shops";
-import { supabase } from "../../lib/supabase";
+import { getShopById, getShopProducts } from "../../shared/api/shops";
+import { supabase } from "../../shared/lib/supabase";
 import TryOnModal from "../../features/virtual-try-on/components/TryOnModal";
 import BookingModal from "../../components/booking-modal";
 import { useBookingStore } from "../../store/booking-store";
-import { NeoView } from "../../components/ui/neo-view";
-import { NEO_THEME } from "../../constants/neobrutalism";
+import { NeoView } from "../../shared/components/ui/neo-view";
+import { NEO_THEME } from "../../shared/constants/neobrutalism";
 
 export default function ShopDetails() {
   const { id } = useLocalSearchParams<{ id: string }>();

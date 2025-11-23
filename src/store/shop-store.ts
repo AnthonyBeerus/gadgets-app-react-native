@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { Tables } from "../types/database.types";
+import { Tables } from "../shared/types/database.types";
 import {
   getShops,
   getShopsByMall,
@@ -8,7 +8,7 @@ import {
   searchShops,
   getCategoriesWithShopFeatures,
   getMalls,
-} from "../api/shops";
+} from "../shared/api/shops";
 
 type Shop = Tables<"shops">;
 type Category = Tables<"category">;

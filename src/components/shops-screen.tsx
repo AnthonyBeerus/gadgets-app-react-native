@@ -14,9 +14,9 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useShopStore } from "../store/shop-store";
-import { NeoView } from "./ui/neo-view";
+import { NeoView } from "../shared/components/ui/neo-view";
 import { NeoShopCard } from "./shop/neo-shop-card";
-import { NEO_THEME } from "../constants/neobrutalism";
+import { NEO_THEME } from "../shared/constants/neobrutalism";
 
 export default function ShopsScreen() {
   const router = useRouter();

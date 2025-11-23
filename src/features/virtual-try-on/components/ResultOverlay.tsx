@@ -13,7 +13,7 @@ import {
 import { useTryOnStore } from "../store/tryOnStore";
 import * as MediaLibrary from "expo-media-library";
 import { File, Paths } from "expo-file-system/next";
-import { NEO_THEME } from "../../../constants/neobrutalism";
+import { NEO_THEME } from '../../../shared/constants/neobrutalism';
 
 interface ResultOverlayProps {
   onClose: () => void;
