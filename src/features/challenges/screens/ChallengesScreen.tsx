@@ -1,11 +1,11 @@
 import React, { useEffect } from 'react';
-import { View, Text, StyleSheet, FlatList, ActivityIndicator } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { View, Text, StyleSheet, ActivityIndicator } from 'react-native';
 import { useChallengeStore } from '../store/challenge-store';
 import { ChallengeCard } from '../components/challenge-card';
 import { Challenge } from '../types/challenge';
 import { useRouter } from 'expo-router';
 import { NEO_THEME } from '../../../shared/constants/neobrutalism';
+import { AnimatedHeaderLayout } from '../../../shared/components/layout/AnimatedHeaderLayout';
 
 export default function ChallengesScreen() {
   const { challenges, loading, fetchChallenges } = useChallengeStore();
@@ -20,6 +20,17 @@ export default function ChallengesScreen() {
     console.log('Pressed challenge:', challenge.title);
   };
 
+  const renderSmallTitle = () => (
+    <Text style={styles.smallHeaderTitle}>CHALLENGES</Text>
+  );
+
+  const renderLargeTitle = () => (
+    <View>
+      <Text style={styles.largeHeaderTitle}>CHALLENGES</Text>
+      <Text style={styles.largeHeaderSubtitle}>CREATE CONTENT, WIN REWARDS</Text>
+    </View>
+  );
+
   if (loading && challenges.length === 0) {
     return (
       <View style={styles.loadingContainer}>
@@ -29,57 +40,44 @@ export default function ChallengesScreen() {
   }
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>CHALLENGES</Text>
-        <Text style={styles.headerSubtitle}>CREATE CONTENT, WIN REWARDS</Text>
+    <AnimatedHeaderLayout
+      renderSmallTitle={renderSmallTitle}
+      renderLargeTitle={renderLargeTitle}
+    >
+      <View style={styles.listContent}>
+        {challenges.map((item) => (
+          <ChallengeCard 
+            key={item.id} 
+            challenge={item} 
+            onPress={handlePressChallenge} 
+          />
+        ))}
       </View>
-      
-      <FlatList
-        data={challenges}
-        renderItem={({ item }) => (
-          <ChallengeCard challenge={item} onPress={handlePressChallenge} />
-        )}
-        keyExtractor={(item) => item.id.toString()}
-        contentContainerStyle={styles.listContent}
-        showsVerticalScrollIndicator={false}
-        onRefresh={fetchChallenges}
-        refreshing={loading}
-      />
-    </SafeAreaView>
+    </AnimatedHeaderLayout>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: NEO_THEME.colors.backgroundLight,
-  },
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  header: {
-    paddingHorizontal: 20,
-    paddingVertical: 20,
-    backgroundColor: NEO_THEME.colors.white,
-    borderBottomWidth: NEO_THEME.borders.width,
-    borderBottomColor: NEO_THEME.colors.black,
-    shadowColor: NEO_THEME.colors.black,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 1,
-    shadowRadius: 0,
-    elevation: 0,
+  smallHeaderTitle: {
+    fontSize: 16,
+    fontWeight: "900",
+    color: NEO_THEME.colors.black,
+    fontFamily: NEO_THEME.fonts.black,
+    textTransform: "uppercase",
   },
-  headerTitle: {
+  largeHeaderTitle: {
     fontSize: 32,
     fontWeight: '900',
     color: NEO_THEME.colors.black,
     fontFamily: NEO_THEME.fonts.black,
     textTransform: 'uppercase',
   },
-  headerSubtitle: {
+  largeHeaderSubtitle: {
     fontSize: 14,
     color: NEO_THEME.colors.grey,
     marginTop: 4,
@@ -89,5 +87,6 @@ const styles = StyleSheet.create({
   },
   listContent: {
     padding: 20,
+    gap: 16,
   },
 });

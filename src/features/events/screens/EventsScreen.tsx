@@ -6,12 +6,12 @@ import {
   TouchableOpacity,
   StyleSheet,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 import { MaterialIcons } from "@expo/vector-icons";
 import { NEO_THEME } from "../../../shared/constants/neobrutalism";
 import { EventCard } from "../components/EventCard";
 import { UPCOMING_EVENTS, EVENT_CATEGORIES } from "../api/mock-events";
 import { Event } from "../types/event";
+import { AnimatedHeaderLayout } from "../../../shared/components/layout/AnimatedHeaderLayout";
 
 export default function EventsScreen() {
   const [selectedCategory, setSelectedCategory] = useState("All");
@@ -26,17 +26,25 @@ export default function EventsScreen() {
     console.log("Selected event:", event.title);
   };
 
-  return (
-    <SafeAreaView style={styles.container}>
-      <ScrollView showsVerticalScrollIndicator={false}>
-        {/* Header */}
-        <View style={styles.header}>
-          <Text style={styles.headerTitle}>EVENTS & SHOWS</Text>
-          <Text style={styles.headerSubtitle}>
-            Discover exciting events happening at Molapo Crossing
-          </Text>
-        </View>
+  const renderSmallTitle = () => (
+    <Text style={styles.smallHeaderTitle}>EVENTS & SHOWS</Text>
+  );
 
+  const renderLargeTitle = () => (
+    <View>
+      <Text style={styles.largeHeaderTitle}>EVENTS & SHOWS</Text>
+      <Text style={styles.largeHeaderSubtitle}>
+        Discover exciting events happening at Molapo Crossing
+      </Text>
+    </View>
+  );
+
+  return (
+    <AnimatedHeaderLayout
+      renderSmallTitle={renderSmallTitle}
+      renderLargeTitle={renderLargeTitle}
+    >
+      <View style={styles.content}>
         {/* Quick Stats */}
         <View style={styles.statsContainer}>
           <View style={styles.statsCard}>
@@ -118,29 +126,23 @@ export default function EventsScreen() {
             ))
           )}
         </View>
-      </ScrollView>
-    </SafeAreaView>
+      </View>
+    </AnimatedHeaderLayout>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  content: {
     flex: 1,
-    backgroundColor: NEO_THEME.colors.backgroundLight,
   },
-  header: {
-    paddingHorizontal: 20,
-    paddingVertical: 24,
-    backgroundColor: NEO_THEME.colors.white,
-    borderBottomWidth: NEO_THEME.borders.width,
-    borderBottomColor: NEO_THEME.colors.black,
-    shadowColor: NEO_THEME.colors.black,
-    shadowOffset: { width: 0, height: 5 },
-    shadowOpacity: 1,
-    shadowRadius: 0,
-    elevation: 0,
+  smallHeaderTitle: {
+    fontSize: 16,
+    fontWeight: "900",
+    color: NEO_THEME.colors.black,
+    fontFamily: NEO_THEME.fonts.black,
+    textTransform: "uppercase",
   },
-  headerTitle: {
+  largeHeaderTitle: {
     fontSize: 28,
     fontWeight: "900",
     color: NEO_THEME.colors.black,
@@ -148,7 +150,7 @@ const styles = StyleSheet.create({
     fontFamily: NEO_THEME.fonts.black,
     textTransform: "uppercase",
   },
-  headerSubtitle: {
+  largeHeaderSubtitle: {
     fontSize: 16,
     color: NEO_THEME.colors.grey,
   },

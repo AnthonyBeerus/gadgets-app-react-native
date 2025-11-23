@@ -19,6 +19,7 @@ import {
 import { Tables } from "../../shared/types/database.types";
 import BookingModal from "../../features/appointments/components/BookingModal";
 import { NEO_THEME } from "../../shared/constants/neobrutalism";
+import { AnimatedHeaderLayout } from "../../shared/components/layout/AnimatedHeaderLayout";
 
 const ServiceCard = ({
   service,
@@ -145,36 +146,23 @@ const Services = () => {
   }
 
   if (selectedCategory && selectedCategoryData) {
+    const renderSmallTitle = () => (
+      <Text style={styles.headerTitle}>{selectedCategoryData.name.toUpperCase()}</Text>
+    );
+
+    const renderLargeTitle = () => (
+      <View>
+        <Text style={styles.largeHeaderTitle}>{selectedCategoryData.name.toUpperCase()}</Text>
+        <Text style={styles.headerSubtitle}>{services?.length || 0} services available</Text>
+      </View>
+    );
+
     return (
-      <SafeAreaView style={styles.container}>
-        <View style={styles.header}>
-          <TouchableOpacity
-            style={styles.backButton}
-            onPress={handleBackToCategories}>
-            <MaterialIcons name="arrow-back" size={24} color={NEO_THEME.colors.black} />
-          </TouchableOpacity>
-          <View style={styles.headerContent}>
-            <View
-              style={[
-                styles.categoryIconSmall,
-                { backgroundColor: `${selectedCategoryData.color}20` },
-              ]}>
-              <MaterialIcons
-                name={selectedCategoryData.icon as any}
-                size={24}
-                color={selectedCategoryData.color}
-              />
-            </View>
-            <View style={styles.headerTextContainer}>
-              <Text style={styles.headerTitle}>
-                {selectedCategoryData.name}
-              </Text>
-              <Text style={styles.headerSubtitle}>
-                {services?.length || 0} services available
-              </Text>
-            </View>
-          </View>
-        </View>
+      <AnimatedHeaderLayout
+        renderSmallTitle={renderSmallTitle}
+        renderLargeTitle={renderLargeTitle}
+        onBackPress={handleBackToCategories}
+      >
 
         {servicesLoading ? (
           <View style={styles.loadingContainer}>
@@ -222,20 +210,28 @@ const Services = () => {
             showsVerticalScrollIndicator={false}
           />
         )}
-      </SafeAreaView>
+      </AnimatedHeaderLayout>
     );
   }
 
+  const renderSmallTitle = () => (
+    <Text style={styles.headerTitle}>BOOK SERVICES</Text>
+  );
+
+  const renderLargeTitle = () => (
+    <View>
+      <Text style={styles.largeHeaderTitle}>BOOK SERVICES</Text>
+      <Text style={styles.largeHeaderSubtitle}>
+        Find and book appointments for beauty, health, sports, and more
+      </Text>
+    </View>
+  );
+
   return (
-    <SafeAreaView style={styles.container}>
-      <ScrollView showsVerticalScrollIndicator={false}>
-        {/* Header */}
-        <View style={styles.mainHeader}>
-          <Text style={styles.mainTitle}>BOOK SERVICES</Text>
-          <Text style={styles.mainSubtitle}>
-            Find and book appointments for beauty, health, sports, and more
-          </Text>
-        </View>
+    <AnimatedHeaderLayout
+      renderSmallTitle={renderSmallTitle}
+      renderLargeTitle={renderLargeTitle}
+    >
 
         {/* Featured Banner */}
         <View style={styles.featuredBanner}>
@@ -264,9 +260,8 @@ const Services = () => {
           </View>
         </View>
 
-        {/* Bottom Spacing */}
-        <View style={styles.bottomSpacing} />
-      </ScrollView>
+      {/* Bottom Spacing */}
+      <View style={styles.bottomSpacing} />
 
       {/* Booking Modal */}
       <BookingModal
@@ -274,7 +269,7 @@ const Services = () => {
         onClose={handleCloseBookingModal}
         service={selectedService}
       />
-    </SafeAreaView>
+    </AnimatedHeaderLayout>
   );
 };
 
@@ -323,6 +318,21 @@ const styles = StyleSheet.create({
     color: NEO_THEME.colors.black,
     fontFamily: NEO_THEME.fonts.black,
     textTransform: "uppercase",
+  },
+  largeHeaderTitle: {
+    fontSize: 28,
+    fontWeight: "900",
+    color: NEO_THEME.colors.black,
+    fontFamily: NEO_THEME.fonts.black,
+    textTransform: "uppercase",
+    marginBottom: 4,
+  },
+  largeHeaderSubtitle: {
+    fontSize: 16,
+    color: NEO_THEME.colors.grey,
+    fontWeight: "700",
+    fontFamily: NEO_THEME.fonts.bold,
+    lineHeight: 22,
   },
   mainHeader: {
     paddingHorizontal: 20,

@@ -1,6 +1,6 @@
 import React from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
-import ShopsScreen from "../../components/shops-screen";
+import ShopsScreen from "../../features/shop/screens/ShopsScreen";
 
 const Home = () => {
   return (

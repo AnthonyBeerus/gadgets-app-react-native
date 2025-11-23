@@ -36,7 +36,7 @@ export default function RootLayout() {
                     name="cart"
                     options={{
                       presentation: "modal",
-                      title: "Shopping Cart",
+                      headerShown: false,
                     }}
                   />
                   <Stack.Screen
