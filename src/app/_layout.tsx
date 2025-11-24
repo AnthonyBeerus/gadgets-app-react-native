@@ -59,6 +59,12 @@ export default function RootLayout() {
                       headerShown: false,
                     }}
                   />
+                  <Stack.Screen
+                    name="gem-shop"
+                    options={{
+                      headerShown: false,
+                    }}
+                  />
                   <Stack.Screen name="auth" options={{ headerShown: false }} />
                 </Stack>
               </NotificationProvider>

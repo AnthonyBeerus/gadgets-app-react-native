@@ -1,6 +1,6 @@
 import React from 'react';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
-import { withLayoutContext } from 'expo-router';
+import { withLayoutContext, useRouter } from 'expo-router';
 import { Text, View, TouchableOpacity, StyleSheet } from 'react-native';
 import { NEO_THEME } from '../../../shared/constants/neobrutalism';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -13,16 +13,19 @@ const MaterialTopTabs = withLayoutContext(Tab.Navigator);
 // Add displayName to prevent undefined errors
 MaterialTopTabs.displayName = 'MaterialTopTabs';
 
-const GemButton = ({ small = false }) => (
-  <TouchableOpacity 
-    style={[styles.gemButton, small && styles.gemButtonSmall]}
-    activeOpacity={0.7}
-    onPress={() => console.log('Navigate to Gem Shop')}
-  >
-    <View style={styles.gemIcon} />
-    <Text style={[styles.gemText, small && styles.gemTextSmall]}>SHOP</Text>
-  </TouchableOpacity>
-);
+const GemButton = ({ small = false }) => {
+  const router = useRouter();
+  return (
+    <TouchableOpacity 
+      style={[styles.gemButton, small && styles.gemButtonSmall]}
+      activeOpacity={0.7}
+      onPress={() => router.push('/gem-shop')}
+    >
+      <View style={styles.gemIcon} />
+      <Text style={[styles.gemText, small && styles.gemTextSmall]}>SHOP</Text>
+    </TouchableOpacity>
+  );
+};
 
 export default function ChallengesLayout() {
   return (
