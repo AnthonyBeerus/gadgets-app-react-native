@@ -2,10 +2,31 @@ import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { NEO_THEME } from '../../../shared/constants/neobrutalism';
 import { NeoView } from '../../../shared/components/ui/neo-view';
+import Animated, { useAnimatedScrollHandler } from 'react-native-reanimated';
+import { useCollapsibleTab } from '../../../shared/context/CollapsibleTabContext';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function MyEntriesScreen() {
+  const { scrollY, headerHeight, tabBarHeight } = useCollapsibleTab();
+  const { top } = useSafeAreaInsets();
+
+  const onScroll = useAnimatedScrollHandler({
+    onScroll: (event) => {
+      scrollY.value = event.contentOffset.y;
+    },
+  });
+
   return (
-    <View style={styles.container}>
+    <Animated.ScrollView
+      onScroll={onScroll}
+      scrollEventThrottle={16}
+      contentContainerStyle={{
+        paddingTop: headerHeight + tabBarHeight + top + 20,
+        paddingBottom: 100,
+        paddingHorizontal: 20,
+      }}
+      showsVerticalScrollIndicator={false}
+    >
       <NeoView style={styles.placeholderCard}>
         <Text style={styles.title}>MY ENTRIES</Text>
         <Text style={styles.subtitle}>NO ENTRIES YET</Text>
@@ -13,17 +34,16 @@ export default function MyEntriesScreen() {
           Join a challenge and submit your content to see it here.
         </Text>
       </NeoView>
-    </View>
+      
+      {/* Dummy content to demonstrate scrolling */}
+      {Array.from({ length: 5 }).map((_, i) => (
+        <View key={i} style={{ height: 100, backgroundColor: 'rgba(0,0,0,0.05)', marginTop: 16, borderRadius: 12 }} />
+      ))}
+    </Animated.ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: NEO_THEME.colors.backgroundLight,
-    padding: 20,
-    justifyContent: 'center',
-  },
   placeholderCard: {
     backgroundColor: NEO_THEME.colors.white,
     padding: 32,

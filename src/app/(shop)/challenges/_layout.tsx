@@ -1,8 +1,11 @@
+import React from 'react';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import { withLayoutContext } from 'expo-router';
 import { Text, View, TouchableOpacity, StyleSheet } from 'react-native';
 import { NEO_THEME } from '../../../shared/constants/neobrutalism';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { CollapsibleTabProvider } from '../../../shared/context/CollapsibleTabContext';
+import { CollapsibleTabHeader } from '../../../shared/components/navigation/CollapsibleTabHeader';
 
 const Tab = createMaterialTopTabNavigator();
 const MaterialTopTabs = withLayoutContext(Tab.Navigator);
@@ -10,93 +13,47 @@ const MaterialTopTabs = withLayoutContext(Tab.Navigator);
 // Add displayName to prevent undefined errors
 MaterialTopTabs.displayName = 'MaterialTopTabs';
 
-type MyTabBarProps = {
-  state: any;
-  descriptors: any;
-  navigation: any;
-};
-
-function MyTabBar({ state, descriptors, navigation }: MyTabBarProps) {
-  const getDisplayTitle = (routeName: string) => {
-    const routeMap: Record<string, string> = {
-      index: 'EXPLORE',
-      leaderboard: 'LEADERBOARD',
-      'my-entries': 'MY ENTRIES',
-    };
-    return routeMap[routeName] || routeName.toUpperCase();
-  };
-
-  return (
-    <View style={styles.tabBarContainer}>
-      {state.routes.map((route: { key: any; name: string }, index: number) => {
-        const { options } = descriptors[route.key];
-        const isFocused = state.index === index;
-
-        const onPress = () => {
-          const event = navigation.emit({
-            type: 'tabPress',
-            target: route.key,
-            canPreventDefault: true,
-          });
-
-          if (!isFocused && !event.defaultPrevented) {
-            navigation.navigate({ name: route.name, merge: true });
-          }
-        };
-
-        const onLongPress = () => {
-          navigation.emit({
-            type: 'tabLongPress',
-            target: route.key,
-          });
-        };
-
-        return (
-          <TouchableOpacity
-            key={route.key}
-            accessibilityRole="button"
-            accessibilityState={isFocused ? { selected: true } : {}}
-            accessibilityLabel={options.tabBarAccessibilityLabel}
-            testID={options.tabBarTestID}
-            onPress={onPress}
-            onLongPress={onLongPress}
-            style={[
-              styles.tabItem,
-              isFocused && styles.tabItemFocused,
-              index < state.routes.length - 1 && styles.tabItemBorder,
-            ]}
-          >
-            <Text
-              style={[
-                styles.tabLabel,
-                isFocused && styles.tabLabelFocused,
-              ]}
-              numberOfLines={1}
-            >
-              {getDisplayTitle(route.name)}
-            </Text>
-          </TouchableOpacity>
-        );
-      })}
-    </View>
-  );
-}
+const GemButton = ({ small = false }) => (
+  <TouchableOpacity 
+    style={[styles.gemButton, small && styles.gemButtonSmall]}
+    activeOpacity={0.7}
+    onPress={() => console.log('Navigate to Gem Shop')}
+  >
+    <View style={styles.gemIcon} />
+    <Text style={[styles.gemText, small && styles.gemTextSmall]}>SHOP</Text>
+  </TouchableOpacity>
+);
 
 export default function ChallengesLayout() {
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
-      <MaterialTopTabs
-        tabBar={(props) => <MyTabBar {...props} />}
-        screenOptions={{
-          swipeEnabled: true,
-          animationEnabled: true,
-        }}
-      >
-        <MaterialTopTabs.Screen name="index" options={{ title: "Explore" }} />
-        <MaterialTopTabs.Screen name="leaderboard" options={{ title: "Leaderboard" }} />
-        <MaterialTopTabs.Screen name="my-entries" options={{ title: "My Entries" }} />
-      </MaterialTopTabs>
-    </SafeAreaView>
+    <CollapsibleTabProvider>
+      <View style={styles.container}>
+        <MaterialTopTabs
+          tabBar={(props) => (
+            <CollapsibleTabHeader 
+              {...props} 
+              title="CHALLENGES"
+              subtitle="CREATE CONTENT, WIN REWARDS"
+              renderHeaderRight={(props) => <GemButton {...props} />}
+              tabNames={{
+                index: 'EXPLORE',
+                leaderboard: 'LEADERBOARD',
+                'my-entries': 'MY ENTRIES',
+              }}
+            />
+          )}
+          screenOptions={{
+            swipeEnabled: true,
+            animationEnabled: true,
+            lazy: true,
+          }}
+        >
+          <MaterialTopTabs.Screen name="index" options={{ title: "Explore" }} />
+          <MaterialTopTabs.Screen name="leaderboard" options={{ title: "Leaderboard" }} />
+          <MaterialTopTabs.Screen name="my-entries" options={{ title: "My Entries" }} />
+        </MaterialTopTabs>
+      </View>
+    </CollapsibleTabProvider>
   );
 }
 
@@ -105,14 +62,14 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: NEO_THEME.colors.backgroundLight,
   },
-  tabBarContainer: {
+  gemButton: {
     flexDirection: 'row',
-    margin: 16,
-    borderRadius: NEO_THEME.borders.radius,
+    alignItems: 'center',
+    backgroundColor: NEO_THEME.colors.yellow,
+    paddingVertical: 8,
+    paddingHorizontal: 16,
     borderWidth: NEO_THEME.borders.width,
     borderColor: NEO_THEME.colors.black,
-    backgroundColor: NEO_THEME.colors.white,
-    overflow: 'hidden',
     // Hard shadow
     shadowColor: NEO_THEME.colors.black,
     shadowOffset: { width: 4, height: 4 },
@@ -120,29 +77,26 @@ const styles = StyleSheet.create({
     shadowRadius: 0,
     elevation: 4,
   },
-  tabItem: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 12,
-    paddingHorizontal: 4,
-    backgroundColor: NEO_THEME.colors.white,
+  gemButtonSmall: {
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    shadowOffset: { width: 2, height: 2 },
   },
-  tabItemFocused: {
+  gemIcon: {
+    width: 16,
+    height: 16,
     backgroundColor: NEO_THEME.colors.primary,
+    marginRight: 8,
+    borderWidth: 2,
+    borderColor: NEO_THEME.colors.black,
   },
-  tabItemBorder: {
-    borderRightWidth: NEO_THEME.borders.width,
-    borderRightColor: NEO_THEME.colors.black,
-  },
-  tabLabel: {
-    fontSize: 12,
+  gemText: {
     fontFamily: NEO_THEME.fonts.bold,
-    color: NEO_THEME.colors.black,
     fontWeight: '700',
-    textTransform: 'uppercase',
+    color: NEO_THEME.colors.black,
+    fontSize: 14,
   },
-  tabLabelFocused: {
-    color: NEO_THEME.colors.white,
+  gemTextSmall: {
+    fontSize: 12,
   },
 });
