@@ -8,6 +8,10 @@ export const NEO_THEME = {
     black: "#000000",
     white: "#ffffff",
     grey: "#9ca3af",
+    greyLight: "#e5e7eb",
+    success: "#22c55e",
+    successLight: "#dcfce7",
+    error: "#ef4444",
   },
   borders: {
     width: 3,

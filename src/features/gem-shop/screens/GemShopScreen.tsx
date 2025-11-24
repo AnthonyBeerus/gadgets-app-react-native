@@ -5,11 +5,12 @@ import { useRouter } from 'expo-router';
 import { NEO_THEME } from '../../../shared/constants/neobrutalism';
 import { StaticHeader } from '../../../shared/components/layout/StaticHeader';
 import { Ionicons } from '@expo/vector-icons';
+import { GemUseCases } from '../components/GemUseCases';
 
 const GEM_PACKS = [
-  { id: 'gems_100', amount: 100, price: '$0.99', name: 'Handful of Gems', color: NEO_THEME.colors.yellow },
-  { id: 'gems_500', amount: 500, price: '$4.99', name: 'Sack of Gems', color: NEO_THEME.colors.blue },
-  { id: 'gems_1200', amount: 1200, price: '$9.99', name: 'Chest of Gems', color: NEO_THEME.colors.primary },
+  { id: 'gems_100', amount: 100, price: 'P10', name: 'Handful of Gems', color: NEO_THEME.colors.yellow },
+  { id: 'gems_500', amount: 500, price: 'P45', name: 'Sack of Gems', color: NEO_THEME.colors.blue },
+  { id: 'gems_1200', amount: 1200, price: 'P99', name: 'Chest of Gems', color: NEO_THEME.colors.primary },
 ];
 
 export default function GemShopScreen() {
@@ -57,7 +58,7 @@ export default function GemShopScreen() {
               Monthly gems, exclusive badges & premium perks.
             </Text>
             <View style={styles.subPriceRow}>
-              <Text style={styles.subPrice}>From $4.99/mo</Text>
+              <Text style={styles.subPrice}>From P49/mo</Text>
               <TouchableOpacity 
                 style={styles.buyButton}
                 onPress={() => router.push('/gem-shop/membership')}
@@ -67,6 +68,10 @@ export default function GemShopScreen() {
             </View>
           </TouchableOpacity>
         </View>
+
+        {/* Gem Packs Section */}
+        {/* Gem Use Cases */}
+        <GemUseCases />
 
         {/* Gem Packs Section */}
         <View style={styles.section}>
@@ -82,8 +87,10 @@ export default function GemShopScreen() {
                 <View style={styles.packIconContainer}>
                   <Ionicons name="diamond-outline" size={40} color={NEO_THEME.colors.black} />
                 </View>
-                <Text style={styles.packAmount}>{pack.amount}</Text>
-                <Text style={styles.packName}>{pack.name}</Text>
+                <View style={styles.packInfo}>
+                  <Text style={styles.packAmount}>{pack.amount}</Text>
+                  <Text style={styles.packName}>{pack.name}</Text>
+                </View>
                 <View style={styles.priceTag}>
                   <Text style={styles.priceText}>{pack.price}</Text>
                 </View>
@@ -221,6 +228,10 @@ const styles = StyleSheet.create({
     shadowRadius: 0,
     elevation: 4,
   },
+  packInfo: {
+    flex: 1,
+    marginRight: 8,
+  },
   packIconContainer: {
     width: 60,
     height: 60,
@@ -236,10 +247,8 @@ const styles = StyleSheet.create({
     fontFamily: NEO_THEME.fonts.black,
     fontSize: 24,
     color: NEO_THEME.colors.black,
-    marginRight: 8,
   },
   packName: {
-    flex: 1,
     fontFamily: NEO_THEME.fonts.bold,
     fontSize: 14,
     color: NEO_THEME.colors.black,
