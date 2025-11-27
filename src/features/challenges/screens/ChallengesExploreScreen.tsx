@@ -1,5 +1,5 @@
-import React, { useEffect } from 'react';
-import { View, Text, StyleSheet, ActivityIndicator, TouchableOpacity } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, Text, StyleSheet, ActivityIndicator, TouchableOpacity, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useChallengeStore } from '../store/challenge-store';
 import { ChallengeCard } from '../components/challenge-card';
@@ -10,11 +10,14 @@ import Animated, { useAnimatedScrollHandler } from 'react-native-reanimated';
 import { useCollapsibleTab } from '../../../shared/context/CollapsibleTabContext';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+type FilterType = 'ALL' | 'FREE' | 'PREMIUM' | 'AI ALLOWED' | 'ENDING SOON';
+
 export default function ChallengesExploreScreen() {
   const { challenges, loading, fetchChallenges } = useChallengeStore();
   const router = useRouter();
   const { scrollY, headerHeight, tabBarHeight } = useCollapsibleTab();
   const { top } = useSafeAreaInsets();
+  const [activeFilter, setActiveFilter] = useState<FilterType>('ALL');
 
   useEffect(() => {
     fetchChallenges();
@@ -30,6 +33,58 @@ export default function ChallengesExploreScreen() {
     router.push(`/challenges/${challenge.id}`);
   };
 
+  const filteredChallenges = challenges.filter(c => {
+    switch (activeFilter) {
+      case 'FREE': return c.type === 'free';
+      case 'PREMIUM': return c.is_premium || c.type === 'subscriber';
+      case 'AI ALLOWED': return c.ai_allowed;
+      case 'ENDING SOON': 
+        // Simple check for demo: if deadline is within next 30 days
+        // In real app, use proper date library like date-fns
+        const deadline = new Date(c.deadline);
+        const now = new Date();
+        const diffTime = Math.abs(deadline.getTime() - now.getTime());
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
+        return diffDays <= 30;
+      default: return true;
+    }
+  });
+
+  const FilterChip = ({ label, type }: { label: FilterType, type?: 'default' | 'premium' | 'ai' | 'urgent' }) => {
+    const isActive = activeFilter === label;
+    
+    let activeColor = NEO_THEME.colors.black;
+    if (type === 'premium') activeColor = NEO_THEME.colors.yellow;
+    if (type === 'ai') activeColor = NEO_THEME.colors.primary;
+    if (type === 'urgent') activeColor = NEO_THEME.colors.error;
+
+    const getTextColor = () => {
+      if (!isActive) return NEO_THEME.colors.black;
+      // Yellow background needs black text, others (Black, Primary, Error) need white
+      if (type === 'premium') return NEO_THEME.colors.black;
+      return NEO_THEME.colors.white;
+    };
+
+    return (
+      <TouchableOpacity
+        style={[
+          styles.filterChip,
+          isActive && { backgroundColor: activeColor },
+          isActive && type === 'ai' && { borderColor: NEO_THEME.colors.black }
+        ]}
+        onPress={() => setActiveFilter(label)}
+        activeOpacity={0.8}
+      >
+        <Text style={[
+          styles.filterText,
+          { color: getTextColor() }
+        ]}>
+          {label}
+        </Text>
+      </TouchableOpacity>
+    );
+  };
+
   if (loading && challenges.length === 0) {
     return (
       <View style={[styles.loadingContainer, { paddingTop: headerHeight + tabBarHeight + top }]}>
@@ -43,7 +98,7 @@ export default function ChallengesExploreScreen() {
       onScroll={onScroll}
       scrollEventThrottle={16}
       contentContainerStyle={{
-        paddingTop: headerHeight + tabBarHeight + top + 20, // Header + TabBar + StatusBar + Spacing
+        paddingTop: headerHeight + tabBarHeight + top + 20,
         paddingBottom: 100,
         paddingHorizontal: 20,
         gap: 16,
@@ -67,13 +122,31 @@ export default function ChallengesExploreScreen() {
         </View>
       </TouchableOpacity>
 
-      {challenges.map((item) => (
+      <ScrollView 
+        horizontal 
+        showsHorizontalScrollIndicator={false} 
+        contentContainerStyle={styles.filterContainer}
+      >
+        <FilterChip label="ALL" />
+        <FilterChip label="FREE" />
+        <FilterChip label="PREMIUM" type="premium" />
+        <FilterChip label="AI ALLOWED" type="ai" />
+        <FilterChip label="ENDING SOON" type="urgent" />
+      </ScrollView>
+
+      {filteredChallenges.map((item) => (
         <ChallengeCard 
           key={item.id} 
           challenge={item} 
           onPress={handlePressChallenge} 
         />
       ))}
+      
+      {filteredChallenges.length === 0 && (
+        <View style={styles.emptyState}>
+          <Text style={styles.emptyText}>No challenges found matching this filter.</Text>
+        </View>
+      )}
     </Animated.ScrollView>
   );
 }
@@ -126,5 +199,32 @@ const styles = StyleSheet.create({
     fontFamily: NEO_THEME.fonts.regular,
     fontSize: 12,
     color: NEO_THEME.colors.greyLight,
+  },
+  filterContainer: {
+    gap: 8,
+    paddingBottom: 4, // Space for shadow
+  },
+  filterChip: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+    backgroundColor: NEO_THEME.colors.white,
+    borderWidth: 2,
+    borderColor: NEO_THEME.colors.black,
+    marginRight: 4,
+  },
+  filterText: {
+    fontFamily: NEO_THEME.fonts.bold,
+    fontSize: 12,
+    color: NEO_THEME.colors.black,
+  },
+  emptyState: {
+    padding: 40,
+    alignItems: 'center',
+  },
+  emptyText: {
+    fontFamily: NEO_THEME.fonts.regular,
+    fontSize: 14,
+    color: NEO_THEME.colors.grey,
   },
 });

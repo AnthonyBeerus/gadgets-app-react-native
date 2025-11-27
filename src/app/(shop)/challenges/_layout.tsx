@@ -46,7 +46,7 @@ export default function ChallengesLayout() {
             />
           )}
           screenOptions={{
-            swipeEnabled: true,
+            swipeEnabled: false,
             animationEnabled: true,
             lazy: true,
           }}
