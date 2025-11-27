@@ -7,6 +7,11 @@ import { NEO_THEME } from '../../../shared/constants/neobrutalism';
 import { useChallengeStore } from '../store/challenge-store';
 import { Challenge } from '../types/challenge';
 import { StaticHeader } from '../../../shared/components/layout/StaticHeader';
+import { ChallengeBadge } from '../components/ChallengeBadge';
+import { RewardCard } from '../components/RewardCard';
+import { RequirementsList } from '../components/RequirementsList';
+import { AIPromoCard } from '../components/AIPromoCard';
+import { MetaInfoCard } from '../components/MetaInfoCard';
 
 export default function ChallengeDetailsScreen() {
   const { id } = useLocalSearchParams();
@@ -53,84 +58,37 @@ export default function ChallengeDetailsScreen() {
         <View style={styles.headerSection}>
           <View style={styles.badgesRow}>
             {isPremium && (
-              <View style={styles.premiumBadge}>
-                <Ionicons name="star" size={12} color={NEO_THEME.colors.black} />
-                <Text style={styles.premiumText}>PLUS MEMBER ONLY</Text>
-              </View>
+              <ChallengeBadge type="premium" text="PLUS MEMBER ONLY" icon="star" />
             )}
             {isPaid && (
-              <View style={styles.feeBadge}>
-                <Ionicons name="diamond" size={12} color={NEO_THEME.colors.white} />
-                <Text style={styles.feeText}>ENTRY: {challenge.entry_fee} GEMS</Text>
-              </View>
+              <ChallengeBadge type="fee" text={`ENTRY: ${challenge.entry_fee} GEMS`} icon="diamond" />
             )}
-            <View style={styles.statusBadge}>
-              <Text style={styles.statusText}>{challenge.status.toUpperCase()}</Text>
-            </View>
+            <ChallengeBadge type="status" text={challenge.status.toUpperCase()} />
             {challenge.ai_allowed && (
-              <View style={styles.aiBadge}>
-                <Ionicons name="sparkles" size={12} color={NEO_THEME.colors.white} />
-                <Text style={styles.aiBadgeText}>AI ALLOWED</Text>
-              </View>
+              <ChallengeBadge type="ai" text="AI ALLOWED" icon="sparkles" />
             )}
           </View>
           
           <Text style={styles.title}>{challenge.title.toUpperCase()}</Text>
           <Text style={styles.description}>{challenge.description}</Text>
 
-          {/* AI Promo Banner */}
-          <TouchableOpacity 
-            style={styles.aiPromo}
-            activeOpacity={0.9}
-            onPress={() => router.push('/gem-shop/ai-tools')}
-          >
-            <View style={styles.aiPromoIcon}>
-              <Ionicons name="color-wand" size={20} color={NEO_THEME.colors.white} />
-            </View>
-            <View style={styles.aiPromoContent}>
-              <Text style={styles.aiPromoTitle}>NEED AN EDGE?</Text>
-              <Text style={styles.aiPromoText}>Use AI Tools to create winning content</Text>
-            </View>
-            <Ionicons name="chevron-forward" size={20} color={NEO_THEME.colors.black} />
-          </TouchableOpacity>
+          <AIPromoCard onPress={() => router.push('/gem-shop/ai-tools')} />
         </View>
 
         {/* Reward Section */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>THE REWARD</Text>
-          <View style={styles.rewardCard}>
-            <Ionicons name="trophy" size={32} color={NEO_THEME.colors.yellow} />
-            <Text style={styles.rewardText}>{challenge.reward}</Text>
-          </View>
+          <RewardCard reward={challenge.reward} />
         </View>
 
         {/* Requirements */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>REQUIREMENTS</Text>
-          <View style={styles.requirementsList}>
-            {challenge.requirements.map((req, index) => (
-              <View key={index} style={styles.reqItem}>
-                <Ionicons name="checkmark-circle" size={20} color={NEO_THEME.colors.success} />
-                <Text style={styles.reqText}>{req}</Text>
-              </View>
-            ))}
-          </View>
+          <RequirementsList requirements={challenge.requirements} />
         </View>
 
         {/* Deadline & Participants */}
-        <View style={styles.metaSection}>
-          <View style={styles.metaItem}>
-            <Ionicons name="time" size={20} color={NEO_THEME.colors.black} />
-            <Text style={styles.metaLabel}>Deadline</Text>
-            <Text style={styles.metaValue}>{challenge.deadline}</Text>
-          </View>
-          <View style={styles.metaDivider} />
-          <View style={styles.metaItem}>
-            <Ionicons name="people" size={20} color={NEO_THEME.colors.black} />
-            <Text style={styles.metaLabel}>Joined</Text>
-            <Text style={styles.metaValue}>{challenge.participants_count}</Text>
-          </View>
-        </View>
+        <MetaInfoCard deadline={challenge.deadline} participants={challenge.participants_count} />
       </ScrollView>
 
       {/* Sticky Footer CTA */}
@@ -225,51 +183,6 @@ const styles = StyleSheet.create({
     gap: 8,
     marginBottom: 12,
   },
-  premiumBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: NEO_THEME.colors.yellow,
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    borderRadius: NEO_THEME.borders.radius,
-    gap: 4,
-    borderWidth: 2,
-    borderColor: NEO_THEME.colors.black,
-  },
-  premiumText: {
-    fontFamily: NEO_THEME.fonts.black,
-    fontSize: 10,
-    color: NEO_THEME.colors.black,
-  },
-  feeBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: NEO_THEME.colors.primary,
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    borderRadius: NEO_THEME.borders.radius,
-    gap: 4,
-    borderWidth: 2,
-    borderColor: NEO_THEME.colors.black,
-  },
-  feeText: {
-    fontFamily: NEO_THEME.fonts.black,
-    fontSize: 10,
-    color: NEO_THEME.colors.white,
-  },
-  statusBadge: {
-    backgroundColor: NEO_THEME.colors.greyLight,
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    borderRadius: NEO_THEME.borders.radius,
-    borderWidth: 2,
-    borderColor: NEO_THEME.colors.black,
-  },
-  statusText: {
-    fontFamily: NEO_THEME.fonts.bold,
-    fontSize: 10,
-    color: NEO_THEME.colors.black,
-  },
   title: {
     fontFamily: NEO_THEME.fonts.black,
     fontSize: 28,
@@ -295,67 +208,6 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     textTransform: 'uppercase',
   },
-  rewardCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: NEO_THEME.colors.black,
-    padding: 20,
-    borderRadius: NEO_THEME.borders.radius,
-    gap: 16,
-    // Hard shadow
-    shadowColor: NEO_THEME.colors.grey,
-    shadowOffset: { width: 4, height: 4 },
-    shadowOpacity: 1,
-    shadowRadius: 0,
-    elevation: 4,
-  },
-  rewardText: {
-    fontFamily: NEO_THEME.fonts.black,
-    fontSize: 20,
-    color: NEO_THEME.colors.white,
-    flex: 1,
-  },
-  requirementsList: {
-    gap: 12,
-  },
-  reqItem: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: 12,
-  },
-  reqText: {
-    fontFamily: NEO_THEME.fonts.regular,
-    fontSize: 16,
-    color: NEO_THEME.colors.black,
-    flex: 1,
-    lineHeight: 22,
-  },
-  metaSection: {
-    flexDirection: 'row',
-    padding: 20,
-    backgroundColor: NEO_THEME.colors.white,
-    marginBottom: 20,
-  },
-  metaItem: {
-    flex: 1,
-    alignItems: 'center',
-    gap: 4,
-  },
-  metaDivider: {
-    width: 2,
-    backgroundColor: NEO_THEME.colors.greyLight,
-  },
-  metaLabel: {
-    fontFamily: NEO_THEME.fonts.regular,
-    fontSize: 12,
-    color: NEO_THEME.colors.grey,
-    textTransform: 'uppercase',
-  },
-  metaValue: {
-    fontFamily: NEO_THEME.fonts.black,
-    fontSize: 18,
-    color: NEO_THEME.colors.black,
-  },
   footer: {
     position: 'absolute',
     bottom: 0,
@@ -375,7 +227,6 @@ const styles = StyleSheet.create({
     gap: 8,
     borderWidth: NEO_THEME.borders.width,
     borderColor: NEO_THEME.colors.black,
-    // Hard shadow
     shadowColor: NEO_THEME.colors.grey,
     shadowOffset: { width: 4, height: 4 },
     shadowOpacity: 1,
@@ -386,53 +237,5 @@ const styles = StyleSheet.create({
     fontFamily: NEO_THEME.fonts.black,
     fontSize: 16,
     textTransform: 'uppercase',
-  },
-  aiBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: NEO_THEME.colors.primary,
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    borderRadius: NEO_THEME.borders.radius,
-    gap: 4,
-    borderWidth: 2,
-    borderColor: NEO_THEME.colors.black,
-  },
-  aiBadgeText: {
-    fontFamily: NEO_THEME.fonts.black,
-    fontSize: 10,
-    color: NEO_THEME.colors.white,
-  },
-  aiPromo: {
-    marginTop: 20,
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: NEO_THEME.colors.yellow,
-    padding: 12,
-    borderRadius: NEO_THEME.borders.radius,
-    borderWidth: NEO_THEME.borders.width,
-    borderColor: NEO_THEME.colors.black,
-    gap: 12,
-  },
-  aiPromoIcon: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: NEO_THEME.colors.black,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  aiPromoContent: {
-    flex: 1,
-  },
-  aiPromoTitle: {
-    fontFamily: NEO_THEME.fonts.black,
-    fontSize: 14,
-    color: NEO_THEME.colors.black,
-  },
-  aiPromoText: {
-    fontFamily: NEO_THEME.fonts.regular,
-    fontSize: 12,
-    color: NEO_THEME.colors.black,
   },
 });

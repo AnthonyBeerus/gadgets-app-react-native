@@ -1,11 +1,14 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, TextInput, Image } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TextInput, TouchableOpacity } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { NEO_THEME } from '../../../shared/constants/neobrutalism';
 import { StaticHeader } from '../../../shared/components/layout/StaticHeader';
 import { useChallengeStore } from '../store/challenge-store';
+import { AICreateButton } from '../components/AICreateButton';
+import { UploadBox } from '../../../shared/components/ui/UploadBox';
+import { InfoBox } from '../../../shared/components/ui/InfoBox';
 
 export default function ChallengeEntryScreen() {
   const { id } = useLocalSearchParams();
@@ -28,29 +31,11 @@ export default function ChallengeEntryScreen() {
         </View>
 
         <View style={styles.uploadSection}>
-          <TouchableOpacity 
-            style={styles.aiCreateButton}
-            activeOpacity={0.9}
+          <AICreateButton 
             onPress={() => router.push('/gem-shop/ai-tools')}
-          >
-            <View style={styles.aiCreateIcon}>
-              <Ionicons name="sparkles" size={24} color={NEO_THEME.colors.white} />
-            </View>
-            <View style={styles.aiCreateContent}>
-              <Text style={styles.aiCreateTitle}>CREATE WITH AI</Text>
-              <Text style={styles.aiCreateSubtitle}>Stand out with professional AI tools</Text>
-            </View>
-            <View style={styles.gemCost}>
-              <Ionicons name="diamond" size={12} color={NEO_THEME.colors.black} />
-              <Text style={styles.gemCostText}>FROM 10</Text>
-            </View>
-          </TouchableOpacity>
-
-          <View style={styles.uploadBox}>
-            <Ionicons name="cloud-upload-outline" size={48} color={NEO_THEME.colors.grey} />
-            <Text style={styles.uploadText}>Tap to upload your content</Text>
-            <Text style={styles.uploadSubtext}>Supports JPG, PNG, MP4</Text>
-          </View>
+            gemCost={10}
+          />
+          <UploadBox />
         </View>
 
         <View style={styles.formSection}>
@@ -64,20 +49,18 @@ export default function ChallengeEntryScreen() {
           />
         </View>
 
-        <View style={styles.infoBox}>
-          <Ionicons name="information-circle" size={24} color={NEO_THEME.colors.black} />
-          <Text style={styles.infoText}>
-            By submitting, you agree to the challenge rules and grant us permission to feature your content.
-          </Text>
+        <View style={styles.infoBoxContainer}>
+          <InfoBox 
+            type="warning"
+            message="By submitting, you agree to the challenge rules and grant us permission to feature your content."
+          />
         </View>
 
         <TouchableOpacity 
           style={styles.submitButton}
           activeOpacity={0.9}
           onPress={() => {
-            // Mock success flow
-            router.push('/(shop)/challenges'); // Or a success screen
-            // In a real app, we'd show a success modal first
+            router.push('/(shop)/challenges');
           }}
         >
           <Text style={styles.submitText}>SUBMIT ENTRY</Text>
@@ -113,27 +96,6 @@ const styles = StyleSheet.create({
   uploadSection: {
     marginBottom: 24,
   },
-  uploadBox: {
-    height: 200,
-    borderWidth: 2,
-    borderColor: NEO_THEME.colors.grey,
-    borderStyle: 'dashed',
-    borderRadius: NEO_THEME.borders.radius,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: NEO_THEME.colors.white,
-    gap: 12,
-  },
-  uploadText: {
-    fontFamily: NEO_THEME.fonts.bold,
-    fontSize: 16,
-    color: NEO_THEME.colors.black,
-  },
-  uploadSubtext: {
-    fontFamily: NEO_THEME.fonts.regular,
-    fontSize: 12,
-    color: NEO_THEME.colors.grey,
-  },
   formSection: {
     marginBottom: 24,
   },
@@ -155,23 +117,8 @@ const styles = StyleSheet.create({
     textAlignVertical: 'top',
     minHeight: 120,
   },
-  infoBox: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    backgroundColor: NEO_THEME.colors.yellow,
-    padding: 16,
-    borderRadius: NEO_THEME.borders.radius,
-    borderWidth: NEO_THEME.borders.width,
-    borderColor: NEO_THEME.colors.black,
-    gap: 12,
+  infoBoxContainer: {
     marginBottom: 32,
-  },
-  infoText: {
-    flex: 1,
-    fontFamily: NEO_THEME.fonts.regular,
-    fontSize: 12,
-    color: NEO_THEME.colors.black,
-    lineHeight: 18,
   },
   submitButton: {
     flexDirection: 'row',
@@ -181,7 +128,6 @@ const styles = StyleSheet.create({
     padding: 16,
     borderRadius: NEO_THEME.borders.radius,
     gap: 8,
-    // Hard shadow
     shadowColor: NEO_THEME.colors.grey,
     shadowOffset: { width: 4, height: 4 },
     shadowOpacity: 1,
@@ -193,59 +139,5 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: NEO_THEME.colors.white,
     textTransform: 'uppercase',
-  },
-  aiCreateButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: NEO_THEME.colors.primary,
-    padding: 16,
-    borderRadius: NEO_THEME.borders.radius,
-    borderWidth: NEO_THEME.borders.width,
-    borderColor: NEO_THEME.colors.black,
-    marginBottom: 16,
-    gap: 12,
-    // Hard shadow
-    shadowColor: NEO_THEME.colors.grey,
-    shadowOffset: { width: 4, height: 4 },
-    shadowOpacity: 1,
-    shadowRadius: 0,
-    elevation: 4,
-  },
-  aiCreateIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: NEO_THEME.colors.black,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  aiCreateContent: {
-    flex: 1,
-  },
-  aiCreateTitle: {
-    fontFamily: NEO_THEME.fonts.black,
-    fontSize: 16,
-    color: NEO_THEME.colors.white,
-  },
-  aiCreateSubtitle: {
-    fontFamily: NEO_THEME.fonts.regular,
-    fontSize: 12,
-    color: NEO_THEME.colors.white,
-  },
-  gemCost: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: NEO_THEME.colors.white,
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: NEO_THEME.borders.radius,
-    gap: 4,
-    borderWidth: 1,
-    borderColor: NEO_THEME.colors.black,
-  },
-  gemCostText: {
-    fontFamily: NEO_THEME.fonts.bold,
-    fontSize: 12,
-    color: NEO_THEME.colors.black,
   },
 });
