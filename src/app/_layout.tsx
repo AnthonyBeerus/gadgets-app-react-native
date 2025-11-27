@@ -2,10 +2,19 @@ import { Stack } from "expo-router";
 import { ToastProvider } from "react-native-toast-notifications";
 import AuthProvider from "../shared/providers/auth-provider";
 import QueryProvider from "../shared/providers/query-provider";
-import { StripeProvider } from "@stripe/stripe-react-native";
 import NotificationProvider from "../shared/providers/notification-provider";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { RevenueCatProvider } from "../shared/providers/RevenueCatProvider";
+import { Platform } from "react-native";
+import React from "react";
+
+// Conditionally import Stripe only on native platforms
+let StripeProvider: any = ({ children }: { children: React.ReactNode }) => <>{children}</>;
+
+if (Platform.OS !== 'web') {
+  const stripe = require("@stripe/stripe-react-native");
+  StripeProvider = stripe.StripeProvider;
+}
 
 export default function RootLayout() {
   return (
@@ -39,6 +48,7 @@ export default function RootLayout() {
                     options={{
                       presentation: "modal",
                       headerShown: false,
+                      title: "Cart",
                     }}
                   />
                   <Stack.Screen
@@ -68,19 +78,37 @@ export default function RootLayout() {
                     }}
                   />
                   <Stack.Screen
-                    name="challenges"
-                    options={{
-                      headerShown: false,
-                    }}
+                    name="auth"
+                    options={{ headerShown: false, title: "Auth" }}
                   />
-                  <Stack.Screen 
-                    name="paywall" 
+                  <Stack.Screen
+                    name="order-details"
+                    options={{ headerShown: false, title: "Order Details" }}
+                  />
+                  <Stack.Screen
+                    name="my-orders"
+                    options={{ headerShown: false, title: "My Orders" }}
+                  />
+                  <Stack.Screen
+                    name="profile"
+                    options={{ headerShown: false, title: "Profile" }}
+                  />
+                  <Stack.Screen
+                    name="edit-profile"
+                    options={{ headerShown: false, title: "Edit Profile" }}
+                  />
+                  <Stack.Screen
+                    name="challenges"
+                    options={{ headerShown: false, title: "Challenges" }}
+                  />
+                  <Stack.Screen
+                    name="paywall"
                     options={{ 
                       presentation: "modal",
-                      headerShown: false 
-                    }} 
+                      headerShown: false, 
+                      title: "Upgrade to Pro" 
+                    }}
                   />
-                  <Stack.Screen name="auth" options={{ headerShown: false }} />
                 </Stack>
                 </RevenueCatProvider>
               </NotificationProvider>
