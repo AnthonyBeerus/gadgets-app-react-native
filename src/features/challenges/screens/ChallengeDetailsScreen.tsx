@@ -12,12 +12,14 @@ import { RewardCard } from '../components/RewardCard';
 import { RequirementsList } from '../components/RequirementsList';
 import { AIPromoCard } from '../components/AIPromoCard';
 import { MetaInfoCard } from '../components/MetaInfoCard';
+import { useEntitlements } from '../../../shared/hooks/useEntitlements';
 
 export default function ChallengeDetailsScreen() {
   const { id } = useLocalSearchParams();
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { challenges } = useChallengeStore();
+  const { isMusePro } = useEntitlements();
   const [challenge, setChallenge] = useState<Challenge | null>(null);
 
   useEffect(() => {
@@ -102,14 +104,22 @@ export default function ChallengeDetailsScreen() {
           ]}
           activeOpacity={0.9}
           onPress={() => {
-            router.push(`/challenges/entry/${challenge.id}`);
+            // If premium challenge and user doesn't have Muse Pro, show paywall
+            if (isPremium && !isMusePro) {
+              router.push('/paywall');
+            } else if (isPaid) {
+              // TODO: Handle gem purchase
+               router.push(`/challenges/entry/${challenge.id}`);
+            } else {
+              router.push(`/challenges/entry/${challenge.id}`);
+            }
           }}
         >
           <Text style={[
             styles.ctaText,
             (isPremium || isPaid) ? { color: NEO_THEME.colors.black } : { color: NEO_THEME.colors.white }
           ]}>
-            {isPremium ? 'UNLOCK WITH PLUS' : 
+            {isPremium && !isMusePro ? 'UNLOCK WITH MUSE PRO' : 
              isPaid ? `UNLOCK FOR ${challenge.entry_fee} GEMS` : 
              'JOIN CHALLENGE'}
           </Text>

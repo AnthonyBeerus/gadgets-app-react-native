@@ -5,6 +5,7 @@ import QueryProvider from "../shared/providers/query-provider";
 import { StripeProvider } from "@stripe/stripe-react-native";
 import NotificationProvider from "../shared/providers/notification-provider";
 import { SafeAreaProvider } from "react-native-safe-area-context";
+import { RevenueCatProvider } from "../shared/providers/RevenueCatProvider";
 
 export default function RootLayout() {
   return (
@@ -15,6 +16,7 @@ export default function RootLayout() {
             <StripeProvider
               publishableKey={process.env.EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY!}>
               <NotificationProvider>
+                <RevenueCatProvider>
                 <Stack>
                   <Stack.Screen
                     name="(shop)"
@@ -71,8 +73,16 @@ export default function RootLayout() {
                       headerShown: false,
                     }}
                   />
+                  <Stack.Screen 
+                    name="paywall" 
+                    options={{ 
+                      presentation: "modal",
+                      headerShown: false 
+                    }} 
+                  />
                   <Stack.Screen name="auth" options={{ headerShown: false }} />
                 </Stack>
+                </RevenueCatProvider>
               </NotificationProvider>
             </StripeProvider>
           </QueryProvider>
