@@ -10,6 +10,11 @@ export interface Challenge {
   image_url: string;
   requirements: string[];
   status: 'active' | 'completed' | 'upcoming';
+  entry_fee?: number; // Gems required
+  is_premium?: boolean; // Subscriber only
+  type: 'free' | 'paid' | 'subscriber';
+  category?: string;
+  ai_allowed?: boolean;
 }
 
 export interface ChallengeSubmission {

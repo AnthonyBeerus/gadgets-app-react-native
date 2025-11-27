@@ -23,9 +23,24 @@ export const ChallengeCard = ({ challenge, onPress }: ChallengeCardProps) => {
             <Ionicons name="business" size={12} color="#fff" />
             <Text style={styles.brandName}>{challenge.brand_name}</Text>
           </View>
-          <View style={styles.participantsBadge}>
-            <Ionicons name="people" size={12} color="#fff" />
-            <Text style={styles.participantsText}>{challenge.participants_count}</Text>
+          
+          <View style={styles.badgesRow}>
+            {challenge.is_premium && (
+              <View style={styles.premiumBadge}>
+                <Ionicons name="star" size={12} color={NEO_THEME.colors.black} />
+                <Text style={styles.premiumText}>PLUS</Text>
+              </View>
+            )}
+            {challenge.entry_fee ? (
+              <View style={styles.feeBadge}>
+                <Ionicons name="diamond" size={12} color={NEO_THEME.colors.white} />
+                <Text style={styles.feeText}>{challenge.entry_fee}</Text>
+              </View>
+            ) : (
+              <View style={styles.freeBadge}>
+                <Text style={styles.freeText}>FREE</Text>
+              </View>
+            )}
           </View>
         </View>
         
@@ -35,9 +50,15 @@ export const ChallengeCard = ({ challenge, onPress }: ChallengeCardProps) => {
             <Ionicons name="trophy" size={14} color="#FFD700" />
             <Text style={styles.rewardText}>{challenge.reward}</Text>
           </View>
-          <View style={styles.deadlineContainer}>
-            <Ionicons name="time-outline" size={12} color="#E0E0E0" />
-            <Text style={styles.deadlineText}>Ends {challenge.deadline}</Text>
+          <View style={styles.metaRow}>
+            <View style={styles.deadlineContainer}>
+              <Ionicons name="time-outline" size={12} color="#E0E0E0" />
+              <Text style={styles.deadlineText}>Ends {challenge.deadline}</Text>
+            </View>
+            <View style={styles.participantsContainer}>
+              <Ionicons name="people" size={12} color="#E0E0E0" />
+              <Text style={styles.deadlineText}>{challenge.participants_count} joined</Text>
+            </View>
           </View>
         </View>
       </View>
@@ -94,22 +115,68 @@ const styles = StyleSheet.create({
     fontFamily: NEO_THEME.fonts.black,
     textTransform: 'uppercase',
   },
-  participantsBadge: {
+  badgesRow: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  premiumBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: NEO_THEME.colors.yellow,
+    paddingHorizontal: 8,
+    paddingVertical: 6,
+    borderRadius: NEO_THEME.borders.radius,
+    gap: 4,
+    borderWidth: 2,
+    borderColor: NEO_THEME.colors.black,
+  },
+  premiumText: {
+    color: NEO_THEME.colors.black,
+    fontSize: 10,
+    fontWeight: '900',
+    fontFamily: NEO_THEME.fonts.black,
+  },
+  feeBadge: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: NEO_THEME.colors.primary,
-    paddingHorizontal: 10,
+    paddingHorizontal: 8,
     paddingVertical: 6,
     borderRadius: NEO_THEME.borders.radius,
     gap: 4,
     borderWidth: 2,
     borderColor: NEO_THEME.colors.white,
   },
-  participantsText: {
+  feeText: {
     color: NEO_THEME.colors.white,
-    fontSize: 12,
+    fontSize: 10,
     fontWeight: '900',
     fontFamily: NEO_THEME.fonts.black,
+  },
+  freeBadge: {
+    backgroundColor: NEO_THEME.colors.success,
+    paddingHorizontal: 8,
+    paddingVertical: 6,
+    borderRadius: NEO_THEME.borders.radius,
+    borderWidth: 2,
+    borderColor: NEO_THEME.colors.white,
+  },
+  freeText: {
+    color: NEO_THEME.colors.white,
+    fontSize: 10,
+    fontWeight: '900',
+    fontFamily: NEO_THEME.fonts.black,
+  },
+  metaRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 4,
+  },
+  participantsContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
   },
   footer: {
     gap: 8,

@@ -20,7 +20,9 @@ const MOCK_CHALLENGES: Challenge[] = [
     participants_count: 124,
     image_url: "https://images.unsplash.com/photo-1519389950473-47ba0277781c?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80",
     requirements: ["Must show product logo", "Use hashtag #TechWaveSummer", "High resolution video"],
-    status: 'active'
+    status: 'active',
+    type: 'free',
+    ai_allowed: true,
   },
   {
     id: 2,
@@ -32,7 +34,10 @@ const MOCK_CHALLENGES: Challenge[] = [
     participants_count: 89,
     image_url: "https://images.unsplash.com/photo-1556656793-02715d8dd660?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80",
     requirements: ["Clear audio", "Good lighting", "Honest first impressions"],
-    status: 'active'
+    status: 'active',
+    type: 'paid',
+    entry_fee: 50,
+    ai_allowed: false,
   },
   {
     id: 3,
@@ -44,7 +49,10 @@ const MOCK_CHALLENGES: Challenge[] = [
     participants_count: 342,
     image_url: "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80",
     requirements: ["Action shots", "Mention key features", "Energetic music"],
-    status: 'upcoming'
+    status: 'upcoming',
+    type: 'subscriber',
+    is_premium: true,
+    ai_allowed: true,
   }
 ];
 

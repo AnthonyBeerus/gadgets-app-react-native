@@ -26,7 +26,7 @@ export default function ChallengesScreen() {
   });
 
   const handlePressChallenge = (challenge: Challenge) => {
-    console.log('Pressed challenge:', challenge.title);
+    router.push(`/challenges/${challenge.id}`);
   };
 
   if (loading && challenges.length === 0) {
