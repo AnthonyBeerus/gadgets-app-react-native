@@ -4,6 +4,7 @@ import * as SecureStore from 'expo-secure-store';
 import * as aesjs from 'aes-js';
 import 'react-native-get-random-values';
 import { Database } from '../types/database.types';
+import { Platform } from 'react-native';
 
 const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL!;
 const supabaseAnonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY!;
@@ -65,11 +66,31 @@ class LargeSecureStore {
   }
 }
 
-export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
-  auth: {
-    storage: new LargeSecureStore(),
-    autoRefreshToken: true,
-    persistSession: true,
-    detectSessionInUrl: false,
-  },
-});
+// Create a dummy client for SSR/web bundling
+const createDummyClient = () => {
+  return {
+    auth: {
+      getSession: async () => ({ data: { session: null }, error: null }),
+      signOut: async () => ({ error: null }),
+    },
+    from: () => ({
+      select: () => ({ data: [], error: null }),
+      insert: () => ({ data: null, error: null }),
+      update: () => ({ data: null, error: null }),
+      delete: () => ({ data: null, error: null }),
+    }),
+  } as any;
+};
+
+// Only create real client on native platforms or in browser (client-side)
+export const supabase = 
+  typeof window === 'undefined' && Platform.OS === 'web'
+    ? createDummyClient()
+    : createClient<Database>(supabaseUrl, supabaseAnonKey, {
+        auth: {
+          storage: new LargeSecureStore(),
+          autoRefreshToken: true,
+          persistSession: true,
+          detectSessionInUrl: false,
+        },
+      });
