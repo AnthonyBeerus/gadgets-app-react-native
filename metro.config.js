@@ -1,7 +1,7 @@
-const { getDefaultConfig } = require("expo/metro-config");
+const { getSentryExpoConfig } = require("@sentry/react-native/metro");
 
 /** @type {import('expo/metro-config').MetroConfig} */
-const config = getDefaultConfig(__dirname);
+const config = getSentryExpoConfig(__dirname);
 
 // Block whatwg-fetch and use cross-fetch instead
 config.resolver.blockList = [/node_modules\/whatwg-fetch\/.*/];

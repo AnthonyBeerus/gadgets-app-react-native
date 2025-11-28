@@ -8,6 +8,13 @@ import { RevenueCatProvider } from "../shared/providers/RevenueCatProvider";
 import { Platform } from "react-native";
 import React from "react";
 
+import * as Sentry from '@sentry/react-native';
+
+Sentry.init({
+  dsn: process.env.EXPO_PUBLIC_SENTRY_DSN,
+  debug: __DEV__, // Only enable debug in development
+});
+
 // Conditionally import Stripe only on native platforms
 let StripeProvider: any = ({ children }: { children: React.ReactNode }) => <>{children}</>;
 
@@ -16,7 +23,7 @@ if (Platform.OS !== 'web') {
   StripeProvider = stripe.StripeProvider;
 }
 
-export default function RootLayout() {
+function RootLayout() {
   return (
     <SafeAreaProvider>
       <ToastProvider>
@@ -119,3 +126,5 @@ export default function RootLayout() {
     </SafeAreaProvider>
   );
 }
+
+export default Sentry.wrap(RootLayout);

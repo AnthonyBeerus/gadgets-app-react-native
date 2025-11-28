@@ -37,6 +37,13 @@
           "isAccessMediaLocationEnabled": true,
           "granularPermissions": ["audio", "photo"]
         }
+      ],
+      [
+        "@sentry/react-native/expo",
+        {
+          "organization": "kaizen-dynamics",
+          "project": "muse"
+        }
       ]
     ],
     "extra": {
