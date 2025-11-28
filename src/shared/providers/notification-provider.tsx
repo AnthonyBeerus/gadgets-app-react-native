@@ -40,22 +40,31 @@ const NotificationProvider = ({ children }: PropsWithChildren) => {
   };
 
   useEffect(() => {
+    // Gracefully handle notification setup failures (e.g., missing Firebase config)
     registerForPushNotificationsAsync()
       .then((token) => {
         setExpoPushToken(token ?? "");
         saveUserPushNotificationToken(token ?? "");
       })
-      .catch((error: any) => setExpoPushToken(`${error}`));
-
-    notificationListener.current =
-      Notifications.addNotificationReceivedListener((notification) => {
-        setNotification(notification);
+      .catch((error: any) => {
+        console.warn('[Notifications] Failed to register:', error.message);
+        // Don't crash the app if notifications fail
+        setExpoPushToken("");
       });
 
-    responseListener.current =
-      Notifications.addNotificationResponseReceivedListener((response) => {
-        console.log(response);
-      });
+    try {
+      notificationListener.current =
+        Notifications.addNotificationReceivedListener((notification) => {
+          setNotification(notification);
+        });
+
+      responseListener.current =
+        Notifications.addNotificationResponseReceivedListener((response) => {
+          console.log(response);
+        });
+    } catch (error) {
+      console.warn('[Notifications] Failed to add listeners:', error);
+    }
 
     return () => {
       notificationListener.current?.remove();
