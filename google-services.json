@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "28353392700",
+    "project_id": "muse-ad3a6",
+    "storage_bucket": "muse-ad3a6.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:28353392700:android:e99bdc958d6eaf4fc05339",
+        "android_client_info": {
+          "package_name": "com.kaizenicai.muse"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBTz0JCHDqSu_bayOyMut_m-qPMWrOvmZY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

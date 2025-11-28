@@ -7,6 +7,7 @@ node_modules/
 .expo/
 dist/
 web-build/
+muse-ad3a6-firebase-adminsdk-fbsvc-c0ae1ee5fd.json
 
 # Native
 *.orig.*
