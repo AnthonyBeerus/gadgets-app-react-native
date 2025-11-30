@@ -72,7 +72,7 @@ const OrdersListScreen = () => {
           </View>
         ) : (
           <View style={styles.listContainer}>
-            {orders.map((item) => renderItem(item))}
+            {orders.map((item: Tables<'order'>) => renderItem(item))}
           </View>
         )}
       </View>

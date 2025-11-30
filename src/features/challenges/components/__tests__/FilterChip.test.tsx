@@ -49,10 +49,10 @@ describe('FilterChip', () => {
     
     types.forEach(type => {
       const { getByText } = render(
-        <FilterChip label="TEST" type={type} isActive={true} onPress={mockOnPress} />
+        <FilterChip label="ALL" type={type} isActive={true} onPress={mockOnPress} />
       );
       
-      expect(getByText('TEST')).toBeTruthy();
+      expect(getByText('ALL')).toBeTruthy();
     });
   });
 });

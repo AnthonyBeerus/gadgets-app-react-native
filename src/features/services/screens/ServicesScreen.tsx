@@ -6,6 +6,7 @@ import {
 } from "react-native";
 import { router } from "expo-router";
 import { getServiceCategories } from "../../../shared/api/api";
+import { Tables } from "../../../shared/types/database.types";
 import { NEO_THEME } from "../../../shared/constants/neobrutalism";
 import { AnimatedHeaderLayout } from "../../../shared/components/layout/AnimatedHeaderLayout";
 import { CategoryCard } from "../components/CategoryCard";
@@ -73,7 +74,7 @@ const ServicesScreen = () => {
       <View style={styles.categoriesSection}>
         <Text style={styles.sectionTitle}>SERVICE CATEGORIES</Text>
         <View style={styles.categoriesGrid}>
-          {categories?.map((category) => (
+          {categories?.map((category: Tables<'service_category'>) => (
             <CategoryCard
               key={category.id}
               category={{
