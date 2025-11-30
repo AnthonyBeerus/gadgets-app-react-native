@@ -31,6 +31,7 @@ export default function ShopsScreen() {
   // Global Zustand store for all shop data and filters
   const {
     shops,
+    allShops,
     categories,
     malls,
     selectedMall,
@@ -55,12 +56,12 @@ export default function ShopsScreen() {
     }
   }, [error]);
 
-  // Featured shops for hero carousel
+  // Featured shops for hero carousel - use allShops to ignore filters
   const featuredShops = React.useMemo(() => {
-    return shops.filter(shop => 
+    return allShops.filter(shop => 
       ['Sefalana', 'La Parada', 'Cappello'].includes(shop.name)
     );
-  }, [shops]);
+  }, [allShops]);
 
   // Auto-scroll carousel
   useEffect(() => {
