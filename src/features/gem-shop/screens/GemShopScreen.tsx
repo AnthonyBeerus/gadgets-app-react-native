@@ -49,19 +49,19 @@ export default function GemShopScreen() {
           <TouchableOpacity 
             style={styles.subscriptionCard} 
             activeOpacity={0.9}
-            onPress={() => router.push('/gem-shop/membership')}
+            onPress={() => router.push('/paywall')}
           >
             <View style={styles.subHeader}>
-              <Text style={styles.subTitle}>MUSE PLUS & PREMIUM</Text>
+              <Text style={styles.subTitle}>MUSE PRO</Text>
             </View>
             <Text style={styles.subDescription}>
-              Monthly gems, exclusive badges & premium perks.
+              Unlimited AI generation, exclusive gems & premium challenges.
             </Text>
             <View style={styles.subPriceRow}>
-              <Text style={styles.subPrice}>From P49/mo</Text>
+              <Text style={styles.subPrice}>Free Trial Available</Text>
               <TouchableOpacity 
                 style={styles.buyButton}
-                onPress={() => router.push('/gem-shop/membership')}
+                onPress={() => router.push('/paywall')}
               >
                 <Text style={styles.buyButtonText}>VIEW PLANS</Text>
               </TouchableOpacity>
