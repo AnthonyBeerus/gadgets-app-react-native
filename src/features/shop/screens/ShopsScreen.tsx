@@ -10,6 +10,7 @@ import {
   Dimensions,
   ActivityIndicator,
   Alert,
+  ScrollView,
 } from "react-native";
 import Animated from "react-native-reanimated";
 import { Ionicons } from "@expo/vector-icons";
@@ -24,6 +25,8 @@ const { width } = Dimensions.get("window");
 
 export default function ShopsScreen() {
   const router = useRouter();
+  const scrollViewRef = React.useRef<ScrollView>(null);
+  const [currentSlide, setCurrentSlide] = React.useState(0);
 
   // Global Zustand store for all shop data and filters
   const {
@@ -52,12 +55,42 @@ export default function ShopsScreen() {
     }
   }, [error]);
 
+  // Featured shops for hero carousel
+  const featuredShops = React.useMemo(() => {
+    return shops.filter(shop => 
+      ['Sefalana', 'La Parada', 'Cappello'].includes(shop.name)
+    );
+  }, [shops]);
+
+  // Auto-scroll carousel
+  useEffect(() => {
+    if (featuredShops.length === 0) return;
+    
+    const interval = setInterval(() => {
+      setCurrentSlide((prev) => {
+        const next = (prev + 1) % featuredShops.length;
+        scrollViewRef.current?.scrollTo({
+          x: (width - 32) * next,
+          animated: true,
+        });
+        return next;
+      });
+    }, 4000); // Change slide every 4 seconds
+
+    return () => clearInterval(interval);
+  }, [featuredShops.length]);
+
+  const handleScroll = (event: any) => {
+    const slideIndex = Math.round(event.nativeEvent.contentOffset.x / (width - 32));
+    setCurrentSlide(slideIndex);
+  };
+
   const navigateToShop = (shopId: number) => {
     router.push(`/shop/${shopId}`);
   };
 
   const selectedMallData = malls.find((m) => m.id === selectedMall);
-  const mallName = selectedMallData?.name?.toUpperCase() || "MALL OF METROPOLIS";
+  const mallName = selectedMallData?.name?.toUpperCase() || "Malopo Crossing";
 
   const renderShopCard = ({ item }: { item: any }) => (
     <NeoShopCard shop={item} onPress={() => navigateToShop(item.id)} />
@@ -103,25 +136,55 @@ export default function ShopsScreen() {
           </View>
         </View>
 
-        {/* Hero Section */}
-        <View style={styles.heroSection}>
-          <View style={styles.heroBorder}>
-            <ImageBackground
-              source={{ uri: "https://images.unsplash.com/photo-1552346154-21d32cc4bc66?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80" }}
-              style={styles.heroImage}
+        {/* Hero Carousel */}
+        {featuredShops.length > 0 && (
+          <View style={styles.heroSection}>
+            <ScrollView
+              ref={scrollViewRef}
+              horizontal
+              pagingEnabled
+              showsHorizontalScrollIndicator={false}
+              onScroll={handleScroll}
+              scrollEventThrottle={16}
+              style={styles.carousel}
             >
-              <View style={styles.heroOverlay}>
-                <Text style={styles.heroTitle}>NEW SNEAKER DROP</Text>
-              </View>
-            </ImageBackground>
+              {featuredShops.map((shop) => (
+                <TouchableOpacity
+                  key={shop.id}
+                  activeOpacity={0.9}
+                  onPress={() => navigateToShop(shop.id)}
+                  style={styles.carouselSlide}
+                >
+                  <View style={styles.heroBorder}>
+                    <ImageBackground
+                      source={{ uri: shop.image_url || 'https://via.placeholder.com/400x200' }}
+                      style={styles.heroImage}
+                    >
+                      <View style={styles.heroOverlay}>
+                        <Text style={styles.heroTitle}>{shop.name.toUpperCase()}</Text>
+                        {shop.category && (
+                          <Text style={styles.heroSubtitle}>{shop.category.name}</Text>
+                        )}
+                      </View>
+                    </ImageBackground>
+                  </View>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+            {/* Pagination Dots */}
+            <View style={styles.pagination}>
+              {featuredShops.map((_, index) => (
+                <View
+                  key={index}
+                  style={[
+                    styles.dot,
+                    currentSlide === index && styles.activeDot
+                  ]}
+                />
+              ))}
+            </View>
           </View>
-          {/* Pagination Dots */}
-          <View style={styles.pagination}>
-            <View style={[styles.dot, styles.activeDot]} />
-            <View style={styles.dot} />
-            <View style={styles.dot} />
-          </View>
-        </View>
+        )}
 
         {/* Category Filter Pills */}
         <Animated.ScrollView 
@@ -152,19 +215,15 @@ export default function ShopsScreen() {
           ))}
         </Animated.ScrollView>
 
-        {/* Shop List */}
         <View style={styles.listContainer}>
           {loading ? (
             <ActivityIndicator size="large" color={NEO_THEME.colors.primary} style={{ marginTop: 40 }} />
           ) : (
-            <FlatList
-              data={shops}
-              renderItem={renderShopCard}
-              keyExtractor={(item) => item.id.toString()}
-              numColumns={2}
-              scrollEnabled={false}
-              columnWrapperStyle={styles.columnWrapper}
-            />
+            <>
+              {shops.map((item) => (
+                <NeoShopCard key={item.id} shop={item} onPress={() => navigateToShop(item.id)} />
+              ))}
+            </>
           )}
         </View>
       </View>
@@ -240,6 +299,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     marginBottom: 24,
   },
+  carousel: {
+    width: '100%',
+  },
+  carouselSlide: {
+    width: width - 32, // Account for padding
+  },
   heroBorder: {
     borderWidth: NEO_THEME.borders.width,
     borderColor: NEO_THEME.colors.black,
@@ -251,6 +316,7 @@ const styles = StyleSheet.create({
   },
   heroOverlay: {
     padding: 16,
+    backgroundColor: 'rgba(0,0,0,0.4)',
   },
   heroTitle: {
     fontFamily: NEO_THEME.fonts.black,
@@ -261,6 +327,15 @@ const styles = StyleSheet.create({
     textShadowRadius: 0,
     textTransform: 'uppercase',
     fontWeight: '900',
+  },
+  heroSubtitle: {
+    fontFamily: NEO_THEME.fonts.bold,
+    fontSize: 14,
+    color: NEO_THEME.colors.white,
+    textShadowColor: NEO_THEME.colors.black,
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 0,
+    marginTop: 4,
   },
   pagination: {
     flexDirection: 'row',

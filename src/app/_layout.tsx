@@ -12,6 +12,7 @@ import * as Sentry from '@sentry/react-native';
 
 Sentry.init({
   dsn: process.env.EXPO_PUBLIC_SENTRY_DSN,
+  sendDefaultPii: true,
   debug: __DEV__, // Only enable debug in development
 });
 
@@ -40,15 +41,15 @@ function RootLayout() {
                   />
                   <Stack.Screen
                     name="categories"
-                    options={{ headerShown: false, title: "Categories" }}
+                    options={{ headerShown: false, title: "Categories", animation: 'ios_from_right', }}
                   />
                   <Stack.Screen
                     name="product"
-                    options={{ headerShown: false, title: "Product" }}
+                    options={{ headerShown: false, title: "Product", animation: 'ios_from_right', }}
                   />
                   <Stack.Screen
                     name="shop"
-                    options={{ headerShown: false, title: "Shop Details" }}
+                    options={{ headerShown: false, title: "Shop Details", animation: 'ios_from_right', }}
                   />
                   <Stack.Screen
                     name="cart"
@@ -70,18 +71,21 @@ function RootLayout() {
                     options={{
                       headerShown: false,
                       title: "Appointments",
+                      animation: 'ios_from_right',
                     }}
                   />
                   <Stack.Screen
                     name="services"
                     options={{
                       headerShown: false,
+                      animation: 'ios_from_right',
                     }}
                   />
                   <Stack.Screen
                     name="gem-shop"
                     options={{
                       headerShown: false,
+                      animation: 'ios_from_right',
                     }}
                   />
                   <Stack.Screen
@@ -90,30 +94,30 @@ function RootLayout() {
                   />
                   <Stack.Screen
                     name="order-details"
-                    options={{ headerShown: false, title: "Order Details" }}
+                    options={{ headerShown: false, title: "Order Details", animation: 'ios_from_right', }}
                   />
                   <Stack.Screen
                     name="my-orders"
-                    options={{ headerShown: false, title: "My Orders" }}
+                    options={{ headerShown: false, title: "My Orders", animation: 'ios_from_right', }}
                   />
                   <Stack.Screen
                     name="profile"
-                    options={{ headerShown: false, title: "Profile" }}
+                    options={{ headerShown: false, title: "Profile", animation: 'ios_from_right', }}
                   />
                   <Stack.Screen
                     name="edit-profile"
-                    options={{ headerShown: false, title: "Edit Profile" }}
+                    options={{ headerShown: false, title: "Edit Profile", animation: 'ios_from_right', }}
                   />
                   <Stack.Screen
                     name="challenges"
-                    options={{ headerShown: false, title: "Challenges" }}
+                    options={{ headerShown: false, title: "Challenges", animation: 'ios_from_right', }}
                   />
                   <Stack.Screen
                     name="paywall"
                     options={{ 
-                      presentation: "modal",
+                      presentation: "formSheet",
                       headerShown: false, 
-                      title: "Upgrade to Pro" 
+                      title: "Upgrade to Pro",
                     }}
                   />
                 </Stack>

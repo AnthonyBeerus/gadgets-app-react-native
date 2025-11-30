@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { NEO_THEME } from '../../../shared/constants/neobrutalism';
 import { NeoView } from '../../../shared/components/ui/neo-view';
 import Animated, { useAnimatedScrollHandler } from 'react-native-reanimated';
