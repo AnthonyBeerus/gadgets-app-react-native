@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, Image, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, Image, ScrollView, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -13,6 +13,8 @@ import { RequirementsList } from '../components/RequirementsList';
 import { AIPromoCard } from '../components/AIPromoCard';
 import { MetaInfoCard } from '../components/MetaInfoCard';
 import { useEntitlements } from '../../../shared/hooks/useEntitlements';
+import { useGemStore } from '../../gems/store/gem-store';
+import { spendGems } from '../../gems/api/gems';
 
 export default function ChallengeDetailsScreen() {
   const { id } = useLocalSearchParams();
@@ -20,7 +22,9 @@ export default function ChallengeDetailsScreen() {
   const insets = useSafeAreaInsets();
   const { challenges } = useChallengeStore();
   const { isMusePro } = useEntitlements();
+  const { balance, fetchBalance } = useGemStore();
   const [challenge, setChallenge] = useState<Challenge | null>(null);
+  const [spending, setSpending] = useState(false);
 
   useEffect(() => {
     if (id && challenges.length > 0) {
@@ -28,6 +32,68 @@ export default function ChallengeDetailsScreen() {
       setChallenge(found || null);
     }
   }, [id, challenges]);
+
+  useEffect(() => {
+    fetchBalance();
+  }, []);
+
+  const handleJoinChallenge = async () => {
+    if (!challenge) return;
+
+    // Premium check
+    if (challenge.is_premium && !isMusePro) {
+      router.push('/paywall');
+      return;
+    }
+
+    // Paid check
+    if (challenge.type === 'paid' && challenge.entry_fee && challenge.entry_fee > 0) {
+      if (balance < challenge.entry_fee) {
+        Alert.alert(
+          'Not Enough Gems',
+          `You need ${challenge.entry_fee} gems to join this challenge. You have ${balance} gems.`,
+          [
+            { text: 'Cancel', style: 'cancel' },
+            { text: 'Get Gems', onPress: () => router.push('/gem-shop') }
+          ]
+        );
+        return;
+      }
+
+      Alert.alert(
+        'Join Challenge',
+        `Spend ${challenge.entry_fee} gems to join "${challenge.title}"?`,
+        [
+          { text: 'Cancel', style: 'cancel' },
+          { 
+            text: 'Join', 
+            onPress: async () => {
+              try {
+                setSpending(true);
+                await spendGems(
+                  challenge.entry_fee!, 
+                  `Joined challenge: ${challenge.title}`,
+                  { challengeId: challenge.id }
+                );
+                // Refresh balance
+                fetchBalance();
+                // Navigate to entry
+                router.push(`/challenges/entry/${challenge.id}`);
+              } catch (error) {
+                Alert.alert('Error', 'Failed to spend gems. Please try again.');
+              } finally {
+                setSpending(false);
+              }
+            } 
+          }
+        ]
+      );
+      return;
+    }
+
+    // Free challenge
+    router.push(`/challenges/entry/${challenge.id}`);
+  };
 
   if (!challenge) {
     return (
@@ -100,34 +166,32 @@ export default function ChallengeDetailsScreen() {
             styles.ctaButton, 
             isPremium ? { backgroundColor: NEO_THEME.colors.yellow } : 
             isPaid ? { backgroundColor: NEO_THEME.colors.primary } : 
-            { backgroundColor: NEO_THEME.colors.black }
+            { backgroundColor: NEO_THEME.colors.black },
+            spending && { opacity: 0.7 }
           ]}
           activeOpacity={0.9}
-          onPress={() => {
-            // If premium challenge and user doesn't have Muse Pro, show paywall
-            if (isPremium && !isMusePro) {
-              router.push('/paywall');
-            } else if (isPaid) {
-              // TODO: Handle gem purchase
-               router.push(`/challenges/entry/${challenge.id}`);
-            } else {
-              router.push(`/challenges/entry/${challenge.id}`);
-            }
-          }}
+          onPress={handleJoinChallenge}
+          disabled={spending}
         >
-          <Text style={[
-            styles.ctaText,
-            (isPremium || isPaid) ? { color: NEO_THEME.colors.black } : { color: NEO_THEME.colors.white }
-          ]}>
-            {isPremium && !isMusePro ? 'UNLOCK WITH MUSE PRO' : 
-             isPaid ? `UNLOCK FOR ${challenge.entry_fee} GEMS` : 
-             'JOIN CHALLENGE'}
-          </Text>
-          <Ionicons 
-            name="arrow-forward" 
-            size={20} 
-            color={(isPremium || isPaid) ? NEO_THEME.colors.black : NEO_THEME.colors.white} 
-          />
+          {spending ? (
+            <ActivityIndicator color={NEO_THEME.colors.black} />
+          ) : (
+            <>
+              <Text style={[
+                styles.ctaText,
+                (isPremium || isPaid) ? { color: NEO_THEME.colors.black } : { color: NEO_THEME.colors.white }
+              ]}>
+                {isPremium && !isMusePro ? 'UNLOCK WITH MUSE PRO' : 
+                 isPaid ? `UNLOCK FOR ${challenge.entry_fee} GEMS` : 
+                 'JOIN CHALLENGE'}
+              </Text>
+              <Ionicons 
+                name="arrow-forward" 
+                size={20} 
+                color={(isPremium || isPaid) ? NEO_THEME.colors.black : NEO_THEME.colors.white} 
+              />
+            </>
+          )}
         </TouchableOpacity>
       </View>
     </View>

@@ -7,9 +7,10 @@ import { Event } from '../types/event';
 interface EventCardProps {
   event: Event;
   onPress: () => void;
+  onCheckIn?: () => void;
 }
 
-export const EventCard = ({ event, onPress }: EventCardProps) => {
+export const EventCard = ({ event, onPress, onCheckIn }: EventCardProps) => {
   const availabilityPercentage =
     (event.availableTickets / event.totalTickets) * 100;
   const isAlmostSoldOut = availabilityPercentage < 20;
@@ -65,30 +66,45 @@ export const EventCard = ({ event, onPress }: EventCardProps) => {
             <Text style={styles.price}>{event.price}</Text>
           </View>
 
-          <View style={styles.availabilityContainer}>
-            {isSoldOut ? (
-              <View style={styles.soldOutBadge}>
-                <Text style={styles.soldOutText}>SOLD OUT</Text>
-              </View>
-            ) : (
-              <>
-                <Text
-                  style={[
-                    styles.availabilityText,
-                    isAlmostSoldOut && styles.lowAvailabilityText,
-                  ]}>
-                  {event.availableTickets} left
-                </Text>
-                {isAlmostSoldOut && (
-                  <MaterialIcons
-                    name="warning"
-                    size={16}
-                    color={NEO_THEME.colors.black}
-                  />
-                )}
-              </>
-            )}
-          </View>
+          {onCheckIn && (
+            <TouchableOpacity 
+              style={styles.checkInButton}
+              onPress={(e) => {
+                e.stopPropagation();
+                onCheckIn();
+              }}
+            >
+              <MaterialIcons name="check-circle" size={16} color={NEO_THEME.colors.white} />
+              <Text style={styles.checkInText}>CHECK IN (+50 GEMS)</Text>
+            </TouchableOpacity>
+          )}
+
+          {!onCheckIn && (
+            <View style={styles.availabilityContainer}>
+              {isSoldOut ? (
+                <View style={styles.soldOutBadge}>
+                  <Text style={styles.soldOutText}>SOLD OUT</Text>
+                </View>
+              ) : (
+                <>
+                  <Text
+                    style={[
+                      styles.availabilityText,
+                      isAlmostSoldOut && styles.lowAvailabilityText,
+                    ]}>
+                    {event.availableTickets} left
+                  </Text>
+                  {isAlmostSoldOut && (
+                    <MaterialIcons
+                      name="warning"
+                      size={16}
+                      color={NEO_THEME.colors.black}
+                    />
+                  )}
+                </>
+              )}
+            </View>
+          )}
         </View>
       </View>
     </TouchableOpacity>
@@ -246,6 +262,23 @@ const styles = StyleSheet.create({
     borderColor: NEO_THEME.colors.black,
   },
   soldOutText: {
+    color: NEO_THEME.colors.white,
+    fontSize: 12,
+    fontWeight: "900",
+    fontFamily: NEO_THEME.fonts.black,
+  },
+  checkInButton: {
+    backgroundColor: NEO_THEME.colors.primary,
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: NEO_THEME.borders.radius,
+    borderWidth: 2,
+    borderColor: NEO_THEME.colors.black,
+    gap: 4,
+  },
+  checkInText: {
     color: NEO_THEME.colors.white,
     fontSize: 12,
     fontWeight: "900",

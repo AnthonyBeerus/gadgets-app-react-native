@@ -1,29 +1,84 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
   ScrollView,
   TouchableOpacity,
   StyleSheet,
+  Alert,
+  ActivityIndicator,
 } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 import { NEO_THEME } from "../../../shared/constants/neobrutalism";
 import { EventCard } from "../components/EventCard";
-import { UPCOMING_EVENTS, EVENT_CATEGORIES } from "../api/mock-events";
+import { EVENT_CATEGORIES } from "../api/mock-events";
+import { fetchEvents } from "../api/events";
 import { Event } from "../types/event";
 import { AnimatedHeaderLayout } from "../../../shared/components/layout/AnimatedHeaderLayout";
+import { addGems } from "../../gems/api/gems";
+import { useGemStore } from "../../gems/store/gem-store";
 
 export default function EventsScreen() {
   const [selectedCategory, setSelectedCategory] = useState("All");
+  const [events, setEvents] = useState<Event[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [checkingIn, setCheckingIn] = useState<number | null>(null);
+  const { fetchBalance } = useGemStore();
+
+  useEffect(() => {
+    loadEvents();
+  }, []);
+
+  const loadEvents = async () => {
+    try {
+      setLoading(true);
+      const data = await fetchEvents();
+      setEvents(data);
+    } catch (err) {
+      setError('Failed to load events');
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const filteredEvents =
     selectedCategory === "All"
-      ? UPCOMING_EVENTS
-      : UPCOMING_EVENTS.filter((event) => event.category === selectedCategory);
+      ? events
+      : events.filter((event) => event.category === selectedCategory);
 
   const handleEventPress = (event: Event) => {
     // TODO: Open event details modal or navigate to event details
     console.log("Selected event:", event.title);
+  };
+
+  const handleCheckIn = async (event: Event) => {
+    if (checkingIn) return;
+
+    Alert.alert(
+      "Check In",
+      `Check in to "${event.title}" and earn 50 Gems?`,
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Check In",
+          onPress: async () => {
+            try {
+              setCheckingIn(event.id);
+              await addGems(50, `Checked in to event: ${event.title}`, { eventId: event.id });
+              await fetchBalance();
+              Alert.alert("Success!", "You earned 50 Gems for checking in!");
+            } catch (error) {
+              console.error("Check-in error:", error);
+              Alert.alert("Error", "Failed to check in. Please try again.");
+            } finally {
+              setCheckingIn(null);
+            }
+          },
+        },
+      ]
+    );
   };
 
   const renderSmallTitle = () => (
@@ -55,7 +110,7 @@ export default function EventsScreen() {
               style={styles.statsIcon}
             />
             <View>
-              <Text style={styles.statsNumber}>{UPCOMING_EVENTS.length}</Text>
+              <Text style={styles.statsNumber}>{events.length}</Text>
               <Text style={styles.statsLabel}>UPCOMING EVENTS</Text>
             </View>
           </View>
@@ -69,7 +124,7 @@ export default function EventsScreen() {
             />
             <View>
               <Text style={styles.statsNumber}>
-                {UPCOMING_EVENTS.reduce(
+                {events.reduce(
                   (sum, event) => sum + event.availableTickets,
                   0
                 )}
@@ -107,13 +162,16 @@ export default function EventsScreen() {
 
         {/* Events List */}
         <View style={styles.eventsSection}>
-          {filteredEvents.length === 0 ? (
+          {loading ? (
+            <View style={styles.emptyContainer}>
+              <Text style={styles.emptyMessage}>Loading events...</Text>
+            </View>
+          ) : filteredEvents.length === 0 ? (
             <View style={styles.emptyContainer}>
               <MaterialIcons name="event-busy" size={64} color={NEO_THEME.colors.grey} />
               <Text style={styles.emptyTitle}>NO EVENTS FOUND</Text>
               <Text style={styles.emptyMessage}>
-                No events available in the {selectedCategory.toLowerCase()}{" "}
-                category at the moment.
+                {error ? error : `No events available in the ${selectedCategory.toLowerCase()} category at the moment.`}
               </Text>
             </View>
           ) : (
@@ -122,11 +180,18 @@ export default function EventsScreen() {
                 key={event.id}
                 event={event}
                 onPress={() => handleEventPress(event)}
+                onCheckIn={() => handleCheckIn(event)}
               />
             ))
           )}
         </View>
       </View>
+      
+      {checkingIn && (
+        <View style={[StyleSheet.absoluteFill, { backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', alignItems: 'center', zIndex: 1000 }]}>
+          <ActivityIndicator size="large" color={NEO_THEME.colors.white} />
+        </View>
+      )}
     </AnimatedHeaderLayout>
   );
 }

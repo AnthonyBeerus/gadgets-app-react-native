@@ -91,7 +91,7 @@ export default function ShopsScreen() {
   };
 
   const selectedMallData = malls.find((m) => m.id === selectedMall);
-  const mallName = selectedMallData?.name?.toUpperCase() || "Malopo Crossing";
+  const mallName = selectedMallData?.name?.toUpperCase() || "Molapo Crossing";
 
   const renderShopCard = ({ item }: { item: any }) => (
     <NeoShopCard shop={item} onPress={() => navigateToShop(item.id)} />

@@ -1,0 +1,10 @@
+Reading .env from: C:\Dev\Muse\gadgets-app-react-native\.env
+Connecting to Supabase: https://ywdogzzehcsphmmfnnzc.supabase.co
+Checking "events" table...
+(node:31908) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Dev/Muse/gadgets-app-react-native/scripts/check-supabase.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\Dev\Muse\gadgets-app-react-native\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+Events table exists. Count: 1
+Checking "challenges" table...
+Challenges table check failed: Could not find the table 'public.challenges' in the schema cache

@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { Challenge } from '../types/challenge';
+import { supabase } from '../../../shared/lib/supabase';
 
 interface ChallengeState {
   challenges: Challenge[];
@@ -8,53 +9,7 @@ interface ChallengeState {
   fetchChallenges: () => Promise<void>;
 }
 
-// Mock data for initial development
-const MOCK_CHALLENGES: Challenge[] = [
-  {
-    id: 1,
-    title: "Summer Vibe Content",
-    description: "Create a 15s video showing how you use our gadgets at the beach.",
-    brand_name: "TechWave",
-    reward: "$500 Cash Prize",
-    deadline: "2025-12-31",
-    participants_count: 124,
-    image_url: "https://images.unsplash.com/photo-1519389950473-47ba0277781c?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80",
-    requirements: ["Must show product logo", "Use hashtag #TechWaveSummer", "High resolution video"],
-    status: 'active',
-    type: 'free',
-    ai_allowed: true,
-  },
-  {
-    id: 2,
-    title: "Unboxing Experience",
-    description: "Film a creative unboxing of the new X-Phone 15.",
-    brand_name: "GadgetZone",
-    reward: "Free X-Phone 15",
-    deadline: "2025-11-30",
-    participants_count: 89,
-    image_url: "https://images.unsplash.com/photo-1556656793-02715d8dd660?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80",
-    requirements: ["Clear audio", "Good lighting", "Honest first impressions"],
-    status: 'active',
-    type: 'paid',
-    entry_fee: 50,
-    ai_allowed: false,
-  },
-  {
-    id: 3,
-    title: "Fitness Tech Challenge",
-    description: "Show us your workout routine using the FitTrack Pro.",
-    brand_name: "FitLife",
-    reward: "Year supply of supplements",
-    deadline: "2025-10-15",
-    participants_count: 342,
-    image_url: "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80",
-    requirements: ["Action shots", "Mention key features", "Energetic music"],
-    status: 'upcoming',
-    type: 'subscriber',
-    is_premium: true,
-    ai_allowed: true,
-  }
-];
+
 
 export const useChallengeStore = create<ChallengeState>((set) => ({
   challenges: [],
@@ -63,10 +18,38 @@ export const useChallengeStore = create<ChallengeState>((set) => ({
   fetchChallenges: async () => {
     set({ loading: true });
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      set({ challenges: MOCK_CHALLENGES, loading: false });
+      const { data, error } = await supabase
+        .from('challenges')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+
+      if (data) {
+        const challenges: Challenge[] = data.map((item: any) => ({
+          id: item.id,
+          title: item.title,
+          description: item.description,
+          brand_name: item.brand_name,
+          brand_logo_url: item.brand_logo_url,
+          reward: item.reward,
+          deadline: item.deadline,
+          participants_count: item.participants_count,
+          image_url: item.image_url,
+          requirements: item.requirements,
+          status: item.status as 'active' | 'completed' | 'upcoming',
+          entry_fee: item.entry_fee,
+          is_premium: item.is_premium,
+          type: item.type as 'free' | 'paid' | 'subscriber',
+          category: item.category,
+          ai_allowed: item.ai_allowed,
+        }));
+        set({ challenges, loading: false });
+      } else {
+        set({ challenges: [], loading: false });
+      }
     } catch (error) {
+      console.error('Error fetching challenges:', error);
       set({ error: 'Failed to fetch challenges', loading: false });
     }
   },
