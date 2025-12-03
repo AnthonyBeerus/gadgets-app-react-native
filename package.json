@@ -10,7 +10,7 @@
     "test": "jest --watchAll",
     "test:ci": "jest",
     "test:coverage": "jest --coverage",
-    "eas-build-pre-install": "cp $GOOGLE_SERVICES_JSON ./google-services.json"
+    "eas-build-pre-install": "bash -c \"if [ -n \\\"$GOOGLE_SERVICES_JSON\\\" ]; then cp $GOOGLE_SERVICES_JSON ./google-services.json; else echo 'GOOGLE_SERVICES_JSON not set, skipping'; fi\""
   },
   "dependencies": {
     "@ai-sdk/google": "^2.0.28",
