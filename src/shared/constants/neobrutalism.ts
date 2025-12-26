@@ -22,6 +22,16 @@ export const NEO_THEME = {
       offsetX: 5,
       offsetY: 5,
     },
+    soft: {
+      shadowColor: "#000",
+      shadowOffset: {
+        width: 0,
+        height: 2,
+      },
+      shadowOpacity: 0.25,
+      shadowRadius: 3.84,
+      elevation: 5,
+    },
   },
   fonts: {
     regular: "System",

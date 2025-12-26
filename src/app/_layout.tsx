@@ -96,9 +96,15 @@ function RootLayout() {
                     name="order-details"
                     options={{ headerShown: false, title: "Order Details", animation: 'ios_from_right', }}
                   />
+
                   <Stack.Screen
-                    name="my-orders"
-                    options={{ headerShown: false, title: "My Orders", animation: 'ios_from_right', }}
+                    name="orders"
+                    options={{ 
+                      headerShown: false, 
+                      title: "Orders", 
+                      presentation: 'card',
+                      animation: 'slide_from_right', 
+                    }} 
                   />
                   <Stack.Screen
                     name="profile"

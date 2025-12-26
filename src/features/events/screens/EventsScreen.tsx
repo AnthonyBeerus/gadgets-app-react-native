@@ -17,6 +17,7 @@ import { Event } from "../types/event";
 import { AnimatedHeaderLayout } from "../../../shared/components/layout/AnimatedHeaderLayout";
 import { addGems } from "../../gems/api/gems";
 import { useGemStore } from "../../gems/store/gem-store";
+import { CartHeaderButton } from "../../../shared/components/ui/CartHeaderButton";
 
 export default function EventsScreen() {
   const [selectedCategory, setSelectedCategory] = useState("All");
@@ -98,6 +99,8 @@ export default function EventsScreen() {
     <AnimatedHeaderLayout
       renderSmallTitle={renderSmallTitle}
       renderLargeTitle={renderLargeTitle}
+      smallHeaderRight={<CartHeaderButton />}
+      largeHeaderRight={<CartHeaderButton />}
     >
       <View style={styles.content}>
         {/* Quick Stats */}

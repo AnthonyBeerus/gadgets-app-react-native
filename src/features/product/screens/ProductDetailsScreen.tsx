@@ -96,6 +96,8 @@ export default function ProductDetailsScreen() {
       placement: "top",
       duration: 1500,
     });
+    // Navigate to Cart
+    router.push("/cart");
   };
 
   // Check if product supports virtual try-on
@@ -109,6 +111,30 @@ export default function ProductDetailsScreen() {
       <StaticHeader 
         title={product.title.toUpperCase()} 
         onBackPress={() => router.back()} 
+        rightElement={
+          <TouchableOpacity onPress={() => router.push("/cart")}>
+            <Ionicons name="cart" size={24} color={NEO_THEME.colors.black} />
+            {items.length > 0 && (
+              <View style={{
+                position: 'absolute',
+                top: -5,
+                right: -5,
+                backgroundColor: NEO_THEME.colors.primary,
+                borderRadius: 10,
+                width: 16,
+                height: 16,
+                justifyContent: 'center',
+                alignItems: 'center',
+                borderWidth: 1,
+                borderColor: 'white'
+              }}>
+                <Text style={{ fontSize: 10, color: 'white', fontWeight: 'bold' }}>
+                  {items.length}
+                </Text>
+              </View>
+            )}
+          </TouchableOpacity>
+        }
       />
 
       <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>

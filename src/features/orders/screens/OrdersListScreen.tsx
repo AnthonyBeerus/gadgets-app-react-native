@@ -14,6 +14,7 @@ import { getMyOrders } from '../../../shared/api/api';
 import { AnimatedHeaderLayout } from '../../../shared/components/layout/AnimatedHeaderLayout';
 import { NEO_THEME } from '../../../shared/constants/neobrutalism';
 import { NeoView } from '../../../shared/components/ui/neo-view';
+import { CartHeaderButton } from '../../../shared/components/ui/CartHeaderButton';
 
 const renderItem = (item: Tables<'order'>) => (
   <Link href={`/orders/${item.slug}`} asChild key={item.id}>
@@ -60,6 +61,8 @@ const OrdersListScreen = () => {
     <AnimatedHeaderLayout
       renderSmallTitle={renderSmallTitle}
       renderLargeTitle={renderLargeTitle}
+      smallHeaderRight={<CartHeaderButton />}
+      largeHeaderRight={<CartHeaderButton />}
     >
       <Stack.Screen options={{ headerShown: false }} />
       <View style={styles.content}>

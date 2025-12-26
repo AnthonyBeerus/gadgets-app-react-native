@@ -21,7 +21,10 @@ const fetchStripekeys = async (totalAmount: number) => {
     },
   });
 
-  if (error) throw new Error(error.message);
+  if (error) {
+    console.error("Supabase Function Error:", JSON.stringify(error, null, 2));
+    throw new Error(error.message || "Failed to communicate with payment server");
+  }
 
   return data;
 };
@@ -59,6 +62,9 @@ export const openStripeCheckout = async () => {
   const { error } = await presentPaymentSheet();
 
   if (error) {
+    if (error.code === 'Canceled') {
+      return false;
+    }
     throw new Error(error.message);
   }
 

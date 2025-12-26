@@ -15,8 +15,13 @@ import { AnimatedHeaderLayout } from "../../../shared/components/layout/Animated
 import { CartItem } from "../components/CartItem";
 import { NEO_THEME } from "../../../shared/constants/neobrutalism";
 import { NeoButton } from "../../../shared/components/ui/neo-button";
+import { useAuth } from "../../../shared/providers/auth-provider"; // Added import
+
+import { useRouter } from "expo-router"; // Added import
 
 export default function CartScreen() {
+  const router = useRouter(); 
+  const { session } = useAuth(); // Added hook
   const {
     items,
     removeItem,
@@ -34,6 +39,18 @@ export default function CartScreen() {
 
     if (totalPrice <= 0) {
       Alert.alert("Cart is empty", "Please add items to your cart before checking out.");
+      return;
+    }
+
+    if (!session) {
+      Alert.alert(
+        "Login Required", 
+        "Please login to complete your purchase.",
+        [
+          { text: "Cancel", style: "cancel" },
+          { text: "Login", onPress: () => router.push("/auth") }
+        ]
+      );
       return;
     }
 
@@ -59,8 +76,9 @@ export default function CartScreen() {
               })),
               {
                 onSuccess: () => {
-                  Alert.alert("Success", "Order created successfully!");
+                  // Alert.alert("Success", "Order created successfully!"); // Commented out
                   resetCart();
+                  router.push({ pathname: "/order-success", params: { orderId: data.id } }); // Added navigation
                 },
               }
             );
@@ -69,9 +87,10 @@ export default function CartScreen() {
       );
     } catch (error) {
       console.error(error);
-      Alert.alert("Error", "An error occurred while creating the order.");
+      Alert.alert("Payment Failed", error instanceof Error ? error.message : "An unknown error occurred");
     }
   };
+
 
   const renderSmallTitle = () => (
     <Text style={styles.smallHeaderTitle}>MY CART</Text>
@@ -90,6 +109,28 @@ export default function CartScreen() {
     <AnimatedHeaderLayout
       renderSmallTitle={renderSmallTitle}
       renderLargeTitle={renderLargeTitle}
+      stickyFooter={
+        items.length > 0 ? (
+          <View style={styles.footer}>
+            <View style={styles.totalContainer}>
+              <Text style={styles.totalLabel}>TOTAL</Text>
+              <Text style={styles.totalPrice}>${getTotalPrice()}</Text>
+            </View>
+            
+            <NeoButton 
+              onPress={handleCheckout}
+              disabled={isCreatingOrder}
+              style={styles.checkoutButton}
+            >
+              {isCreatingOrder ? (
+                <ActivityIndicator color={NEO_THEME.colors.white} />
+              ) : (
+                <Text style={styles.checkoutButtonText}>CHECKOUT</Text>
+              )}
+            </NeoButton>
+          </View>
+        ) : null
+      }
     >
       <View style={styles.content}>
         {items.length === 0 ? (
@@ -113,26 +154,7 @@ export default function CartScreen() {
           </View>
         )}
 
-        {items.length > 0 && (
-          <View style={styles.footer}>
-            <View style={styles.totalContainer}>
-              <Text style={styles.totalLabel}>TOTAL</Text>
-              <Text style={styles.totalPrice}>${getTotalPrice()}</Text>
-            </View>
-            
-            <NeoButton 
-              onPress={handleCheckout}
-              disabled={isCreatingOrder}
-              style={styles.checkoutButton}
-            >
-              {isCreatingOrder ? (
-                <ActivityIndicator color={NEO_THEME.colors.white} />
-              ) : (
-                <Text style={styles.checkoutButtonText}>CHECKOUT</Text>
-              )}
-            </NeoButton>
-          </View>
-        )}
+
       </View>
     </AnimatedHeaderLayout>
   );
@@ -140,8 +162,7 @@ export default function CartScreen() {
 
 const styles = StyleSheet.create({
   content: {
-    flex: 1,
-    paddingBottom: 100,
+    paddingBottom: 200, // Increased padding to account for sticky footer
   },
   smallHeaderTitle: {
     fontSize: 16,
@@ -188,8 +209,10 @@ const styles = StyleSheet.create({
   footer: {
     padding: 16,
     backgroundColor: NEO_THEME.colors.white,
+
     borderTopWidth: NEO_THEME.borders.width,
     borderColor: NEO_THEME.colors.black,
+    paddingBottom: 32, // Add extra padding for bottom safe area if needed, or just visual
   },
   totalContainer: {
     flexDirection: "row",

@@ -22,11 +22,13 @@ import { useBookingStore } from "../../../store/booking-store";
 import { StaticHeader } from "../../../shared/components/layout/StaticHeader";
 import { NEO_THEME } from "../../../shared/constants/neobrutalism";
 import { NeoButton } from "../../../shared/components/ui/neo-button";
+import { useCartStore } from "../../../store/cart-store"; // Added import
 
 export default function ShopDetailsScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const { openBookingModal } = useBookingStore();
+  const { items } = useCartStore(); // Added hook usage
 
   const [shop, setShop] = useState<any>(null);
   const [products, setProducts] = useState<any[]>([]);
@@ -174,6 +176,30 @@ export default function ShopDetailsScreen() {
       <StaticHeader 
         title={shop.name.toUpperCase()} 
         onBackPress={() => router.back()} 
+        rightElement={
+          <TouchableOpacity onPress={() => router.push("/cart")}>
+            <Ionicons name="cart" size={24} color={NEO_THEME.colors.black} />
+            {items.length > 0 && (
+              <View style={{
+                position: 'absolute',
+                top: -5,
+                right: -5,
+                backgroundColor: NEO_THEME.colors.primary,
+                borderRadius: 10,
+                width: 16,
+                height: 16,
+                justifyContent: 'center',
+                alignItems: 'center',
+                borderWidth: 1,
+                borderColor: 'white'
+              }}>
+                <Text style={{ fontSize: 10, color: 'white', fontWeight: 'bold' }}>
+                  {items.length}
+                </Text>
+              </View>
+            )}
+          </TouchableOpacity>
+        }
       />
       
       <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>

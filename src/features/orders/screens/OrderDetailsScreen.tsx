@@ -9,6 +9,7 @@ import {
   View,
 } from 'react-native';
 import { format } from 'date-fns';
+import QRCode from 'react-native-qrcode-svg'; // Added import
 
 import { getMyOrder } from '../../../shared/api/api';
 import { NEO_THEME } from '../../../shared/constants/neobrutalism';
@@ -42,6 +43,12 @@ const OrderDetailsScreen = () => {
         <View style={styles.headerSection}>
           <Text style={styles.item}>{order.slug}</Text>
           <Text style={styles.details}>{order.description}</Text>
+          
+          <View style={styles.qrContainer}>
+            <QRCode value={order.id.toString()} size={150} />
+            <Text style={styles.qrLabel}>Scan for pickup</Text>
+          </View>
+
           <View style={[styles.statusBadge, styles[`statusBadge_${order.status}`]]}>
             <Text style={styles.statusText}>{order.status.toUpperCase()}</Text>
           </View>
@@ -198,5 +205,22 @@ const styles: { [key: string]: any } = StyleSheet.create({
     marginTop: 20,
     fontSize: 16,
     fontWeight: 'bold',
+  },
+  qrContainer: {
+    alignItems: 'center',
+    marginTop: 16,
+    marginBottom: 24,
+    padding: 16,
+    backgroundColor: NEO_THEME.colors.white,
+    borderWidth: 1,
+    borderColor: NEO_THEME.colors.grey,
+  },
+  qrLabel: {
+    marginTop: 8,
+    fontSize: 14,
+    fontWeight: '700',
+    color: NEO_THEME.colors.grey,
+    fontFamily: NEO_THEME.fonts.bold,
+    textTransform: 'uppercase',
   },
 });

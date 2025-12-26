@@ -20,6 +20,7 @@ import { NeoView } from "../../../shared/components/ui/neo-view";
 import { NeoShopCard } from "../../../components/shop/neo-shop-card";
 import { NEO_THEME } from "../../../shared/constants/neobrutalism";
 import { AnimatedHeaderLayout } from "../../../shared/components/layout/AnimatedHeaderLayout";
+import { CartHeaderButton } from "../../../shared/components/ui/CartHeaderButton";
 
 const { width } = Dimensions.get("window");
 
@@ -119,6 +120,8 @@ export default function ShopsScreen() {
     <AnimatedHeaderLayout
       renderSmallTitle={renderSmallTitle}
       renderLargeTitle={renderLargeTitle}
+      smallHeaderRight={<CartHeaderButton />}
+      largeHeaderRight={<CartHeaderButton />}
     >
       <View style={styles.content}>
         {/* Search Bar */}

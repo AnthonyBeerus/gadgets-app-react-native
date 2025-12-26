@@ -11,6 +11,7 @@ import { NEO_THEME } from "../../../shared/constants/neobrutalism";
 import { ProfileOption } from "../components/ProfileOption";
 import { AnimatedHeaderLayout } from "../../../shared/components/layout/AnimatedHeaderLayout";
 import { router } from "expo-router";
+import { CartHeaderButton } from "../../../shared/components/ui/CartHeaderButton";
 
 const ProfileScreen = () => {
   const { user } = useAuth();
@@ -51,6 +52,8 @@ const ProfileScreen = () => {
     <AnimatedHeaderLayout
       renderSmallTitle={renderSmallTitle}
       renderLargeTitle={renderLargeTitle}
+      smallHeaderRight={<CartHeaderButton />}
+      largeHeaderRight={<CartHeaderButton />}
     >
       {/* Account Section */}
       <View style={styles.section}>

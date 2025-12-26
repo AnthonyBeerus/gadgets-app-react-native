@@ -29,6 +29,7 @@ interface AnimatedHeaderLayoutProps {
   onTitlePress?: () => void;
   onBackPress?: () => void;
   contentContainerStyle?: ViewStyle;
+  stickyFooter?: React.ReactNode;
 }
 
 export const AnimatedHeaderLayout: React.FC<AnimatedHeaderLayoutProps> = ({
@@ -41,6 +42,7 @@ export const AnimatedHeaderLayout: React.FC<AnimatedHeaderLayoutProps> = ({
   onTitlePress,
   onBackPress,
   contentContainerStyle,
+  stickyFooter,
 }) => {
   const { top } = useSafeAreaInsets();
   const scrollY = useSharedValue(0);
@@ -170,6 +172,11 @@ export const AnimatedHeaderLayout: React.FC<AnimatedHeaderLayoutProps> = ({
 
         <View style={styles.content}>{children}</View>
       </Animated.ScrollView>
+      {stickyFooter && (
+        <View style={styles.stickyFooterContainer}>
+          {stickyFooter}
+        </View>
+      )}
     </View>
   );
 };
@@ -240,5 +247,12 @@ const styles = StyleSheet.create({
   largeBackButton: {
     marginBottom: 12,
     padding: 4,
+  },
+  stickyFooterContainer: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    zIndex: 100,
   },
 });

@@ -10,6 +10,7 @@ import { Tables } from "../../../shared/types/database.types";
 import { NEO_THEME } from "../../../shared/constants/neobrutalism";
 import { AnimatedHeaderLayout } from "../../../shared/components/layout/AnimatedHeaderLayout";
 import { CategoryCard } from "../components/CategoryCard";
+import { CartHeaderButton } from "../../../shared/components/ui/CartHeaderButton";
 
 const ServicesScreen = () => {
   const {
@@ -63,6 +64,8 @@ const ServicesScreen = () => {
     <AnimatedHeaderLayout
       renderSmallTitle={renderSmallTitle}
       renderLargeTitle={renderLargeTitle}
+      smallHeaderRight={<CartHeaderButton />}
+      largeHeaderRight={<CartHeaderButton />}
     >
       {/* Featured Banner */}
       <View style={styles.featuredBanner}>

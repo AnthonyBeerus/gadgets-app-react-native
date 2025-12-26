@@ -2,7 +2,7 @@ import React from "react";
 import { View, Text, StyleSheet, Image, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { NEO_THEME } from "../../../shared/constants/neobrutalism";
-import { NeoView } from "../../../shared/components/ui/neo-view";
+
 
 type CartItemType = {
   id: number;
@@ -27,7 +27,7 @@ export const CartItem = ({
   onRemove,
 }: CartItemProps) => {
   return (
-    <NeoView style={styles.container} containerStyle={styles.neoContainer}>
+    <View style={styles.container}>
       <View style={styles.content}>
         <View style={styles.imageContainer}>
           <Image source={{ uri: item.heroImage }} style={styles.image} />
@@ -69,7 +69,7 @@ export const CartItem = ({
           </View>
         </View>
       </View>
-    </NeoView>
+    </View>
   );
 };
 
@@ -77,9 +77,13 @@ const styles = StyleSheet.create({
   container: {
     marginBottom: 16,
     backgroundColor: NEO_THEME.colors.white,
-  },
-  neoContainer: {
-    marginBottom: 0,
+    borderWidth: NEO_THEME.borders.width,
+    borderColor: NEO_THEME.colors.black,
+    shadowColor: NEO_THEME.colors.black,
+    shadowOffset: { width: 4, height: 4 },
+    shadowOpacity: 1,
+    shadowRadius: 0,
+    elevation: 4, // for android
   },
   content: {
     flexDirection: "row",
@@ -139,7 +143,7 @@ const styles = StyleSheet.create({
     borderRightWidth: NEO_THEME.borders.width,
     borderColor: NEO_THEME.colors.black,
     backgroundColor: NEO_THEME.colors.backgroundLight,
-    height: "100%",
+    paddingVertical: 8, // matches button padding
     justifyContent: "center",
   },
   quantityText: {
