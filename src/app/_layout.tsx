@@ -10,10 +10,27 @@ import React from "react";
 
 import * as Sentry from '@sentry/react-native';
 
+// 🚀 PERFORMANCE: Keep Sentry synchronous (required for error tracking)
+const navigationIntegration = Sentry.reactNavigationIntegration({
+  enableTimeToInitialDisplay: true,
+});
+
 Sentry.init({
   dsn: process.env.EXPO_PUBLIC_SENTRY_DSN,
-  sendDefaultPii: true,
-  debug: __DEV__, // Only enable debug in development
+  profilesSampleRate: 0.1,
+  replaysSessionSampleRate: 0.1,
+  replaysOnErrorSampleRate: 1.0,
+  tracesSampleRate: 0.1,
+  integrations: [
+    Sentry.mobileReplayIntegration({
+      maskAllImages: true,
+      maskAllText: true,
+      maskAllVectors: true,
+    }),
+    navigationIntegration,
+    Sentry.spotlightIntegration(),
+  ],
+  attachScreenshot: true,
 });
 
 // Conditionally import Stripe only on native platforms
