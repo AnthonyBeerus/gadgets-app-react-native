@@ -98,6 +98,10 @@ function RootLayout() {
                   />
 
                   <Stack.Screen
+                    name="order-success"
+                    options={{ headerShown: false, title: "Order Success" }}
+                  />
+                  <Stack.Screen
                     name="orders"
                     options={{ 
                       headerShown: false, 
