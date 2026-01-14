@@ -10,7 +10,7 @@
     "test": "jest --watchAll",
     "test:ci": "jest",
     "test:coverage": "jest --coverage",
-    "eas-build-pre-install": "bash -c \"if [ -n \\\"$GOOGLE_SERVICES_JSON\\\" ]; then cp $GOOGLE_SERVICES_JSON ./google-services.json; else echo 'GOOGLE_SERVICES_JSON not set, skipping'; fi\""
+    "eas-build-pre-install": "bash -c \"if [ -n \\\"$GOOGLE_SERVICES_JSON\\\" ]; then echo \\\"$GOOGLE_SERVICES_JSON\\\" > ./google-services.json; else echo 'GOOGLE_SERVICES_JSON not set, skipping'; fi\""
   },
   "dependencies": {
     "@ai-sdk/google": "^2.0.28",
@@ -28,6 +28,7 @@
     "cross-fetch": "^3.1.8",
     "date-fns": "^3.6.0",
     "expo": "~54.0.30",
+    "expo-camera": "~17.0.10",
     "expo-constants": "~18.0.9",
     "expo-dev-client": "~6.0.20",
     "expo-device": "~8.0.10",

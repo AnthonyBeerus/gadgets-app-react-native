@@ -55,7 +55,9 @@ export default function CartScreen() {
     }
 
     try {
-      await setupStripePaymentSheet(Math.floor(totalPrice * 100));
+      const clientSecret = await setupStripePaymentSheet(Math.floor(totalPrice * 100));
+      // Extract PI ID from client secret (pi_..._secret_...)
+      const paymentIntentId = clientSecret?.split('_secret_')[0];
 
       const result = await openStripeCheckout();
 
@@ -65,7 +67,11 @@ export default function CartScreen() {
       }
 
       await createSupabaseOrder(
-        { totalPrice },
+        { 
+          totalPrice,
+          paymentIntentId,
+          paymentStatus: 'succeeded' // We assume success if openStripeCheckout returns true
+        },
         {
           onSuccess: (data) => {
             createSupabaseOrderItem(

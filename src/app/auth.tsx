@@ -1,3 +1,4 @@
+import React from 'react';
 import {
   View,
   Text,
@@ -22,7 +23,8 @@ const authSchema = zod.object({
 });
 
 export default function Auth() {
-  const { session } = useAuth();
+  const { session, createDevMerchant } = useAuth();
+  const [registerAsMerchant, setRegisterAsMerchant] = React.useState(false);
 
   if (session) return <Redirect href='/' />;
 
@@ -54,6 +56,16 @@ export default function Auth() {
     if (error) {
       alert(error.message);
     } else {
+      if (registerAsMerchant) {
+        try {
+            await createDevMerchant();
+            Toast.show('Merchant Account Created!', { type: 'success' });
+        } catch (e) {
+            console.error(e);
+            // Don't alert here, user is signed up anyway. Could maybe show toast warning.
+        }
+      }
+
       Toast.show('Signed up successfully', {
         type: 'success',
         placement: 'top',
@@ -121,6 +133,18 @@ export default function Auth() {
             </>
           )}
         />
+
+        {/* Merchant Toggle for Sign Up */}
+        <TouchableOpacity 
+            style={styles.checkboxContainer} 
+            onPress={() => setRegisterAsMerchant(!registerAsMerchant)}
+            activeOpacity={0.8}
+        >
+            <View style={[styles.checkbox, registerAsMerchant && styles.checkboxChecked]}>
+                {registerAsMerchant && <View style={styles.checkboxInner} />}
+            </View>
+            <Text style={styles.checkboxLabel}>Register as Merchant (Dev)</Text>
+        </TouchableOpacity>
 
         <TouchableOpacity
           style={styles.button}
@@ -206,5 +230,34 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     textAlign: 'left',
     width: '90%',
+  },
+  checkboxContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 24,
+    width: '90%',
+  },
+  checkbox: {
+    width: 24,
+    height: 24,
+    borderRadius: 4,
+    borderWidth: 2,
+    borderColor: '#fff',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 12,
+  },
+  checkboxChecked: {
+    backgroundColor: '#fff',
+  },
+  checkboxInner: {
+    width: 12,
+    height: 12,
+    backgroundColor: '#6a1b9a',
+    borderRadius: 2,
+  },
+  checkboxLabel: {
+    color: '#fff',
+    fontSize: 16,
   },
 });

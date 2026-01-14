@@ -118,10 +118,10 @@ export const getShopProducts = (shopId: number) => {
   return useQuery({
     queryKey: ["shopProducts", shopId],
     queryFn: async () => {
-      // Note: Product table doesn't have shop_id column
-      // This query won't work until the database schema is updated
-      const { data, error } = await supabase.from("product").select("*");
-      // .eq("shop_id", shopId); // Commented out until schema is fixed
+      const { data, error } = await supabase
+        .from("product")
+        .select("*")
+        .eq("shop_id", shopId);
 
       if (error) {
         throw new Error(
@@ -235,7 +235,7 @@ export const createOrder = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    async mutationFn({ totalPrice }: { totalPrice: number }) {
+    async mutationFn({ totalPrice, paymentIntentId, paymentStatus }: { totalPrice: number; paymentIntentId?: string; paymentStatus?: string }) {
       const { data, error } = await supabase
         .from("order")
         .insert({
@@ -243,6 +243,8 @@ export const createOrder = () => {
           slug,
           user: id,
           status: "Pending",
+          payment_intent_id: paymentIntentId,
+          stripe_payment_status: paymentStatus || 'pending'
         })
         .select("*")
         .single();
@@ -339,27 +341,8 @@ export const getMyOrder = (slug: string) => {
 
 // ===== SERVICE RELATED FUNCTIONS =====
 
-export const getServiceCategories = () => {
-  return useQuery({
-    queryKey: ["serviceCategories"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("service_category")
-        .select("*")
-        .eq("is_active", true)
-        .order("name");
+// ===== SERVICE RELATED FUNCTIONS =====
 
-      if (error) {
-        throw new Error(
-          "An error occurred while fetching service categories: " +
-            error.message
-        );
-      }
-
-      return data;
-    },
-  });
-};
 
 export const getServicesByCategory = (categoryId: number) => {
   return useQuery({
@@ -807,11 +790,172 @@ export const getEventVenue = (venueId: number) => {
 
       if (error || !data) {
         throw new Error(
-          "An error occurred while fetching venue details: " + error?.message
+          "An error occurred while fetching event venue: " +
+            (error?.message || "Venue not found")
         );
       }
 
       return data;
+    },
+  });
+};
+
+export const getShopEvents = (shopId: number) => {
+  return useQuery({
+    queryKey: ["shopEvents", shopId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("events")
+        .select("*")
+        .eq("shop_id", shopId)
+        .order("date", { ascending: true });
+
+      if (error) {
+        throw new Error(
+          "An error occurred while fetching shop events: " + error.message
+        );
+      }
+
+      return data || [];
+    },
+    enabled: !!shopId,
+  });
+};
+
+export const createEvent = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    async mutationFn(eventData: {
+      title: string;
+      description: string;
+      date: string;
+      location: string;
+      imageUrl: string;
+      shopId: number;
+      price?: number;
+      totalTickets?: number;
+    }) {
+      const { data, error } = await supabase
+        .from("events")
+        .insert({
+          title: eventData.title,
+          description: eventData.description,
+          date: eventData.date,
+          location: eventData.location,
+          image_url: eventData.imageUrl,
+          shop_id: eventData.shopId,
+          price: eventData.price || 0,
+          total_tickets: eventData.totalTickets || 0,
+          tickets_sold: 0,
+        })
+        .select("*")
+        .single();
+
+      if (error) {
+        throw new Error(
+          "An error occurred while creating event: " + error.message
+        );
+      }
+
+      return data;
+    },
+
+    async onSuccess() {
+      await queryClient.invalidateQueries({ queryKey: ["events"] });
+      await queryClient.invalidateQueries({ queryKey: ["shopEvents"] });
+    },
+  });
+};
+// End of Event functions
+
+// Services
+export const getServiceCategories = () => {
+  return useQuery({
+    queryKey: ["serviceCategories"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("service_categories")
+        .select("*")
+        .order("name", { ascending: true });
+
+      if (error) {
+        throw new Error(
+          "An error occurred while fetching service categories: " + error.message
+        );
+      }
+
+      return data || [];
+    },
+  });
+};
+
+export const getProviderServices = (providerId: number) => {
+  return useQuery({
+    queryKey: ["providerServices", providerId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("service")
+        .select(`
+            *,
+            category:service_categories(name)
+        `)
+        .eq("provider_id", providerId)
+        .order("created_at", { ascending: false });
+
+      if (error) {
+        throw new Error(
+          "An error occurred while fetching provider services: " + error.message
+        );
+      }
+
+      return data || [];
+    },
+    enabled: !!providerId,
+  });
+};
+
+export const createService = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    async mutationFn(serviceData: {
+      name: string;
+      description: string;
+      categoryId: number;
+      providerId: number;
+      price: number;
+      durationMinutes: number;
+      imageUrl: string;
+      slug: string;
+    }) {
+      const { data, error } = await supabase
+        .from("service")
+        .insert({
+          name: serviceData.name,
+          description: serviceData.description,
+          category_id: serviceData.categoryId,
+          provider_id: serviceData.providerId,
+          price: serviceData.price,
+          duration_minutes: serviceData.durationMinutes,
+          image_url: serviceData.imageUrl,
+          slug: serviceData.slug,
+          is_active: true,
+        })
+        .select("*")
+        .single();
+
+      if (error) {
+        throw new Error(
+          "An error occurred while creating service: " + error.message
+        );
+      }
+
+      return data;
+    },
+
+    async onSuccess() {
+      await queryClient.invalidateQueries({ queryKey: ["providerServices"] });
     },
   });
 };
@@ -823,58 +967,102 @@ export const createEventBooking = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    async mutationFn({
-      venueId,
-      eventName,
-      eventType,
-      eventDate,
-      startTime,
-      endTime,
-      estimatedGuests,
-      contactPhone,
-      contactEmail,
-      totalPrice,
-      specialRequirements,
-      notes,
-    }: {
-      venueId: number;
-      eventName: string;
-      eventType: string;
-      eventDate: string;
-      startTime: string;
-      endTime: string;
-      estimatedGuests: number;
-      contactPhone: string;
-      contactEmail: string;
-      totalPrice: number;
-      specialRequirements?: string;
-      notes?: string;
-    }) {
+    async mutationFn(bookingData: { eventId: number; tickets: number }) {
       const { data, error } = await supabase
-        // @ts-ignore - event_booking table may not exist in current schema
-        .from("event_booking")
+        .from("event_tickets")
         .insert({
+          event_id: bookingData.eventId,
           user_id: id,
-          venue_id: venueId,
-          event_name: eventName,
-          event_type: eventType,
-          event_date: eventDate,
-          start_time: startTime,
-          end_time: endTime,
-          estimated_guests: estimatedGuests,
-          contact_phone: contactPhone,
-          contact_email: contactEmail,
-          total_price: totalPrice,
-          special_requirements: specialRequirements,
-          notes,
-          status: "pending",
+          quantity: bookingData.tickets,
+          status: "confirmed",
+          purchase_date: new Date().toISOString(),
         })
         .select("*")
         .single();
 
       if (error) {
         throw new Error(
-          "An error occurred while creating event booking: " + error.message
+          "An error occurred while booking tickets: " + error.message
+        );
+      }
+
+      // Update tickets sold
+      await supabase.rpc("increment_tickets_sold", {
+        event_id: bookingData.eventId,
+        quantity: bookingData.tickets,
+      });
+
+      return data;
+    },
+    async onSuccess() {
+      await queryClient.invalidateQueries({ queryKey: ["events"] });
+    },
+  });
+};
+
+// Challenges
+export const getShopChallenges = (shopId: number) => {
+  return useQuery({
+    queryKey: ["shopChallenges", shopId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("challenges")
+        .select("*")
+        .eq("shop_id", shopId)
+        .order("created_at", { ascending: false });
+
+      if (error) {
+        throw new Error(
+          "An error occurred while fetching shop challenges: " + error.message
+        );
+      }
+
+      return data || [];
+    },
+    enabled: !!shopId,
+  });
+};
+
+export const createChallenge = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    async mutationFn(challengeData: {
+      title: string;
+      description: string;
+      brandName: string;
+      reward: string;
+      deadline: string;
+      imageUrl: string;
+      requirements: string[];
+      category: string;
+      type: 'free' | 'paid' | 'subscriber';
+      entryFee?: number;
+      shopId: number;
+    }) {
+      const { data, error } = await supabase
+        .from("challenges")
+        .insert({
+          title: challengeData.title,
+          description: challengeData.description,
+          brand_name: challengeData.brandName,
+          reward: challengeData.reward,
+          deadline: challengeData.deadline,
+          image_url: challengeData.imageUrl,
+          requirements: challengeData.requirements,
+          category: challengeData.category,
+          type: challengeData.type,
+          entry_fee: challengeData.entryFee,
+          shop_id: challengeData.shopId,
+          status: 'active',
+          participants_count: 0
+        })
+        .select("*")
+        .single();
+
+      if (error) {
+        throw new Error(
+          "An error occurred while creating challenge: " + error.message
         );
       }
 
@@ -882,11 +1070,13 @@ export const createEventBooking = () => {
     },
 
     async onSuccess() {
-      await queryClient.invalidateQueries({ queryKey: ["eventBookings"] });
-      await queryClient.invalidateQueries({ queryKey: ["myEventBookings"] });
+      await queryClient.invalidateQueries({ queryKey: ["shopChallenges"] });
+      // ongoing_challenges might be another key
     },
   });
 };
+
+
 
 export const getMyEventBookings = () => {
   const {

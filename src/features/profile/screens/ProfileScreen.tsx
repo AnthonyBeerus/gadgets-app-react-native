@@ -14,7 +14,7 @@ import { router } from "expo-router";
 import { CartHeaderButton } from "../../../shared/components/ui/CartHeaderButton";
 
 const ProfileScreen = () => {
-  const { user } = useAuth();
+  const { user, createDevMerchant, isMerchant, switchRole } = useAuth();
 
   const renderSmallTitle = () => (
     <Text style={styles.headerTitle}>
@@ -133,6 +133,37 @@ const ProfileScreen = () => {
             subtitle="App version and legal information"
             onPress={() => {}}
           />
+        </View>
+      </View>
+
+      {/* Developer Section */}
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>DEVELOPER</Text>
+        <View style={styles.optionsContainer}>
+          {isMerchant ? (
+             <ProfileOption
+                // @ts-ignore
+                icon="store"
+                title="SWITCH TO MERCHANT MODE"
+                subtitle="Access your dashboard"
+                onPress={() => switchRole('merchant')}
+             />
+          ) : (
+            <ProfileOption
+                // @ts-ignore
+                icon="add-business"
+                title="ACTIVATE MERCHANT MODE"
+                subtitle="Create a Dev Merchant account"
+                onPress={async () => {
+                    try {
+                        await createDevMerchant();
+                        alert("Merchant Account Created! Redirecting...");
+                    } catch (e: any) {
+                        alert("Error: " + e.message);
+                    }
+                }}
+            />
+          )}
         </View>
       </View>
 

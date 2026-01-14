@@ -1,4 +1,6 @@
-// This file intentionally left empty
-// The services route only contains modal screens (booking-modal)
-// The main Services screen is in app/(shop)/services.tsx
-export {};
+import { Component } from 'react';
+import { Redirect } from 'expo-router';
+
+export default function ServicesIndex() {
+  return <Redirect href="/(shop)/services" />;
+}

@@ -52,6 +52,8 @@ export const setupStripePaymentSheet = async (totalAmount: number) => {
       phone: 'always',
     },
   });
+
+  return paymentIntent;
 };
 
 export const openStripeCheckout = async () => {

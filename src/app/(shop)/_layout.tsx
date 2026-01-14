@@ -40,11 +40,12 @@ function TabBarIcon(props: {
 }
 
 const TabsLayout = () => {
-  const { session, mounting } = useAuth();
+  const { session, mounting, isMerchant, activeRole } = useAuth();
   const insets = useSafeAreaInsets();
 
   if (mounting) return <ActivityIndicator />;
   if (!session) return <Redirect href="/auth" />;
+  if (isMerchant && activeRole === 'merchant') return <Redirect href="/(merchant)" />; // Exclusive Mode
 
   return (
     

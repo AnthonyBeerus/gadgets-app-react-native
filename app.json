@@ -46,6 +46,12 @@
         }
       ],
       [
+        "expo-camera",
+        {
+          "cameraPermission": "Allow $(PRODUCT_NAME) to access your camera."
+        }
+      ],
+      [
         "@sentry/react-native/expo",
         {
           "organization": "kaizen-dynamics",
