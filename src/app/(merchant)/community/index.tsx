@@ -4,20 +4,59 @@ import { useRouter } from 'expo-router';
 import { MaterialIcons } from '@expo/vector-icons';
 import { NEO_THEME } from '../../../shared/constants/neobrutalism';
 import { useAuth } from '../../../shared/providers/auth-provider';
-import { getShopEvents } from '../../../shared/api/api';
+import { getShopEvents, deleteEvent } from '../../../shared/api/api';
 import { format } from 'date-fns';
+import { Alert } from 'react-native';
+
+import Animated, { useAnimatedScrollHandler } from 'react-native-reanimated';
+import { useCollapsibleTab } from '../../../shared/context/CollapsibleTabContext';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function MerchantEventsScreen() {
   const router = useRouter();
   const { merchantShopId } = useAuth();
   const { data: events, isLoading, error } = getShopEvents(merchantShopId || 0);
+  const { mutate: deleteEventMutation } = deleteEvent();
+
+  // Collapsible Tab Logic
+  const { scrollY, headerHeight, tabBarHeight } = useCollapsibleTab();
+  const insets = useSafeAreaInsets();
+  
+  const scrollHandler = useAnimatedScrollHandler((event) => {
+    scrollY.value = event.contentOffset.y;
+  });
+
+  const handleDelete = (id: number) => {
+    Alert.alert(
+      "Delete Event",
+      "Are you sure you want to delete this event?",
+      [
+        { text: "Cancel", style: "cancel" },
+        { 
+          text: "Delete", 
+          style: "destructive", 
+          onPress: () => {
+            deleteEventMutation(id, {
+                onSuccess: () => Alert.alert("Success", "Event deleted"),
+                onError: (err) => Alert.alert("Error", err.message)
+            });
+          }
+        }
+      ]
+    );
+  };
 
   const renderItem = ({ item }: { item: any }) => (
     <View style={styles.card}>
       <Image source={{ uri: item.image_url }} style={styles.image} />
       <View style={styles.cardContent}>
-        <Text style={styles.title}>{item.title}</Text>
-        <Text style={styles.date}>{format(new Date(item.date), 'MMM dd, yyyy • h:mm a')}</Text>
+        <View style={styles.headerRow}>
+            <Text style={styles.title}>{item.title}</Text>
+            <TouchableOpacity onPress={() => handleDelete(item.id)} style={styles.deleteBtn}>
+                <MaterialIcons name="delete-outline" size={24} color="gray" />
+            </TouchableOpacity>
+        </View>
+        <Text style={styles.date}>{format(new Date(item.event_date), 'MMM dd, yyyy • h:mm a')}</Text>
         <Text style={styles.tickets}>
             {item.tickets_sold} / {item.total_tickets} Tickets Sold
         </Text>
@@ -28,33 +67,45 @@ export default function MerchantEventsScreen() {
     </View>
   );
 
+  const AddButton = (
+    <TouchableOpacity 
+        style={styles.fab} 
+        onPress={() => router.push('/events/create')}
+    >
+      <MaterialIcons name="add" size={24} color="white" />
+      <Text style={styles.fabText}>Create Event</Text>
+    </TouchableOpacity>
+  );
+
+  if (isLoading) {
+    return (
+      <View style={styles.center}>
+          <ActivityIndicator size="large" color={NEO_THEME.colors.primary} />
+      </View>
+    );
+  }
+
+  if (error) {
+    return (
+      <View style={styles.center}>
+          <Text style={styles.errorText}>Error loading events: {error.message}</Text>
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>My Events</Text>
-        <TouchableOpacity 
-            style={styles.addButton} 
-            onPress={() => router.push('/events/create')}
-        >
-          <MaterialIcons name="add" size={24} color="white" />
-          <Text style={styles.addButtonText}>Create</Text>
-        </TouchableOpacity>
-      </View>
-
-      {isLoading ? (
-        <View style={styles.center}>
-            <ActivityIndicator size="large" color={NEO_THEME.colors.primary} />
-        </View>
-      ) : error ? (
-        <View style={styles.center}>
-            <Text style={styles.errorText}>Error loading events: {error.message}</Text>
-        </View>
-      ) : (
-        <FlatList
+        <Animated.FlatList
             data={events}
             keyExtractor={(item) => item.id.toString()}
             renderItem={renderItem}
-            contentContainerStyle={styles.list}
+            onScroll={scrollHandler}
+            scrollEventThrottle={16}
+            contentContainerStyle={{ 
+                paddingHorizontal: 16, 
+                paddingBottom: 100,
+                paddingTop: headerHeight + tabBarHeight + insets.top + 16 
+            }}
             ListEmptyComponent={
             <View style={styles.emptyState}>
                 <Text style={styles.emptyText}>No events pending.</Text>
@@ -62,7 +113,9 @@ export default function MerchantEventsScreen() {
             </View>
             }
         />
-      )}
+        <View style={styles.fabContainer}>
+            {AddButton}
+        </View>
     </View>
   );
 }
@@ -77,42 +130,32 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  header: {
-    padding: 16,
-    paddingTop: 60, // Safe area equivalent
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    backgroundColor: 'white',
-    borderBottomWidth: NEO_THEME.borders.width,
-    borderBottomColor: NEO_THEME.colors.black,
+  fabContainer: {
+    position: 'absolute',
+    right: 20,
+    bottom: 20,
+    zIndex: 100,
   },
-  headerTitle: {
-    fontSize: 24,
-    fontFamily: NEO_THEME.fonts.bold,
-    color: NEO_THEME.colors.black,
-  },
-  addButton: {
+  fab: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: NEO_THEME.colors.primary,
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-    borderRadius: NEO_THEME.borders.radius,
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 30,
     borderWidth: NEO_THEME.borders.width,
     borderColor: NEO_THEME.colors.black,
     shadowColor: NEO_THEME.colors.black,
-    shadowOffset: { width: 2, height: 2 },
+    shadowOffset: { width: 4, height: 4 },
     shadowOpacity: 1,
     shadowRadius: 0,
+    elevation: 8,
   },
-  addButtonText: {
+  fabText: {
     color: 'white',
     fontFamily: NEO_THEME.fonts.bold,
-    marginLeft: 4,
-  },
-  list: {
-    padding: 16,
+    fontSize: 16,
+    marginLeft: 8,
   },
   card: {
     backgroundColor: 'white',
@@ -135,10 +178,20 @@ const styles = StyleSheet.create({
   cardContent: {
     padding: 12,
   },
+  headerRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: 4,
+  },
   title: {
     fontSize: 18,
     fontFamily: NEO_THEME.fonts.bold,
-    marginBottom: 4,
+    flex: 1,
+    marginRight: 8,
+  },
+  deleteBtn: {
+      padding: 4,
   },
   date: {
     fontSize: 14,

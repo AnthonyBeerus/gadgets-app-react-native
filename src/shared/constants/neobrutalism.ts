@@ -12,7 +12,16 @@ export const NEO_THEME = {
     success: "#22c55e",
     successLight: "#dcfce7",
     error: "#ef4444",
+    red: "#ef4444",
   },
+  pastels: [
+    "#A3E635", // Lime
+    "#F472B6", // Pink
+    "#22D3EE", // Cyan
+    "#F97316", // Orange
+    "#A78BFA", // Purple
+    "#FACC15", // Yellow
+  ],
   borders: {
     width: 3,
     radius: 0,

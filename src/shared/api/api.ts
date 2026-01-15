@@ -120,7 +120,7 @@ export const getShopProducts = (shopId: number) => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("product")
-        .select("*")
+        .select("*, category:category(name)")
         .eq("shop_id", shopId);
 
       if (error) {
@@ -808,7 +808,7 @@ export const getShopEvents = (shopId: number) => {
         .from("events")
         .select("*")
         .eq("shop_id", shopId)
-        .order("date", { ascending: true });
+        .order("event_date", { ascending: true });
 
       if (error) {
         throw new Error(
@@ -841,13 +841,15 @@ export const createEvent = () => {
         .insert({
           title: eventData.title,
           description: eventData.description,
-          date: eventData.date,
+          event_date: eventData.date.split('T')[0], // YYYY-MM-DD
+          start_time: new Date(eventData.date).toLocaleTimeString('en-GB', { hour12: false }), // HH:MM:SS
+          end_time: new Date(new Date(eventData.date).getTime() + 2 * 60 * 60 * 1000).toLocaleTimeString('en-GB', { hour12: false }), // +2 hours
           location: eventData.location,
           image_url: eventData.imageUrl,
           shop_id: eventData.shopId,
           price: eventData.price || 0,
           total_tickets: eventData.totalTickets || 0,
-          tickets_sold: 0,
+          category: 'Culture', // Valid values: Music, Comedy, Art, Business, Culture, Film
         })
         .select("*")
         .single();
@@ -867,6 +869,36 @@ export const createEvent = () => {
     },
   });
 };
+
+export const deleteEvent = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    async mutationFn(id: number) {
+      console.log('[API] Deleting event id:', id);
+      const { error, count, data } = await supabase
+        .from("events")
+        .delete({ count: 'exact' })
+        .eq("id", id)
+        .select('*');
+
+      if (error) {
+        throw new Error("Failed to delete event: " + error.message);
+      }
+
+      if (count === 0) {
+        throw new Error("Failed to delete event: Item not found or permission denied");
+      }
+      
+      return data;
+    },
+
+    async onSuccess() {
+      await queryClient.invalidateQueries({ queryKey: ["events"] });
+      await queryClient.invalidateQueries({ queryKey: ["shopEvents"] });
+    },
+  });
+};
 // End of Event functions
 
 // Services
@@ -875,7 +907,7 @@ export const getServiceCategories = () => {
     queryKey: ["serviceCategories"],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("service_categories")
+        .from("service_category")
         .select("*")
         .order("name", { ascending: true });
 
@@ -898,7 +930,7 @@ export const getProviderServices = (providerId: number) => {
         .from("service")
         .select(`
             *,
-            category:service_categories(name)
+            category:service_category(name)
         `)
         .eq("provider_id", providerId)
         .order("created_at", { ascending: false });
@@ -951,6 +983,35 @@ export const createService = () => {
         );
       }
 
+      return data;
+    },
+
+    async onSuccess() {
+      await queryClient.invalidateQueries({ queryKey: ["providerServices"] });
+    },
+  });
+};
+
+export const deleteService = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    async mutationFn(id: number) {
+      console.log('[API] Deleting service id:', id);
+      const { error, count, data } = await supabase
+        .from("service")
+        .delete({ count: 'exact' })
+        .eq("id", id)
+        .select('*');
+
+      if (error) {
+        throw new Error("Failed to delete service: " + error.message);
+      }
+
+      if (count === 0) {
+        throw new Error("Failed to delete service: Item not found or permission denied");
+      }
+      
       return data;
     },
 
@@ -1072,6 +1133,35 @@ export const createChallenge = () => {
     async onSuccess() {
       await queryClient.invalidateQueries({ queryKey: ["shopChallenges"] });
       // ongoing_challenges might be another key
+    },
+  });
+};
+
+export const deleteChallenge = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    async mutationFn(id: number) {
+      console.log('[API] Deleting challenge id:', id);
+      const { error, count, data } = await supabase
+        .from("challenges")
+        .delete({ count: 'exact' })
+        .eq("id", id)
+        .select('*');
+
+      if (error) {
+        throw new Error("Failed to delete challenge: " + error.message);
+      }
+
+      if (count === 0) {
+        throw new Error("Failed to delete challenge: Item not found or permission denied");
+      }
+      
+      return data;
+    },
+
+    async onSuccess() {
+      await queryClient.invalidateQueries({ queryKey: ["shopChallenges"] });
     },
   });
 };
@@ -1395,4 +1485,130 @@ export const cancelTicketPurchase = () => {
       await queryClient.invalidateQueries({ queryKey: ["myTickets"] });
     },
   });
+};
+
+// ===== PRODUCT MANAGEMENT FUNCTIONS =====
+
+export const createProduct = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    async mutationFn(productData: any) {
+      // Generate a slug from title
+      const slug = productData.title
+        .toLowerCase()
+        .replace(/[^\w\s-]/g, "")
+        .replace(/[\s_-]+/g, "-")
+        .replace(/^-+|-+$/g, "");
+      
+      const uniqueSlug = `${slug}-${Date.now()}`;
+
+      const { data, error } = await supabase
+        .from("product")
+        .insert({
+          ...productData,
+          slug: uniqueSlug,
+        })
+        .select("*")
+        .single();
+
+      if (error) {
+        throw new Error("Failed to create product: " + error.message);
+      }
+
+      return data;
+    },
+    async onSuccess() {
+      await queryClient.invalidateQueries({ queryKey: ["shopProducts"] });
+    },
+  });
+};
+
+export const updateProduct = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    async mutationFn({ id, updates }: { id: number; updates: any }) {
+      const { data, error } = await supabase
+        .from("product")
+        .update(updates)
+        .eq("id", id)
+        .select("*")
+        .single();
+
+      if (error) {
+        throw new Error("Failed to update product: " + error.message);
+      }
+
+      return data;
+    },
+    async onSuccess(_, variables) {
+      await queryClient.invalidateQueries({ queryKey: ["shopProducts"] });
+      await queryClient.invalidateQueries({ queryKey: ["product", variables.id] });
+    },
+  });
+};
+
+export const deleteProduct = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    async mutationFn(id: number) {
+      console.log('[API] Deleting product id:', id);
+      const { error, count, data } = await supabase
+        .from("product")
+        .delete({ count: 'exact' }) // Request count
+        .eq("id", id)
+        .select('*'); // Select to see what was deleted
+
+      console.log('[API] Delete result - error:', error);
+      console.log('[API] Delete result - count:', count);
+      console.log('[API] Delete result - data:', data);
+
+      if (error) {
+        throw new Error("Failed to delete product: " + error.message);
+      }
+
+      if (count === 0) {
+        throw new Error("Failed to delete product: Item not found or permission denied (RLS)");
+      }
+    },
+    async onSuccess(data, variables) {
+      console.log('[API] Delete mutation success for id:', variables);
+      await queryClient.invalidateQueries({ queryKey: ["shopProducts"] });
+    },
+  });
+};
+
+export const uploadProductImage = async (uri: string) => {
+  try {
+    const filename = `product-${Date.now()}-${Math.random().toString(36).substring(7)}.jpg`;
+    const formData = new FormData();
+    
+    // @ts-ignore - React Native FormData expects specific object structure
+    formData.append('file', {
+      uri,
+      name: filename,
+      type: 'image/jpeg',
+    });
+
+    const { data, error } = await supabase.storage
+      .from('product-images')
+      .upload(filename, formData, {
+        cacheControl: '3600',
+        upsert: false,
+      });
+
+    if (error) {
+      throw error;
+    }
+
+    const { data: { publicUrl } } = supabase.storage
+      .from('product-images')
+      .getPublicUrl(filename);
+
+    return publicUrl;
+  } catch (error: any) {
+    throw new Error('Image upload failed: ' + error.message);
+  }
 };

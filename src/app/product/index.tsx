@@ -10,7 +10,7 @@ import {
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { ProductListItem } from "../../components/product-list-item";
+import { PopProductCard } from "../../components/shop/PopProductCard";
 import { getShopProducts } from "../../shared/api/shops";
 import { NEO_THEME } from "../../shared/constants/neobrutalism";
 
@@ -74,9 +74,36 @@ const ProductsPage = () => {
         <FlatList
           data={products}
           keyExtractor={(item) => item.id.toString()}
-          renderItem={({ item }) => <ProductListItem product={item} />}
-          numColumns={2}
-          columnWrapperStyle={styles.productRow}
+          renderItem={({ item, index }) => (
+            <PopProductCard 
+                item={item} 
+                index={index}
+                onPress={() => router.push(`/product/${item.slug}`)}
+                 style={{ width: '100%', marginBottom: 16 }}
+                 // Default variant (horizontal)
+                 actionButton={
+                     <TouchableOpacity 
+                        style={{
+                            width: 32,
+                            height: 32,
+                            borderRadius: 16,
+                            backgroundColor: NEO_THEME.colors.yellow,
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                            borderWidth: 2,
+                            borderColor: 'black',
+                        }}
+                        onPress={(e) => {
+                             e.stopPropagation();
+                             // Add to cart logic here
+                             console.log('Add to cart', item.id);
+                        }}
+                     >
+                         <Ionicons name="bag-add" size={16} color="black" />
+                     </TouchableOpacity>
+                 }
+            />
+          )}
           contentContainerStyle={styles.productsList}
           showsVerticalScrollIndicator={false}
         />
@@ -119,10 +146,7 @@ const styles = StyleSheet.create({
     fontFamily: NEO_THEME.fonts.bold,
     textTransform: "uppercase",
   },
-  productRow: {
-    justifyContent: "space-between",
-    paddingHorizontal: 16,
-  },
+
   productsList: {
     padding: 16,
   },

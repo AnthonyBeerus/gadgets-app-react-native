@@ -149,6 +149,23 @@ const AppNavigator = () => {
           title: "Upgrade to Pro",
         }}
       />
+      <Stack.Screen
+          name="create-product"
+          options={{
+            headerShown: false,
+            title: "Create Product",
+            animation: 'ios_from_right',
+          }}
+        />
+      <Stack.Screen
+          name="(modal)"
+          options={{
+            presentation: "formSheet",
+            sheetAllowedDetents: [0.5, 0.75],
+            sheetGrabberVisible: true,
+            headerShown: false,
+          }}
+        />
     </Stack>
   );
 }

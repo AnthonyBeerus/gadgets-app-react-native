@@ -23,6 +23,7 @@ import { StaticHeader } from "../../../shared/components/layout/StaticHeader";
 import { NEO_THEME } from "../../../shared/constants/neobrutalism";
 import { NeoButton } from "../../../shared/components/ui/neo-button";
 import { useCartStore } from "../../../store/cart-store"; // Added import
+import { PopProductCard } from "../../../components/shop/PopProductCard";
 
 export default function ShopDetailsScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -249,40 +250,7 @@ export default function ShopDetailsScreen() {
             </View>
           </View>
 
-          {/* Products Preview */}
-          <View style={styles.section}>
-            <View style={styles.sectionHeader}>
-              <Text style={styles.sectionTitle}>PRODUCTS & SERVICES</Text>
-              {products.length > 0 && (
-                <TouchableOpacity onPress={handleBrowseProducts}>
-                  <Text style={styles.viewAllText}>VIEW ALL</Text>
-                </TouchableOpacity>
-              )}
-            </View>
 
-            {productsLoading ? (
-              <ActivityIndicator color={NEO_THEME.colors.primary} />
-            ) : products.length > 0 ? (
-              <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.productsScroll}>
-                {products.slice(0, 5).map((product) => (
-                  <TouchableOpacity
-                    key={product.id}
-                    style={styles.productCard}
-                    onPress={() => router.push(`/product/${product.slug}`)}
-                  >
-                    <Image
-                      source={{ uri: product.imageUrl || "https://via.placeholder.com/150" }}
-                      style={styles.productImage}
-                    />
-                    <Text style={styles.productName} numberOfLines={1}>{product.name}</Text>
-                    <Text style={styles.productPrice}>P{product.price}</Text>
-                  </TouchableOpacity>
-                ))}
-              </ScrollView>
-            ) : (
-              <Text style={styles.emptyText}>No products available.</Text>
-            )}
-          </View>
 
           {/* Services Grid */}
           <View style={styles.section}>
