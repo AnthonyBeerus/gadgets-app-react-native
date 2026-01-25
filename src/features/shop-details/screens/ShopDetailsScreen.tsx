@@ -175,7 +175,7 @@ export default function ShopDetailsScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <StaticHeader 
-        title={shop.name.toUpperCase()} 
+        title={shop.name} 
         onBackPress={() => router.back()} 
         rightElement={
           <TouchableOpacity onPress={() => router.push("/cart")}>
@@ -367,6 +367,8 @@ const styles = StyleSheet.create({
     width: "100%",
     height: 250,
     resizeMode: "cover",
+    borderBottomLeftRadius: 32,
+    borderBottomRightRadius: 32,
     borderBottomWidth: NEO_THEME.borders.width,
     borderColor: NEO_THEME.colors.black,
   },
@@ -378,6 +380,7 @@ const styles = StyleSheet.create({
     color: NEO_THEME.colors.black,
     marginBottom: 24,
     lineHeight: 24,
+    fontFamily: NEO_THEME.fonts.regular,
   },
   quickActionsSection: {
     marginBottom: 24,
@@ -388,7 +391,7 @@ const styles = StyleSheet.create({
   primaryActionText: {
     color: NEO_THEME.colors.white,
     fontWeight: "900",
-    fontFamily: NEO_THEME.fonts.black,
+    fontFamily: NEO_THEME.fonts.bold,
     fontSize: 16,
   },
   secondaryActions: {
@@ -404,7 +407,7 @@ const styles = StyleSheet.create({
     backgroundColor: NEO_THEME.colors.white,
     borderWidth: NEO_THEME.borders.width,
     borderColor: NEO_THEME.colors.black,
-    borderRadius: NEO_THEME.borders.radius,
+    borderRadius: 24, // Pill
     gap: 8,
     shadowColor: NEO_THEME.colors.black,
     shadowOffset: { width: 4, height: 4 },
@@ -413,7 +416,7 @@ const styles = StyleSheet.create({
   },
   secondaryActionText: {
     fontWeight: "900",
-    fontFamily: NEO_THEME.fonts.black,
+    fontFamily: NEO_THEME.fonts.bold,
     color: NEO_THEME.colors.black,
   },
   section: {
@@ -429,8 +432,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "900",
     color: NEO_THEME.colors.black,
-    fontFamily: NEO_THEME.fonts.black,
-    textTransform: "uppercase",
+    fontFamily: NEO_THEME.fonts.bold,
   },
   viewAllText: {
     color: NEO_THEME.colors.primary,
@@ -491,8 +493,8 @@ const styles = StyleSheet.create({
   },
   featureLabel: {
     fontWeight: "900",
-    fontFamily: NEO_THEME.fonts.black,
-    textTransform: "uppercase",
+    fontFamily: NEO_THEME.fonts.bold,
+    fontSize: 12,
   },
   detailRow: {
     flexDirection: "row",

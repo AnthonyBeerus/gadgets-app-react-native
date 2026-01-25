@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { View, Text, StyleSheet, Button, Alert, ActivityIndicator, TouchableOpacity } from "react-native";
 import { CameraView, CameraType, useCameraPermissions } from "expo-camera";
+import * as Clipboard from 'expo-clipboard';
 import { NEO_THEME } from "../shared/constants/neobrutalism";
 import { supabase } from "../shared/lib/supabase";
 import { MaterialIcons } from "@expo/vector-icons";
@@ -30,7 +31,7 @@ export default function MerchantScanScreen() {
     
     // Prevent duplicate scans of the same code immediately
     if (data === lastScannedData) {
-        // Debounce??
+        return;
     }
 
     setScanned(true);
@@ -38,17 +39,25 @@ export default function MerchantScanScreen() {
     setLastScannedData(data);
 
     try {
-        console.log(`Bar code with type ${type} and data ${data} has been scanned!`);
+        console.log(`Bar code scanned. Data len: ${data.length}`);
         
-        // Parse order ID. QR code value is just the order ID (number).
-        const orderId = parseInt(data, 10);
+        let orderId: number;
+        let token: string;
 
-        if (isNaN(orderId)) {
-            throw new Error("Invalid QR Code content. Expected numeric Order ID.");
+        try {
+            const parsed = JSON.parse(data);
+            orderId = parsed.orderId;
+            token = parsed.token;
+        } catch (e) {
+             throw new Error("Invalid QR Format. Ensure customer is using the latest app version.");
+        }
+
+        if (!orderId || !token) {
+            throw new Error("Incomplete QR data. Missing ID or Security Token.");
         }
 
         const { data: result, error } = await supabase.functions.invoke('verify-fulfillment', {
-            body: { orderId }
+            body: { orderId, token }
         });
 
         if (error) {
@@ -58,7 +67,7 @@ export default function MerchantScanScreen() {
         if (result.verified) {
             Alert.alert(
                 "✅ ORDER VERIFIED",
-                `Payment Status: PAID\nAmount: $${result.amount}\n\nOrder #${orderId} is confirmed.`,
+                `Payment Status: PAID\nAmount: $${result.amount}\nCustomer: ${result.customer_email}\n\nOrder #${orderId} is confirmed.`,
                 [{ text: "Scan Next", onPress: () => {
                     setScanned(false);
                     setVerifying(false);
@@ -108,6 +117,23 @@ export default function MerchantScanScreen() {
         <View style={styles.buttonContainer}>
             <Button title={'Tap to Scan Again'} onPress={() => setScanned(false)} />
         </View>
+      )}
+
+      {/* Dev Mode: Paste Scan */}
+      {!scanned && !verifying && (
+         <View style={[styles.buttonContainer, { bottom: 100 }]}>
+             <Button title="Paste QR (Dev)" onPress={async () => {
+                 const content = await Clipboard.getStringAsync();
+                 if (content) {
+                     Alert.alert("Simulate Scan?", `Process: ${content.substring(0, 20)}...`, [
+                         { text: "Cancel", style: "cancel" },
+                         { text: "Simulate", onPress: () => handleBarCodeScanned({ type: 'PASTE', data: content }) }
+                     ]);
+                 } else {
+                     Alert.alert("Clipboard Empty");
+                 }
+             }} />
+         </View>
       )}
     </View>
   );

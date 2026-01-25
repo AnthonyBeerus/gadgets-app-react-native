@@ -11,7 +11,7 @@ import { NEO_THEME } from "../../../shared/constants/neobrutalism";
 import { ProfileOption } from "../components/ProfileOption";
 import { AnimatedHeaderLayout } from "../../../shared/components/layout/AnimatedHeaderLayout";
 import { router } from "expo-router";
-import { CartHeaderButton } from "../../../shared/components/ui/CartHeaderButton";
+import { HeaderRightGroup } from "../../../shared/components/ui/header-right-group";
 
 const ProfileScreen = () => {
   const { user, createDevMerchant, isMerchant, switchRole } = useAuth();
@@ -52,8 +52,8 @@ const ProfileScreen = () => {
     <AnimatedHeaderLayout
       renderSmallTitle={renderSmallTitle}
       renderLargeTitle={renderLargeTitle}
-      smallHeaderRight={<CartHeaderButton />}
-      largeHeaderRight={<CartHeaderButton />}
+      smallHeaderRight={<HeaderRightGroup />}
+      largeHeaderRight={<HeaderRightGroup />}
     >
       {/* Account Section */}
       <View style={styles.section}>

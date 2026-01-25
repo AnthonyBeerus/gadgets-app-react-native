@@ -1,6 +1,8 @@
 import React from 'react';
 import { View, Text, Image, StyleSheet, TouchableOpacity } from 'react-native';
+import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import { NEO_THEME } from '../../shared/constants/neobrutalism';
+import { SCALE, TIMING_CONFIG } from '../../shared/constants/animations';
 import { Ionicons } from '@expo/vector-icons';
 
 interface NeoShopCardProps {
@@ -9,46 +11,70 @@ interface NeoShopCardProps {
 }
 
 export const NeoShopCard = ({ shop, onPress }: NeoShopCardProps) => {
+  const scale = useSharedValue<number>(SCALE.normal);
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: scale.value }],
+  }));
+
+  const handlePressIn = () => {
+    scale.value = withTiming(SCALE.pressed, TIMING_CONFIG.fast);
+  };
+
+  const handlePressOut = () => {
+    scale.value = withTiming(SCALE.normal, TIMING_CONFIG.fast);
+  };
+
   return (
-    <TouchableOpacity onPress={onPress} activeOpacity={0.9} style={styles.card}>
-      <View style={styles.imageContainer}>
-        <Image source={{ uri: shop.image_url }} style={styles.image} />
-        {shop.is_open === false && (
-          <View style={styles.closedBadge}>
-            <Text style={styles.closedText}>CLOSED</Text>
-          </View>
-        )}
-      </View>
-      
-      <View style={styles.content}>
-        <View style={styles.header}>
-          <Text style={styles.title} numberOfLines={1}>{shop.name}</Text>
-          {shop.rating && (
-            <View style={styles.ratingBadge}>
-              <Ionicons name="star" size={14} color={NEO_THEME.colors.yellow} />
-              <Text style={styles.ratingText}>{shop.rating}</Text>
+    <Animated.View style={[styles.container, animatedStyle]}> 
+      <TouchableOpacity 
+        onPress={onPress} 
+        onPressIn={handlePressIn}
+        onPressOut={handlePressOut}
+        activeOpacity={1} 
+        style={styles.card}
+      >
+        <View style={styles.imageContainer}>
+          <Image source={{ uri: shop.image_url }} style={styles.image} />
+          {shop.is_open === false && (
+            <View style={styles.closedBadge}>
+              <Text style={styles.closedText}>CLOSED</Text>
             </View>
           )}
         </View>
         
-        <View style={styles.footer}>
-          <View style={styles.categoryTag}>
-            <Ionicons name="pricetag" size={14} color={NEO_THEME.colors.black} />
-            <Text style={styles.categoryText}>{shop.category?.name || 'SHOP'}</Text>
+        <View style={styles.content}>
+          <View style={styles.header}>
+            <Text style={styles.title} numberOfLines={1}>{shop.name}</Text>
+            {shop.rating && (
+              <View style={styles.ratingBadge}>
+                <Ionicons name="star" size={14} color={NEO_THEME.colors.yellow} />
+                <Text style={styles.ratingText}>{shop.rating}</Text>
+              </View>
+            )}
           </View>
           
-          <View style={styles.arrowButton}>
-            <Ionicons name="chevron-forward" size={20} color={NEO_THEME.colors.white} />
+          <View style={styles.footer}>
+            <View style={styles.categoryTag}>
+              <Ionicons name="pricetag" size={14} color={NEO_THEME.colors.black} />
+              <Text style={styles.categoryText}>{shop.category?.name || 'SHOP'}</Text>
+            </View>
+            
+            <View style={styles.arrowButton}>
+              <Ionicons name="chevron-forward" size={20} color={NEO_THEME.colors.white} />
+            </View>
           </View>
         </View>
-      </View>
-    </TouchableOpacity>
+      </TouchableOpacity>
+    </Animated.View>
   );
 };
 
 const styles = StyleSheet.create({
-  card: {
+  container: {
     marginBottom: 16,
+  },
+  card: {
     backgroundColor: NEO_THEME.colors.white,
     borderRadius: NEO_THEME.borders.radius,
     overflow: 'hidden',
@@ -100,7 +126,6 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontFamily: NEO_THEME.fonts.black,
     color: NEO_THEME.colors.black,
-    textTransform: 'uppercase',
     fontWeight: '900',
     marginRight: 8,
   },

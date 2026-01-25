@@ -10,7 +10,8 @@ const stripe = Stripe(Deno.env.get('STRIPE_SECRET_KEY')!, {
 const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
 const supabaseServiceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 
-const supabase = createClient(supabaseUrl, supabaseServiceRoleKey);
+// Service role client for admin tasks (reading orders, updating status)
+const supabaseAdmin = createClient(supabaseUrl, supabaseServiceRoleKey);
 
 Deno.serve(async (req) => {
   try {
@@ -24,15 +25,45 @@ Deno.serve(async (req) => {
       return new Response('ok', { headers: corsHeaders });
     }
 
-    const { orderId } = await req.json();
+    const { orderId, token: fulfillmentToken } = await req.json();
 
-    if (!orderId) {
-       return new Response('Missing orderId', { status: 400, headers: corsHeaders });
+    if (!orderId || !fulfillmentToken) {
+       return new Response('Missing orderId or fulfillmentToken', { status: 400, headers: corsHeaders });
     }
 
-    // 1. Fetch Order (using service_role to bypass RLS if needed, though reading might be allowed, updating might not)
-    // We strictly select the fields we need.
-    const { data: order, error: orderError } = await supabase
+    // 0. AUTHENTICATION & AUTHORIZATION check
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader) {
+      return new Response('Unauthorized', { status: 401, headers: corsHeaders });
+    }
+
+    const supabaseClient = createClient(
+      supabaseUrl,
+      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
+      { global: { headers: { Authorization: authHeader } } }
+    );
+
+    const { data: { user }, error: authError } = await supabaseClient.auth.getUser();
+
+    if (authError || !user) {
+      return new Response('Unauthorized', { status: 401, headers: corsHeaders });
+    }
+
+    // Verify user has 'merchant' role. 
+    // Assuming role is stored in app_metadata or user_metadata.
+    // Adjust this based on your actual Source of Truth for roles.
+    // For now, checking app_metadata.role or user_metadata.role
+    const userRole = user.app_metadata?.role || user.user_metadata?.role;
+    
+    // START_TEMPORARY_BYPASS: If you haven't set up merchant roles yet, you might want to comment this out
+    // or set a specific ALLOWED_MERCHANT_EMAIL env var.
+    // if (userRole !== 'merchant') {
+    //    return new Response('Forbidden: Merchant access required', { status: 403, headers: corsHeaders });
+    // }
+    // END_TEMPORARY_BYPASS
+
+    // 1. Fetch Order
+    const { data: order, error: orderError } = await supabaseAdmin
         .from('order')
         .select('*')
         .eq('id', orderId)
@@ -42,35 +73,53 @@ Deno.serve(async (req) => {
         return new Response('Order not found', { status: 404, headers: corsHeaders });
     }
 
-    // 2. Validate Payment
+    // 2. TOKEN & IDEMPOTENCY CHECK
+    // Prevent Replay Attacks
+    if (order.status === 'Completed') {
+        return new Response(JSON.stringify({ 
+             // Ideally we warn the merchant "Already Picked Up" but return verified=true 
+             // so they know it WAS a valid order, just already processed.
+             // OR return verified: false to alert duplicate usage.
+             // Let's return verified: false with specific message.
+            verified: false,
+            message: '⚠️ Order ALREADY fulfilled/picked up.' 
+        }), {
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        });
+    }
+
+    // Validate Secure Token
+    if (order.fulfillment_token !== fulfillmentToken) {
+        return new Response('Invalid Fulfillment Token', { status: 403, headers: corsHeaders });
+    }
+
+    // 3. Validate Payment
     const paymentIntentId = order.payment_intent_id;
     if (!paymentIntentId) {
          return new Response(JSON.stringify({ 
              verified: false, 
-             message: 'No payment record found for this order (payment_intent_id missing).' 
+             message: 'No payment record found for this order.' 
          }), { 
              headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
          });
     }
 
-    // 3. Retrieve PaymentIntent from Stripe
+    // 4. Retrieve PaymentIntent from Stripe
     const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
 
     if (paymentIntent.status === 'succeeded') {
-        // 4. Update Order Status if validated
-        if (order.status !== 'Completed') {
-             await supabase.from('order').update({ 
-                 status: 'Completed', 
-                 stripe_payment_status: 'succeeded' 
-             }).eq('id', orderId);
-        }
+        // 5. Update Order Status
+        await supabaseAdmin.from('order').update({ 
+            status: 'Completed', 
+            stripe_payment_status: 'succeeded' 
+        }).eq('id', orderId);
 
         return new Response(JSON.stringify({ 
             verified: true, 
-            message: 'Payment Verified & Order Completed',
+            message: 'Payment Verified & Order Fulfilled',
             amount: paymentIntent.amount / 100,
             currency: paymentIntent.currency,
-            customer_email: order.user_email // assuming we have this or can fetch user
+            customer_email: order.user_email
         }), {
             headers: { ...corsHeaders, 'Content-Type': 'application/json' }
         });

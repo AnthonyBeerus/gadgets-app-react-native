@@ -20,7 +20,11 @@ import { NeoView } from "../../../shared/components/ui/neo-view";
 import { NeoShopCard } from "../../../components/shop/neo-shop-card";
 import { NEO_THEME } from "../../../shared/constants/neobrutalism";
 import { AnimatedHeaderLayout } from "../../../shared/components/layout/AnimatedHeaderLayout";
-import { CartHeaderButton } from "../../../shared/components/ui/CartHeaderButton";
+import { HeaderRightGroup } from "../../../shared/components/ui/header-right-group";
+import { SmallHeaderTitle, LargeHeaderTitle } from "../../../shared/components/layout/header-titles";
+import { FadeIn, FadeInDown } from "react-native-reanimated";
+import { DURATION, EASING } from "../../../shared/constants/animations";
+import { NuviaInput } from "../../../shared/components/ui/nuvia-input";
 
 const { width } = Dimensions.get("window");
 
@@ -100,19 +104,57 @@ export default function ShopsScreen() {
 
   const renderSmallTitle = () => (
     <TouchableOpacity onPress={() => router.push("/mall-selector")} activeOpacity={0.7}>
-      <View style={styles.smallHeaderContent}>
-        <Text style={styles.smallHeaderTitle}>{mallName}</Text>
-        <Ionicons name="chevron-down" size={20} color={NEO_THEME.colors.black} />
-      </View>
+      <SmallHeaderTitle title={mallName}>
+        <Ionicons name="chevron-down" size={20} color={NEO_THEME.colors.black} style={{ marginLeft: 4 }} />
+      </SmallHeaderTitle>
     </TouchableOpacity>
   );
 
   const renderLargeTitle = () => (
-    <TouchableOpacity onPress={() => router.push("/mall-selector")} activeOpacity={0.8}>
-      <NeoView style={styles.mallSelector} shadowOffset={3} containerStyle={{ alignSelf: 'stretch' }}>
-        <Text style={styles.mallSelectorText}>{mallName}</Text>
-        <Ionicons name="chevron-down" size={24} color={NEO_THEME.colors.black} />
-      </NeoView>
+    <TouchableOpacity 
+      onPress={() => router.push("/mall-selector")} 
+      activeOpacity={0.8}
+      style={{ marginTop: 8 }}
+    >
+      <View>
+        {/* Meta Label */}
+        <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8 }}>
+           <View style={{ width: 8, height: 8, backgroundColor: NEO_THEME.colors.primary, marginRight: 8 }} />
+           <Text style={{ 
+             fontFamily: NEO_THEME.fonts.bold, 
+             fontSize: 12, 
+             letterSpacing: 2, 
+             color: NEO_THEME.colors.grey 
+           }}>
+             CURRENT LOCATION
+           </Text>
+        </View>
+
+        {/* Massive Title */}
+        <Text style={{ 
+            fontFamily: NEO_THEME.fonts.black, 
+            fontSize: 40, 
+            lineHeight: 40, 
+            color: NEO_THEME.colors.black,
+            letterSpacing: -1, // Tight tracking for impact
+            marginBottom: 8
+        }}>
+          {mallName}
+        </Text>
+
+        {/* Action Indicator */}
+         <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            <Text style={{ 
+              fontFamily: NEO_THEME.fonts.bold, 
+              fontSize: 14,
+              marginRight: 6,
+              textDecorationLine: 'underline'
+            }}>
+              CHANGE
+            </Text>
+            <Ionicons name="arrow-forward" size={16} color={NEO_THEME.colors.black} />
+         </View>
+      </View>
     </TouchableOpacity>
   );
 
@@ -120,29 +162,36 @@ export default function ShopsScreen() {
     <AnimatedHeaderLayout
       renderSmallTitle={renderSmallTitle}
       renderLargeTitle={renderLargeTitle}
-      smallHeaderRight={<CartHeaderButton />}
-      largeHeaderRight={<CartHeaderButton />}
+      smallHeaderRight={<HeaderRightGroup />}
+      largeHeaderRight={<HeaderRightGroup />}
     >
       <View style={styles.content}>
         {/* Search Bar */}
-        <View style={styles.searchContainer}>
-          <View style={styles.searchWrapper}>
-            <TextInput
-              style={styles.searchInput}
-              placeholder="Search for products, brands..."
-              placeholderTextColor={NEO_THEME.colors.grey}
-              value={searchQuery}
-              onChangeText={setSearchQuery}
-            />
-            <TouchableOpacity style={styles.searchButton}>
-              <Text style={styles.searchButtonText}>SEARCH</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
+        <Animated.View 
+          entering={FadeInDown.duration(DURATION.normal).delay(100).easing(EASING.out)}
+          style={styles.searchContainer}
+        >
+          <NuviaInput
+            placeholder="Search for products, brands..."
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+            leftIcon={<Ionicons name="search" size={20} color={NEO_THEME.colors.grey} />}
+            rightIcon={
+               <TouchableOpacity onPress={() => console.log('Search')}>
+                 <View style={{ backgroundColor: NEO_THEME.colors.secondary, borderRadius: 12, padding: 4 }}>
+                   <Ionicons name="arrow-forward" size={16} color={NEO_THEME.colors.black} />
+                 </View>
+               </TouchableOpacity>
+            }
+          />
+        </Animated.View>
 
         {/* Hero Carousel */}
         {featuredShops.length > 0 && (
-          <View style={styles.heroSection}>
+          <Animated.View 
+            style={styles.heroSection}
+            entering={FadeInDown.duration(DURATION.normal).delay(200).easing(EASING.out)}
+          >
             <ScrollView
               ref={scrollViewRef}
               horizontal
@@ -187,45 +236,56 @@ export default function ShopsScreen() {
                 />
               ))}
             </View>
-          </View>
+          </Animated.View>
         )}
 
         {/* Category Filter Pills */}
-        <Animated.ScrollView 
-          horizontal 
-          showsHorizontalScrollIndicator={false} 
-          contentContainerStyle={styles.filtersContainer}
-        >
-          {categories.map((item) => (
-            <TouchableOpacity
-              key={item.id}
-              onPress={() => setSelectedCategory(selectedCategory === item.id ? null : item.id)}
-              style={{ marginRight: 12 }}
-            >
-              <View
-                style={[
-                  styles.filterPill,
-                  selectedCategory === item.id ? styles.activeFilterPill : styles.inactiveFilterPill
-                ]}
+        <Animated.View entering={FadeInDown.duration(DURATION.normal).delay(300).easing(EASING.out)}>
+          <Animated.ScrollView 
+            horizontal 
+            showsHorizontalScrollIndicator={false} 
+            contentContainerStyle={styles.filtersContainer}
+          >
+            {categories.map((item, index) => (
+              <Animated.View 
+                key={item.id}
+                entering={FadeIn.duration(DURATION.fast).delay(300 + (index * 50)).easing(EASING.out)}
               >
-                <Text style={[
-                  styles.filterText,
-                  selectedCategory === item.id ? styles.activeFilterText : styles.inactiveFilterText
-                ]}>
-                  {item.name}
-                </Text>
-              </View>
-            </TouchableOpacity>
-          ))}
-        </Animated.ScrollView>
+              <TouchableOpacity
+                onPress={() => setSelectedCategory(selectedCategory === item.id ? null : item.id)}
+                style={{ marginRight: 12 }}
+              >
+                <View
+                  style={[
+                    styles.filterPill,
+                    selectedCategory === item.id ? styles.activeFilterPill : styles.inactiveFilterPill
+                  ]}
+                >
+                  <Text style={[
+                    styles.filterText,
+                    selectedCategory === item.id ? styles.activeFilterText : styles.inactiveFilterText
+                  ]}>
+                    {item.name}
+                  </Text>
+                </View>
+              </TouchableOpacity>
+              </Animated.View>
+            ))}
+          </Animated.ScrollView>
+        </Animated.View>
 
         <View style={styles.listContainer}>
           {loading ? (
             <ActivityIndicator size="large" color={NEO_THEME.colors.primary} style={{ marginTop: 40 }} />
           ) : (
             <>
-              {shops.map((item) => (
-                <NeoShopCard key={item.id} shop={item} onPress={() => navigateToShop(item.id)} />
+              {shops.map((item, index) => (
+                <Animated.View 
+                  key={item.id}
+                  entering={FadeInDown.duration(DURATION.normal).delay(400 + (index * 50)).easing(EASING.out)}
+                >
+                  <NeoShopCard shop={item} onPress={() => navigateToShop(item.id)} />
+                </Animated.View>
               ))}
             </>
           )}
@@ -256,14 +316,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 16,
   },
-  mallSelectorText: {
-    fontFamily: NEO_THEME.fonts.black,
-    fontSize: 20,
-    color: NEO_THEME.colors.black,
-    fontWeight: '900',
-    textTransform: 'uppercase',
-    flex: 1,
-  },
   content: {
     flex: 1,
   },
@@ -277,6 +329,14 @@ const styles = StyleSheet.create({
     borderWidth: NEO_THEME.borders.width,
     borderColor: NEO_THEME.colors.black,
     backgroundColor: NEO_THEME.colors.white,
+    borderRadius: NEO_THEME.borders.radius,
+    overflow: 'hidden',
+    // Hard shadow for search bar
+    shadowColor: NEO_THEME.colors.black,
+    shadowOffset: { width: 4, height: 4 },
+    shadowOpacity: 1,
+    shadowRadius: 0,
+    elevation: 4,
   },
   searchInput: {
     flex: 1,
@@ -287,7 +347,7 @@ const styles = StyleSheet.create({
     color: NEO_THEME.colors.black,
   },
   searchButton: {
-    backgroundColor: NEO_THEME.colors.blue,
+    backgroundColor: NEO_THEME.colors.secondary, // Yellow CTA
     paddingHorizontal: 24,
     justifyContent: 'center',
     borderLeftWidth: NEO_THEME.borders.width,
@@ -295,16 +355,18 @@ const styles = StyleSheet.create({
   },
   searchButtonText: {
     fontFamily: NEO_THEME.fonts.bold,
-    color: NEO_THEME.colors.white,
+    color: NEO_THEME.colors.black,
     fontSize: 14,
     fontWeight: '700',
   },
   heroSection: {
     paddingHorizontal: 16,
     marginBottom: 24,
+    marginTop: 8,
   },
   carousel: {
     width: '100%',
+    overflow: 'visible', // Allow shadows
   },
   carouselSlide: {
     width: width - 32, // Account for padding
@@ -312,6 +374,14 @@ const styles = StyleSheet.create({
   heroBorder: {
     borderWidth: NEO_THEME.borders.width,
     borderColor: NEO_THEME.colors.black,
+    borderRadius: NEO_THEME.borders.radius,
+    shadowColor: NEO_THEME.colors.black,
+    shadowOffset: { width: 4, height: 4 },
+    shadowOpacity: 1,
+    shadowRadius: 0,
+    elevation: 4,
+    backgroundColor: NEO_THEME.colors.white,
+    overflow: 'hidden',
   },
   heroImage: {
     width: '100%',
@@ -320,7 +390,7 @@ const styles = StyleSheet.create({
   },
   heroOverlay: {
     padding: 16,
-    backgroundColor: 'rgba(0,0,0,0.4)',
+    backgroundColor: 'rgba(0,0,0,0.3)',
   },
   heroTitle: {
     fontFamily: NEO_THEME.fonts.black,
@@ -329,7 +399,6 @@ const styles = StyleSheet.create({
     textShadowColor: NEO_THEME.colors.black,
     textShadowOffset: { width: 2, height: 2 },
     textShadowRadius: 0,
-    textTransform: 'uppercase',
     fontWeight: '900',
   },
   heroSubtitle: {
@@ -353,6 +422,7 @@ const styles = StyleSheet.create({
     backgroundColor: NEO_THEME.colors.white,
     borderWidth: NEO_THEME.borders.width,
     borderColor: NEO_THEME.colors.black,
+    borderRadius: 6,
   },
   activeDot: {
     backgroundColor: NEO_THEME.colors.black,
@@ -362,13 +432,20 @@ const styles = StyleSheet.create({
     paddingBottom: 24,
   },
   filterPill: {
-    paddingHorizontal: 24,
+    paddingHorizontal: 20,
     paddingVertical: 10,
     borderWidth: NEO_THEME.borders.width,
     borderColor: NEO_THEME.colors.black,
+    borderRadius: 20, // Pill shape
   },
   activeFilterPill: {
-    backgroundColor: NEO_THEME.colors.black,
+    backgroundColor: NEO_THEME.colors.primary, // Lilac for active
+    shadowColor: NEO_THEME.colors.black,
+    shadowOffset: { width: 2, height: 2 },
+    shadowOpacity: 1,
+    shadowRadius: 0,
+    elevation: 2,
+    transform: [{ translateY: -2 }], // Pop up slightly
   },
   inactiveFilterPill: {
     backgroundColor: NEO_THEME.colors.white,

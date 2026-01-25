@@ -65,8 +65,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "900",
     color: NEO_THEME.colors.black,
-    fontFamily: NEO_THEME.fonts.black,
-    textTransform: "uppercase",
+    fontFamily: NEO_THEME.fonts.bold,
   },
   headerRight: {
     marginLeft: 12,

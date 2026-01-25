@@ -106,7 +106,7 @@ export default function ShopTabBar({ state, descriptors, navigation }: TabBarPro
           style={styles.fab}
         >
             {/* Using FontAwesome Trophy for Challenges to match previous icon choice or similar */}
-          <MaterialIcons name="emoji-events" size={32} color="white" />
+          <MaterialIcons name="emoji-events" size={32} color={NEO_THEME.colors.black} />
         </TouchableOpacity>
       )}
     </Animated.View>
@@ -130,7 +130,7 @@ const styles = StyleSheet.create({
     marginRight: 16,
     flexDirection: 'row',
     height: 64,
-    backgroundColor: '#F5F5F5', 
+    backgroundColor: NEO_THEME.colors.white, 
     borderWidth: NEO_THEME.borders.width,
     borderColor: NEO_THEME.colors.black,
     borderRadius: 32,
@@ -163,7 +163,7 @@ const styles = StyleSheet.create({
     width: 64,
     height: 64,
     borderRadius: 32,
-    backgroundColor: NEO_THEME.colors.primary,
+    backgroundColor: NEO_THEME.colors.secondary, // Yellow Pop
     borderWidth: NEO_THEME.borders.width,
     borderColor: NEO_THEME.colors.black,
     alignItems: 'center',

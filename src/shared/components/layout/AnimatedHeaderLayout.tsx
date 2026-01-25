@@ -1,10 +1,18 @@
+/**
+ * AnimatedHeaderLayout
+ * 
+ * Bold, asymmetric header following frontend-design principles:
+ * - Left accent stripe for visual anchor
+ * - Asymmetric layout (left-aligned title)
+ * - Geometric texture overlay
+ * - Grid-breaking header right group
+ */
 import React from "react";
 import {
   View,
   Text,
   StyleSheet,
   TouchableOpacity,
-  Dimensions,
   ViewStyle,
 } from "react-native";
 import Animated, {
@@ -13,11 +21,14 @@ import Animated, {
   useAnimatedScrollHandler,
   useAnimatedStyle,
   useSharedValue,
-  SharedValue,
+  FadeIn,
+  FadeInDown,
 } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { NEO_THEME } from "../../constants/neobrutalism";
+import { SCROLL_THRESHOLDS, EASING, DURATION } from "../../constants/animations";
+import { SmallHeaderTitle, LargeHeaderTitle } from "./header-titles";
 
 interface AnimatedHeaderLayoutProps {
   children: React.ReactNode;
@@ -44,51 +55,44 @@ export const AnimatedHeaderLayout: React.FC<AnimatedHeaderLayoutProps> = ({
   contentContainerStyle,
   stickyFooter,
 }) => {
-  const { top } = useSafeAreaInsets();
+  const { top, bottom } = useSafeAreaInsets();
   const scrollY = useSharedValue(0);
 
-  const onScroll = useAnimatedScrollHandler({
+  const scrollHandler = useAnimatedScrollHandler({
     onScroll: (event) => {
       scrollY.value = event.contentOffset.y;
     },
   });
 
+  // Large title: fades and translates up
   const largeTitleStyle = useAnimatedStyle(() => {
     const opacity = interpolate(
       scrollY.value,
-      [0, 40],
+      [SCROLL_THRESHOLDS.largeTitleFadeStart, SCROLL_THRESHOLDS.largeTitleFadeEnd],
       [1, 0],
-      Extrapolation.CLAMP
-    );
-    const scale = interpolate(
-      scrollY.value,
-      [0, 40],
-      [1, 0.9],
-      Extrapolation.CLAMP
-    );
-    return { opacity, transform: [{ scale }] };
-  });
-
-  const smallHeaderStyle = useAnimatedStyle(() => {
-    const opacity = interpolate(
-      scrollY.value,
-      [40, 80],
-      [0, 1],
       Extrapolation.CLAMP
     );
     const translateY = interpolate(
       scrollY.value,
-      [40, 80],
-      [20, 0],
+      [SCROLL_THRESHOLDS.largeTitleFadeStart, SCROLL_THRESHOLDS.largeTitleFadeEnd],
+      [0, -20],
       Extrapolation.CLAMP
     );
-    return {
-      opacity,
-      transform: [{ translateY }],
-    };
+    return { opacity, transform: [{ translateY }] };
   });
 
-  const headerHeight = 60 + top;
+  // Small header & Background: fades in
+  const headerAnimatedStyle = useAnimatedStyle(() => {
+    const opacity = interpolate(
+      scrollY.value,
+      [SCROLL_THRESHOLDS.smallHeaderFadeStart, SCROLL_THRESHOLDS.smallHeaderFadeEnd],
+      [0, 1],
+      Extrapolation.CLAMP
+    );
+    return { opacity };
+  });
+
+  const headerHeight = 52 + top;
 
   const DefaultSmallTitle = () => (
     <TouchableOpacity 
@@ -96,7 +100,7 @@ export const AnimatedHeaderLayout: React.FC<AnimatedHeaderLayoutProps> = ({
       activeOpacity={onTitlePress ? 0.7 : 1}
       disabled={!onTitlePress}
     >
-      <Text style={styles.smallHeaderTitle}>{title}</Text>
+      <SmallHeaderTitle title={title || ''} />
     </TouchableOpacity>
   );
 
@@ -106,74 +110,86 @@ export const AnimatedHeaderLayout: React.FC<AnimatedHeaderLayoutProps> = ({
       activeOpacity={onTitlePress ? 0.7 : 1}
       disabled={!onTitlePress}
     >
-      <Text style={styles.largeHeaderTitle}>{title}</Text>
+      <LargeHeaderTitle title={title || ''} />
     </TouchableOpacity>
   );
 
   return (
     <View style={styles.container}>
-      {/* Small Header (Fixed) */}
-      <Animated.View
-        style={[
-          styles.smallHeader,
-          { height: headerHeight, paddingTop: top },
-          smallHeaderStyle,
-        ]}
-      >
+      {/* Background (Fades in) */}
+      <Animated.View style={[styles.headerBackground, headerAnimatedStyle]} />
+      
+      {/* Status Bar Spacer */}
+      <View style={{ height: top + 10 }} />
+
+      {/* Small Header (Fixed, Fades in) */}
+      <Animated.View style={[styles.smallHeader, headerAnimatedStyle]}>
         {onBackPress && (
-          <TouchableOpacity
-            onPress={onBackPress}
-            style={styles.backButton}
-            activeOpacity={0.7}
-          >
+          <TouchableOpacity onPress={onBackPress} style={styles.backButton}>
             <Ionicons name="arrow-back" size={24} color={NEO_THEME.colors.black} />
           </TouchableOpacity>
         )}
-        <View style={styles.smallHeaderContent}>
+        <View style={styles.smallHeaderTitleContainer}>
           {renderSmallTitle ? renderSmallTitle() : <DefaultSmallTitle />}
         </View>
         {smallHeaderRight && (
-          <View style={styles.smallHeaderRight}>{smallHeaderRight}</View>
+          <View style={styles.smallHeaderRight}>
+            {smallHeaderRight}
+          </View>
         )}
       </Animated.View>
 
+      {/* Content */}
       <Animated.ScrollView
+        onScroll={scrollHandler}
         scrollEventThrottle={16}
-        onScroll={onScroll}
-        contentContainerStyle={[
-          {
-            paddingTop: headerHeight + 10,
-            paddingBottom: 100,
-          },
-          contentContainerStyle,
-        ]}
+        contentContainerStyle={{ paddingTop: 0, paddingBottom: 100 }}
         showsVerticalScrollIndicator={false}
       >
-        {/* Large Header (Scrolls) */}
-        <Animated.View style={[styles.largeHeaderContainer, largeTitleStyle]}>
+        {/* Large Header Content */}
+        <Animated.View 
+          style={[
+            styles.largeHeaderContainer, 
+            { paddingTop: 20, paddingHorizontal: 20, paddingBottom: 20 },
+            largeTitleStyle
+          ]}
+        >
           {onBackPress && (
-            <TouchableOpacity
-              onPress={onBackPress}
-              style={styles.largeBackButton}
-              activeOpacity={0.7}
-            >
-              <Ionicons name="arrow-back" size={28} color={NEO_THEME.colors.black} />
-            </TouchableOpacity>
+            <Animated.View entering={FadeIn.duration(DURATION.normal).easing(EASING.out)} style={{ marginBottom: 16 }}>
+              <TouchableOpacity 
+                onPress={onBackPress}
+                style={styles.largeBackButton}
+              >
+                <Ionicons name="arrow-back" size={24} color={NEO_THEME.colors.black} />
+              </TouchableOpacity>
+            </Animated.View>
           )}
+          
           <View style={styles.largeHeaderRow}>
-            <View style={{ flex: 1 }}>
+            <Animated.View 
+              entering={FadeInDown.duration(DURATION.slow).easing(EASING.out)}
+              style={styles.largeTitleContainer}
+            >
               {renderLargeTitle ? renderLargeTitle() : <DefaultLargeTitle />}
-            </View>
+            </Animated.View>
+            
             {largeHeaderRight && (
-              <View style={styles.largeHeaderRight}>{largeHeaderRight}</View>
+              <Animated.View 
+                entering={FadeInDown.duration(DURATION.slow).delay(100).easing(EASING.out)}
+                style={styles.largeHeaderRight}
+              >
+                {largeHeaderRight}
+              </Animated.View>
             )}
           </View>
         </Animated.View>
 
-        <View style={styles.content}>{children}</View>
+        {children}
       </Animated.ScrollView>
+
+      {/* Sticky Footer */}
       {stickyFooter && (
-        <View style={styles.stickyFooterContainer}>
+        <View style={[styles.stickyFooter, { paddingBottom: bottom || 20 }]}>
           {stickyFooter}
         </View>
       )}
@@ -184,75 +200,82 @@ export const AnimatedHeaderLayout: React.FC<AnimatedHeaderLayoutProps> = ({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: NEO_THEME.colors.background,
+  },
+  headerBackground: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    height: 100, // Sufficient to cover status bar + small header
     backgroundColor: NEO_THEME.colors.backgroundLight,
+    borderBottomWidth: NEO_THEME.borders.width,
+    borderColor: NEO_THEME.colors.black,
+    zIndex: 10,
   },
   smallHeader: {
     position: "absolute",
     top: 0,
     left: 0,
     right: 0,
-    backgroundColor: NEO_THEME.colors.white,
-    alignItems: "center",
-    justifyContent: "center",
-    zIndex: 10,
-    borderBottomWidth: NEO_THEME.borders.width,
-    borderBottomColor: NEO_THEME.colors.black,
-  },
-  smallHeaderContent: {
+    height: 100, // Matches background
     flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
+    alignItems: "flex-end",
+    paddingBottom: 16,
+    paddingHorizontal: 16,
+    zIndex: 20,
   },
-  smallHeaderTitle: {
-    fontSize: 16,
-    fontWeight: "900",
-    color: NEO_THEME.colors.black,
-    fontFamily: NEO_THEME.fonts.black,
-    textTransform: "uppercase",
+  backButton: {
+    marginRight: 16,
+    marginBottom: 2,
+  },
+  smallHeaderTitleContainer: {
+    flex: 1,
+    justifyContent: "flex-end",
   },
   smallHeaderRight: {
-    position: "absolute",
-    right: 16,
-    bottom: 12, // Approximate alignment
+    marginRight: 0,
+    marginBottom: 2,
+    flexDirection: "row",
+    alignItems: "center",
   },
   largeHeaderContainer: {
-    paddingHorizontal: 16,
-    marginBottom: 16,
+    // Structural container
   },
   largeHeaderRow: {
     flexDirection: "row",
-    alignItems: "center",
     justifyContent: "space-between",
-  },
-  largeHeaderTitle: {
-    fontFamily: NEO_THEME.fonts.black,
-    fontSize: 32,
-    color: NEO_THEME.colors.black,
-    fontWeight: "900",
-    textTransform: "uppercase",
-  },
-  largeHeaderRight: {
-    marginLeft: 16,
-  },
-  content: {
-    flex: 1,
-  },
-  backButton: {
-    position: 'absolute',
-    left: 16,
-    bottom: 12,
-    padding: 4,
-    zIndex: 20,
+    alignItems: "flex-start",
   },
   largeBackButton: {
-    marginBottom: 12,
-    padding: 4,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    borderWidth: NEO_THEME.borders.width,
+    borderColor: NEO_THEME.colors.black,
+    backgroundColor: NEO_THEME.colors.white,
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 16,
   },
-  stickyFooterContainer: {
-    position: 'absolute',
+  largeTitleContainer: {
+    flex: 1,
+  },
+  largeHeaderRight: {
+    marginLeft: 12,
+    marginTop: 4,
+  },
+  stickyFooter: {
+    position: "absolute",
     bottom: 0,
     left: 0,
     right: 0,
+    backgroundColor: NEO_THEME.colors.backgroundLight,
+    borderTopWidth: NEO_THEME.borders.width,
+    borderColor: NEO_THEME.colors.black,
+    paddingTop: 16,
+    paddingHorizontal: 20,
+    elevation: 10,
     zIndex: 100,
   },
 });

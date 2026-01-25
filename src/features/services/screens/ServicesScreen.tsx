@@ -10,7 +10,8 @@ import { Tables } from "../../../shared/types/database.types";
 import { NEO_THEME } from "../../../shared/constants/neobrutalism";
 import { AnimatedHeaderLayout } from "../../../shared/components/layout/AnimatedHeaderLayout";
 import { CategoryCard } from "../components/CategoryCard";
-import { CartHeaderButton } from "../../../shared/components/ui/CartHeaderButton";
+import { HeaderRightGroup } from "../../../shared/components/ui/header-right-group";
+import { SmallHeaderTitle, LargeHeaderTitle } from "../../../shared/components/layout/header-titles";
 
 const ServicesScreen = () => {
   const {
@@ -48,24 +49,23 @@ const ServicesScreen = () => {
   }
 
   const renderSmallTitle = () => (
-    <Text style={styles.headerTitle}>BOOK SERVICES</Text>
+    <SmallHeaderTitle title="BOOK SERVICES" />
   );
 
   const renderLargeTitle = () => (
-    <View>
-      <Text style={styles.largeHeaderTitle}>BOOK SERVICES</Text>
-      <Text style={styles.largeHeaderSubtitle}>
-        Find and book appointments for beauty, health, sports, and more
-      </Text>
-    </View>
+    <LargeHeaderTitle 
+      title="BOOK SERVICES" 
+      subtitle="Find and book appointments for beauty, health, sports, and more"
+      style={{ lineHeight: 30 }}
+    />
   );
 
   return (
     <AnimatedHeaderLayout
       renderSmallTitle={renderSmallTitle}
       renderLargeTitle={renderLargeTitle}
-      smallHeaderRight={<CartHeaderButton />}
-      largeHeaderRight={<CartHeaderButton />}
+      smallHeaderRight={<HeaderRightGroup />}
+      largeHeaderRight={<HeaderRightGroup />}
     >
       {/* Featured Banner */}
       <View style={styles.featuredBanner}>
@@ -107,28 +107,6 @@ const styles = StyleSheet.create({
     backgroundColor: NEO_THEME.colors.backgroundLight,
     justifyContent: "center",
     alignItems: "center",
-  },
-  headerTitle: {
-    fontSize: 20,
-    fontWeight: "900",
-    color: NEO_THEME.colors.black,
-    fontFamily: NEO_THEME.fonts.black,
-    textTransform: "uppercase",
-  },
-  largeHeaderTitle: {
-    fontSize: 28,
-    fontWeight: "900",
-    color: NEO_THEME.colors.black,
-    fontFamily: NEO_THEME.fonts.black,
-    textTransform: "uppercase",
-    marginBottom: 4,
-  },
-  largeHeaderSubtitle: {
-    fontSize: 16,
-    color: NEO_THEME.colors.grey,
-    fontWeight: "700",
-    fontFamily: NEO_THEME.fonts.bold,
-    lineHeight: 22,
   },
   featuredBanner: {
     backgroundColor: NEO_THEME.colors.yellow,

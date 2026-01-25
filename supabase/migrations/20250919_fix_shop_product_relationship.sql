@@ -27,7 +27,7 @@ ON public.product FOR SELECT
 USING (true);
 
 -- Step 3: Create a view for shops with product counts (useful for listings)
-CREATE OR REPLACE VIEW shops_with_product_count AS
+CREATE OR REPLACE VIEW shops_with_product_count WITH (security_invoker = true) AS
 SELECT 
     s.*,
     COUNT(p.id) as product_count

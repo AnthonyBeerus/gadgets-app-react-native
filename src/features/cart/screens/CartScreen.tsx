@@ -9,7 +9,7 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { useCartStore } from "../../../store/cart-store";
-import { createOrder, createOrderItem } from "../../../shared/api/api";
+import { createOrder, createOrderItem, updateOrder } from "../../../shared/api/api";
 import { openStripeCheckout, setupStripePaymentSheet } from "../../../shared/lib/stripe";
 import { AnimatedHeaderLayout } from "../../../shared/components/layout/AnimatedHeaderLayout";
 import { CartItem } from "../components/CartItem";
@@ -33,6 +33,7 @@ export default function CartScreen() {
 
   const { mutateAsync: createSupabaseOrder, isPending: isCreatingOrder } = createOrder();
   const { mutateAsync: createSupabaseOrderItem } = createOrderItem();
+  const { mutateAsync: updateSupabaseOrder } = updateOrder();
 
   const handleCheckout = async () => {
     const totalPrice = parseFloat(getTotalPrice());
@@ -55,42 +56,52 @@ export default function CartScreen() {
     }
 
     try {
+      // 1. Setup Payment Intent first to get the ID
       const clientSecret = await setupStripePaymentSheet(Math.floor(totalPrice * 100));
-      // Extract PI ID from client secret (pi_..._secret_...)
       const paymentIntentId = clientSecret?.split('_secret_')[0];
 
-      const result = await openStripeCheckout();
+      if (!paymentIntentId) {
+        throw new Error("Failed to initialize payment.");
+      }
 
-      if (!result) {
+      // 2. Create Order in PENDING state immediately
+      // This prevents "ghost orders" where user pays but no order is created if app crashes.
+      const newOrder = await createSupabaseOrder({ 
+          totalPrice,
+          paymentIntentId,
+          paymentStatus: 'pending'
+      });
+
+      // 3. Create Order Items linked to the pending order
+      await createSupabaseOrderItem(
+          items.map((item) => ({
+            orderId: newOrder.id,
+            productId: item.id,
+            quantity: item.quantity,
+          }))
+      );
+
+      // 4. Present Payment Sheet
+      const paymentResult = await openStripeCheckout();
+
+      if (!paymentResult) {
         Alert.alert("Payment Cancelled", "The payment process was cancelled.");
         return;
       }
 
-      await createSupabaseOrder(
-        { 
-          totalPrice,
-          paymentIntentId,
-          paymentStatus: 'succeeded' // We assume success if openStripeCheckout returns true
-        },
-        {
-          onSuccess: (data) => {
-            createSupabaseOrderItem(
-              items.map((item) => ({
-                orderId: data.id,
-                productId: item.id,
-                quantity: item.quantity,
-              })),
-              {
-                onSuccess: () => {
-                  // Alert.alert("Success", "Order created successfully!"); // Commented out
-                  resetCart();
-                  router.push({ pathname: "/order-success", params: { orderId: data.id } }); // Added navigation
-                },
-              }
-            );
-          },
+      // 5. If Payment Succeeded, Update Order Status
+      // (Ideally verify with server logic/webhook, but this is better than before)
+      await updateSupabaseOrder({
+        orderId: newOrder.id,
+        updates: {
+          status: 'Completed', // Or 'Paid' if you distinguish
+          stripe_payment_status: 'succeeded'
         }
-      );
+      });
+
+      resetCart();
+      router.push({ pathname: "/order-success", params: { orderId: newOrder.id } });
+
     } catch (error) {
       console.error(error);
       Alert.alert("Payment Failed", error instanceof Error ? error.message : "An unknown error occurred");

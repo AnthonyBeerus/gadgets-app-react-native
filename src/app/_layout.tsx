@@ -5,6 +5,8 @@ import QueryProvider from "../shared/providers/query-provider";
 import NotificationProvider from "../shared/providers/notification-provider";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { RevenueCatProvider } from "../shared/providers/RevenueCatProvider";
+import { FontProvider } from "../shared/providers/font-provider";
+import { ThemeProvider } from "../shared/providers/theme-provider";
 import { Platform } from "react-native";
 import React from "react";
 
@@ -172,22 +174,26 @@ const AppNavigator = () => {
 
 function RootLayout() {
   return (
-    <SafeAreaProvider>
-      <ToastProvider>
-        <AuthProvider>
-          <QueryProvider>
-            <StripeProvider
-              publishableKey={process.env.EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY!}>
-              <NotificationProvider>
-                <RevenueCatProvider>
-                  <AppNavigator />
-                </RevenueCatProvider>
-              </NotificationProvider>
-            </StripeProvider>
-          </QueryProvider>
-        </AuthProvider>
-      </ToastProvider>
-    </SafeAreaProvider>
+    <ThemeProvider>
+      <FontProvider>
+        <SafeAreaProvider>
+          <ToastProvider>
+          <AuthProvider>
+            <QueryProvider>
+              <StripeProvider
+                publishableKey={process.env.EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY!}>
+                <NotificationProvider>
+                  <RevenueCatProvider>
+                    <AppNavigator />
+                  </RevenueCatProvider>
+                </NotificationProvider>
+              </StripeProvider>
+            </QueryProvider>
+          </AuthProvider>
+        </ToastProvider>
+      </SafeAreaProvider>
+      </FontProvider>
+    </ThemeProvider>
   );
 }
 

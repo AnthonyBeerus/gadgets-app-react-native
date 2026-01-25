@@ -1,15 +1,29 @@
+/**
+ * NeoButton
+ * 
+ * Neubrutalist button with smooth, refined press animations.
+ * Uses withTiming for controlled, predictable motion.
+ */
 import React from "react";
 import {
-  TouchableOpacity,
   Text,
   StyleSheet,
-  TouchableOpacityProps,
   ViewStyle,
   TextStyle,
+  Pressable,
+  PressableProps,
 } from "react-native";
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+} from "react-native-reanimated";
 import { NEO_THEME } from "../../constants/neobrutalism";
+import { TIMING_CONFIG, SCALE } from "../../constants/animations";
 
-interface NeoButtonProps extends TouchableOpacityProps {
+const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
+
+interface NeoButtonProps extends PressableProps {
   variant?: "primary" | "secondary" | "outline";
   children: React.ReactNode;
   style?: ViewStyle;
@@ -21,14 +35,17 @@ export const NeoButton: React.FC<NeoButtonProps> = ({
   children,
   style,
   textStyle,
+  onPress,
   ...props
 }) => {
+  const scale = useSharedValue<number>(SCALE.normal);
+
   const getBackgroundColor = () => {
     switch (variant) {
       case "primary":
         return NEO_THEME.colors.primary;
       case "secondary":
-        return NEO_THEME.colors.yellow;
+        return NEO_THEME.colors.vibrantOrange;
       case "outline":
         return NEO_THEME.colors.white;
       default:
@@ -45,14 +62,29 @@ export const NeoButton: React.FC<NeoButtonProps> = ({
     }
   };
 
+  const rStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: scale.value }],
+  }));
+
+  const handlePressIn = () => {
+    scale.value = withTiming(SCALE.pressed, TIMING_CONFIG.fast);
+  };
+
+  const handlePressOut = () => {
+    scale.value = withTiming(SCALE.normal, TIMING_CONFIG.normal);
+  };
+
   return (
-    <TouchableOpacity
+    <AnimatedPressable
       style={[
         styles.button,
         { backgroundColor: getBackgroundColor() },
+        rStyle,
         style,
       ]}
-      activeOpacity={0.8}
+      onPressIn={handlePressIn}
+      onPressOut={handlePressOut}
+      onPress={onPress}
       {...props}
     >
       {typeof children === "string" ? (
@@ -62,7 +94,7 @@ export const NeoButton: React.FC<NeoButtonProps> = ({
       ) : (
         children
       )}
-    </TouchableOpacity>
+    </AnimatedPressable>
   );
 };
 
@@ -74,19 +106,17 @@ const styles = StyleSheet.create({
     borderColor: NEO_THEME.colors.black,
     alignItems: "center",
     justifyContent: "center",
+    // Neubrutalist hard shadow
     shadowColor: NEO_THEME.colors.black,
-    shadowOffset: {
-      width: NEO_THEME.shadows.hard.offsetX,
-      height: NEO_THEME.shadows.hard.offsetY,
-    },
+    shadowOffset: { width: 4, height: 4 },
     shadowOpacity: 1,
     shadowRadius: 0,
-    elevation: 0,
+    elevation: 8,
   },
   text: {
-    fontFamily: NEO_THEME.fonts.black,
+    fontFamily: NEO_THEME.fonts.bold,
     fontSize: 16,
     fontWeight: "900",
-    textTransform: "uppercase",
+    letterSpacing: 0.5,
   },
 });

@@ -1,14 +1,8 @@
 import React from 'react';
 import { Redirect, Stack, useLocalSearchParams, router } from 'expo-router';
-import {
-  ActivityIndicator,
-  FlatList,
-  Image,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
+import { View, Text, StyleSheet, ScrollView, ActivityIndicator, Alert, TouchableHighlight, TouchableOpacity, FlatList, Image } from "react-native";
 import { format } from 'date-fns';
+import * as Clipboard from 'expo-clipboard';
 import QRCode from 'react-native-qrcode-svg'; // Added import
 
 import { getMyOrder } from '../../../shared/api/api';
@@ -44,9 +38,32 @@ const OrderDetailsScreen = () => {
           <Text style={styles.item}>{order.slug}</Text>
           <Text style={styles.details}>{order.description}</Text>
           
+          {/* QR Code Section */}
           <View style={styles.qrContainer}>
-            <QRCode value={order.id.toString()} size={150} />
+            <Text style={{ marginBottom: 10, color: NEO_THEME.colors.grey, fontSize: 12 }}>Tap QR to Copy (Dev Mode)</Text>
+            <TouchableOpacity 
+                activeOpacity={0.7}
+                onPress={async () => {
+                    const qrPayload = JSON.stringify({ 
+                        orderId: order.id, 
+                        token: order.fulfillment_token 
+                    });
+                    await Clipboard.setStringAsync(qrPayload);
+                    Alert.alert("Copied!", "QR Payload copied to clipboard. Paste it in the Scanner screen.");
+                }}
+            >
+                <View style={styles.qrWrapper}>
+                <QRCode 
+                    value={JSON.stringify({ 
+                    orderId: order.id, 
+                    token: order.fulfillment_token 
+                    })} 
+                    size={180} 
+                />
+                </View>
+            </TouchableOpacity>
             <Text style={styles.qrLabel}>Scan for pickup</Text>
+            <Text style={styles.qrSublabel}>Show this to the staff</Text>
           </View>
 
           <View style={[styles.statusBadge, styles[`statusBadge_${order.status}`]]}>

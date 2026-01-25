@@ -257,8 +257,46 @@ export const createOrder = () => {
       return data;
     },
 
+
     async onSuccess() {
       await queryClient.invalidateQueries({ queryKey: ["order"] });
+    },
+  });
+};
+
+export const updateOrder = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    async mutationFn({
+      orderId,
+      updates,
+    }: {
+      orderId: number;
+      updates: Partial<Tables<"order">>;
+    }) {
+      const { data, error } = await supabase
+        .from("order")
+        .update(updates)
+        .eq("id", orderId)
+        .select("*")
+        .single();
+
+      if (error) {
+        throw new Error(
+          "An error occurred while updating order: " + error.message
+        );
+      }
+
+      return data;
+    },
+
+    async onSuccess(data) {
+      await queryClient.invalidateQueries({ queryKey: ["order"] });
+      // Also invalidate specific order
+      if (data) {
+          await queryClient.invalidateQueries({ queryKey: ["orders", data.slug] });
+      }
     },
   });
 };
