@@ -86,126 +86,68 @@ export type Database = {
           },
         ]
       }
-      category: {
+      categories: {
         Row: {
           created_at: string
-          description: string | null
-          has_appointment_booking: boolean | null
-          has_collection: boolean | null
-          has_delivery: boolean | null
-          has_virtual_try_on: boolean | null
-          icon_name: string | null
           id: number
-          imageUrl: string | null
           name: string
-          products: number[] | null
-          slug: string
         }
         Insert: {
           created_at?: string
-          description?: string | null
-          has_appointment_booking?: boolean | null
-          has_collection?: boolean | null
-          has_delivery?: boolean | null
-          has_virtual_try_on?: boolean | null
-          icon_name?: string | null
           id?: number
-          imageUrl?: string | null
           name: string
-          products?: number[] | null
-          slug: string
         }
         Update: {
           created_at?: string
-          description?: string | null
-          has_appointment_booking?: boolean | null
-          has_collection?: boolean | null
-          has_delivery?: boolean | null
-          has_virtual_try_on?: boolean | null
-          icon_name?: string | null
           id?: number
-          imageUrl?: string | null
           name?: string
-          products?: number[] | null
-          slug?: string
         }
         Relationships: []
       }
-      delivery_orders: {
+      challenges: {
         Row: {
-          actual_delivery_time: string | null
-          collection_time: string | null
           created_at: string
-          delivery_address: string | null
-          delivery_fee: number | null
-          delivery_notes: string | null
-          delivery_person_name: string | null
-          delivery_person_phone: string | null
-          delivery_phone: string
-          delivery_type: string
-          estimated_delivery_time: string | null
+          description: string | null
+          end_date: string
           id: number
-          order_id: number | null
+          reward_points: number
           shop_id: number | null
-          status: string | null
-          tracking_number: string | null
-          updated_at: string
+          start_date: string
+          status: string
+          title: string
         }
         Insert: {
-          actual_delivery_time?: string | null
-          collection_time?: string | null
           created_at?: string
-          delivery_address?: string | null
-          delivery_fee?: number | null
-          delivery_notes?: string | null
-          delivery_person_name?: string | null
-          delivery_person_phone?: string | null
-          delivery_phone: string
-          delivery_type: string
-          estimated_delivery_time?: string | null
+          description?: string | null
+          end_date: string
           id?: number
-          order_id?: number | null
+          reward_points: number
           shop_id?: number | null
-          status?: string | null
-          tracking_number?: string | null
-          updated_at?: string
+          start_date: string
+          status: string
+          title: string
         }
         Update: {
-          actual_delivery_time?: string | null
-          collection_time?: string | null
           created_at?: string
-          delivery_address?: string | null
-          delivery_fee?: number | null
-          delivery_notes?: string | null
-          delivery_person_name?: string | null
-          delivery_person_phone?: string | null
-          delivery_phone?: string
-          delivery_type?: string
-          estimated_delivery_time?: string | null
+          description?: string | null
+          end_date?: string
           id?: number
-          order_id?: number | null
+          reward_points?: number
           shop_id?: number | null
-          status?: string | null
-          tracking_number?: string | null
-          updated_at?: string
+          start_date?: string
+          status: string
+          title?: string
         }
         Relationships: [
           {
-            foreignKeyName: "delivery_orders_order_id_fkey"
-            columns: ["order_id"]
-            isOneToOne: false
-            referencedRelation: "order"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "delivery_orders_shop_id_fkey"
+            foreignKeyName: "challenges_shop_id_fkey"
             columns: ["shop_id"]
             isOneToOne: false
             referencedRelation: "shops"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "delivery_orders_shop_id_fkey"
+            foreignKeyName: "challenges_shop_id_fkey"
             columns: ["shop_id"]
             isOneToOne: false
             referencedRelation: "shops_with_product_count"
@@ -213,256 +155,209 @@ export type Database = {
           },
         ]
       }
-      event_venue: {
+      content: {
         Row: {
-          amenities: string[] | null
-          capacity: string
-          color: string | null
+          author: string | null
+          content: string | null
           created_at: string
-          description: string
-          email: string | null
-          icon: string | null
           id: number
           image_url: string | null
-          is_available: boolean | null
-          location: string
-          name: string
-          phone: string | null
-          price_range: string | null
-          type: string
-        }
-        Insert: {
-          amenities?: string[] | null
-          capacity: string
-          color?: string | null
-          created_at?: string
-          description: string
-          email?: string | null
-          icon?: string | null
-          id?: number
-          image_url?: string | null
-          is_available?: boolean | null
-          location: string
-          name: string
-          phone?: string | null
-          price_range?: string | null
-          type: string
-        }
-        Update: {
-          amenities?: string[] | null
-          capacity?: string
-          color?: string | null
-          created_at?: string
-          description?: string
-          email?: string | null
-          icon?: string | null
-          id?: number
-          image_url?: string | null
-          is_available?: boolean | null
-          location?: string
-          name?: string
-          phone?: string | null
-          price_range?: string | null
-          type?: string
-        }
-        Relationships: []
-      }
-      events: {
-        Row: {
-          available_tickets: number
-          category: string
-          created_at: string
-          description: string
-          end_time: string
-          event_date: string
-          id: number
-          image_url: string | null
-          is_featured: boolean | null
-          price: number
-          start_time: string
-          status: string | null
-          tags: string[] | null
+          shop_id: number | null
           title: string
-          total_tickets: number
+          type: string
           updated_at: string
-          venue_id: number | null
         }
         Insert: {
-          available_tickets?: number
-          category: string
+          author?: string | null
+          content?: string | null
           created_at?: string
-          description: string
-          end_time: string
-          event_date: string
           id?: number
           image_url?: string | null
-          is_featured?: boolean | null
-          price: number
-          start_time: string
-          status?: string | null
-          tags?: string[] | null
+          shop_id?: number | null
           title: string
-          total_tickets?: number
+          type: string
           updated_at?: string
-          venue_id?: number | null
         }
         Update: {
-          available_tickets?: number
-          category?: string
+          author?: string | null
+          content?: string | null
           created_at?: string
-          description?: string
-          end_time?: string
-          event_date?: string
           id?: number
           image_url?: string | null
-          is_featured?: boolean | null
-          price?: number
-          start_time?: string
-          status?: string | null
-          tags?: string[] | null
+          shop_id?: number | null
           title?: string
-          total_tickets?: number
+          type?: string
           updated_at?: string
-          venue_id?: number | null
         }
         Relationships: [
           {
-            foreignKeyName: "events_venue_id_fkey"
-            columns: ["venue_id"]
+            foreignKeyName: "content_shop_id_fkey"
+            columns: ["shop_id"]
             isOneToOne: false
-            referencedRelation: "event_venue"
+            referencedRelation: "shops"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "content_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "shops_with_product_count"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      events: {
+        Row: {
+          category: string
+          created_at: string | null
+          date: string
+          description: string | null
+          id: number
+          image_url: string | null
+          location: string | null
+          mall_id: number | null
+          title: string
+        }
+        Insert: {
+          category: string
+          created_at?: string | null
+          date: string
+          description?: string | null
+          id?: number
+          image_url?: string | null
+          location?: string | null
+          mall_id?: number | null
+          title: string
+        }
+        Update: {
+          category?: string
+          created_at?: string | null
+          date?: string
+          description?: string | null
+          id?: number
+          image_url?: string | null
+          location?: string | null
+          mall_id?: number | null
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "events_mall_id_fkey"
+            columns: ["mall_id"]
+            isOneToOne: false
+            referencedRelation: "malls"
             referencedColumns: ["id"]
           },
         ]
       }
       malls: {
         Row: {
-          contact_email: string | null
-          contact_phone: string | null
-          created_at: string | null
+          address: string
+          created_at: string
           description: string | null
-          hero_image: string | null
           id: number
           image_url: string | null
-          is_featured: boolean | null
-          is_physical: boolean | null
-          latitude: number | null
-          location: string | null
-          longitude: number | null
+          latitude: number
+          longitude: number
           name: string
-          opening_hours: Json | null
+          opening_hours: string | null
+          phone: string | null
           slug: string
-          updated_at: string | null
         }
         Insert: {
-          contact_email?: string | null
-          contact_phone?: string | null
-          created_at?: string | null
+          address: string
+          created_at?: string
           description?: string | null
-          hero_image?: string | null
           id?: number
           image_url?: string | null
-          is_featured?: boolean | null
-          is_physical?: boolean | null
-          latitude?: number | null
-          location?: string | null
-          longitude?: number | null
+          latitude: number
+          longitude: number
           name: string
-          opening_hours?: Json | null
+          opening_hours?: string | null
+          phone?: string | null
           slug: string
-          updated_at?: string | null
         }
         Update: {
-          contact_email?: string | null
-          contact_phone?: string | null
-          created_at?: string | null
+          address?: string
+          created_at?: string
           description?: string | null
-          hero_image?: string | null
           id?: number
           image_url?: string | null
-          is_featured?: boolean | null
-          is_physical?: boolean | null
-          latitude?: number | null
-          location?: string | null
-          longitude?: number | null
+          latitude?: number
+          longitude?: number
           name?: string
-          opening_hours?: Json | null
+          opening_hours?: string | null
+          phone?: string | null
           slug?: string
-          updated_at?: string | null
         }
         Relationships: []
       }
       order: {
         Row: {
           created_at: string
-          description: string | null
+          fulfillment_status: string | null
+          fulfillment_token: string | null
           id: number
-          slug: string
           status: string
-          totalPrice: number
-          user: string
+          total_amount: number | null
+          user_id: string
         }
         Insert: {
           created_at?: string
-          description?: string | null
+          fulfillment_status?: string | null
+          fulfillment_token?: string | null
           id?: number
-          slug: string
-          status: string
-          totalPrice: number
-          user: string
+          status?: string
+          total_amount?: number | null
+          user_id: string
         }
         Update: {
           created_at?: string
-          description?: string | null
+          fulfillment_status?: string | null
+          fulfillment_token?: string | null
           id?: number
-          slug?: string
           status?: string
-          totalPrice?: number
-          user?: string
+          total_amount?: number | null
+          user_id?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "order_user_fkey"
-            columns: ["user"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       order_item: {
         Row: {
           created_at: string
           id: number
-          order: number
-          product: number
+          order_id: number
+          price: number
+          product_id: number
           quantity: number
         }
         Insert: {
           created_at?: string
           id?: number
-          order: number
-          product: number
+          order_id: number
+          price: number
+          product_id: number
           quantity: number
         }
         Update: {
           created_at?: string
           id?: number
-          order?: number
-          product?: number
+          order_id?: number
+          price?: number
+          product_id?: number
           quantity?: number
         }
         Relationships: [
           {
-            foreignKeyName: "order_item_order_fkey"
-            columns: ["order"]
+            foreignKeyName: "order_item_order_id_fkey"
+            columns: ["order_id"]
             isOneToOne: false
             referencedRelation: "order"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "order_item_product_fkey"
-            columns: ["product"]
+            foreignKeyName: "order_item_product_id_fkey"
+            columns: ["product_id"]
             isOneToOne: false
             referencedRelation: "product"
             referencedColumns: ["id"]
@@ -471,68 +366,44 @@ export type Database = {
       }
       product: {
         Row: {
-          brand: string | null
-          category: number
-          color_variants: Json | null
+          category_id: number
           created_at: string
           description: string | null
-          dimensions: Json | null
-          heroImage: string
           id: number
-          imagesUrl: string[]
-          is_available: boolean | null
-          maxQuantity: number
+          image_url: string | null
+          name: string
           price: number
-          shop_id: number | null
-          sku: string | null
-          slug: string
-          title: string
-          weight: number | null
+          shop_id: number
+          stock: number
         }
         Insert: {
-          brand?: string | null
-          category: number
-          color_variants?: Json | null
+          category_id: number
           created_at?: string
           description?: string | null
-          dimensions?: Json | null
-          heroImage: string
           id?: number
-          imagesUrl: string[]
-          is_available?: boolean | null
-          maxQuantity: number
+          image_url?: string | null
+          name: string
           price: number
-          shop_id?: number | null
-          sku?: string | null
-          slug: string
-          title: string
-          weight?: number | null
+          shop_id: number
+          stock?: number
         }
         Update: {
-          brand?: string | null
-          category?: number
-          color_variants?: Json | null
+          category_id?: number
           created_at?: string
           description?: string | null
-          dimensions?: Json | null
-          heroImage?: string
           id?: number
-          imagesUrl?: string[]
-          is_available?: boolean | null
-          maxQuantity?: number
+          image_url?: string | null
+          name?: string
           price?: number
-          shop_id?: number | null
-          sku?: string | null
-          slug?: string
-          title?: string
-          weight?: number | null
+          shop_id?: number
+          stock?: number
         }
         Relationships: [
           {
-            foreignKeyName: "product_category_fkey"
-            columns: ["category"]
+            foreignKeyName: "product_category_id_fkey"
+            columns: ["category_id"]
             isOneToOne: false
-            referencedRelation: "category"
+            referencedRelation: "categories"
             referencedColumns: ["id"]
           },
           {
@@ -547,72 +418,6 @@ export type Database = {
             columns: ["shop_id"]
             isOneToOne: false
             referencedRelation: "shops_with_product_count"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      service: {
-        Row: {
-          category_id: number
-          created_at: string
-          description: string | null
-          duration_minutes: number
-          id: number
-          image_url: string | null
-          is_active: boolean | null
-          max_advance_booking_days: number | null
-          name: string
-          price: number
-          provider_id: number
-          rating: number | null
-          slug: string
-          total_reviews: number | null
-        }
-        Insert: {
-          category_id: number
-          created_at?: string
-          description?: string | null
-          duration_minutes: number
-          id?: number
-          image_url?: string | null
-          is_active?: boolean | null
-          max_advance_booking_days?: number | null
-          name: string
-          price: number
-          provider_id: number
-          rating?: number | null
-          slug: string
-          total_reviews?: number | null
-        }
-        Update: {
-          category_id?: number
-          created_at?: string
-          description?: string | null
-          duration_minutes?: number
-          id?: number
-          image_url?: string | null
-          is_active?: boolean | null
-          max_advance_booking_days?: number | null
-          name?: string
-          price?: number
-          provider_id?: number
-          rating?: number | null
-          slug?: string
-          total_reviews?: number | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "service_category_id_fkey"
-            columns: ["category_id"]
-            isOneToOne: false
-            referencedRelation: "service_category"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "service_provider_id_fkey"
-            columns: ["provider_id"]
-            isOneToOne: false
-            referencedRelation: "service_provider"
             referencedColumns: ["id"]
           },
         ]
@@ -624,8 +429,7 @@ export type Database = {
           end_time: string
           id: number
           is_available: boolean | null
-          provider_id: number
-          service_id: number | null
+          service_id: number
           start_time: string
         }
         Insert: {
@@ -634,8 +438,7 @@ export type Database = {
           end_time: string
           id?: number
           is_available?: boolean | null
-          provider_id: number
-          service_id?: number | null
+          service_id: number
           start_time: string
         }
         Update: {
@@ -644,23 +447,15 @@ export type Database = {
           end_time?: string
           id?: number
           is_available?: boolean | null
-          provider_id?: number
-          service_id?: number | null
+          service_id?: number
           start_time?: string
         }
         Relationships: [
           {
-            foreignKeyName: "service_availability_provider_id_fkey"
-            columns: ["provider_id"]
-            isOneToOne: false
-            referencedRelation: "service_provider"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "service_availability_service_id_fkey"
             columns: ["service_id"]
             isOneToOne: false
-            referencedRelation: "service"
+            referencedRelation: "services"
             referencedColumns: ["id"]
           },
         ]
@@ -669,162 +464,82 @@ export type Database = {
         Row: {
           booking_date: string
           booking_time: string
-          cancellation_reason: string | null
-          cancelled_at: string | null
-          completed_at: string | null
           created_at: string
+          customer_name: string
+          customer_notes: string | null
           duration_minutes: number
           id: number
-          notes: string | null
-          payment_intent_id: string | null
-          payment_status: string
-          provider_id: number
           service_id: number
-          slug: string
           status: string
-          total_amount: number
+          total_price: number
           user_id: string
         }
         Insert: {
           booking_date: string
           booking_time: string
-          cancellation_reason?: string | null
-          cancelled_at?: string | null
-          completed_at?: string | null
           created_at?: string
+          customer_name: string
+          customer_notes?: string | null
           duration_minutes: number
           id?: number
-          notes?: string | null
-          payment_intent_id?: string | null
-          payment_status?: string
-          provider_id: number
           service_id: number
-          slug: string
           status?: string
-          total_amount: number
+          total_price: number
           user_id: string
         }
         Update: {
           booking_date?: string
           booking_time?: string
-          cancellation_reason?: string | null
-          cancelled_at?: string | null
-          completed_at?: string | null
           created_at?: string
+          customer_name?: string
+          customer_notes?: string | null
           duration_minutes?: number
           id?: number
-          notes?: string | null
-          payment_intent_id?: string | null
-          payment_status?: string
-          provider_id?: number
           service_id?: number
-          slug?: string
           status?: string
-          total_amount?: number
+          total_price?: number
           user_id?: string
         }
         Relationships: [
           {
-            foreignKeyName: "service_booking_provider_id_fkey"
-            columns: ["provider_id"]
-            isOneToOne: false
-            referencedRelation: "service_provider"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "service_booking_service_id_fkey"
             columns: ["service_id"]
             isOneToOne: false
-            referencedRelation: "service"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "service_booking_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "users"
+            referencedRelation: "services"
             referencedColumns: ["id"]
           },
         ]
       }
-      service_category: {
-        Row: {
-          color: string
-          created_at: string
-          description: string
-          icon: string
-          id: number
-          is_active: boolean
-          name: string
-          slug: string
-        }
-        Insert: {
-          color: string
-          created_at?: string
-          description: string
-          icon: string
-          id?: number
-          is_active?: boolean
-          name: string
-          slug: string
-        }
-        Update: {
-          color?: string
-          created_at?: string
-          description?: string
-          icon?: string
-          id?: number
-          is_active?: boolean
-          name?: string
-          slug?: string
-        }
-        Relationships: []
-      }
       service_provider: {
         Row: {
-          address: string | null
-          avatar_url: string | null
+          bio: string | null
           created_at: string
-          description: string | null
-          email: string
           id: number
-          is_active: boolean | null
-          is_verified: boolean | null
           name: string
           phone: string | null
-          rating: number | null
-          shop_id: number | null
-          total_reviews: number | null
+          shop_id: number
+          specialties: string[] | null
+          user_id: string | null
         }
         Insert: {
-          address?: string | null
-          avatar_url?: string | null
+          bio?: string | null
           created_at?: string
-          description?: string | null
-          email: string
           id?: number
-          is_active?: boolean | null
-          is_verified?: boolean | null
           name: string
           phone?: string | null
-          rating?: number | null
-          shop_id?: number | null
-          total_reviews?: number | null
+          shop_id: number
+          specialties?: string[] | null
+          user_id?: string | null
         }
         Update: {
-          address?: string | null
-          avatar_url?: string | null
+          bio?: string | null
           created_at?: string
-          description?: string | null
-          email?: string
           id?: number
-          is_active?: boolean | null
-          is_verified?: boolean | null
           name?: string
           phone?: string | null
-          rating?: number | null
-          shop_id?: number | null
-          total_reviews?: number | null
+          shop_id?: number
+          specialties?: string[] | null
+          user_id?: string | null
         }
         Relationships: [
           {
@@ -845,102 +560,160 @@ export type Database = {
       }
       service_review: {
         Row: {
-          booking_id: number
           comment: string | null
           created_at: string
           id: number
-          is_verified: boolean | null
-          provider_id: number
           rating: number
           service_id: number
           user_id: string
         }
         Insert: {
-          booking_id: number
           comment?: string | null
           created_at?: string
           id?: number
-          is_verified?: boolean | null
-          provider_id: number
           rating: number
           service_id: number
           user_id: string
         }
         Update: {
-          booking_id?: number
           comment?: string | null
           created_at?: string
           id?: number
-          is_verified?: boolean | null
-          provider_id?: number
           rating?: number
           service_id?: number
           user_id?: string
         }
         Relationships: [
           {
-            foreignKeyName: "service_review_booking_id_fkey"
-            columns: ["booking_id"]
-            isOneToOne: true
-            referencedRelation: "service_booking"
+            foreignKeyName: "service_review_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
             referencedColumns: ["id"]
           },
+        ]
+      }
+      services: {
+        Row: {
+          created_at: string
+          description: string | null
+          duration_minutes: number
+          id: number
+          image_url: string | null
+          name: string
+          price: number
+          provider_id: number | null
+          shop_id: number
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          duration_minutes: number
+          id?: number
+          image_url?: string | null
+          name: string
+          price: number
+          provider_id?: number | null
+          shop_id: number
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          duration_minutes?: number
+          id?: number
+          image_url?: string | null
+          name?: string
+          price?: number
+          provider_id?: number | null
+          shop_id?: number
+        }
+        Relationships: [
           {
-            foreignKeyName: "service_review_provider_id_fkey"
+            foreignKeyName: "services_provider_id_fkey"
             columns: ["provider_id"]
             isOneToOne: false
             referencedRelation: "service_provider"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "service_review_service_id_fkey"
-            columns: ["service_id"]
+            foreignKeyName: "services_shop_id_fkey"
+            columns: ["shop_id"]
             isOneToOne: false
-            referencedRelation: "service"
+            referencedRelation: "shops"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "service_review_user_id_fkey"
-            columns: ["user_id"]
+            foreignKeyName: "services_shop_id_fkey"
+            columns: ["shop_id"]
             isOneToOne: false
-            referencedRelation: "users"
+            referencedRelation: "shops_with_product_count"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      shop_features: {
+        Row: {
+          feature_key: string
+          feature_value: string
+          id: number
+          shop_id: number
+        }
+        Insert: {
+          feature_key: string
+          feature_value: string
+          id?: number
+          shop_id: number
+        }
+        Update: {
+          feature_key?: string
+          feature_value?: string
+          id?: number
+          shop_id?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shop_features_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "shops"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "shop_features_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "shops_with_product_count"
             referencedColumns: ["id"]
           },
         ]
       }
       shop_reviews: {
         Row: {
+          comment: string | null
           created_at: string
           id: number
-          is_verified_purchase: boolean | null
           order_id: number | null
           rating: number
-          review_text: string | null
-          shop_id: number | null
-          updated_at: string
-          user_id: string | null
+          shop_id: number
+          user_id: string
         }
         Insert: {
+          comment?: string | null
           created_at?: string
           id?: number
-          is_verified_purchase?: boolean | null
           order_id?: number | null
           rating: number
-          review_text?: string | null
-          shop_id?: number | null
-          updated_at?: string
-          user_id?: string | null
+          shop_id: number
+          user_id: string
         }
         Update: {
+          comment?: string | null
           created_at?: string
           id?: number
-          is_verified_purchase?: boolean | null
           order_id?: number | null
           rating?: number
-          review_text?: string | null
-          shop_id?: number | null
-          updated_at?: string
-          user_id?: string | null
+          shop_id?: number
+          user_id?: string
         }
         Relationships: [
           {
@@ -968,103 +741,42 @@ export type Database = {
       }
       shops: {
         Row: {
-          category_id: number | null
+          category: string
           created_at: string
-          delivery_fee: number | null
           description: string | null
-          email: string | null
-          estimated_delivery_time: string | null
-          facebook_handle: string | null
-          has_appointment_booking: boolean | null
-          has_collection: boolean | null
-          has_delivery: boolean | null
-          has_online_ordering: boolean | null
-          has_virtual_try_on: boolean | null
+          floor: number | null
           id: number
           image_url: string | null
-          instagram_handle: string | null
-          is_active: boolean | null
-          is_featured: boolean | null
-          location: string
-          logo_url: string | null
           mall_id: number | null
-          minimum_order_amount: number | null
           name: string
-          opening_hours: Json | null
+          opening_hours: string | null
           phone: string | null
-          rating: number | null
-          total_reviews: number | null
-          updated_at: string
-          website_url: string | null
         }
         Insert: {
-          category_id?: number | null
+          category: string
           created_at?: string
-          delivery_fee?: number | null
           description?: string | null
-          email?: string | null
-          estimated_delivery_time?: string | null
-          facebook_handle?: string | null
-          has_appointment_booking?: boolean | null
-          has_collection?: boolean | null
-          has_delivery?: boolean | null
-          has_online_ordering?: boolean | null
-          has_virtual_try_on?: boolean | null
+          floor?: number | null
           id?: number
           image_url?: string | null
-          instagram_handle?: string | null
-          is_active?: boolean | null
-          is_featured?: boolean | null
-          location: string
-          logo_url?: string | null
           mall_id?: number | null
-          minimum_order_amount?: number | null
           name: string
-          opening_hours?: Json | null
+          opening_hours?: string | null
           phone?: string | null
-          rating?: number | null
-          total_reviews?: number | null
-          updated_at?: string
-          website_url?: string | null
         }
         Update: {
-          category_id?: number | null
+          category?: string
           created_at?: string
-          delivery_fee?: number | null
           description?: string | null
-          email?: string | null
-          estimated_delivery_time?: string | null
-          facebook_handle?: string | null
-          has_appointment_booking?: boolean | null
-          has_collection?: boolean | null
-          has_delivery?: boolean | null
-          has_online_ordering?: boolean | null
-          has_virtual_try_on?: boolean | null
+          floor?: number | null
           id?: number
           image_url?: string | null
-          instagram_handle?: string | null
-          is_active?: boolean | null
-          is_featured?: boolean | null
-          location?: string
-          logo_url?: string | null
           mall_id?: number | null
-          minimum_order_amount?: number | null
           name?: string
-          opening_hours?: Json | null
+          opening_hours?: string | null
           phone?: string | null
-          rating?: number | null
-          total_reviews?: number | null
-          updated_at?: string
-          website_url?: string | null
         }
         Relationships: [
-          {
-            foreignKeyName: "shops_category_id_fkey"
-            columns: ["category_id"]
-            isOneToOne: false
-            referencedRelation: "category"
-            referencedColumns: ["id"]
-          },
           {
             foreignKeyName: "shops_mall_id_fkey"
             columns: ["mall_id"]
@@ -1077,36 +789,27 @@ export type Database = {
       ticket_purchases: {
         Row: {
           created_at: string
-          event_id: number | null
+          event_id: number
           id: number
-          payment_intent_id: string | null
-          purchase_date: string
           quantity: number
-          status: string | null
           total_price: number
-          user_id: string | null
+          user_id: string
         }
         Insert: {
           created_at?: string
-          event_id?: number | null
+          event_id: number
           id?: number
-          payment_intent_id?: string | null
-          purchase_date?: string
-          quantity?: number
-          status?: string | null
+          quantity: number
           total_price: number
-          user_id?: string | null
+          user_id: string
         }
         Update: {
           created_at?: string
-          event_id?: number | null
+          event_id?: number
           id?: number
-          payment_intent_id?: string | null
-          purchase_date?: string
           quantity?: number
-          status?: string | null
           total_price?: number
-          user_id?: string | null
+          user_id?: string
         }
         Relationships: [
           {
@@ -1120,28 +823,37 @@ export type Database = {
       }
       users: {
         Row: {
-          avatar_url: string
-          created_at: string | null
+          avatar_url: string | null
+          created_at: string
           email: string
           id: string
-          stripe_customer_id: string | null
-          type: string | null
+          loyalty_points: number | null
+          name: string | null
+          phone: string | null
+          preferences: Json | null
+          role: string | null
         }
         Insert: {
-          avatar_url: string
-          created_at?: string | null
+          avatar_url?: string | null
+          created_at?: string
           email: string
           id: string
-          stripe_customer_id?: string | null
-          type?: string | null
+          loyalty_points?: number | null
+          name?: string | null
+          phone?: string | null
+          preferences?: Json | null
+          role?: string | null
         }
         Update: {
-          avatar_url?: string
-          created_at?: string | null
+          avatar_url?: string | null
+          created_at?: string
           email?: string
           id?: string
-          stripe_customer_id?: string | null
-          type?: string | null
+          loyalty_points?: number | null
+          name?: string | null
+          phone?: string | null
+          preferences?: Json | null
+          role?: string | null
         }
         Relationships: []
       }
@@ -1149,51 +861,31 @@ export type Database = {
     Views: {
       shops_with_product_count: {
         Row: {
-          category_id: number | null
+          category: string | null
           created_at: string | null
-          delivery_fee: number | null
           description: string | null
-          email: string | null
-          estimated_delivery_time: string | null
-          facebook_handle: string | null
-          has_appointment_booking: boolean | null
-          has_collection: boolean | null
-          has_delivery: boolean | null
-          has_online_ordering: boolean | null
-          has_virtual_try_on: boolean | null
+          floor: number | null
           id: number | null
           image_url: string | null
-          instagram_handle: string | null
-          is_active: boolean | null
-          is_featured: boolean | null
-          location: string | null
-          logo_url: string | null
-          minimum_order_amount: number | null
+          mall_id: number | null
           name: string | null
-          opening_hours: Json | null
+          opening_hours: string | null
           phone: string | null
           product_count: number | null
-          rating: number | null
-          total_reviews: number | null
-          updated_at: string | null
-          website_url: string | null
         }
         Relationships: [
           {
-            foreignKeyName: "shops_category_id_fkey"
-            columns: ["category_id"]
+            foreignKeyName: "shops_mall_id_fkey"
+            columns: ["mall_id"]
             isOneToOne: false
-            referencedRelation: "category"
+            referencedRelation: "malls"
             referencedColumns: ["id"]
           },
         ]
       }
     }
     Functions: {
-      decrement_product_quantity: {
-        Args: { product_id: number; quantity: number }
-        Returns: undefined
-      }
+      [_ in never]: never
     }
     Enums: {
       [_ in never]: never
@@ -1204,33 +896,27 @@ export type Database = {
   }
 }
 
-type DatabaseWithoutInternals = Omit<Database, "__InternalSupabase">
-
-type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, "public">]
+type PublicSchema = Database[Extract<keyof Database, "public">]
 
 export type Tables<
-  DefaultSchemaTableNameOrOptions extends
-    | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
-    | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
-    schema: keyof DatabaseWithoutInternals
-  }
-    ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
-        DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
+  PublicTableNameOrOptions extends
+    | keyof (PublicSchema["Tables"] & PublicSchema["Views"])
+    | { schema: keyof Database },
+  TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
+    ? keyof (Database[PublicTableNameOrOptions["schema"]]["Tables"] &
+        Database[PublicTableNameOrOptions["schema"]]["Views"])
     : never = never,
-> = DefaultSchemaTableNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals
-}
-  ? (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
-      DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
+> = PublicTableNameOrOptions extends { schema: keyof Database }
+  ? (Database[PublicTableNameOrOptions["schema"]]["Tables"] &
+      Database[PublicTableNameOrOptions["schema"]]["Views"])[TableName] extends {
       Row: infer R
     }
     ? R
     : never
-  : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] &
-        DefaultSchema["Views"])
-    ? (DefaultSchema["Tables"] &
-        DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
+  : PublicTableNameOrOptions extends keyof (PublicSchema["Tables"] &
+        PublicSchema["Views"])
+    ? (PublicSchema["Tables"] &
+        PublicSchema["Views"])[PublicTableNameOrOptions] extends {
         Row: infer R
       }
       ? R
@@ -1238,24 +924,20 @@ export type Tables<
     : never
 
 export type TablesInsert<
-  DefaultSchemaTableNameOrOptions extends
-    | keyof DefaultSchema["Tables"]
-    | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
-    schema: keyof DatabaseWithoutInternals
-  }
-    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+  PublicTableNameOrOptions extends
+    | keyof PublicSchema["Tables"]
+    | { schema: keyof Database },
+  TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
+    ? keyof Database[PublicTableNameOrOptions["schema"]]["Tables"]
     : never = never,
-> = DefaultSchemaTableNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals
-}
-  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+> = PublicTableNameOrOptions extends { schema: keyof Database }
+  ? Database[PublicTableNameOrOptions["schema"]]["Tables"][TableName] extends {
       Insert: infer I
     }
     ? I
     : never
-  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
-    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
+  : PublicTableNameOrOptions extends keyof PublicSchema["Tables"]
+    ? PublicSchema["Tables"][PublicTableNameOrOptions] extends {
         Insert: infer I
       }
       ? I
@@ -1263,24 +945,20 @@ export type TablesInsert<
     : never
 
 export type TablesUpdate<
-  DefaultSchemaTableNameOrOptions extends
-    | keyof DefaultSchema["Tables"]
-    | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
-    schema: keyof DatabaseWithoutInternals
-  }
-    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+  PublicTableNameOrOptions extends
+    | keyof PublicSchema["Tables"]
+    | { schema: keyof Database },
+  TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
+    ? keyof Database[PublicTableNameOrOptions["schema"]]["Tables"]
     : never = never,
-> = DefaultSchemaTableNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals
-}
-  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+> = PublicTableNameOrOptions extends { schema: keyof Database }
+  ? Database[PublicTableNameOrOptions["schema"]]["Tables"][TableName] extends {
       Update: infer U
     }
     ? U
     : never
-  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
-    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
+  : PublicTableNameOrOptions extends keyof PublicSchema["Tables"]
+    ? PublicSchema["Tables"][PublicTableNameOrOptions] extends {
         Update: infer U
       }
       ? U
@@ -1288,41 +966,29 @@ export type TablesUpdate<
     : never
 
 export type Enums<
-  DefaultSchemaEnumNameOrOptions extends
-    | keyof DefaultSchema["Enums"]
-    | { schema: keyof DatabaseWithoutInternals },
-  EnumName extends DefaultSchemaEnumNameOrOptions extends {
-    schema: keyof DatabaseWithoutInternals
-  }
-    ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
+  PublicEnumNameOrOptions extends
+    | keyof PublicSchema["Enums"]
+    | { schema: keyof Database },
+  EnumName extends PublicEnumNameOrOptions extends { schema: keyof Database }
+    ? keyof Database[PublicEnumNameOrOptions["schema"]]["Enums"]
     : never = never,
-> = DefaultSchemaEnumNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals
-}
-  ? DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
-  : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"]
-    ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
+> = PublicEnumNameOrOptions extends { schema: keyof Database }
+  ? Database[PublicEnumNameOrOptions["schema"]]["Enums"][EnumName]
+  : PublicEnumNameOrOptions extends keyof PublicSchema["Enums"]
+    ? PublicSchema["Enums"][PublicEnumNameOrOptions]
     : never
 
 export type CompositeTypes<
   PublicCompositeTypeNameOrOptions extends
-    | keyof DefaultSchema["CompositeTypes"]
-    | { schema: keyof DatabaseWithoutInternals },
+    | keyof PublicSchema["CompositeTypes"]
+    | { schema: keyof Database },
   CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
-    schema: keyof DatabaseWithoutInternals
+    schema: keyof Database
   }
-    ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
+    ? keyof Database[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
     : never = never,
-> = PublicCompositeTypeNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals
-}
-  ? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
-  : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
-    ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
+> = PublicCompositeTypeNameOrOptions extends { schema: keyof Database }
+  ? Database[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
+  : PublicCompositeTypeNameOrOptions extends keyof PublicSchema["CompositeTypes"]
+    ? PublicSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
     : never
-
-export const Constants = {
-  public: {
-    Enums: {},
-  },
-} as const
