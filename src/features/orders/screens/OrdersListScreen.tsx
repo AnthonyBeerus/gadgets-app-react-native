@@ -9,6 +9,7 @@ import {
 import { Link, Stack } from 'expo-router';
 import { FlashList } from '@shopify/flash-list';
 import { format } from 'date-fns';
+import { formatOrderId } from '../../../shared/utils/order';
 
 import { Tables } from '../../../shared/types/database.types';
 import { getMyOrders } from '../../../shared/api/api';
@@ -23,7 +24,7 @@ const renderItem = (item: any) => (
       <NeoView style={styles.orderContainer} containerStyle={styles.neoContainer}>
         <View style={styles.orderContent}>
           <View style={styles.orderDetailsContainer}>
-            <Text style={styles.orderItem}>{item.slug}</Text>
+            <Text style={styles.orderItem}>Order {formatOrderId(item.slug)}</Text>
             <Text style={styles.orderDetails}>{item.description}</Text>
             <Text style={styles.orderDate}>
               {format(new Date(item.created_at), 'MMM dd, yyyy')}
@@ -49,13 +50,13 @@ const OrdersListScreen = () => {
   const { data: orders, error, isLoading } = getMyOrders();
 
   const renderSmallTitle = () => (
-    <Text style={styles.smallHeaderTitle}>MY ORDERS</Text>
+    <Text style={styles.smallHeaderTitle}>My Orders</Text>
   );
 
   const renderLargeTitle = () => (
     <View>
-      <Text style={styles.largeHeaderTitle}>MY ORDERS</Text>
-      <Text style={styles.largeHeaderSubtitle}>TRACK YOUR PURCHASES</Text>
+      <Text style={styles.largeHeaderTitle}>My Orders</Text>
+      <Text style={styles.largeHeaderSubtitle}>Track your purchases</Text>
     </View>
   );
 
@@ -105,15 +106,14 @@ const styles: { [key: string]: any } = StyleSheet.create({
     fontSize: 16,
     fontWeight: "900",
     color: NEO_THEME.colors.black,
-    fontFamily: NEO_THEME.fonts.black,
-    textTransform: "uppercase",
+    fontFamily: NEO_THEME.fonts.bold,
   },
   largeHeaderTitle: {
     fontSize: 32,
     fontWeight: '900',
     color: NEO_THEME.colors.black,
-    fontFamily: NEO_THEME.fonts.black,
-    textTransform: "uppercase",
+    fontFamily: NEO_THEME.fonts.bold,
+    letterSpacing: -1,
   },
   largeHeaderSubtitle: {
     fontSize: 14,
@@ -121,7 +121,6 @@ const styles: { [key: string]: any } = StyleSheet.create({
     marginTop: 4,
     fontWeight: '700',
     fontFamily: NEO_THEME.fonts.bold,
-    textTransform: 'uppercase',
   },
   listContainer: {
     padding: 16,
@@ -129,9 +128,12 @@ const styles: { [key: string]: any } = StyleSheet.create({
   orderContainer: {
     backgroundColor: NEO_THEME.colors.white,
     padding: 16,
+    borderRadius: 16, // Rounded
   },
   neoContainer: {
     marginBottom: 16,
+    borderRadius: 16, // Rounded Shadow
+    width: '100%',
   },
   orderContent: {
     flexDirection: 'row',
@@ -145,7 +147,7 @@ const styles: { [key: string]: any } = StyleSheet.create({
     fontSize: 18,
     fontWeight: '900',
     color: NEO_THEME.colors.black,
-    fontFamily: NEO_THEME.fonts.black,
+    fontFamily: NEO_THEME.fonts.bold,
     marginBottom: 4,
   },
   orderDetails: {
@@ -160,8 +162,8 @@ const styles: { [key: string]: any } = StyleSheet.create({
   },
   statusBadge: {
     paddingVertical: 6,
-    paddingHorizontal: 10,
-    borderRadius: 0,
+    paddingHorizontal: 12,
+    borderRadius: 20, // Pill
     alignSelf: 'flex-start',
     borderWidth: NEO_THEME.borders.width,
     borderColor: NEO_THEME.colors.black,
@@ -170,19 +172,19 @@ const styles: { [key: string]: any } = StyleSheet.create({
     fontSize: 12,
     fontWeight: '900',
     color: NEO_THEME.colors.black,
-    fontFamily: NEO_THEME.fonts.black,
+    fontFamily: NEO_THEME.fonts.bold,
   },
   statusBadge_Pending: {
     backgroundColor: NEO_THEME.colors.yellow,
   },
   statusBadge_Completed: {
-    backgroundColor: '#4caf50', // Consider adding to theme
+    backgroundColor: '#4caf50', 
   },
   statusBadge_Shipped: {
     backgroundColor: NEO_THEME.colors.blue,
   },
   statusBadge_InTransit: {
-    backgroundColor: '#ff9800', // Consider adding to theme
+    backgroundColor: '#ff9800', 
   },
   emptyContainer: {
     alignItems: "center",
@@ -194,8 +196,7 @@ const styles: { [key: string]: any } = StyleSheet.create({
     color: NEO_THEME.colors.black,
     marginTop: 16,
     marginBottom: 8,
-    fontFamily: NEO_THEME.fonts.black,
-    textTransform: "uppercase",
+    fontFamily: NEO_THEME.fonts.bold,
   },
   emptyMessage: {
     fontSize: 16,

@@ -9,6 +9,23 @@ import { getMyOrder } from '../../../shared/api/api';
 import { NEO_THEME } from '../../../shared/constants/neobrutalism';
 import { StaticHeader } from '../../../shared/components/layout/StaticHeader';
 
+import { formatOrderId } from '../../../shared/utils/order';
+
+const getFriendlyStatusMessage = (status: string) => {
+  switch (status.toLowerCase()) {
+    case 'pending':
+      return "We've received your order and are preparing it.";
+    case 'completed':
+      return "Your order has been completed. Thanks for shopping!";
+    case 'shipped':
+      return "Good news! Your order is on its way.";
+    case 'intransit':
+      return "Your order is arriving soon.";
+    default:
+      return "Order status updated.";
+  }
+};
+
 const OrderDetailsScreen = () => {
   const { slug } = useLocalSearchParams<{ slug: string }>();
 
@@ -21,23 +38,39 @@ const OrderDetailsScreen = () => {
   const orderItems = order.order_items.map((orderItem: any) => {
     return {
       id: orderItem.id,
-      title: orderItem.products.title,
-      heroImage: orderItem.products.heroImage,
-      price: orderItem.products.price,
+      title: orderItem.products?.title ?? 'Unknown Product',
+      heroImage: orderItem.products?.heroImage ?? 'https://via.placeholder.com/150',
+      price: orderItem.products?.price ?? 0,
       quantity: orderItem.quantity,
     };
   });
 
+  const calculateTotal = () => {
+      // Use DB total if available, else sum items
+      if (order.total_amount) return order.total_amount;
+      return orderItems.reduce((acc: number, item: any) => acc + (item.price * item.quantity), 0);
+  };
+
+  const totalAmount = calculateTotal();
+
   return (
     <View style={styles.container}>
       <Stack.Screen options={{ headerShown: false }} />
-      <StaticHeader title={`ORDER ${order.slug}`} onBackPress={() => router.back()} />
+      <StaticHeader title="Order Details" onBackPress={() => router.back()} />
       
-      <View style={styles.content}>
+      <ScrollView style={styles.content} contentContainerStyle={{ paddingTop: 120, paddingBottom: 40 }}>
         <View style={styles.headerSection}>
-          <Text style={styles.item}>{order.slug}</Text>
-          <Text style={styles.details}>{order.description}</Text>
+          <View style={{flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8}}>
+               <Text style={styles.item}>Order {formatOrderId(order.slug)}</Text>
+               <View style={[styles.statusBadge, styles[`statusBadge_${order.status}`]]}>
+                    <Text style={styles.statusText}>{order.status}</Text>
+               </View>
+          </View>
           
+          <Text style={styles.friendlyMessage}>{getFriendlyStatusMessage(order.status)}</Text>
+          <Text style={styles.date}>Placed on {format(new Date(order.created_at), 'MMMM dd, yyyy')} at {format(new Date(order.created_at), 'h:mm a')}</Text>
+
+
           {/* QR Code Section */}
           <View style={styles.qrContainer}>
             <Text style={{ marginBottom: 10, color: NEO_THEME.colors.grey, fontSize: 12 }}>Tap QR to Copy (Dev Mode)</Text>
@@ -58,40 +91,52 @@ const OrderDetailsScreen = () => {
                     orderId: order.id, 
                     token: order.fulfillment_token 
                     })} 
-                    size={180} 
+                    size={140} 
                 />
                 </View>
             </TouchableOpacity>
-            <Text style={styles.qrLabel}>Scan for pickup</Text>
-            <Text style={styles.qrSublabel}>Show this to the staff</Text>
+            <Text style={styles.qrLabel}>Pickup QR Code</Text>
+            <Text style={styles.qrSublabel}>Show this to staff to collect your items</Text>
           </View>
-
-          <View style={[styles.statusBadge, styles[`statusBadge_${order.status}`]]}>
-            <Text style={styles.statusText}>{order.status.toUpperCase()}</Text>
-          </View>
-          <Text style={styles.date}>
-            {format(new Date(order.created_at), 'MMM dd, yyyy')}
-          </Text>
         </View>
 
-        <Text style={styles.itemsTitle}>ITEMS ORDERED</Text>
+        <Text style={styles.itemsTitle}>Items Ordered</Text>
         <FlatList
           data={orderItems}
           keyExtractor={item => item.id.toString()}
+          ListFooterComponent={() => (
+              <View style={styles.summarySection}>
+                  <View style={styles.summaryRow}>
+                      <Text style={styles.summaryLabel}>Subtotal</Text>
+                      <Text style={styles.summaryValue}>${totalAmount.toFixed(2)}</Text>
+                  </View>
+                  <View style={styles.summaryRow}>
+                      <Text style={styles.summaryLabel}>Payment Status</Text>
+                      <Text style={[styles.summaryValue, { color: order.stripe_payment_status === 'succeeded' || 'paid' ? NEO_THEME.colors.primary : 'red' }]}>
+                          {order.stripe_payment_status?.toUpperCase() ?? 'PAID'}
+                      </Text>
+                  </View>
+                  <View style={[styles.summaryRow, { marginTop: 8, paddingTop: 8, borderTopWidth: 1, borderTopColor: '#eee' }]}>
+                      <Text style={styles.totalLabel}>Total</Text>
+                      <Text style={styles.totalValue}>${totalAmount.toFixed(2)}</Text>
+                  </View>
+              </View>
+          )}
           renderItem={({ item }) => (
             <View style={styles.orderItem}>
               <Image source={{ uri: item.heroImage }} style={styles.heroImage} />
               <View style={styles.itemInfo}>
                 <Text style={styles.itemName}>{item.title}</Text>
-                <Text style={styles.itemPrice}>Price: ${item.price}</Text>
+                <Text style={styles.itemPrice}>${item.price}</Text>
                 <Text style={styles.itemQuantity}>Qty: {item.quantity}</Text>
               </View>
             </View>
           )}
           showsVerticalScrollIndicator={false}
+          scrollEnabled={false}
           contentContainerStyle={styles.listContent}
         />
-      </View>
+      </ScrollView>
     </View>
   );
 };
@@ -105,7 +150,6 @@ const styles: { [key: string]: any } = StyleSheet.create({
   },
   content: {
     flex: 1,
-    padding: 16,
   },
   headerSection: {
     backgroundColor: NEO_THEME.colors.white,
@@ -113,6 +157,7 @@ const styles: { [key: string]: any } = StyleSheet.create({
     borderWidth: NEO_THEME.borders.width,
     borderColor: NEO_THEME.colors.black,
     marginBottom: 24,
+    borderRadius: 16, // Rounded
     shadowColor: NEO_THEME.colors.black,
     shadowOffset: { width: 4, height: 4 },
     shadowOpacity: 1,
@@ -120,24 +165,30 @@ const styles: { [key: string]: any } = StyleSheet.create({
     elevation: 0,
   },
   item: {
-    fontSize: 24,
+    fontSize: 20, // Smaller than before
     fontWeight: '900',
     color: NEO_THEME.colors.black,
-    fontFamily: NEO_THEME.fonts.black,
+    fontFamily: NEO_THEME.fonts.bold,
+  },
+  friendlyMessage: {
+    fontSize: 16,
+    color: NEO_THEME.colors.black,
     marginBottom: 8,
+    fontWeight: '500',
+    fontFamily: NEO_THEME.fonts.regular,
   },
   details: {
-    fontSize: 16,
+    fontSize: 14,
     color: NEO_THEME.colors.grey,
     marginBottom: 16,
     fontWeight: '500',
   },
   statusBadge: {
-    paddingVertical: 6,
+    paddingVertical: 4,
     paddingHorizontal: 12,
     borderWidth: NEO_THEME.borders.width,
     borderColor: NEO_THEME.colors.black,
-    alignSelf: 'flex-start',
+    borderRadius: 20, // Pill
   },
   statusBadge_Pending: {
     backgroundColor: NEO_THEME.colors.yellow,
@@ -154,22 +205,21 @@ const styles: { [key: string]: any } = StyleSheet.create({
   statusText: {
     color: NEO_THEME.colors.black,
     fontWeight: '900',
-    fontFamily: NEO_THEME.fonts.black,
-    fontSize: 12,
+    fontFamily: NEO_THEME.fonts.bold,
+    fontSize: 10,
   },
   date: {
-    fontSize: 14,
-    color: NEO_THEME.colors.black,
-    marginTop: 16,
-    fontWeight: '700',
+    fontSize: 12,
+    color: NEO_THEME.colors.grey,
+    marginBottom: 16,
+    fontWeight: '500',
   },
   itemsTitle: {
     fontSize: 20,
     fontWeight: '900',
     color: NEO_THEME.colors.black,
-    fontFamily: NEO_THEME.fonts.black,
+    fontFamily: NEO_THEME.fonts.bold, 
     marginBottom: 16,
-    textTransform: 'uppercase',
   },
   listContent: {
     paddingBottom: 40,
@@ -177,44 +227,49 @@ const styles: { [key: string]: any } = StyleSheet.create({
   orderItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 16,
+    marginBottom: 12,
     padding: 12,
     backgroundColor: NEO_THEME.colors.white,
     borderWidth: NEO_THEME.borders.width,
     borderColor: NEO_THEME.colors.black,
+    borderRadius: 12, // Rounded
+    // Subtle shadow
     shadowColor: NEO_THEME.colors.black,
     shadowOffset: { width: 2, height: 2 },
     shadowOpacity: 1,
     shadowRadius: 0,
-    elevation: 0,
   },
   heroImage: {
-    width: 80,
-    height: 80,
-    borderRadius: NEO_THEME.borders.radius,
+    width: 50, 
+    height: 50,
+    borderRadius: 8, 
     borderWidth: 1,
     borderColor: NEO_THEME.colors.black,
   },
   itemInfo: {
     flex: 1,
-    marginLeft: 16,
+    marginLeft: 12,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
   itemName: {
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: '900',
     color: NEO_THEME.colors.black,
     fontFamily: NEO_THEME.fonts.bold,
-    marginBottom: 4,
+    flex: 1,
   },
   itemPrice: {
     fontSize: 14,
     fontWeight: '700',
-    color: NEO_THEME.colors.primary,
+    color: NEO_THEME.colors.black,
+    marginHorizontal: 8,
   },
   itemQuantity: {
-    fontSize: 14,
+    fontSize: 12,
     color: NEO_THEME.colors.grey,
-    marginTop: 2,
+    fontWeight: '700',
   },
   errorText: {
     color: 'red',
@@ -225,19 +280,67 @@ const styles: { [key: string]: any } = StyleSheet.create({
   },
   qrContainer: {
     alignItems: 'center',
-    marginTop: 16,
-    marginBottom: 24,
-    padding: 16,
-    backgroundColor: NEO_THEME.colors.white,
+    marginTop: 8,
+    padding: 12,
+    backgroundColor: '#FAFAFA', // Slight contrast
     borderWidth: 1,
     borderColor: NEO_THEME.colors.grey,
+    borderRadius: 12, 
+    borderStyle: 'dashed', 
+  },
+  qrWrapper: {
+    padding: 8,
+    backgroundColor: 'white',
+    borderRadius: 8,
   },
   qrLabel: {
     marginTop: 8,
     fontSize: 14,
-    fontWeight: '700',
-    color: NEO_THEME.colors.grey,
+    fontWeight: '900',
+    color: NEO_THEME.colors.black,
     fontFamily: NEO_THEME.fonts.bold,
-    textTransform: 'uppercase',
   },
+  qrSublabel: {
+     fontSize: 12,
+     color: NEO_THEME.colors.grey,
+     marginTop: 2,
+     textAlign: 'center',
+  },
+  summarySection: {
+      marginTop: 24,
+      backgroundColor: NEO_THEME.colors.white,
+      padding: 16,
+      borderWidth: NEO_THEME.borders.width,
+      borderColor: NEO_THEME.colors.black,
+      borderRadius: 16,
+      shadowColor: NEO_THEME.colors.black,
+      shadowOffset: { width: 4, height: 4 },
+      shadowOpacity: 1,
+      shadowRadius: 0,
+  },
+  summaryRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      marginBottom: 8,
+  },
+  summaryLabel: {
+      fontSize: 14,
+      color: NEO_THEME.colors.grey,
+      fontFamily: NEO_THEME.fonts.bold,
+  },
+  summaryValue: {
+      fontSize: 14,
+      color: NEO_THEME.colors.black,
+      fontFamily: NEO_THEME.fonts.bold,
+  },
+  totalLabel: {
+      fontSize: 18,
+      color: NEO_THEME.colors.black,
+      fontFamily: NEO_THEME.fonts.black,
+  },
+  totalValue: {
+      fontSize: 18,
+      color: NEO_THEME.colors.primary,
+      fontFamily: NEO_THEME.fonts.black,
+  }
 });
