@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, Text, Image, StyleSheet, TouchableOpacity } from 'react-native';
+import { Image } from 'expo-image';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import { NEO_THEME } from '../../shared/constants/neobrutalism';
 import { SCALE, TIMING_CONFIG } from '../../shared/constants/animations';
@@ -35,7 +36,12 @@ export const NeoShopCard = ({ shop, onPress }: NeoShopCardProps) => {
         style={styles.card}
       >
         <View style={styles.imageContainer}>
-          <Image source={{ uri: shop.image_url }} style={styles.image} />
+          <Image 
+            source={{ uri: shop.image_url }} 
+            style={styles.image} 
+            contentFit="cover"
+            transition={200}
+          />
           {shop.is_open === false && (
             <View style={styles.closedBadge}>
               <Text style={styles.closedText}>CLOSED</Text>
@@ -92,7 +98,6 @@ const styles = StyleSheet.create({
   image: {
     width: '100%',
     height: 200,
-    resizeMode: 'cover',
     borderBottomWidth: NEO_THEME.borders.width,
     borderColor: NEO_THEME.colors.black,
   },

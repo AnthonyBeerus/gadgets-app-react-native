@@ -1,5 +1,6 @@
 import React from "react";
-import { View, Text, StyleSheet, Image, TouchableOpacity } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import { Image } from "expo-image";
 import { Ionicons } from "@expo/vector-icons";
 import { NEO_THEME } from "../../../shared/constants/neobrutalism";
 
@@ -30,7 +31,7 @@ export const CartItem = ({
     <View style={styles.container}>
       <View style={styles.content}>
         <View style={styles.imageContainer}>
-          <Image source={{ uri: item.heroImage }} style={styles.image} />
+          <Image source={item.heroImage} style={styles.image} contentFit="cover" />
         </View>
 
         <View style={styles.details}>
@@ -100,7 +101,6 @@ const styles = StyleSheet.create({
   image: {
     width: "100%",
     height: "100%",
-    resizeMode: "cover",
   },
   details: {
     flex: 1,

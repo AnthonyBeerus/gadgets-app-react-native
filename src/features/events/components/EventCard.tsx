@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, Text, Image, TouchableOpacity, StyleSheet } from 'react-native';
+import { Image } from 'expo-image';
+import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { NEO_THEME } from '../../../shared/constants/neobrutalism';
 import { Event } from '../types/event';
@@ -27,7 +28,12 @@ export const EventCard = ({ event, onPress, onCheckIn }: EventCardProps) => {
         </View>
       )}
 
-      <Image source={{ uri: event.image }} style={styles.eventImage} />
+      <Image 
+        source={{ uri: event.image }} 
+        style={styles.eventImage} 
+        contentFit="cover"
+        transition={200}
+      />
 
       <View style={styles.eventInfo}>
         <View style={styles.eventHeader}>
@@ -153,7 +159,6 @@ const styles = StyleSheet.create({
   eventImage: {
     width: "100%",
     height: 200,
-    resizeMode: "cover",
     borderBottomWidth: NEO_THEME.borders.width,
     borderBottomColor: NEO_THEME.colors.black,
   },

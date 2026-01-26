@@ -7,6 +7,7 @@ import {
   View,
 } from 'react-native';
 import { Link, Stack } from 'expo-router';
+import { FlashList } from '@shopify/flash-list';
 import { format } from 'date-fns';
 
 import { Tables } from '../../../shared/types/database.types';
@@ -16,7 +17,7 @@ import { NEO_THEME } from '../../../shared/constants/neobrutalism';
 import { NeoView } from '../../../shared/components/ui/neo-view';
 import { HeaderRightGroup } from '../../../shared/components/ui/header-right-group';
 
-const renderItem = (item: Tables<'order'>) => (
+const renderItem = (item: any) => (
   <Link href={`/orders/${item.slug}`} asChild key={item.id}>
     <Pressable>
       <NeoView style={styles.orderContainer} containerStyle={styles.neoContainer}>
@@ -38,6 +39,11 @@ const renderItem = (item: Tables<'order'>) => (
     </Pressable>
   </Link>
 );
+
+
+// Fix for missing types in DB schema and FlashList
+type OrderWithExtras = Tables<'order'> & { slug: string; description: string };
+const FlashListFixed = FlashList as unknown as <T>(props: React.ComponentProps<typeof FlashList<T>> & { estimatedItemSize: number }) => React.ReactElement;
 
 const OrdersListScreen = () => {
   const { data: orders, error, isLoading } = getMyOrders();
@@ -74,8 +80,13 @@ const OrdersListScreen = () => {
             </Text>
           </View>
         ) : (
-          <View style={styles.listContainer}>
-            {orders.map((item: Tables<'order'>) => renderItem(item))}
+          <View style={{ flex: 1, minHeight: 2 }}>
+            <FlashListFixed<OrderWithExtras>
+                data={orders as unknown as OrderWithExtras[]}
+                renderItem={({ item }) => renderItem(item)}
+                estimatedItemSize={100}
+                contentContainerStyle={styles.listContainer}
+            />
           </View>
         )}
       </View>

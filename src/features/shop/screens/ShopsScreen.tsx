@@ -13,6 +13,8 @@ import {
   ScrollView,
 } from "react-native";
 import Animated from "react-native-reanimated";
+import { FlashList } from "@shopify/flash-list";
+import { Image } from "expo-image";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useShopStore } from "../../../store/shop-store";
@@ -209,17 +211,20 @@ export default function ShopsScreen() {
                   style={styles.carouselSlide}
                 >
                   <View style={styles.heroBorder}>
-                    <ImageBackground
-                      source={{ uri: shop.image_url || 'https://via.placeholder.com/400x200' }}
-                      style={styles.heroImage}
-                    >
+                    <View style={styles.heroImageContainer}>
+                      <Image
+                        source={{ uri: shop.image_url || 'https://via.placeholder.com/400x200' }}
+                        style={styles.heroImage}
+                        contentFit="cover"
+                        transition={200}
+                      />
                       <View style={styles.heroOverlay}>
                         <Text style={styles.heroTitle}>{shop.name.toUpperCase()}</Text>
                         {shop.category && (
                           <Text style={styles.heroSubtitle}>{shop.category.name}</Text>
                         )}
                       </View>
-                    </ImageBackground>
+                    </View>
                   </View>
                 </TouchableOpacity>
               ))}
@@ -246,7 +251,7 @@ export default function ShopsScreen() {
             showsHorizontalScrollIndicator={false} 
             contentContainerStyle={styles.filtersContainer}
           >
-            {categories.map((item, index) => (
+            {categories.map((item: any, index: number) => (
               <Animated.View 
                 key={item.id}
                 entering={FadeIn.duration(DURATION.fast).delay(300 + (index * 50)).easing(EASING.out)}
@@ -278,16 +283,13 @@ export default function ShopsScreen() {
           {loading ? (
             <ActivityIndicator size="large" color={NEO_THEME.colors.primary} style={{ marginTop: 40 }} />
           ) : (
-            <>
-              {shops.map((item, index) => (
-                <Animated.View 
-                  key={item.id}
-                  entering={FadeInDown.duration(DURATION.normal).delay(400 + (index * 50)).easing(EASING.out)}
-                >
-                  <NeoShopCard shop={item} onPress={() => navigateToShop(item.id)} />
-                </Animated.View>
-              ))}
-            </>
+            <FlashList
+              data={shops}
+              renderItem={renderShopCard}
+              // @ts-ignore: estimatedItemSize definition missing
+              estimatedItemSize={280}
+              scrollEnabled={false}
+            />
           )}
         </View>
       </View>
@@ -383,14 +385,20 @@ const styles = StyleSheet.create({
     backgroundColor: NEO_THEME.colors.white,
     overflow: 'hidden',
   },
-  heroImage: {
+  heroImageContainer: {
     width: '100%',
     height: 200,
-    justifyContent: 'flex-end',
+    position: 'relative',
+  },
+  heroImage: {
+    width: '100%',
+    height: '100%',
   },
   heroOverlay: {
+    ...StyleSheet.absoluteFillObject,
     padding: 16,
     backgroundColor: 'rgba(0,0,0,0.3)',
+    justifyContent: 'flex-end',
   },
   heroTitle: {
     fontFamily: NEO_THEME.fonts.black,

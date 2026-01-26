@@ -8,6 +8,7 @@ import {
   FlatList,
   ActivityIndicator,
 } from "react-native";
+import { FlashList } from "@shopify/flash-list";
 import { useCartStore } from "../../../store/cart-store";
 import { AnimatedHeaderLayout } from "../../../shared/components/layout/AnimatedHeaderLayout";
 import { CartItem } from "../components/CartItem";
@@ -16,20 +17,10 @@ import { NeoButton } from "../../../shared/components/ui/neo-button";
 import { useAuth } from "../../../shared/providers/auth-provider"; // Added import
 
 import { useRouter } from "expo-router"; // Added import
-
-export default function CartScreen() {
-  const router = useRouter(); 
-  const { session } = useAuth(); // Added hook
-  const {
-    items,
-    removeItem,
-    incrementItem,
-    decrementItem,
-    getTotalPrice,
-    resetCart,
-  } = useCartStore();
-
 import { useCheckout } from "../hooks/use-checkout";
+
+// Fix for missing estimatedItemSize inside FlashListProps
+const FlashListFixed = FlashList as unknown as <T>(props: React.ComponentProps<typeof FlashList<T>> & { estimatedItemSize: number }) => React.ReactElement;
 
 export default function CartScreen() {
   const router = useRouter(); 
@@ -40,6 +31,7 @@ export default function CartScreen() {
     incrementItem,
     decrementItem,
     getTotalPrice,
+    resetCart,
   } = useCartStore();
 
   const { checkout, isProcessing } = useCheckout();
@@ -98,20 +90,22 @@ export default function CartScreen() {
             </Text>
           </View>
         ) : (
-          <View style={styles.listContainer}>
-            {items.map((item) => (
-              <CartItem
-                key={item.id}
-                item={item}
-                onRemove={removeItem}
-                onIncrement={incrementItem}
-                onDecrement={decrementItem}
-              />
-            ))}
+          <View style={{ flex: 1, minHeight: 2 }}>
+            <FlashListFixed<any>
+              data={items}
+              renderItem={({ item }) => (
+                <CartItem
+                  item={item}
+                  onRemove={removeItem}
+                  onIncrement={incrementItem}
+                  onDecrement={decrementItem}
+                />
+              )}
+              estimatedItemSize={120}
+              contentContainerStyle={styles.listContainer}
+            />
           </View>
         )}
-
-
       </View>
     </AnimatedHeaderLayout>
   );

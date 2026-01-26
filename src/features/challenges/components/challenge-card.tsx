@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
+import { Image } from 'expo-image';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Challenge } from '../types/challenge';
 import { NEO_THEME } from '../../../shared/constants/neobrutalism';
@@ -16,7 +17,12 @@ export const ChallengeCard = ({ challenge, onPress }: ChallengeCardProps) => {
       onPress={() => onPress(challenge)}
       activeOpacity={0.9}
     >
-      <Image source={{ uri: challenge.image_url }} style={styles.image} />
+      <Image 
+        source={{ uri: challenge.image_url }} 
+        style={styles.image} 
+        contentFit="cover"
+        transition={200}
+      />
       <View style={styles.overlay}>
         <View style={styles.header}>
           <View style={styles.brandContainer}>
@@ -84,7 +90,6 @@ const styles = StyleSheet.create({
   image: {
     width: '100%',
     height: '100%',
-    resizeMode: 'cover',
   },
   overlay: {
     ...StyleSheet.absoluteFillObject,

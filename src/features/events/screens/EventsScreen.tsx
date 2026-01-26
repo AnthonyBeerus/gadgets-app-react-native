@@ -9,6 +9,7 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
+import { FlashList } from "@shopify/flash-list";
 import { NEO_THEME } from "../../../shared/constants/neobrutalism";
 import { EventCard } from "../components/EventCard";
 import { EVENT_CATEGORIES } from "../api/mock-events";
@@ -95,6 +96,76 @@ export default function EventsScreen() {
     </View>
   );
 
+  const renderHeader = () => (
+    <View>
+      <View style={styles.statsContainer}>
+        <View style={styles.statsCard}>
+          <MaterialIcons
+            name="event"
+            size={24}
+            color={NEO_THEME.colors.primary}
+            style={styles.statsIcon}
+          />
+          <View>
+            <Text style={styles.statsNumber}>{events.length}</Text>
+            <Text style={styles.statsLabel}>UPCOMING EVENTS</Text>
+          </View>
+        </View>
+
+        <View style={styles.statsCard}>
+          <MaterialIcons
+            name="confirmation-number"
+            size={24}
+            color={NEO_THEME.colors.yellow}
+            style={styles.statsIcon}
+          />
+          <View>
+            <Text style={styles.statsNumber}>
+              {events.reduce(
+                (sum, event) => sum + event.availableTickets,
+                0
+              )}
+            </Text>
+            <Text style={styles.statsLabel}>TICKETS AVAILABLE</Text>
+          </View>
+        </View>
+      </View>
+
+      <View style={styles.categoryContainer}>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.categoryScrollView}>
+          {EVENT_CATEGORIES.map((category) => (
+            <TouchableOpacity
+              key={category}
+              style={[
+                styles.categoryButton,
+                selectedCategory === category && styles.activeCategoryButton,
+              ]}
+              onPress={() => setSelectedCategory(category)}>
+              <Text
+                style={[
+                  styles.categoryButtonText,
+                  selectedCategory === category && styles.activeCategoryText,
+                ]}>
+                {category.toUpperCase()}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
+      </View>
+    </View>
+  );
+
+  const renderEventItem = ({ item }: { item: Event }) => (
+    <EventCard
+      event={item}
+      onPress={() => handleEventPress(item)}
+      onCheckIn={() => handleCheckIn(item)}
+    />
+  );
+
   return (
     <AnimatedHeaderLayout
       renderSmallTitle={renderSmallTitle}
@@ -103,91 +174,29 @@ export default function EventsScreen() {
       largeHeaderRight={<HeaderRightGroup />}
     >
       <View style={styles.content}>
-        {/* Quick Stats */}
-        <View style={styles.statsContainer}>
-          <View style={styles.statsCard}>
-            <MaterialIcons
-              name="event"
-              size={24}
-              color={NEO_THEME.colors.primary}
-              style={styles.statsIcon}
+        {loading ? (
+             <View style={styles.emptyContainer}>
+               <Text style={styles.emptyMessage}>Loading events...</Text>
+             </View>
+           ) : (
+            <FlashList<Event>
+              data={filteredEvents}
+              renderItem={renderEventItem}
+              // @ts-ignore: estimatedItemSize missing in FlashListProps type def
+              estimatedItemSize={300}
+              ListHeaderComponent={renderHeader}
+              ListEmptyComponent={
+                <View style={styles.emptyContainer}>
+                  <MaterialIcons name="event-busy" size={64} color={NEO_THEME.colors.grey} />
+                  <Text style={styles.emptyTitle}>NO EVENTS FOUND</Text>
+                  <Text style={styles.emptyMessage}>
+                    {error ? error : `No events available in the ${selectedCategory.toLowerCase()} category at the moment.`}
+                  </Text>
+                </View>
+              }
+              contentContainerStyle={{ paddingBottom: 80, paddingHorizontal: 20 }}
             />
-            <View>
-              <Text style={styles.statsNumber}>{events.length}</Text>
-              <Text style={styles.statsLabel}>UPCOMING EVENTS</Text>
-            </View>
-          </View>
-
-          <View style={styles.statsCard}>
-            <MaterialIcons
-              name="confirmation-number"
-              size={24}
-              color={NEO_THEME.colors.yellow}
-              style={styles.statsIcon}
-            />
-            <View>
-              <Text style={styles.statsNumber}>
-                {events.reduce(
-                  (sum, event) => sum + event.availableTickets,
-                  0
-                )}
-              </Text>
-              <Text style={styles.statsLabel}>TICKETS AVAILABLE</Text>
-            </View>
-          </View>
-        </View>
-
-        {/* Category Filter */}
-        <View style={styles.categoryContainer}>
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.categoryScrollView}>
-            {EVENT_CATEGORIES.map((category) => (
-              <TouchableOpacity
-                key={category}
-                style={[
-                  styles.categoryButton,
-                  selectedCategory === category && styles.activeCategoryButton,
-                ]}
-                onPress={() => setSelectedCategory(category)}>
-                <Text
-                  style={[
-                    styles.categoryButtonText,
-                    selectedCategory === category && styles.activeCategoryText,
-                  ]}>
-                  {category.toUpperCase()}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </ScrollView>
-        </View>
-
-        {/* Events List */}
-        <View style={styles.eventsSection}>
-          {loading ? (
-            <View style={styles.emptyContainer}>
-              <Text style={styles.emptyMessage}>Loading events...</Text>
-            </View>
-          ) : filteredEvents.length === 0 ? (
-            <View style={styles.emptyContainer}>
-              <MaterialIcons name="event-busy" size={64} color={NEO_THEME.colors.grey} />
-              <Text style={styles.emptyTitle}>NO EVENTS FOUND</Text>
-              <Text style={styles.emptyMessage}>
-                {error ? error : `No events available in the ${selectedCategory.toLowerCase()} category at the moment.`}
-              </Text>
-            </View>
-          ) : (
-            filteredEvents.map((event) => (
-              <EventCard
-                key={event.id}
-                event={event}
-                onPress={() => handleEventPress(event)}
-                onCheckIn={() => handleCheckIn(event)}
-              />
-            ))
-          )}
-        </View>
+           )}
       </View>
       
       {checkingIn && (

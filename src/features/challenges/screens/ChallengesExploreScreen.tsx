@@ -7,9 +7,17 @@ import { AIBanner } from '../../../shared/components/ui/AIBanner';
 import { Challenge } from '../types/challenge';
 import { useRouter } from 'expo-router';
 import { NEO_THEME } from '../../../shared/constants/neobrutalism';
+import { FlashList, FlashListProps } from '@shopify/flash-list';
 import Animated, { useAnimatedScrollHandler } from 'react-native-reanimated';
 import { useCollapsibleTab } from '../../../shared/context/CollapsibleTabContext';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+
+// Fix for missing estimatedItemSize in FlashListProps
+interface FlashListPropsWithEstimatedItemSize<T> extends FlashListProps<T> {
+  estimatedItemSize: number;
+}
+
+const AnimatedFlashList = Animated.createAnimatedComponent(FlashList) as unknown as <T>(props: FlashListPropsWithEstimatedItemSize<T> & { ref?: any }) => React.ReactElement;
 
 type FilterType = 'ALL' | 'FREE' | 'PREMIUM' | 'AI ALLOWED' | 'ENDING SOON';
 
@@ -49,28 +57,16 @@ export default function ChallengesExploreScreen() {
     }
   });
 
-  if (loading && challenges.length === 0) {
-    return (
-      <View style={[styles.loadingContainer, { paddingTop: headerHeight + tabBarHeight + top }]}>
-        <ActivityIndicator size="large" color={NEO_THEME.colors.primary} />
-      </View>
-    );
-  }
+  const renderItem = ({ item }: { item: Challenge }) => (
+    <ChallengeCard 
+      challenge={item} 
+      onPress={handlePressChallenge} 
+    />
+  );
 
-  return (
-    <Animated.ScrollView
-      onScroll={onScroll}
-      scrollEventThrottle={16}
-      contentContainerStyle={{
-        paddingTop: headerHeight + tabBarHeight + top + 20,
-        paddingBottom: 100,
-        paddingHorizontal: 20,
-        gap: 16,
-      }}
-      showsVerticalScrollIndicator={false}
-    >
+  const ListHeader = () => (
+    <View style={styles.headerContainer}>
       <AIBanner onPress={() => router.push('/gem-shop/ai-tools')} />
-
       <ScrollView 
         horizontal 
         showsHorizontalScrollIndicator={false} 
@@ -82,21 +78,37 @@ export default function ChallengesExploreScreen() {
         <FilterChip label="AI ALLOWED" type="ai" isActive={activeFilter === 'AI ALLOWED'} onPress={() => setActiveFilter('AI ALLOWED')} />
         <FilterChip label="ENDING SOON" type="urgent" isActive={activeFilter === 'ENDING SOON'} onPress={() => setActiveFilter('ENDING SOON')} />
       </ScrollView>
+    </View>
+  );
 
-      {filteredChallenges.map((item) => (
-        <ChallengeCard 
-          key={item.id} 
-          challenge={item} 
-          onPress={handlePressChallenge} 
-        />
-      ))}
-      
-      {filteredChallenges.length === 0 && (
+  if (loading && challenges.length === 0) {
+    return (
+      <View style={[styles.loadingContainer, { paddingTop: headerHeight + tabBarHeight + top }]}>
+        <ActivityIndicator size="large" color={NEO_THEME.colors.primary} />
+      </View>
+    );
+  }
+
+  return (
+    <AnimatedFlashList<Challenge>
+      data={filteredChallenges}
+      renderItem={renderItem}
+      estimatedItemSize={280}
+      onScroll={onScroll}
+      scrollEventThrottle={16}
+      ListHeaderComponent={ListHeader}
+      contentContainerStyle={{
+        paddingTop: headerHeight + tabBarHeight + top + 20,
+        paddingBottom: 100,
+        paddingHorizontal: 20,
+      }}
+      showsVerticalScrollIndicator={false}
+      ListEmptyComponent={
         <View style={styles.emptyState}>
           <Text style={styles.emptyText}>No challenges found matching this filter.</Text>
         </View>
-      )}
-    </Animated.ScrollView>
+      }
+    />
   );
 }
 
@@ -105,6 +117,10 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  headerContainer: {
+    gap: 16,
+    marginBottom: 16,
   },
   filterContainer: {
     gap: 8,
