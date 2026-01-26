@@ -9,8 +9,6 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { useCartStore } from "../../../store/cart-store";
-import { createOrder, createOrderItem, updateOrder } from "../../../shared/api/api";
-import { openStripeCheckout, setupStripePaymentSheet } from "../../../shared/lib/stripe";
 import { AnimatedHeaderLayout } from "../../../shared/components/layout/AnimatedHeaderLayout";
 import { CartItem } from "../components/CartItem";
 import { NEO_THEME } from "../../../shared/constants/neobrutalism";
@@ -31,81 +29,23 @@ export default function CartScreen() {
     resetCart,
   } = useCartStore();
 
-  const { mutateAsync: createSupabaseOrder, isPending: isCreatingOrder } = createOrder();
-  const { mutateAsync: createSupabaseOrderItem } = createOrderItem();
-  const { mutateAsync: updateSupabaseOrder } = updateOrder();
+import { useCheckout } from "../hooks/use-checkout";
 
-  const handleCheckout = async () => {
-    const totalPrice = parseFloat(getTotalPrice());
+export default function CartScreen() {
+  const router = useRouter(); 
+  const { session } = useAuth();
+  const {
+    items,
+    removeItem,
+    incrementItem,
+    decrementItem,
+    getTotalPrice,
+  } = useCartStore();
 
-    if (totalPrice <= 0) {
-      Alert.alert("Cart is empty", "Please add items to your cart before checking out.");
-      return;
-    }
+  const { checkout, isProcessing } = useCheckout();
 
-    if (!session) {
-      Alert.alert(
-        "Login Required", 
-        "Please login to complete your purchase.",
-        [
-          { text: "Cancel", style: "cancel" },
-          { text: "Login", onPress: () => router.push("/auth") }
-        ]
-      );
-      return;
-    }
-
-    try {
-      // 1. Setup Payment Intent first to get the ID
-      const clientSecret = await setupStripePaymentSheet(Math.floor(totalPrice * 100));
-      const paymentIntentId = clientSecret?.split('_secret_')[0];
-
-      if (!paymentIntentId) {
-        throw new Error("Failed to initialize payment.");
-      }
-
-      // 2. Create Order in PENDING state immediately
-      // This prevents "ghost orders" where user pays but no order is created if app crashes.
-      const newOrder = await createSupabaseOrder({ 
-          totalPrice,
-          paymentIntentId,
-          paymentStatus: 'pending'
-      });
-
-      // 3. Create Order Items linked to the pending order
-      await createSupabaseOrderItem(
-          items.map((item) => ({
-            orderId: newOrder.id,
-            productId: item.id,
-            quantity: item.quantity,
-          }))
-      );
-
-      // 4. Present Payment Sheet
-      const paymentResult = await openStripeCheckout();
-
-      if (!paymentResult) {
-        Alert.alert("Payment Cancelled", "The payment process was cancelled.");
-        return;
-      }
-
-      // 5. If Payment Succeeded, Update Order Status
-      // (Ideally verify with server logic/webhook, but this is better than before)
-      await updateSupabaseOrder({
-        orderId: newOrder.id,
-        updates: {
-          status: 'Completed', // Or 'Paid' if you distinguish
-          stripe_payment_status: 'succeeded'
-        }
-      });
-
-      resetCart();
-      router.push({ pathname: "/order-success", params: { orderId: newOrder.id } });
-
-    } catch (error) {
-      console.error(error);
-      Alert.alert("Payment Failed", error instanceof Error ? error.message : "An unknown error occurred");
-    }
+  const handleCheckout = () => {
+      checkout();
   };
 
 
@@ -136,10 +76,10 @@ export default function CartScreen() {
             
             <NeoButton 
               onPress={handleCheckout}
-              disabled={isCreatingOrder}
+              disabled={isProcessing}
               style={styles.checkoutButton}
             >
-              {isCreatingOrder ? (
+              {isProcessing ? (
                 <ActivityIndicator color={NEO_THEME.colors.white} />
               ) : (
                 <Text style={styles.checkoutButtonText}>CHECKOUT</Text>

@@ -299,6 +299,8 @@ export type Database = {
           fulfillment_token: string | null
           id: number
           status: string
+          stripe_payment_intent_id: string | null
+          stripe_payment_status: string | null
           total_amount: number | null
           user_id: string
         }
@@ -308,6 +310,8 @@ export type Database = {
           fulfillment_token?: string | null
           id?: number
           status?: string
+          stripe_payment_intent_id?: string | null
+          stripe_payment_status?: string | null
           total_amount?: number | null
           user_id: string
         }
@@ -317,6 +321,8 @@ export type Database = {
           fulfillment_token?: string | null
           id?: number
           status?: string
+          stripe_payment_intent_id?: string | null
+          stripe_payment_status?: string | null
           total_amount?: number | null
           user_id?: string
         }

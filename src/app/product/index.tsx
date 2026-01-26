@@ -11,7 +11,7 @@ import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { PopProductCard } from "../../components/shop/PopProductCard";
-import { getShopProducts } from "../../shared/api/shops";
+import { useProducts } from "../../features/product/hooks/use-products";
 import { NEO_THEME } from "../../shared/constants/neobrutalism";
 
 const ProductsPage = () => {
@@ -20,27 +20,16 @@ const ProductsPage = () => {
     shopName: string;
   }>();
   const router = useRouter();
-  const [products, setProducts] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+  
+  const shopId = shop ? parseInt(shop) : undefined;
+  const { data: rawProducts = [], isLoading: loading } = useProducts(shopId);
 
-  useEffect(() => {
-    if (shop) {
-      loadShopProducts();
-    }
-  }, [shop]);
-
-  const loadShopProducts = async () => {
-    try {
-      setLoading(true);
-      const productsData = await getShopProducts(parseInt(shop!));
-      setProducts(productsData || []);
-    } catch (error) {
-      console.error("Error loading shop products:", error);
-      setProducts([]);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const products = rawProducts.map(p => ({
+      ...p,
+      slug: p.id.toString(),
+      image_url: p.image_url || undefined,
+      description: p.description || undefined,
+  }));
 
   if (loading) {
     return (
