@@ -146,7 +146,10 @@ const ProfileScreen = () => {
                 icon="store"
                 title="SWITCH TO MERCHANT MODE"
                 subtitle="Access your dashboard"
-                onPress={() => switchRole('merchant')}
+                onPress={() => {
+                    switchRole('merchant');
+                    router.replace("/(merchant)");
+                }}
              />
           ) : (
             <ProfileOption
@@ -157,7 +160,7 @@ const ProfileScreen = () => {
                 onPress={async () => {
                     try {
                         await createDevMerchant();
-                        alert("Merchant Account Created! Redirecting...");
+                        router.replace("/(merchant)");
                     } catch (e: any) {
                         alert("Error: " + e.message);
                     }

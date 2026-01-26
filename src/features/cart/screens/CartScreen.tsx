@@ -13,8 +13,9 @@ import { useCartStore } from "../../../store/cart-store";
 import { AnimatedHeaderLayout } from "../../../shared/components/layout/AnimatedHeaderLayout";
 import { CartItem } from "../components/CartItem";
 import { NEO_THEME } from "../../../shared/constants/neobrutalism";
-import { NeoButton } from "../../../shared/components/ui/neo-button";
-import { useAuth } from "../../../shared/providers/auth-provider"; // Added import
+import { NuviaButton } from "../../../shared/components/ui/nuvia-button";
+import { NuviaText } from "../../../components/atoms/nuvia-text";
+import { useAuth } from "../../../shared/providers/auth-provider";
 
 import { useRouter } from "expo-router"; // Added import
 import { useCheckout } from "../hooks/use-checkout";
@@ -42,15 +43,15 @@ export default function CartScreen() {
 
 
   const renderSmallTitle = () => (
-    <Text style={styles.smallHeaderTitle}>MY CART</Text>
+    <NuviaText variant="label">MY CART</NuviaText>
   );
 
   const renderLargeTitle = () => (
     <View>
-      <Text style={styles.largeHeaderTitle}>MY CART</Text>
-      <Text style={styles.largeHeaderSubtitle}>
+      <NuviaText variant="display">MY CART</NuviaText>
+      <NuviaText variant="label" color={NEO_THEME.colors.grey}>
         {items.length} {items.length === 1 ? "ITEM" : "ITEMS"}
-      </Text>
+      </NuviaText>
     </View>
   );
 
@@ -62,21 +63,26 @@ export default function CartScreen() {
         items.length > 0 ? (
           <View style={styles.footer}>
             <View style={styles.totalContainer}>
-              <Text style={styles.totalLabel}>TOTAL</Text>
-              <Text style={styles.totalPrice}>${getTotalPrice()}</Text>
+              <NuviaText variant="h3">TOTAL</NuviaText>
+              <NuviaText variant="display" color={NEO_THEME.colors.primary}>
+                ${getTotalPrice()}
+              </NuviaText>
             </View>
             
-            <NeoButton 
+            <NuviaButton 
               onPress={handleCheckout}
               disabled={isProcessing}
+              variant="primary"
               style={styles.checkoutButton}
             >
               {isProcessing ? (
                 <ActivityIndicator color={NEO_THEME.colors.white} />
               ) : (
-                <Text style={styles.checkoutButtonText}>CHECKOUT</Text>
+                <NuviaText variant="label" color={NEO_THEME.colors.white}>
+                    CHECKOUT
+                </NuviaText>
               )}
-            </NeoButton>
+            </NuviaButton>
           </View>
         ) : null
       }
@@ -84,10 +90,10 @@ export default function CartScreen() {
       <View style={styles.content}>
         {items.length === 0 ? (
           <View style={styles.emptyContainer}>
-            <Text style={styles.emptyText}>YOUR CART IS EMPTY</Text>
-            <Text style={styles.emptySubtext}>
+            <NuviaText variant="h2">YOUR CART IS EMPTY</NuviaText>
+            <NuviaText variant="body" color={NEO_THEME.colors.grey} style={{ textAlign: "center", marginTop: 8 }}>
               Start adding some awesome gadgets!
-            </Text>
+            </NuviaText>
           </View>
         ) : (
           <View style={{ flex: 1, minHeight: 2 }}>
@@ -113,29 +119,7 @@ export default function CartScreen() {
 
 const styles = StyleSheet.create({
   content: {
-    paddingBottom: 200, // Increased padding to account for sticky footer
-  },
-  smallHeaderTitle: {
-    fontSize: 16,
-    fontWeight: "900",
-    color: NEO_THEME.colors.black,
-    fontFamily: NEO_THEME.fonts.black,
-    textTransform: "uppercase",
-  },
-  largeHeaderTitle: {
-    fontSize: 32,
-    fontWeight: "900",
-    color: NEO_THEME.colors.black,
-    fontFamily: NEO_THEME.fonts.black,
-    textTransform: "uppercase",
-  },
-  largeHeaderSubtitle: {
-    fontSize: 16,
-    color: NEO_THEME.colors.grey,
-    marginTop: 4,
-    fontWeight: "700",
-    fontFamily: NEO_THEME.fonts.bold,
-    textTransform: "uppercase",
+    paddingBottom: 200,
   },
   listContainer: {
     padding: 16,
@@ -145,25 +129,12 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  emptyText: {
-    fontSize: 24,
-    fontWeight: "900",
-    color: NEO_THEME.colors.black,
-    fontFamily: NEO_THEME.fonts.black,
-    marginBottom: 8,
-  },
-  emptySubtext: {
-    fontSize: 16,
-    color: NEO_THEME.colors.grey,
-    textAlign: "center",
-  },
   footer: {
     padding: 16,
     backgroundColor: NEO_THEME.colors.white,
-
-    borderTopWidth: NEO_THEME.borders.width,
+    borderTopWidth: 2,
     borderColor: NEO_THEME.colors.black,
-    paddingBottom: 32, // Add extra padding for bottom safe area if needed, or just visual
+    paddingBottom: 32,
   },
   totalContainer: {
     flexDirection: "row",
@@ -171,26 +142,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginBottom: 16,
   },
-  totalLabel: {
-    fontSize: 18,
-    fontWeight: "900",
-    color: NEO_THEME.colors.black,
-    fontFamily: NEO_THEME.fonts.black,
-  },
-  totalPrice: {
-    fontSize: 24,
-    fontWeight: "900",
-    color: NEO_THEME.colors.primary,
-    fontFamily: NEO_THEME.fonts.black,
-  },
   checkoutButton: {
     width: "100%",
-  },
-  checkoutButtonText: {
-    fontSize: 16,
-    fontWeight: "900",
-    color: NEO_THEME.colors.white,
-    fontFamily: NEO_THEME.fonts.black,
-    textTransform: "uppercase",
   },
 });

@@ -1,8 +1,9 @@
 import React from "react";
-import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import { View, StyleSheet, TouchableOpacity } from "react-native";
 import { Image } from "expo-image";
 import { Ionicons } from "@expo/vector-icons";
 import { NEO_THEME } from "../../../shared/constants/neobrutalism";
+import { NuviaText } from "../../../components/atoms/nuvia-text";
 
 
 type CartItemType = {
@@ -35,10 +36,12 @@ export const CartItem = ({
         </View>
 
         <View style={styles.details}>
-          <Text style={styles.title} numberOfLines={2}>
+          <NuviaText variant="bodyBold" numberOfLines={2}>
             {item.title}
-          </Text>
-          <Text style={styles.price}>${item.price.toFixed(2)}</Text>
+          </NuviaText>
+          <NuviaText variant="h3" color={NEO_THEME.colors.primary}>
+            ${item.price.toFixed(2)}
+          </NuviaText>
 
           <View style={styles.actions}>
             <View style={styles.quantityControl}>
@@ -50,7 +53,7 @@ export const CartItem = ({
               </TouchableOpacity>
               
               <View style={styles.quantityValue}>
-                <Text style={styles.quantityText}>{item.quantity}</Text>
+                <NuviaText variant="label">{item.quantity}</NuviaText>
               </View>
 
               <TouchableOpacity
@@ -78,25 +81,30 @@ const styles = StyleSheet.create({
   container: {
     marginBottom: 16,
     backgroundColor: NEO_THEME.colors.white,
-    borderWidth: NEO_THEME.borders.width,
+    borderWidth: 2,
     borderColor: NEO_THEME.colors.black,
+    borderRadius: 16,
+    // Softer Nuvia Shadow
     shadowColor: NEO_THEME.colors.black,
     shadowOffset: { width: 4, height: 4 },
     shadowOpacity: 1,
     shadowRadius: 0,
-    elevation: 4, // for android
+    elevation: 4,
+    overflow: 'hidden',
   },
   content: {
     flexDirection: "row",
     padding: 12,
-    gap: 12,
+    gap: 16,
   },
   imageContainer: {
     width: 80,
     height: 80,
-    borderWidth: NEO_THEME.borders.width,
+    borderRadius: 12,
+    borderWidth: 1.5,
     borderColor: NEO_THEME.colors.black,
-    backgroundColor: NEO_THEME.colors.backgroundLight,
+    backgroundColor: NEO_THEME.colors.background,
+    overflow: 'hidden',
   },
   image: {
     width: "100%",
@@ -105,20 +113,7 @@ const styles = StyleSheet.create({
   details: {
     flex: 1,
     justifyContent: "space-between",
-  },
-  title: {
-    fontSize: 16,
-    fontWeight: "900",
-    color: NEO_THEME.colors.black,
-    fontFamily: NEO_THEME.fonts.black,
-    textTransform: "uppercase",
-    marginBottom: 4,
-  },
-  price: {
-    fontSize: 16,
-    fontWeight: "700",
-    color: NEO_THEME.colors.primary,
-    fontFamily: NEO_THEME.fonts.bold,
+    paddingVertical: 2,
   },
   actions: {
     flexDirection: "row",
@@ -129,33 +124,36 @@ const styles = StyleSheet.create({
   quantityControl: {
     flexDirection: "row",
     alignItems: "center",
-    borderWidth: NEO_THEME.borders.width,
+    borderWidth: 1.5,
     borderColor: NEO_THEME.colors.black,
-    backgroundColor: NEO_THEME.colors.white,
+    backgroundColor: NEO_THEME.colors.background,
+    borderRadius: 20, // Pill shape
+    padding: 2,
   },
   quantityButton: {
-    padding: 8,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
     backgroundColor: NEO_THEME.colors.white,
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 1,
+    borderColor: NEO_THEME.colors.black,
   },
   quantityValue: {
     paddingHorizontal: 12,
-    borderLeftWidth: NEO_THEME.borders.width,
-    borderRightWidth: NEO_THEME.borders.width,
-    borderColor: NEO_THEME.colors.black,
-    backgroundColor: NEO_THEME.colors.backgroundLight,
-    paddingVertical: 8, // matches button padding
     justifyContent: "center",
-  },
-  quantityText: {
-    fontSize: 14,
-    fontWeight: "900",
-    color: NEO_THEME.colors.black,
-    fontFamily: NEO_THEME.fonts.black,
+    alignItems: 'center',
+    minWidth: 32,
   },
   removeButton: {
-    padding: 8,
-    backgroundColor: "#FF4444",
-    borderWidth: NEO_THEME.borders.width,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: NEO_THEME.colors.black,
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 1.5,
     borderColor: NEO_THEME.colors.black,
     shadowColor: NEO_THEME.colors.black,
     shadowOffset: { width: 2, height: 2 },

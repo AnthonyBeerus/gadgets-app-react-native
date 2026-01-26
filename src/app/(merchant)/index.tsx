@@ -8,7 +8,7 @@ import { useState } from "react";
 
 export default function MerchantDashboard() {
   const router = useRouter();
-  const { isMerchant, createDevMerchant, user } = useAuth();
+  const { isMerchant, createDevMerchant, user, switchRole } = useAuth();
   const [loading, setLoading] = useState(false);
 
   const handleCreateDevMerchant = async () => {
@@ -54,8 +54,22 @@ export default function MerchantDashboard() {
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={styles.header}>
-            <Text style={styles.greeting}>Welcome back,</Text>
-            <Text style={styles.username}>{user?.email?.split('@')[0] || 'Merchant'}</Text>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                <View>
+                    <Text style={styles.greeting}>Welcome back,</Text>
+                    <Text style={styles.username}>{user?.email?.split('@')[0] || 'Merchant'}</Text>
+                </View>
+                <TouchableOpacity 
+                    style={[styles.miniButton, { backgroundColor: NEO_THEME.colors.sky }]} 
+                    onPress={() => {
+                        switchRole('shopper');
+                        router.replace('/(shop)');
+                    }}
+                >
+                    <MaterialIcons name="shopping-bag" size={20} color={NEO_THEME.colors.black} />
+                    <Text style={styles.miniButtonText}>Exit</Text>
+                </TouchableOpacity>
+            </View>
         </View>
 
         <View style={styles.statsContainer}>
@@ -229,6 +243,21 @@ const styles = StyleSheet.create({
       fontFamily: NEO_THEME.fonts.bold,
       fontSize: 14,
       textAlign: 'center',
+  },
+  miniButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: 12,
+    borderWidth: 2,
+    borderColor: NEO_THEME.colors.black,
+    gap: 4,
+  },
+  miniButtonText: {
+    fontFamily: NEO_THEME.fonts.bold,
+    fontSize: 12,
+    color: NEO_THEME.colors.black,
   }
 
 });

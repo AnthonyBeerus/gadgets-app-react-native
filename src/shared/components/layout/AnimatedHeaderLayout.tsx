@@ -211,7 +211,15 @@ const styles = StyleSheet.create({
     backgroundColor: NEO_THEME.colors.backgroundLight,
     borderBottomWidth: NEO_THEME.borders.width,
     borderColor: NEO_THEME.colors.black,
+    borderBottomLeftRadius: 32,
+    borderBottomRightRadius: 32,
     zIndex: 10,
+    // Add a slight shadow to the sticky header
+    shadowColor: NEO_THEME.colors.black,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 4,
   },
   smallHeader: {
     position: "absolute",

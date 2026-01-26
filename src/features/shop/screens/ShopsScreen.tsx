@@ -18,15 +18,16 @@ import { Image } from "expo-image";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useShopStore } from "../../../store/shop-store";
-import { NeoView } from "../../../shared/components/ui/neo-view";
-import { NeoShopCard } from "../../../components/shop/neo-shop-card";
 import { NEO_THEME } from "../../../shared/constants/neobrutalism";
 import { AnimatedHeaderLayout } from "../../../shared/components/layout/AnimatedHeaderLayout";
 import { HeaderRightGroup } from "../../../shared/components/ui/header-right-group";
-import { SmallHeaderTitle, LargeHeaderTitle } from "../../../shared/components/layout/header-titles";
 import { FadeIn, FadeInDown } from "react-native-reanimated";
 import { DURATION, EASING } from "../../../shared/constants/animations";
 import { NuviaInput } from "../../../shared/components/ui/nuvia-input";
+import { NuviaProductCard } from "../../../components/molecules/nuvia-product-card";
+import { NuviaShopCard } from "../../../components/molecules/nuvia-shop-card";
+import { NuviaTag } from "../../../shared/components/ui/nuvia-tag";
+import { NuviaText } from "../../../components/atoms/nuvia-text";
 
 const { width } = Dimensions.get("window");
 
@@ -93,7 +94,7 @@ export default function ShopsScreen() {
     setCurrentSlide(slideIndex);
   };
 
-  const navigateToShop = (shopId: number) => {
+  const navigateToShop = (shopId: number | string) => {
     router.push(`/shop/${shopId}`);
   };
 
@@ -101,14 +102,13 @@ export default function ShopsScreen() {
   const mallName = selectedMallData?.name?.toUpperCase() || "Molapo Crossing";
 
   const renderShopCard = ({ item }: { item: any }) => (
-    <NeoShopCard shop={item} onPress={() => navigateToShop(item.id)} />
+    <NuviaShopCard shop={item} onPress={() => navigateToShop(item.id)} />
   );
 
   const renderSmallTitle = () => (
-    <TouchableOpacity onPress={() => router.push("/mall-selector")} activeOpacity={0.7}>
-      <SmallHeaderTitle title={mallName}>
-        <Ionicons name="chevron-down" size={20} color={NEO_THEME.colors.black} style={{ marginLeft: 4 }} />
-      </SmallHeaderTitle>
+    <TouchableOpacity onPress={() => router.push("/mall-selector")} activeOpacity={0.7} style={{ flexDirection: 'row', alignItems: 'center' }}>
+      <NuviaText variant="label" style={{ marginRight: 4 }}>{mallName}</NuviaText>
+      <Ionicons name="chevron-down" size={16} color={NEO_THEME.colors.black} />
     </TouchableOpacity>
   );
 
@@ -119,42 +119,19 @@ export default function ShopsScreen() {
       style={{ marginTop: 8 }}
     >
       <View>
-        {/* Meta Label */}
-        <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8 }}>
-           <View style={{ width: 8, height: 8, backgroundColor: NEO_THEME.colors.primary, marginRight: 8 }} />
-           <Text style={{ 
-             fontFamily: NEO_THEME.fonts.bold, 
-             fontSize: 12, 
-             letterSpacing: 2, 
-             color: NEO_THEME.colors.grey 
-           }}>
-             CURRENT LOCATION
-           </Text>
+        <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 4 }}>
+           <NuviaTag label="CURRENT LOCATION" color={NEO_THEME.colors.secondary} />
         </View>
 
-        {/* Massive Title */}
-        <Text style={{ 
-            fontFamily: NEO_THEME.fonts.black, 
-            fontSize: 40, 
-            lineHeight: 40, 
-            color: NEO_THEME.colors.black,
-            letterSpacing: -1, // Tight tracking for impact
-            marginBottom: 8
-        }}>
+        <NuviaText variant="display" style={{ fontSize: 36, lineHeight: 42, marginBottom: 8 }}>
           {mallName}
-        </Text>
+        </NuviaText>
 
-        {/* Action Indicator */}
          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-            <Text style={{ 
-              fontFamily: NEO_THEME.fonts.bold, 
-              fontSize: 14,
-              marginRight: 6,
-              textDecorationLine: 'underline'
-            }}>
+            <NuviaText variant="label" style={{ textDecorationLine: 'underline', marginRight: 4 }}>
               CHANGE
-            </Text>
-            <Ionicons name="arrow-forward" size={16} color={NEO_THEME.colors.black} />
+            </NuviaText>
+            <Ionicons name="arrow-forward" size={14} color={NEO_THEME.colors.black} />
          </View>
       </View>
     </TouchableOpacity>
@@ -174,17 +151,10 @@ export default function ShopsScreen() {
           style={styles.searchContainer}
         >
           <NuviaInput
-            placeholder="Search for products, brands..."
+            placeholder="Search shops or categories..."
             value={searchQuery}
             onChangeText={setSearchQuery}
             leftIcon={<Ionicons name="search" size={20} color={NEO_THEME.colors.grey} />}
-            rightIcon={
-               <TouchableOpacity onPress={() => console.log('Search')}>
-                 <View style={{ backgroundColor: NEO_THEME.colors.secondary, borderRadius: 12, padding: 4 }}>
-                   <Ionicons name="arrow-forward" size={16} color={NEO_THEME.colors.black} />
-                 </View>
-               </TouchableOpacity>
-            }
           />
         </Animated.View>
 
@@ -219,9 +189,11 @@ export default function ShopsScreen() {
                         transition={200}
                       />
                       <View style={styles.heroOverlay}>
-                        <Text style={styles.heroTitle}>{shop.name.toUpperCase()}</Text>
+                        <NuviaText variant="h1" color={NEO_THEME.colors.white}>
+                            {shop.name}
+                        </NuviaText>
                         {shop.category && (
-                          <Text style={styles.heroSubtitle}>{shop.category.name}</Text>
+                          <NuviaTag label={shop.category.name} color={NEO_THEME.colors.primary} style={{ marginTop: 4 }} />
                         )}
                       </View>
                     </View>
@@ -229,54 +201,35 @@ export default function ShopsScreen() {
                 </TouchableOpacity>
               ))}
             </ScrollView>
-            {/* Pagination Dots */}
-            <View style={styles.pagination}>
-              {featuredShops.map((_, index) => (
-                <View
-                  key={index}
-                  style={[
-                    styles.dot,
-                    currentSlide === index && styles.activeDot
-                  ]}
-                />
-              ))}
-            </View>
+            {/* Pagination dots simplified or replaced by Nuvia dots if needed */}
           </Animated.View>
         )}
 
         {/* Category Filter Pills */}
         <Animated.View entering={FadeInDown.duration(DURATION.normal).delay(300).easing(EASING.out)}>
-          <Animated.ScrollView 
+          <ScrollView 
             horizontal 
             showsHorizontalScrollIndicator={false} 
             contentContainerStyle={styles.filtersContainer}
           >
-            {categories.map((item: any, index: number) => (
-              <Animated.View 
-                key={item.id}
-                entering={FadeIn.duration(DURATION.fast).delay(300 + (index * 50)).easing(EASING.out)}
-              >
+            {categories.map((item: any) => (
               <TouchableOpacity
+                key={item.id}
                 onPress={() => setSelectedCategory(selectedCategory === item.id ? null : item.id)}
-                style={{ marginRight: 12 }}
+                style={{ marginRight: 10 }}
               >
-                <View
-                  style={[
-                    styles.filterPill,
-                    selectedCategory === item.id ? styles.activeFilterPill : styles.inactiveFilterPill
-                  ]}
-                >
-                  <Text style={[
-                    styles.filterText,
-                    selectedCategory === item.id ? styles.activeFilterText : styles.inactiveFilterText
-                  ]}>
-                    {item.name}
-                  </Text>
-                </View>
+                <NuviaTag 
+                    label={item.name} 
+                    color={selectedCategory === item.id ? NEO_THEME.colors.primary : NEO_THEME.colors.white}
+                    style={{ 
+                        paddingHorizontal: 16, 
+                        paddingVertical: 8,
+                        transform: [{ translateY: selectedCategory === item.id ? -2 : 0 }]
+                    }}
+                />
               </TouchableOpacity>
-              </Animated.View>
             ))}
-          </Animated.ScrollView>
+          </ScrollView>
         </Animated.View>
 
         <View style={styles.listContainer}>

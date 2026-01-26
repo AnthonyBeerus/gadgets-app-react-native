@@ -44,8 +44,7 @@ if (Platform.OS !== 'web') {
 }
 
 const AppNavigator = () => {
-  const { activeRole } = useAuth();
-  const isMerchant = activeRole === 'merchant';
+  const { activeRole, isMerchant } = useAuth();
   
   return (
     <Stack>
@@ -127,7 +126,7 @@ const AppNavigator = () => {
         options={{ headerShown: false, title: "Order Success" }}
       />
       <Stack.Screen
-        name="orders"
+        name="orders/index"
         options={{ 
           headerShown: false, 
           title: "Orders", 

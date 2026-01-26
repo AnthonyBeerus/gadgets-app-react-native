@@ -3,7 +3,8 @@ import { View, Text, StyleSheet, ActivityIndicator } from "react-native";
 import QRCode from "react-native-qrcode-svg";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { NEO_THEME } from "../../../shared/constants/neobrutalism";
-import { NeoButton } from "../../../shared/components/ui/neo-button";
+import { NuviaButton } from "../../../shared/components/ui/nuvia-button";
+import { NuviaText } from "../../../components/atoms/nuvia-text";
 import { AnimatedHeaderLayout } from "../../../shared/components/layout/AnimatedHeaderLayout";
 
 export default function OrderSuccessScreen() {
@@ -24,12 +25,12 @@ export default function OrderSuccessScreen() {
     router.replace("/");
   };
 
-  const renderSmallTitle = () => <Text style={styles.smallHeaderTitle}>SUCCESS</Text>;
+  const renderSmallTitle = () => <NuviaText variant="label">SUCCESS</NuviaText>;
 
   const renderLargeTitle = () => (
     <View>
-      <Text style={styles.largeHeaderTitle}>ORDER PLACED</Text>
-      <Text style={styles.largeHeaderSubtitle}>THANK YOU!</Text>
+      <NuviaText variant="display">ORDER PLACED</NuviaText>
+      <NuviaText variant="label" color={NEO_THEME.colors.grey}>THANK YOU!</NuviaText>
     </View>
   );
 
@@ -40,9 +41,9 @@ export default function OrderSuccessScreen() {
     >
       <View style={styles.content}>
         <View style={styles.card}>
-          <Text style={styles.message}>
+          <NuviaText variant="h3" style={styles.message}>
             Your order has been placed successfully!
-          </Text>
+          </NuviaText>
           
           <View style={styles.qrContainer}>
             {orderId && showQR ? (
@@ -59,17 +60,17 @@ export default function OrderSuccessScreen() {
             )}
           </View>
 
-          <Text style={styles.orderIdLabel}>ORDER ID</Text>
-          <Text style={styles.orderId}>{orderId}</Text>
+          <NuviaText variant="label" color={NEO_THEME.colors.grey}>ORDER ID</NuviaText>
+          <NuviaText variant="h3" style={{ marginBottom: 16 }}>{orderId}</NuviaText>
           
-          <Text style={styles.instruction}>
+          <NuviaText variant="body" color={NEO_THEME.colors.grey} style={{ textAlign: "center" }}>
             Show this QR code at the counter for pickup.
-          </Text>
+          </NuviaText>
         </View>
 
-        <NeoButton onPress={handleContinueShopping} style={styles.button}>
-          <Text style={styles.buttonText}>CONTINUE SHOPPING</Text>
-        </NeoButton>
+        <NuviaButton onPress={handleContinueShopping} variant="primary" style={styles.button}>
+          <NuviaText variant="label" color={NEO_THEME.colors.white}>CONTINUE SHOPPING</NuviaText>
+        </NuviaButton>
       </View>
     </AnimatedHeaderLayout>
   );
@@ -84,72 +85,32 @@ const styles = StyleSheet.create({
   card: {
     width: "100%",
     backgroundColor: NEO_THEME.colors.white,
-    borderWidth: NEO_THEME.borders.width,
+    borderWidth: 2,
     borderColor: NEO_THEME.colors.black,
+    borderRadius: 24,
     padding: 24,
     alignItems: "center",
     marginBottom: 24,
-    ...NEO_THEME.shadows.soft,
+    // Nuvia Shadow
+    shadowColor: NEO_THEME.colors.black,
+    shadowOffset: { width: 6, height: 6 },
+    shadowOpacity: 1,
+    shadowRadius: 0,
+    elevation: 4,
   },
   qrContainer: {
     padding: 16,
     backgroundColor: "white",
     marginBottom: 24,
-    borderWidth: 1, // Inner border for QR aesthetics
-    borderColor: "#eee",
+    borderWidth: 1.5,
+    borderColor: NEO_THEME.colors.black,
+    borderRadius: 12,
   },
   message: {
-    fontSize: 18,
-    fontFamily: NEO_THEME.fonts.bold,
     textAlign: "center",
     marginBottom: 24,
-    color: NEO_THEME.colors.black,
-  },
-  orderIdLabel: {
-    fontSize: 14,
-    fontFamily: NEO_THEME.fonts.bold,
-    color: NEO_THEME.colors.grey,
-    marginBottom: 4,
-    textTransform: "uppercase",
-  },
-  orderId: {
-    fontSize: 16,
-    fontFamily: NEO_THEME.fonts.black,
-    color: NEO_THEME.colors.black,
-    marginBottom: 16,
-  },
-  instruction: {
-    fontSize: 14,
-    fontFamily: NEO_THEME.fonts.regular,
-    textAlign: "center",
-    color: NEO_THEME.colors.grey,
   },
   button: {
     width: "100%",
-  },
-  buttonText: {
-    fontSize: 16,
-    fontFamily: NEO_THEME.fonts.black,
-    color: NEO_THEME.colors.white,
-    textTransform: "uppercase",
-  },
-  smallHeaderTitle: {
-    fontSize: 16,
-    fontFamily: NEO_THEME.fonts.black,
-    color: NEO_THEME.colors.black,
-    textTransform: "uppercase",
-  },
-  largeHeaderTitle: {
-    fontSize: 32,
-    fontFamily: NEO_THEME.fonts.black,
-    color: NEO_THEME.colors.black,
-    textTransform: "uppercase",
-  },
-  largeHeaderSubtitle: {
-    fontSize: 16,
-    fontFamily: NEO_THEME.fonts.bold,
-    color: NEO_THEME.colors.grey,
-    marginTop: 4,
-    textTransform: "uppercase",
   },
 });

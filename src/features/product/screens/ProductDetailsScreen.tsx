@@ -18,8 +18,10 @@ import { useCartStore } from "../../../store/cart-store";
 import { getProduct } from "../../../shared/api/api";
 import { NEO_THEME } from "../../../shared/constants/neobrutalism";
 import TryOnModal from "../../virtual-try-on/components/TryOnModal";
-import { NeoButton } from "../../../shared/components/ui/neo-button";
+import { NuviaButton } from "../../../shared/components/ui/nuvia-button";
 import { StaticHeader } from "../../../shared/components/layout/StaticHeader";
+import { NuviaText } from "../../../components/atoms/nuvia-text";
+import { NuviaTag } from "../../../shared/components/ui/nuvia-tag";
 
 const { width } = Dimensions.get("window");
 
@@ -112,26 +114,23 @@ export default function ProductDetailsScreen() {
         title={product.title.toUpperCase()} 
         onBackPress={() => router.back()} 
         rightElement={
-          <TouchableOpacity onPress={() => router.push("/cart")}>
+          <TouchableOpacity onPress={() => router.push("/cart")} style={{ position: 'relative' }}>
             <Ionicons name="cart" size={24} color={NEO_THEME.colors.black} />
             {items.length > 0 && (
-              <View style={{
-                position: 'absolute',
-                top: -5,
-                right: -5,
-                backgroundColor: NEO_THEME.colors.primary,
-                borderRadius: 10,
-                width: 16,
-                height: 16,
-                justifyContent: 'center',
-                alignItems: 'center',
-                borderWidth: 1,
-                borderColor: 'white'
-              }}>
-                <Text style={{ fontSize: 10, color: 'white', fontWeight: 'bold' }}>
-                  {items.length}
-                </Text>
-              </View>
+              <NuviaTag 
+                label={items.length.toString()} 
+                color={NEO_THEME.colors.primary} 
+                style={{
+                    position: 'absolute',
+                    top: -6,
+                    right: -6,
+                    paddingHorizontal: 4,
+                    minWidth: 18,
+                    height: 18,
+                    borderRadius: 9,
+                }}
+                textStyle={{ fontSize: 10, color: NEO_THEME.colors.white }}
+              />
             )}
           </TouchableOpacity>
         }
@@ -159,10 +158,10 @@ export default function ProductDetailsScreen() {
                   <Ionicons name="camera" size={28} color="#fff" />
                 </View>
                 <View style={styles.tryOnTextContainer}>
-                  <Text style={styles.tryOnButtonTitle}>VIRTUAL TRY-ON</Text>
-                  <Text style={styles.tryOnButtonSubtitle}>
+                  <NuviaText variant="h3">VIRTUAL TRY-ON</NuviaText>
+                  <NuviaText variant="caption">
                     See how it looks on you!
-                  </Text>
+                  </NuviaText>
                 </View>
                 <Ionicons name="chevron-forward" size={24} color={NEO_THEME.colors.black} />
               </TouchableOpacity>
@@ -174,12 +173,15 @@ export default function ProductDetailsScreen() {
             {/* Price and Rating */}
             <View style={styles.headerSection}>
               <View style={styles.priceRow}>
-                <View style={styles.priceTag}>
-                  <Text style={styles.price}>P{product.price.toFixed(2)}</Text>
-                </View>
+                 <NuviaTag 
+                    label={`P${product.price.toFixed(2)}`} 
+                    color={NEO_THEME.colors.secondary} 
+                    style={{ paddingHorizontal: 20, paddingVertical: 10 }}
+                    textStyle={{ fontSize: 24 }}
+                 />
                 <View style={styles.ratingContainer}>
-                  <Ionicons name="star" size={16} color={NEO_THEME.colors.black} />
-                  <Text style={styles.ratingText}>4.5</Text>
+                  <Ionicons name="star" size={16} color={NEO_THEME.colors.secondary} />
+                  <NuviaText variant="label">4.5</NuviaText>
                 </View>
               </View>
             </View>
@@ -232,7 +234,7 @@ export default function ProductDetailsScreen() {
             {/* Size Selection */}
             {isClothing && (
               <View style={styles.section}>
-                <Text style={styles.sectionTitle}>SIZE</Text>
+                <NuviaText variant="h3" style={styles.sectionTitle}>SIZE</NuviaText>
                 <View style={styles.sizeContainer}>
                   {SIZES.map((size) => (
                     <TouchableOpacity
@@ -244,14 +246,14 @@ export default function ProductDetailsScreen() {
                       onPress={() => setSelectedSize(size)}
                       activeOpacity={0.7}
                     >
-                      <Text
+                      <NuviaText
+                        variant="label"
                         style={[
-                          styles.sizeText,
                           selectedSize === size && styles.selectedSizeText,
                         ]}
                       >
                         {size}
-                      </Text>
+                      </NuviaText>
                     </TouchableOpacity>
                   ))}
                 </View>
@@ -260,12 +262,12 @@ export default function ProductDetailsScreen() {
 
             {/* Description */}
             <View style={styles.section}>
-              <Text style={styles.sectionTitle}>DETAILS</Text>
-              <Text style={styles.description}>
+              <NuviaText variant="h3" style={styles.sectionTitle}>DETAILS</NuviaText>
+              <NuviaText variant="body" style={styles.description}>
                 A stylish and comfortable {product.title.toLowerCase()}. Made with
                 high-quality materials for maximum durability and comfort. Perfect
                 for casual wear or special occasions.
-              </Text>
+              </NuviaText>
             </View>
 
             {/* Additional Images */}
@@ -302,7 +304,7 @@ export default function ProductDetailsScreen() {
               <Ionicons name="remove" size={20} color={NEO_THEME.colors.white} />
             </TouchableOpacity>
 
-          <Text style={styles.quantityText}>{quantity}</Text>
+          <NuviaText variant="h3" style={styles.quantityText}>{quantity}</NuviaText>
 
           <TouchableOpacity
             style={[
@@ -313,13 +315,13 @@ export default function ProductDetailsScreen() {
             disabled={quantity >= product.maxQuantity}
             activeOpacity={0.7}
           >
-            <Ionicons name="add" size={20} color={NEO_THEME.colors.white} />
+            <Ionicons name="add" size={20} color={NEO_THEME.colors.black} />
           </TouchableOpacity>
         </View>
 
-        <NeoButton onPress={addToCart} style={styles.buyButton}>
-          BUY NOW
-        </NeoButton>
+        <NuviaButton onPress={addToCart} variant="primary" style={styles.buyButton}>
+          <NuviaText variant="label" color={NEO_THEME.colors.white}>BUY NOW</NuviaText>
+        </NuviaButton>
       </View>
 
       {/* Virtual Try-On Modal */}
@@ -609,26 +611,23 @@ const styles = StyleSheet.create({
     borderColor: NEO_THEME.colors.black,
   },
   quantityButton: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
     backgroundColor: NEO_THEME.colors.white,
     alignItems: "center",
     justifyContent: "center",
-    borderWidth: 1,
+    borderWidth: 1.5,
     borderColor: NEO_THEME.colors.black,
   },
   disabledButton: {
     backgroundColor: NEO_THEME.colors.greyLight,
     borderColor: NEO_THEME.colors.grey,
+    opacity: 0.5,
   },
   quantityText: {
-    fontSize: 16,
-    fontWeight: "900",
-    color: NEO_THEME.colors.black,
-    minWidth: 20,
+    minWidth: 24,
     textAlign: "center",
-    fontFamily: NEO_THEME.fonts.bold,
   },
   buyButton: {
     flex: 1,
