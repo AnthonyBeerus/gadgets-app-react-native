@@ -23,7 +23,11 @@ export const useCheckout = () => {
       userId: string;
       items: { productId: number; quantity: number }[];
     }) => {
-      return apiClient.post<{ id: number; slug: string }>('/orders', data);
+      return apiClient.post<{ id: number; slug: string }>('/api/orders', data, {
+        headers: {
+          Authorization: `Bearer ${session?.access_token}`
+        }
+      });
     },
   });
 
@@ -65,7 +69,8 @@ export const useCheckout = () => {
         userId: session.user.id,
         items: items.map(item => ({
           productId: item.id,
-          quantity: item.quantity
+          quantity: item.quantity,
+          price: item.price
         }))
       });
 
@@ -86,7 +91,7 @@ export const useCheckout = () => {
       await legacyUpdateOrder({
         orderId: newOrder.id,
         updates: {
-          status: 'Completed',
+          // status: 'Completed', // REMOVED: Do not auto-complete. Wait for scan.
           stripe_payment_status: 'succeeded'
         }
       });

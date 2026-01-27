@@ -2,6 +2,7 @@
 import { z } from 'zod';
 import { supabase } from '../../../shared/lib/supabase';
 import { generateOrderSlug } from '../../../shared/utils/utils';
+import { createClient } from '@supabase/supabase-js';
 
 const OrderSchema = z.object({
   totalPrice: z.number().positive(),
@@ -9,9 +10,13 @@ const OrderSchema = z.object({
   userId: z.string().min(1),
   items: z.array(z.object({
     productId: z.number().int().positive(),
-    quantity: z.number().int().positive()
+    quantity: z.number().int().positive(),
+    price: z.number().positive()
   })).min(1)
 });
+
+// Moved to top
+
 
 export async function POST(request: Request) {
   try {
@@ -22,16 +27,23 @@ export async function POST(request: Request) {
       return Response.json({ error: result.error }, { status: 400 });
     }
 
+    const authHeader = request.headers.get('Authorization');
+    const supabaseClient = createClient(
+      process.env.EXPO_PUBLIC_SUPABASE_URL!,
+      process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY!,
+      { global: { headers: { Authorization: authHeader! } } }
+    );
+
     const { totalPrice, paymentIntentId, items, userId } = result.data;
     const slug = generateOrderSlug();
 
     // 1. Create Order
-    const { data: order, error: orderError } = await supabase
+    const { data: order, error: orderError } = await supabaseClient
       .from('order')
       .insert({
-        total_amount: totalPrice,
+        totalPrice: totalPrice, // Real column name
         slug,
-        user_id: userId,
+        user: userId, // Real column name
         status: 'Pending',
         payment_intent_id: paymentIntentId,
         stripe_payment_status: 'pending' // Default
@@ -47,10 +59,11 @@ export async function POST(request: Request) {
     const orderItems = items.map(item => ({
       order: order.id,
       product: item.productId,
-      quantity: item.quantity
+      quantity: item.quantity,
+      price: item.price
     }));
 
-    const { error: itemsError } = await supabase
+    const { error: itemsError } = await supabaseClient
       .from('order_item')
       .insert(orderItems);
 

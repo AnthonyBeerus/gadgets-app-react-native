@@ -6,11 +6,15 @@ import { NEO_THEME } from "../../../shared/constants/neobrutalism";
 import { NuviaButton } from "../../../shared/components/ui/nuvia-button";
 import { NuviaText } from "../../../components/atoms/nuvia-text";
 import { AnimatedHeaderLayout } from "../../../shared/components/layout/AnimatedHeaderLayout";
+import { getMyOrder } from "../../../shared/api/api"; // Added import
 
 export default function OrderSuccessScreen() {
   const router = useRouter();
   const { orderId } = useLocalSearchParams();
   const [showQR, setShowQR] = useState(false);
+  
+  // New: Fetch order to get the fulfillment token
+  const { data: order, isLoading } = getMyOrder(Array.isArray(orderId) ? orderId[0] : orderId);
 
   useEffect(() => {
     // Delay QR rendering to prevent IllegalViewOperationException during transition
@@ -34,6 +38,11 @@ export default function OrderSuccessScreen() {
     </View>
   );
 
+  const qrPayload = order ? JSON.stringify({
+    orderId: order.id,
+    token: order.fulfillment_token
+  }) : null;
+
   return (
     <AnimatedHeaderLayout
       renderSmallTitle={renderSmallTitle}
@@ -46,9 +55,9 @@ export default function OrderSuccessScreen() {
           </NuviaText>
           
           <View style={styles.qrContainer}>
-            {orderId && showQR ? (
+            {order && showQR && qrPayload ? (
               <QRCode
-                value={typeof orderId === 'string' ? orderId : orderId[0]}
+                value={qrPayload}
                 size={200}
                 color="black"
                 backgroundColor="white"
@@ -61,7 +70,7 @@ export default function OrderSuccessScreen() {
           </View>
 
           <NuviaText variant="label" color={NEO_THEME.colors.grey}>ORDER ID</NuviaText>
-          <NuviaText variant="h3" style={{ marginBottom: 16 }}>{orderId}</NuviaText>
+          <NuviaText variant="h3" style={{ marginBottom: 16 }}>{order ? order.id : '...'}</NuviaText>
           
           <NuviaText variant="body" color={NEO_THEME.colors.grey} style={{ textAlign: "center" }}>
             Show this QR code at the counter for pickup.

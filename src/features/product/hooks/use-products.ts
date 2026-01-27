@@ -7,11 +7,18 @@ export const useProducts = (shopId?: number) => {
   return useQuery({
     queryKey: ['products', shopId],
     queryFn: async () => {
-      let path = '/products';
+      let path = '/api/products';
       if (shopId) {
         path += `?shop_id=${shopId}`;
       }
-      return apiClient.get<Tables<'product'>[]>(path);
+      try {
+        const response = await apiClient.get<Tables<'product'>[]>(path);
+        console.log('useProducts response length:', response?.length);
+        return response;
+      } catch (e) {
+        console.error('useProducts error:', e);
+        throw e;
+      }
     },
   });
 };

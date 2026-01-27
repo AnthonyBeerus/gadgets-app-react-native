@@ -2,7 +2,8 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "../lib/supabase";
 import { useAuth } from "../providers/auth-provider";
 import { generateOrderSlug } from "../utils/utils";
-import { Tables, TablesInsert } from "../types/database.types";
+import { Database, Tables, TablesInsert } from '../types/database.types';
+import { apiClient } from "./client";
 
 export const getProductsAndCategories = () => {
   return useQuery({
@@ -26,19 +27,14 @@ export const getProduct = (slug: string) => {
   return useQuery({
     queryKey: ["product", slug],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("product")
-        .select("*")
-        .eq("slug", slug)
-        .single();
-
-      if (error || !data) {
+      try {
+        const data = await apiClient.get<Tables<'product'>>(`/api/products/${slug}`);
+        return data;
+      } catch (error: any) {
         throw new Error(
-          "An error occurred while fetching data: " + error?.message
+          "An error occurred while fetching data: " + (error?.message || error)
         );
       }
-
-      return data;
     },
   });
 };
@@ -225,12 +221,18 @@ export const getMyOrders = () => {
   });
 };
 
+// Helper to generate a secure random token for QR fulfillment verification
+const generateFulfillmentToken = () => {
+  return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+};
+
 export const createOrder = () => {
   const {
     user: { id },
   } = useAuth();
 
   const slug = generateOrderSlug();
+  const fulfillmentToken = generateFulfillmentToken();
 
   const queryClient = useQueryClient();
 
@@ -244,7 +246,8 @@ export const createOrder = () => {
           user: id,
           status: "Pending",
           payment_intent_id: paymentIntentId,
-          stripe_payment_status: paymentStatus || 'pending'
+          stripe_payment_status: paymentStatus || 'pending',
+          fulfillment_token: fulfillmentToken
         })
         .select("*")
         .single();
@@ -260,6 +263,20 @@ export const createOrder = () => {
 
     async onSuccess() {
       await queryClient.invalidateQueries({ queryKey: ["order"] });
+    },
+  });
+};
+
+export const deleteOrder = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    async mutationFn(orderId: number) {
+      const { error } = await supabase.from("order").delete().eq("id", orderId);
+      if (error) throw new Error(error.message);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["orders"] });
     },
   });
 };
@@ -308,15 +325,17 @@ export const createOrderItem = () => {
         orderId: number;
         productId: number;
         quantity: number;
+        price: number;
       }[]
     ) {
       const { data, error } = await supabase
         .from("order_item")
         .insert(
-          insertData.map(({ orderId, quantity, productId }) => ({
+          insertData.map(({ orderId, quantity, productId, price }) => ({
             order: orderId,
             product: productId,
             quantity,
+            price
           }))
         )
         .select("*");
@@ -352,6 +371,25 @@ export const createOrderItem = () => {
   });
 };
 
+export interface OrderWithItems {
+  id: number;
+  created_at: string;
+  status: string;
+  slug: string;
+  totalPrice: number;
+  fulfillment_token: string | null;
+  stripe_payment_status: string | null;
+  order_items: {
+    id: number;
+    quantity: number;
+    products: {
+      title: string;
+      heroImage: string;
+      price: number;
+    } | null;
+  }[];
+}
+
 export const getMyOrder = (slug: string) => {
   const {
     user: { id },
@@ -372,7 +410,7 @@ export const getMyOrder = (slug: string) => {
           "An error occurred while fetching data: " + error.message
         );
 
-      return data;
+      return data as unknown as OrderWithItems;
     },
   });
 };
@@ -1066,15 +1104,16 @@ export const createEventBooking = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    async mutationFn(bookingData: { eventId: number; tickets: number }) {
+    async mutationFn(bookingData: { eventId: number; tickets: number; totalPrice: number }) {
       const { data, error } = await supabase
-        .from("event_tickets")
+        .from("ticket_purchases")
         .insert({
           event_id: bookingData.eventId,
           user_id: id,
           quantity: bookingData.tickets,
           status: "confirmed",
           purchase_date: new Date().toISOString(),
+          total_price: bookingData.totalPrice,
         })
         .select("*")
         .single();

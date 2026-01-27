@@ -9,7 +9,9 @@ export class ApiError extends Error {
   const getBaseUrl = () => {
     // In production, this would come from an environment variable.
     // For TDD purposes, we respect the process.env if set.
-    return process.env.EXPO_PUBLIC_API_URL || (process.env.NODE_ENV === 'test' ? 'https://test-api.com' : undefined);
+    const url = process.env.EXPO_PUBLIC_API_URL || (process.env.NODE_ENV === 'test' ? 'https://test-api.com' : undefined);
+    if (!url) console.warn('EXPO_PUBLIC_API_URL is missing');
+    return url;
   };
   
   const fetchWithErrorHandling = async (path: string, options?: RequestInit) => {
@@ -38,11 +40,16 @@ export class ApiError extends Error {
         let errorMessage = "Request failed";
         let errorCode = undefined;
         try {
-            const errorBody = await response.json();
-            errorMessage = errorBody.message || errorMessage;
-            errorCode = errorBody.code;
-        } catch {
-            // If json parse fails, use default message
+            const errorText = await response.text();
+            try {
+                const errorBody = JSON.parse(errorText);
+                errorMessage = errorBody.message || errorBody.error || errorMessage;
+                errorCode = errorBody.code;
+            } catch {
+                errorMessage = errorText || errorMessage;
+            }
+        } catch (e) {
+            console.warn("[API] Failed to read error body", e);
         }
         
         throw new ApiError(errorMessage, response.status, errorCode);

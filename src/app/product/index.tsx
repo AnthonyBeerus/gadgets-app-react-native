@@ -26,9 +26,14 @@ const ProductsPage = () => {
 
   const products = rawProducts.map(p => ({
       ...p,
-      slug: p.id.toString(),
-      image_url: p.image_url || undefined,
+      image_url: p.heroImage || (p.imagesUrl && p.imagesUrl[0]) || undefined,
+      heroImage: p.heroImage || undefined,
       description: p.description || undefined,
+      imagesUrl: p.imagesUrl || undefined,
+      category: p.category?.toString() || undefined,
+      shop_id: p.shop_id || undefined,
+      available: p.available ?? undefined,
+      maxQuantity: p.maxQuantity || undefined
   }));
 
   if (loading) {
