@@ -42,7 +42,7 @@ export default function ProductDetailsScreen() {
   const [selectedSize, setSelectedSize] = useState("M");
 
   // Get color variants from JSONB column
-  const colorVariants = (product?.color_variants as any[]) || [];
+  const colorVariants = ((product as any)?.color_variants as any[]) || [];
 
   // Set initial color when variants load
   if (colorVariants.length > 0 && !selectedColor) {
@@ -58,11 +58,11 @@ export default function ProductDetailsScreen() {
         <ActivityIndicator size="large" color={NEO_THEME.colors.primary} />
       </View>
     );
-  if (error) return <Text>Error: {error.message}</Text>;
+  if (error) return <View style={styles.loadingContainer}><Text>Error: {(error as Error).message}</Text></View>;
   if (!product) return <Redirect href="/404" />;
 
   const increaseQuantity = () => {
-    if (quantity < product.maxQuantity) {
+    if (quantity < (product.maxQuantity || 0)) {
       setQuantity((prev) => prev + 1);
       incrementItem(product.id);
     } else {
@@ -88,10 +88,10 @@ export default function ProductDetailsScreen() {
     addItem({
       id: product.id,
       title: product.title,
-      heroImage: product.heroImage,
-      price: product.price,
+      heroImage: product.heroImage || "",
+      price: product.price || 0,
       quantity: quantity === 0 ? 1 : quantity,
-      maxQuantity: product.maxQuantity,
+      maxQuantity: product.maxQuantity || 0,
     });
     toast.show("Added to cart", {
       type: "success",
@@ -140,7 +140,7 @@ export default function ProductDetailsScreen() {
         {/* Hero Image */}
         <View style={styles.heroContainer}>
           <Image
-            source={{ uri: currentHeroImage }}
+            source={{ uri: currentHeroImage || 'https://placeholder.com/placeholder.png' }}
             style={styles.heroImage}
             resizeMode="cover"
           />
@@ -174,7 +174,7 @@ export default function ProductDetailsScreen() {
             <View style={styles.headerSection}>
               <View style={styles.priceRow}>
                  <NuviaTag 
-                    label={`P${product.price.toFixed(2)}`} 
+                    label={`P${(product.price || 0).toFixed(2)}`} 
                     color={NEO_THEME.colors.secondary} 
                     style={{ paddingHorizontal: 20, paddingVertical: 10 }}
                     textStyle={{ fontSize: 24 }}
@@ -271,7 +271,7 @@ export default function ProductDetailsScreen() {
             </View>
 
             {/* Additional Images */}
-            {product.imagesUrl.length > 0 && (
+            {product.imagesUrl && product.imagesUrl.length > 0 && (
               <View style={styles.section}>
                 <Text style={styles.sectionTitle}>MORE IMAGES</Text>
                 <FlatList
@@ -309,10 +309,10 @@ export default function ProductDetailsScreen() {
           <TouchableOpacity
             style={[
               styles.quantityButton,
-              quantity >= product.maxQuantity && styles.disabledButton,
+              quantity >= (product.maxQuantity || 0) && styles.disabledButton,
             ]}
             onPress={increaseQuantity}
-            disabled={quantity >= product.maxQuantity}
+            disabled={quantity >= (product.maxQuantity || 0)}
             activeOpacity={0.7}
           >
             <Ionicons name="add" size={20} color={NEO_THEME.colors.black} />

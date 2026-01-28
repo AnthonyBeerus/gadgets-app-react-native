@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { Tables } from "../shared/types/database.types";
+import { Tables } from "../shared/types/database.types"; // Updated types
 import {
   getShops,
   getShopsByMall,

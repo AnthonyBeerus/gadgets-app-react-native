@@ -35,13 +35,7 @@ Sentry.init({
   attachScreenshot: true,
 });
 
-// Conditionally import Stripe only on native platforms
-let StripeProvider: any = ({ children }: { children: React.ReactNode }) => <>{children}</>;
-
-if (Platform.OS !== 'web') {
-  const stripe = require("@stripe/stripe-react-native");
-  StripeProvider = stripe.StripeProvider;
-}
+import { StripeProviderWrapper } from "../shared/providers/stripe";
 
 const AppNavigator = () => {
   const { activeRole, isMerchant } = useAuth();
@@ -179,14 +173,14 @@ function RootLayout() {
           <ToastProvider>
           <AuthProvider>
             <QueryProvider>
-              <StripeProvider
+              <StripeProviderWrapper
                 publishableKey={process.env.EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY!}>
                 <NotificationProvider>
                   <RevenueCatProvider>
                     <AppNavigator />
                   </RevenueCatProvider>
                 </NotificationProvider>
-              </StripeProvider>
+              </StripeProviderWrapper>
             </QueryProvider>
           </AuthProvider>
         </ToastProvider>

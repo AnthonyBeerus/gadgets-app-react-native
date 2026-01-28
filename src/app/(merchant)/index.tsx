@@ -1,15 +1,18 @@
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from "react-native";
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, Modal, Pressable } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { NEO_THEME } from "../../shared/constants/neobrutalism";
 import { useAuth } from "../../shared/providers/auth-provider";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useState } from "react";
+import QRCode from 'react-native-qrcode-svg';
 
 export default function MerchantDashboard() {
   const router = useRouter();
   const { isMerchant, createDevMerchant, user, switchRole } = useAuth();
   const [loading, setLoading] = useState(false);
+  const [showQR, setShowQR] = useState(false);
+  const [qrData, setQrData] = useState<string | null>(null);
 
   const handleCreateDevMerchant = async () => {
     try {
@@ -21,6 +24,18 @@ export default function MerchantDashboard() {
     } finally {
         setLoading(false);
     }
+  };
+
+  const generateHandoverCode = () => {
+      // In a real app, this would fetch the specific order to generate a code for.
+      // For this demo, we generate a mock valid payload for testing.
+      const payload = JSON.stringify({
+          orderId: 1001,
+          token: "fulfillment_secret_123",
+          timestamp: Date.now()
+      });
+      setQrData(payload);
+      setShowQR(true);
   };
 
   if (!isMerchant) {
@@ -95,14 +110,57 @@ export default function MerchantDashboard() {
                 </TouchableOpacity>
                 <TouchableOpacity 
                   style={styles.actionCard}
+                  onPress={generateHandoverCode}
+                >
+                    <MaterialIcons name="qr-code" size={32} color={NEO_THEME.colors.black} />
+                    <Text style={styles.actionText}>Generate Handover Code</Text>
+                </TouchableOpacity>
+            </View>
+
+             <View style={[styles.actionGrid, { marginTop: 16 }]}>
+                 <TouchableOpacity 
+                  style={styles.actionCard}
                   onPress={() => router.push('/scan-order')}
                 >
                     <MaterialIcons name="qr-code-scanner" size={32} color={NEO_THEME.colors.black} />
-                    <Text style={styles.actionText}>Scan Order</Text>
+                    <Text style={styles.actionText}>Scan (Debug)</Text>
                 </TouchableOpacity>
-            </View>
+             </View>
         </View>
       </ScrollView>
+
+      {/* QR Code Modal */}
+      <Modal visible={showQR} animationType="slide" transparent>
+          <View style={styles.modalOverlay}>
+              <View style={styles.modalContent}>
+                  <View style={styles.modalHeader}>
+                      <Text style={styles.modalTitle}>Handover QR</Text>
+                      <TouchableOpacity onPress={() => setShowQR(false)}>
+                          <MaterialIcons name="close" size={24} color={NEO_THEME.colors.black} />
+                      </TouchableOpacity>
+                  </View>
+                  
+                  <View style={styles.qrContainer}>
+                      {qrData && (
+                          <QRCode 
+                              value={qrData}
+                              size={200}
+                              testID="handover-qr-code"
+                          />
+                      )}
+                  </View>
+                  
+                  <Text style={styles.qrInstructions}>
+                      Ask customer to scan to confirm receipt.
+                  </Text>
+
+                  <TouchableOpacity style={styles.closeButton} onPress={() => setShowQR(false)}>
+                      <Text style={styles.closeButtonText}>Done</Text>
+                  </TouchableOpacity>
+              </View>
+          </View>
+      </Modal>
+
     </SafeAreaView>
   );
 }
@@ -258,6 +316,59 @@ const styles = StyleSheet.create({
     fontFamily: NEO_THEME.fonts.bold,
     fontSize: 12,
     color: NEO_THEME.colors.black,
+  },
+  modalOverlay: {
+      flex: 1,
+      backgroundColor: 'rgba(0,0,0,0.5)',
+      justifyContent: 'center',
+      alignItems: 'center',
+      padding: 20
+  },
+  modalContent: {
+      backgroundColor: NEO_THEME.colors.white,
+      width: '100%',
+      maxWidth: 350,
+      borderRadius: NEO_THEME.borders.radius,
+      borderWidth: NEO_THEME.borders.width,
+      borderColor: NEO_THEME.colors.black,
+      padding: 24,
+      alignItems: 'center',
+      shadowColor: NEO_THEME.colors.black,
+      shadowOffset: { width: 8, height: 8 },
+      shadowOpacity: 1,
+      shadowRadius: 0,
+  },
+  modalHeader: {
+      width: '100%',
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginBottom: 24,
+  },
+  modalTitle: {
+      fontSize: 20,
+      fontFamily: NEO_THEME.fonts.bold,
+  },
+  qrContainer: {
+      padding: 16,
+      backgroundColor: 'white',
+      borderRadius: 12,
+      marginBottom: 24,
+  },
+  qrInstructions: {
+      fontFamily: NEO_THEME.fonts.regular,
+      textAlign: 'center',
+      marginBottom: 24,
+      color: NEO_THEME.colors.grey,
+  },
+  closeButton: {
+      backgroundColor: NEO_THEME.colors.black,
+      paddingVertical: 12,
+      paddingHorizontal: 32,
+      borderRadius: NEO_THEME.borders.radius,
+  },
+  closeButtonText: {
+      color: 'white',
+      fontFamily: NEO_THEME.fonts.bold,
   }
-
 });

@@ -107,7 +107,7 @@ export default function MerchantScanScreen() {
         <View style={styles.overlay}>
             <View style={styles.scanBox} />
             <Text style={styles.overlayText}>
-                {verifying ? "VERIFYING..." : "Scan Customer QR Code"}
+                {verifying ? "VERIFYING..." : "Scan Handover Code"}
             </Text>
             {verifying && <ActivityIndicator size="large" color={NEO_THEME.colors.primary} style={{ marginTop: 20 }} />}
         </View>

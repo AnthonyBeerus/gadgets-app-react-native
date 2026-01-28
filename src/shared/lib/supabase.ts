@@ -82,15 +82,15 @@ const createDummyClient = () => {
   } as any;
 };
 
-// Only create real client on native platforms or in browser (client-side)
-export const supabase = 
-  typeof window === 'undefined' && Platform.OS === 'web'
-    ? createDummyClient()
-    : createClient<Database>(supabaseUrl, supabaseAnonKey, {
-        auth: {
-          storage: new LargeSecureStore(),
-          autoRefreshToken: true,
-          persistSession: true,
-          detectSessionInUrl: false,
-        },
-      });
+// Use real client everywhere except maybe in extremely specific build-time contexts.
+// In Expo API routes, we need the real client.
+export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
+    auth: {
+      storage: Platform.OS === 'web' 
+        ? (typeof window !== "undefined" ? AsyncStorage : undefined) 
+        : new LargeSecureStore(),
+      autoRefreshToken: true,
+      persistSession: true,
+      detectSessionInUrl: false,
+    },
+  });

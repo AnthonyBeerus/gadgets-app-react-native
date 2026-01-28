@@ -58,7 +58,7 @@ export const getFeaturedMalls = async () => {
 };
 
 export const getShopsByMall = async (mallId: number) => {
-  const { data, error } = await supabase
+  const { data, error } = await (supabase
     .from("shops")
     .select(
       `
@@ -71,7 +71,7 @@ export const getShopsByMall = async (mallId: number) => {
       ),
       products:product(count)
     `
-    )
+    ) as any)
     .eq("mall_id", mallId)
     .order("is_featured", { ascending: false })
     .order("rating", { ascending: false });
@@ -82,7 +82,7 @@ export const getShopsByMall = async (mallId: number) => {
 
 // Shop Functions
 export const getShops = async () => {
-  const { data, error } = await supabase
+  const { data, error } = await (supabase
     .from("shops")
     .select(
       `
@@ -100,7 +100,7 @@ export const getShops = async () => {
       ),
       products:product(count)
     `
-    )
+    ) as any)
     .order("is_featured", { ascending: false })
     .order("rating", { ascending: false });
 
@@ -109,7 +109,7 @@ export const getShops = async () => {
 };
 
 export const getShopsByCategory = async (categoryId: number) => {
-  const { data, error } = await supabase
+  const { data, error } = await (supabase
     .from("shops")
     .select(
       `
@@ -122,7 +122,7 @@ export const getShopsByCategory = async (categoryId: number) => {
       ),
       products:product(count)
     `
-    )
+    ) as any)
     .eq("category_id", categoryId)
     .order("is_featured", { ascending: false })
     .order("rating", { ascending: false });
@@ -134,7 +134,7 @@ export const getShopsByCategory = async (categoryId: number) => {
 export const getShopById = async (shopId: number) => {
   console.log("getShopById called with ID:", shopId);
 
-  const { data, error } = await supabase
+  const { data, error } = await (supabase
     .from("shops")
     .select(
       `
@@ -153,7 +153,7 @@ export const getShopById = async (shopId: number) => {
         user_id
       )
     `
-    )
+    ) as any)
     .eq("id", shopId)
     .single();
 
@@ -167,7 +167,7 @@ export const getShopById = async (shopId: number) => {
 };
 
 export const getFeaturedShops = async () => {
-  const { data, error } = await supabase
+  const { data, error } = await (supabase
     .from("shops")
     .select(
       `
@@ -179,7 +179,7 @@ export const getFeaturedShops = async () => {
         "imageUrl"
       )
     `
-    )
+    ) as any)
     .eq("is_featured", true)
     .order("rating", { ascending: false })
     .limit(6);
@@ -446,7 +446,7 @@ export const getCategoriesWithShopFeatures = async () => {
 
 // Search Functions
 export const searchShops = async (query: string) => {
-  const { data, error } = await supabase
+  const { data, error } = await (supabase
     .from("shops")
     .select(
       `
@@ -459,7 +459,7 @@ export const searchShops = async (query: string) => {
       ),
       products:product(count)
     `
-    )
+    ) as any)
     .or(`name.ilike.%${query}%, description.ilike.%${query}%`)
     .order("rating", { ascending: false });
 
@@ -474,7 +474,7 @@ export const getShopsWithFeature = async (
     | "has_appointment_booking"
     | "has_virtual_try_on"
 ) => {
-  const { data, error } = await supabase
+  const { data, error } = await (supabase
     .from("shops")
     .select(
       `
@@ -487,7 +487,7 @@ export const getShopsWithFeature = async (
       ),
       products:product(count)
     `
-    )
+    ) as any)
     .eq(feature, true)
     .order("rating", { ascending: false });
 

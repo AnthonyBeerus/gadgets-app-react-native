@@ -1,11 +1,12 @@
-import React from 'react';
+import React from 'react'; // Verified structural types
 import { Redirect, Stack, useLocalSearchParams, router } from 'expo-router';
 import { View, Text, StyleSheet, ScrollView, ActivityIndicator, Alert, TouchableHighlight, TouchableOpacity, FlatList, Image } from "react-native";
 import { format } from 'date-fns';
 import * as Clipboard from 'expo-clipboard';
+import { MaterialIcons } from "@expo/vector-icons";
 import QRCode from 'react-native-qrcode-svg'; // Added import
 
-import { getMyOrder } from '../../../shared/api/api';
+import { getMyOrder, deleteOrder } from '../../../shared/api/api';
 import { NEO_THEME } from '../../../shared/constants/neobrutalism';
 import { StaticHeader } from '../../../shared/components/layout/StaticHeader';
 
@@ -30,10 +31,32 @@ const OrderDetailsScreen = () => {
   const { slug } = useLocalSearchParams<{ slug: string }>();
 
   const { data: order, error, isLoading } = getMyOrder(slug);
+  const { mutate: deleteOrderAction } = deleteOrder();
 
   if (isLoading) return <ActivityIndicator size="large" color={NEO_THEME.colors.primary} style={{ marginTop: 40 }} />;
 
   if (error || !order) return <Text style={styles.errorText}>Error: {error?.message}</Text>;
+
+  const handleDeleteOrder = (orderId: number) => {
+    Alert.alert(
+      "Delete Order",
+      "Are you sure you want to delete this order? This cannot be undone.",
+      [
+        { text: "Cancel", style: "cancel" },
+        { 
+          text: "Delete", 
+          style: "destructive", 
+          onPress: () => {
+             // @ts-ignore
+            deleteOrderAction(orderId, {
+              onSuccess: () => router.back(),
+              onError: (e: any) => Alert.alert("Error", e.message)
+            });
+          }
+        }
+      ]
+    );
+  };
 
   const orderItems = order.order_items.map((orderItem: any) => {
     return {
@@ -47,7 +70,7 @@ const OrderDetailsScreen = () => {
 
   const calculateTotal = () => {
       // Use DB total if available, else sum items
-      if (order.total_amount) return order.total_amount;
+      if (order.totalPrice) return order.totalPrice;
       return orderItems.reduce((acc: number, item: any) => acc + (item.price * item.quantity), 0);
   };
 
@@ -71,7 +94,25 @@ const OrderDetailsScreen = () => {
           <Text style={styles.date}>Placed on {format(new Date(order.created_at), 'MMMM dd, yyyy')} at {format(new Date(order.created_at), 'h:mm a')}</Text>
 
 
-          {/* QR Code Section */}
+          {(order.status === 'pending' || order.status === 'Pending') && (
+             <TouchableOpacity 
+               style={styles.scanButton}
+               onPress={() => router.push('/scan-order')}
+             >
+               <MaterialIcons name="qr-code-scanner" size={24} color="white" />
+               <Text style={styles.scanButtonText}>Scan to Collect</Text>
+             </TouchableOpacity>
+          )}
+
+          <TouchableOpacity 
+              style={[styles.scanButton, { backgroundColor: '#FF4444', marginTop: 10 }]}
+              onPress={() => handleDeleteOrder(order.id)}
+          >
+              <MaterialIcons name="delete" size={24} color="white" />
+              <Text style={styles.scanButtonText}>Delete Order (Dev)</Text>
+          </TouchableOpacity>
+
+          {/* QR Code Section - Only show for completed/verified orders or Dev Mode */}
           <View style={styles.qrContainer}>
             <Text style={{ marginBottom: 10, color: NEO_THEME.colors.grey, fontSize: 12 }}>Tap QR to Copy (Dev Mode)</Text>
             <TouchableOpacity 
@@ -112,7 +153,7 @@ const OrderDetailsScreen = () => {
                   </View>
                   <View style={styles.summaryRow}>
                       <Text style={styles.summaryLabel}>Payment Status</Text>
-                      <Text style={[styles.summaryValue, { color: order.stripe_payment_status === 'succeeded' || 'paid' ? NEO_THEME.colors.primary : 'red' }]}>
+                      <Text style={[styles.summaryValue, { color: order.stripe_payment_status === 'succeeded' || order.stripe_payment_status === 'paid' ? NEO_THEME.colors.primary : 'red' }]}>
                           {order.stripe_payment_status?.toUpperCase() ?? 'PAID'}
                       </Text>
                   </View>
@@ -342,5 +383,26 @@ const styles: { [key: string]: any } = StyleSheet.create({
       fontSize: 18,
       color: NEO_THEME.colors.primary,
       fontFamily: NEO_THEME.fonts.black,
+  },
+  scanButton: {
+    backgroundColor: NEO_THEME.colors.primary,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 16,
+    borderRadius: 12,
+    borderWidth: 2,
+    borderColor: 'black',
+    marginBottom: 24,
+    gap: 8,
+    shadowColor: 'black',
+    shadowOffset: { width: 4, height: 4 },
+    shadowOpacity: 1,
+    shadowRadius: 0,
+  },
+  scanButtonText: {
+    color: 'white',
+    fontFamily: NEO_THEME.fonts.bold,
+    fontSize: 16,
   }
 });

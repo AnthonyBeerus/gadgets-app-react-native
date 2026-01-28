@@ -198,18 +198,19 @@ export const fetchShopsWithProductCount = async () => {
 };
 
 export const getMyOrders = () => {
-  const {
-    user: { id },
-  } = useAuth();
+  const { user } = useAuth();
+  const userId = user?.id;
 
   return useQuery({
-    queryKey: ["orders", id],
+    queryKey: ["orders", userId],
     queryFn: async () => {
+      if (!userId) throw new Error("User not authenticated");
+
       const { data, error } = await supabase
         .from("order")
         .select("*")
         .order("created_at", { ascending: false })
-        .eq("user", id);
+        .eq("user", userId);
 
       if (error)
         throw new Error(
@@ -227,9 +228,8 @@ const generateFulfillmentToken = () => {
 };
 
 export const createOrder = () => {
-  const {
-    user: { id },
-  } = useAuth();
+  const { user } = useAuth();
+  const userId = user?.id;
 
   const slug = generateOrderSlug();
   const fulfillmentToken = generateFulfillmentToken();
@@ -238,12 +238,14 @@ export const createOrder = () => {
 
   return useMutation({
     async mutationFn({ totalPrice, paymentIntentId, paymentStatus }: { totalPrice: number; paymentIntentId?: string; paymentStatus?: string }) {
+      if (!userId) throw new Error("User not authenticated");
+
       const { data, error } = await supabase
         .from("order")
         .insert({
           totalPrice,
           slug,
-          user: id,
+          user: userId,
           status: "Pending",
           payment_intent_id: paymentIntentId,
           stripe_payment_status: paymentStatus || 'pending',
@@ -391,18 +393,19 @@ export interface OrderWithItems {
 }
 
 export const getMyOrder = (slug: string) => {
-  const {
-    user: { id },
-  } = useAuth();
+  const { user } = useAuth();
+  const userId = user?.id;
 
   return useQuery({
     queryKey: ["orders", slug],
     queryFn: async () => {
+      if (!userId) throw new Error("User not authenticated");
+
       const { data, error } = await supabase
         .from("order")
         .select("*, order_items:order_item(*, products:product(*))")
         .eq("slug", slug)
-        .eq("user", id)
+        .eq("user", userId)
         .single();
 
       if (error || !data)
@@ -568,13 +571,14 @@ export const getServiceAvailability = (
 };
 
 export const getMyServiceBookings = () => {
-  const {
-    user: { id },
-  } = useAuth();
+  const { user } = useAuth();
+  const userId = user?.id;
 
   return useQuery({
-    queryKey: ["serviceBookings", id],
+    queryKey: ["serviceBookings", userId],
     queryFn: async () => {
+      if (!userId) throw new Error("User not authenticated");
+
       const { data, error } = await supabase
         .from("service_booking")
         .select(
@@ -594,7 +598,7 @@ export const getMyServiceBookings = () => {
           )
         `
         )
-        .eq("user_id", id)
+        .eq("user_id", userId)
         .order("booking_date", { ascending: false })
         .order("booking_time", { ascending: false });
 
@@ -610,13 +614,14 @@ export const getMyServiceBookings = () => {
 };
 
 export const getServiceBooking = (slug: string) => {
-  const {
-    user: { id },
-  } = useAuth();
+  const { user } = useAuth();
+  const userId = user?.id;
 
   return useQuery({
     queryKey: ["serviceBooking", slug],
     queryFn: async () => {
+      if (!userId) throw new Error("User not authenticated");
+
       const { data, error } = await supabase
         .from("service_booking")
         .select(
@@ -641,7 +646,7 @@ export const getServiceBooking = (slug: string) => {
         `
         )
         .eq("slug", slug)
-        .eq("user_id", id)
+        .eq("user_id", userId)
         .single();
 
       if (error || !data) {
@@ -657,9 +662,8 @@ export const getServiceBooking = (slug: string) => {
 };
 
 export const createServiceBooking = () => {
-  const {
-    user: { id },
-  } = useAuth();
+  const { user } = useAuth();
+  const userId = user?.id;
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -672,6 +676,8 @@ export const createServiceBooking = () => {
       totalAmount: number;
       notes?: string;
     }) {
+      if (!userId) throw new Error("User not authenticated");
+
       // Generate a unique slug for the booking
       const slug = `booking-${Date.now()}-${Math.random()
         .toString(36)
@@ -680,7 +686,7 @@ export const createServiceBooking = () => {
       const { data, error } = await supabase
         .from("service_booking")
         .insert({
-          user_id: id,
+          user_id: userId,
           service_id: bookingData.serviceId,
           provider_id: bookingData.providerId,
           booking_date: bookingData.bookingDate,
@@ -783,9 +789,8 @@ export const cancelServiceBooking = () => {
 };
 
 export const createServiceReview = () => {
-  const {
-    user: { id },
-  } = useAuth();
+  const { user } = useAuth();
+  const userId = user?.id;
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -802,11 +807,13 @@ export const createServiceReview = () => {
       rating: number;
       comment?: string;
     }) {
+      if (!userId) throw new Error("User not authenticated");
+
       const { data, error } = await supabase
         .from("service_review")
         .insert({
           booking_id: bookingId,
-          user_id: id,
+          user_id: userId,
           service_id: serviceId,
           provider_id: providerId,
           rating,
@@ -925,6 +932,7 @@ export const createEvent = () => {
           shop_id: eventData.shopId,
           price: eventData.price || 0,
           total_tickets: eventData.totalTickets || 0,
+          available_tickets: eventData.totalTickets || 0,
           category: 'Culture', // Valid values: Music, Comedy, Art, Business, Culture, Film
         })
         .select("*")
@@ -1098,18 +1106,19 @@ export const deleteService = () => {
 };
 
 export const createEventBooking = () => {
-  const {
-    user: { id },
-  } = useAuth();
+  const { user } = useAuth();
+  const userId = user?.id;
   const queryClient = useQueryClient();
 
   return useMutation({
     async mutationFn(bookingData: { eventId: number; tickets: number; totalPrice: number }) {
+      if (!userId) throw new Error("User not authenticated");
+
       const { data, error } = await supabase
         .from("ticket_purchases")
         .insert({
           event_id: bookingData.eventId,
-          user_id: id,
+          user_id: userId,
           quantity: bookingData.tickets,
           status: "confirmed",
           purchase_date: new Date().toISOString(),
@@ -1246,27 +1255,36 @@ export const deleteChallenge = () => {
 
 
 export const getMyEventBookings = () => {
-  const {
-    user: { id },
-  } = useAuth();
+  const { user } = useAuth();
+  const userId = user?.id;
 
   return useQuery({
     queryKey: ["myEventBookings"],
     queryFn: async () => {
+      if (!userId) throw new Error("User not authenticated");
+
       const { data, error } = await supabase
-        // @ts-ignore - event_booking table may not exist in current schema
-        .from("event_booking")
+        .from("ticket_purchases")
         .select(
           `
           *,
-          event_venue (
-            name,
-            type,
-            location
+          events (
+            id,
+            title,
+            description,
+            event_date,
+            start_time,
+            end_time,
+            image_url,
+            category,
+            event_venue (
+              name,
+              location
+            )
           )
         `
         )
-        .eq("user_id", id)
+        .eq("user_id", userId)
         .order("created_at", { ascending: false });
 
       if (error) {
@@ -1294,7 +1312,7 @@ export const updateEventBookingStatus = () => {
     }) {
       const { data, error } = await supabase
         // @ts-ignore - event_booking table may not exist in current schema
-        .from("event_booking")
+        .from("ticket_purchases")
         .update({ status })
         .eq("id", bookingId)
         .select("*")
@@ -1470,6 +1488,7 @@ export const purchaseTickets = () => {
           quantity,
           total_price: totalPrice,
           status: "confirmed",
+          purchase_date: new Date().toISOString(),
         })
         .select("*")
         .single();

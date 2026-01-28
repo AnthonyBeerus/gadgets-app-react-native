@@ -1,10 +1,5 @@
-export type Json =
-  | string
-  | number
-  | boolean
-  | null
-  | { [key: string]: Json | undefined }
-  | Json[]
+export type Json = any
+
 
 export type Database = {
   // Allows to automatically instantiate createClient with right options
@@ -69,262 +64,364 @@ export type Database = {
           updated_at?: string
           user_id?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "appointments_shop_id_fkey"
-            columns: ["shop_id"]
-            isOneToOne: false
-            referencedRelation: "shops"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "appointments_shop_id_fkey"
-            columns: ["shop_id"]
-            isOneToOne: false
-            referencedRelation: "shops_with_product_count"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
-      categories: {
+      category: {
         Row: {
           created_at: string
+          description: string | null
+          has_appointment_booking: boolean | null
+          has_collection: boolean | null
+          has_delivery: boolean | null
+          has_virtual_try_on: boolean | null
+          icon_name: string | null
           id: number
+          imageUrl: string | null
           name: string
+          products: number[] | null
+          slug: string
         }
         Insert: {
           created_at?: string
+          description?: string | null
+          has_appointment_booking?: boolean | null
+          has_collection?: boolean | null
+          has_delivery?: boolean | null
+          has_virtual_try_on?: boolean | null
+          icon_name?: string | null
           id?: number
+          imageUrl?: string | null
           name: string
+          products?: number[] | null
+          slug: string
         }
         Update: {
           created_at?: string
+          description?: string | null
+          has_appointment_booking?: boolean | null
+          has_collection?: boolean | null
+          has_delivery?: boolean | null
+          has_virtual_try_on?: boolean | null
+          icon_name?: string | null
           id?: number
+          imageUrl?: string | null
           name?: string
+          products?: number[] | null
+          slug?: string
         }
         Relationships: []
       }
       challenges: {
         Row: {
-          created_at: string
-          description: string | null
-          end_date: string
+          ai_allowed: boolean | null
+          brand_logo_url: string | null
+          brand_name: string
+          category: string | null
+          created_at: string | null
+          deadline: string
+          description: string
+          entry_fee: number | null
           id: number
-          reward_points: number
+          image_url: string
+          is_premium: boolean | null
+          participants_count: number | null
+          requirements: string[]
+          reward: string
           shop_id: number | null
-          start_date: string
           status: string
-          title: string
-        }
-        Insert: {
-          created_at?: string
-          description?: string | null
-          end_date: string
-          id?: number
-          reward_points: number
-          shop_id?: number | null
-          start_date: string
-          status: string
-          title: string
-        }
-        Update: {
-          created_at?: string
-          description?: string | null
-          end_date?: string
-          id?: number
-          reward_points?: number
-          shop_id?: number | null
-          start_date?: string
-          status: string
-          title?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "challenges_shop_id_fkey"
-            columns: ["shop_id"]
-            isOneToOne: false
-            referencedRelation: "shops"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "challenges_shop_id_fkey"
-            columns: ["shop_id"]
-            isOneToOne: false
-            referencedRelation: "shops_with_product_count"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      content: {
-        Row: {
-          author: string | null
-          content: string | null
-          created_at: string
-          id: number
-          image_url: string | null
-          shop_id: number | null
           title: string
           type: string
+          updated_at: string | null
+        }
+        Insert: {
+          ai_allowed?: boolean | null
+          brand_logo_url?: string | null
+          brand_name: string
+          category?: string | null
+          created_at?: string | null
+          deadline: string
+          description: string
+          entry_fee?: number | null
+          id?: number
+          image_url: string
+          is_premium?: boolean | null
+          participants_count?: number | null
+          requirements: string[]
+          reward: string
+          shop_id?: number | null
+          status: string
+          title: string
+          type: string
+          updated_at?: string | null
+        }
+        Update: {
+          ai_allowed?: boolean | null
+          brand_logo_url?: string | null
+          brand_name?: string
+          category?: string | null
+          created_at?: string | null
+          deadline?: string
+          description?: string
+          entry_fee?: number | null
+          id?: number
+          image_url?: string
+          is_premium?: boolean | null
+          participants_count?: number | null
+          requirements?: string[]
+          reward?: string
+          shop_id?: number | null
+          status?: string
+          title?: string
+          type?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      delivery_orders: {
+        Row: {
+          actual_delivery_time: string | null
+          collection_time: string | null
+          created_at: string
+          delivery_address: string | null
+          delivery_fee: number | null
+          delivery_person_name: string | null
+          delivery_person_phone: string | null
+          delivery_phone: string
+          delivery_type: string
+          estimated_delivery_time: string | null
+          id: number
+          order_id: number | null
+          shop_id: number | null
+          status: string | null
+          tracking_number: string | null
           updated_at: string
         }
         Insert: {
-          author?: string | null
-          content?: string | null
+          actual_delivery_time?: string | null
+          collection_time?: string | null
           created_at?: string
+          delivery_address?: string | null
+          delivery_fee?: number | null
+          delivery_person_name?: string | null
+          delivery_person_phone?: string | null
+          delivery_phone: string
+          delivery_type: string
+          estimated_delivery_time?: string | null
           id?: number
-          image_url?: string | null
+          order_id?: number | null
           shop_id?: number | null
-          title: string
-          type: string
+          status?: string | null
+          tracking_number?: string | null
           updated_at?: string
         }
         Update: {
-          author?: string | null
-          content?: string | null
+          actual_delivery_time?: string | null
+          collection_time?: string | null
           created_at?: string
+          delivery_address?: string | null
+          delivery_fee?: number | null
+          delivery_person_name?: string | null
+          delivery_person_phone?: string | null
+          delivery_phone?: string
+          delivery_type?: string
+          estimated_delivery_time?: string | null
           id?: number
-          image_url?: string | null
+          order_id?: number | null
           shop_id?: number | null
-          title?: string
-          type?: string
+          status?: string | null
+          tracking_number?: string | null
           updated_at?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "content_shop_id_fkey"
-            columns: ["shop_id"]
-            isOneToOne: false
-            referencedRelation: "shops"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "content_shop_id_fkey"
-            columns: ["shop_id"]
-            isOneToOne: false
-            referencedRelation: "shops_with_product_count"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       events: {
         Row: {
+          attendees: number | null
+          available_tickets: number
           category: string
           created_at: string | null
-          date: string
-          description: string | null
+          description: string
+          end_time: string | null
+          event_date: string
           id: number
-          image_url: string | null
-          location: string | null
-          mall_id: number | null
+          image_url: string
+          is_featured: boolean | null
+          location: string
+          price: number
+          shop_id: number | null
+          start_time: string | null
+          status: string
+          time: string
           title: string
+          total_tickets: number
+          updated_at: string | null
         }
         Insert: {
+          available_tickets: number
           category: string
           created_at?: string | null
-          date: string
-          description?: string | null
+          description: string
+          end_time?: string
+          event_date: string
           id?: number
-          image_url?: string | null
-          location?: string | null
-          mall_id?: number | null
+          image_url: string
+          is_featured?: boolean | null
+          location: string
+          price: number
+          shop_id?: number | null
+          start_time?: string
+          status?: string
+          time?: string
           title: string
+          total_tickets: number
+          updated_at?: string | null
         }
         Update: {
+          attendees?: number | null
+          available_tickets?: number
           category?: string
           created_at?: string | null
-          date?: string
-          description?: string | null
+          description?: string
+          end_time?: string
+          event_date?: string
           id?: number
-          image_url?: string | null
-          location?: string | null
-          mall_id?: number | null
+          image_url?: string
+          is_featured?: boolean | null
+          location?: string
+          price?: number
+          shop_id?: number | null
+          start_time?: string
+          status?: string
+          time?: string
           title?: string
+          total_tickets?: number
+          updated_at?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "events_mall_id_fkey"
-            columns: ["mall_id"]
-            isOneToOne: false
-            referencedRelation: "malls"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
+      }
+      event_venue: {
+        Row: {
+          email: string | null
+          id: number
+          is_available: boolean | null
+          location: string
+          name: string
+          phone: string | null
+          type: string | null
+        }
+        Insert: {
+          email?: string | null
+          id?: number
+          is_available?: boolean | null
+          location: string
+          name: string
+          phone?: string | null
+          type?: string | null
+        }
+        Update: {
+          email?: string | null
+          id?: number
+          is_available?: boolean | null
+          location?: string
+          name?: string
+          phone?: string | null
+          type?: string | null
+        }
+        Relationships: []
       }
       malls: {
         Row: {
-          address: string
-          created_at: string
+          contact_email: string | null
+          contact_phone: string | null
+          created_at: string | null
           description: string | null
+          hero_image: string | null
           id: number
           image_url: string | null
-          latitude: number
-          longitude: number
+          is_featured: boolean | null
+          is_physical: boolean | null
+          latitude: number | null
+          location: string | null
+          longitude: number | null
           name: string
-          opening_hours: string | null
-          phone: string | null
+          opening_hours: Json | null
           slug: string
+          updated_at: string | null
         }
         Insert: {
-          address: string
-          created_at?: string
+          contact_email?: string | null
+          contact_phone?: string | null
+          created_at?: string | null
           description?: string | null
+          hero_image?: string | null
           id?: number
           image_url?: string | null
-          latitude: number
-          longitude: number
+          is_featured?: boolean | null
+          is_physical?: boolean | null
+          latitude?: number | null
+          location?: string | null
+          longitude?: number | null
           name: string
-          opening_hours?: string | null
-          phone?: string | null
+          opening_hours?: Json | null
           slug: string
+          updated_at?: string | null
         }
         Update: {
-          address?: string
-          created_at?: string
+          contact_email?: string | null
+          contact_phone?: string | null
+          created_at?: string | null
           description?: string | null
+          hero_image?: string | null
           id?: number
           image_url?: string | null
-          latitude?: number
-          longitude?: number
+          is_featured?: boolean | null
+          is_physical?: boolean | null
+          latitude?: number | null
+          location?: string | null
+          longitude?: number | null
           name?: string
-          opening_hours?: string | null
-          phone?: string | null
+          opening_hours?: Json | null
           slug?: string
+          updated_at?: string | null
         }
         Relationships: []
       }
       order: {
         Row: {
           created_at: string
-          fulfillment_status: string | null
+          description: string | null
           fulfillment_token: string | null
           id: number
+          slug: string
           status: string
           stripe_payment_intent_id: string | null
-          stripe_payment_status: string | null
-          total_amount: number | null
-          user_id: string
+          stripe_session_id: string | null
+          totalPrice: number
+          user: string
         }
         Insert: {
           created_at?: string
-          fulfillment_status?: string | null
+          description?: string | null
           fulfillment_token?: string | null
           id?: number
-          status?: string
+          slug: string
+          status: string
           stripe_payment_intent_id?: string | null
-          stripe_payment_status?: string | null
-          total_amount?: number | null
-          user_id: string
+          stripe_session_id?: string | null
+          totalPrice: number
+          user: string
         }
         Update: {
           created_at?: string
-          fulfillment_status?: string | null
+          description?: string | null
           fulfillment_token?: string | null
           id?: number
+          slug?: string
           status?: string
           stripe_payment_intent_id?: string | null
-          stripe_payment_status?: string | null
-          total_amount?: number | null
-          user_id?: string
+          stripe_session_id?: string | null
+          totalPrice?: number
+          user?: string
         }
         Relationships: []
       }
@@ -332,101 +429,151 @@ export type Database = {
         Row: {
           created_at: string
           id: number
-          order_id: number
-          price: number
-          product_id: number
+          order: number
+          product: number
           quantity: number
         }
         Insert: {
           created_at?: string
           id?: number
-          order_id: number
-          price: number
-          product_id: number
+          order: number
+          product: number
           quantity: number
         }
         Update: {
           created_at?: string
           id?: number
-          order_id?: number
-          price?: number
-          product_id?: number
+          order?: number
+          product?: number
           quantity?: number
         }
-        Relationships: [
-          {
-            foreignKeyName: "order_item_order_id_fkey"
-            columns: ["order_id"]
-            isOneToOne: false
-            referencedRelation: "order"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "order_item_product_id_fkey"
-            columns: ["product_id"]
-            isOneToOne: false
-            referencedRelation: "product"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       product: {
         Row: {
-          category_id: number
+          brand: string | null
+          category: number
+          colors: string[] | null
           created_at: string
           description: string | null
+          dimensions: Json | null
+          heroImage: string
+          id: number
+          imagesUrl: string[]
+          is_available: boolean | null
+          is_featured: boolean | null
+          maxQuantity: number
+          price: number
+          rating: number | null
+          reviews_count: number | null
+          shop_id: number | null
+          sku: string | null
+          slug: string
+          title: string
+          variants: Json | null
+          weight: number | null
+        }
+        Insert: {
+          brand?: string | null
+          category: number
+          colors?: string[] | null
+          created_at?: string
+          description?: string | null
+          dimensions?: Json | null
+          heroImage: string
+          id?: number
+          imagesUrl: string[]
+          is_available?: boolean | null
+          is_featured?: boolean | null
+          maxQuantity: number
+          price: number
+          rating?: number | null
+          reviews_count?: number | null
+          shop_id?: number | null
+          sku?: string | null
+          slug: string
+          title: string
+          variants?: Json | null
+          weight?: number | null
+        }
+        Update: {
+          brand?: string | null
+          category?: number
+          colors?: string[] | null
+          created_at?: string
+          description?: string | null
+          dimensions?: Json | null
+          heroImage?: string
+          id?: number
+          imagesUrl?: string[]
+          is_available?: boolean | null
+          is_featured?: boolean | null
+          maxQuantity?: number
+          price?: number
+          rating?: number | null
+          reviews_count?: number | null
+          shop_id?: number | null
+          sku?: string | null
+          slug?: string
+          title?: string
+          variants?: Json | null
+          weight?: number | null
+        }
+        Relationships: []
+      }
+      service: {
+        Row: {
+          category_id: number
+          created_at: string
+          description: string
+          duration_minutes: number
           id: number
           image_url: string | null
+          is_active: boolean | null
+          max_advance_booking_days: number | null
           name: string
           price: number
-          shop_id: number
-          stock: number
+          provider_id: number | null
+          rating: number | null
+          slug: string
+          staff_id: string | null
+          total_reviews: number | null
         }
         Insert: {
           category_id: number
           created_at?: string
-          description?: string | null
+          description: string
+          duration_minutes: number
           id?: number
           image_url?: string | null
+          is_active?: boolean | null
+          max_advance_booking_days?: number | null
           name: string
           price: number
-          shop_id: number
-          stock?: number
+          provider_id?: number | null
+          rating?: number | null
+          slug: string
+          staff_id?: string | null
+          total_reviews?: number | null
         }
         Update: {
           category_id?: number
           created_at?: string
-          description?: string | null
+          description?: string
+          duration_minutes?: number
           id?: number
           image_url?: string | null
+          is_active?: boolean | null
+          max_advance_booking_days?: number | null
           name?: string
           price?: number
-          shop_id?: number
-          stock?: number
+          provider_id?: number | null
+          rating?: number | null
+          slug?: string
+          staff_id?: string | null
+          total_reviews?: number | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "product_category_id_fkey"
-            columns: ["category_id"]
-            isOneToOne: false
-            referencedRelation: "categories"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "product_shop_id_fkey"
-            columns: ["shop_id"]
-            isOneToOne: false
-            referencedRelation: "shops"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "product_shop_id_fkey"
-            columns: ["shop_id"]
-            isOneToOne: false
-            referencedRelation: "shops_with_product_count"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       service_availability: {
         Row: {
@@ -435,7 +582,8 @@ export type Database = {
           end_time: string
           id: number
           is_available: boolean | null
-          service_id: number
+          provider_id: number
+          service_id: number | null
           start_time: string
         }
         Insert: {
@@ -444,7 +592,8 @@ export type Database = {
           end_time: string
           id?: number
           is_available?: boolean | null
-          service_id: number
+          provider_id: number
+          service_id?: number | null
           start_time: string
         }
         Update: {
@@ -453,445 +602,407 @@ export type Database = {
           end_time?: string
           id?: number
           is_available?: boolean | null
-          service_id?: number
+          provider_id?: number
+          service_id?: number | null
           start_time?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "service_availability_service_id_fkey"
-            columns: ["service_id"]
-            isOneToOne: false
-            referencedRelation: "services"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       service_booking: {
         Row: {
           booking_date: string
           booking_time: string
+          cancellation_reason: string | null
+          cancelled_at: string | null
           created_at: string
-          customer_name: string
-          customer_notes: string | null
           duration_minutes: number
           id: number
+          notes: string | null
+          payment_status: string | null
+          provider_id: number
           service_id: number
-          status: string
-          total_price: number
+          slug: string
+          status: string | null
+          total_amount: number
           user_id: string
         }
         Insert: {
           booking_date: string
           booking_time: string
+          cancellation_reason?: string | null
+          cancelled_at?: string | null
           created_at?: string
-          customer_name: string
-          customer_notes?: string | null
           duration_minutes: number
           id?: number
+          notes?: string | null
+          payment_status?: string | null
+          provider_id: number
           service_id: number
-          status?: string
-          total_price: number
+          slug: string
+          status?: string | null
+          total_amount: number
           user_id: string
         }
         Update: {
           booking_date?: string
           booking_time?: string
+          cancellation_reason?: string | null
+          cancelled_at?: string | null
           created_at?: string
-          customer_name?: string
-          customer_notes?: string | null
           duration_minutes?: number
           id?: number
+          notes?: string | null
+          payment_status?: string | null
+          provider_id?: number
           service_id?: number
-          status?: string
-          total_price?: number
+          slug?: string
+          status?: string | null
+          total_amount?: number
           user_id?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "service_booking_service_id_fkey"
-            columns: ["service_id"]
-            isOneToOne: false
-            referencedRelation: "services"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       service_provider: {
         Row: {
-          bio: string | null
           created_at: string
+          description: string | null
+          email: string
           id: number
+          is_active: boolean | null
+          is_verified: boolean | null
           name: string
           phone: string | null
-          shop_id: number
-          specialties: string[] | null
-          user_id: string | null
+          rating: number | null
+          shop_id: number | null
+          total_reviews: number | null
         }
         Insert: {
-          bio?: string | null
           created_at?: string
+          description?: string | null
+          email: string
           id?: number
+          is_active?: boolean | null
+          is_verified?: boolean | null
           name: string
           phone?: string | null
-          shop_id: number
-          specialties?: string[] | null
-          user_id?: string | null
+          rating?: number | null
+          shop_id?: number | null
+          total_reviews?: number | null
         }
         Update: {
-          bio?: string | null
           created_at?: string
+          description?: string | null
+          email?: string
           id?: number
+          is_active?: boolean | null
+          is_verified?: boolean | null
           name?: string
           phone?: string | null
-          shop_id?: number
-          specialties?: string[] | null
-          user_id?: string | null
+          rating?: number | null
+          shop_id?: number | null
+          total_reviews?: number | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "service_provider_shop_id_fkey"
-            columns: ["shop_id"]
-            isOneToOne: false
-            referencedRelation: "shops"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "service_provider_shop_id_fkey"
-            columns: ["shop_id"]
-            isOneToOne: false
-            referencedRelation: "shops_with_product_count"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       service_review: {
         Row: {
+          booking_id: number
           comment: string | null
           created_at: string
           id: number
+          is_verified: boolean | null
+          provider_id: number
           rating: number
           service_id: number
           user_id: string
         }
         Insert: {
+          booking_id: number
           comment?: string | null
           created_at?: string
           id?: number
+          is_verified?: boolean | null
+          provider_id: number
           rating: number
           service_id: number
           user_id: string
         }
         Update: {
+          booking_id?: number
           comment?: string | null
           created_at?: string
           id?: number
+          is_verified?: boolean | null
+          provider_id?: number
           rating?: number
           service_id?: number
           user_id?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "service_review_service_id_fkey"
-            columns: ["service_id"]
-            isOneToOne: false
-            referencedRelation: "services"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      services: {
-        Row: {
-          created_at: string
-          description: string | null
-          duration_minutes: number
-          id: number
-          image_url: string | null
-          name: string
-          price: number
-          provider_id: number | null
-          shop_id: number
-        }
-        Insert: {
-          created_at?: string
-          description?: string | null
-          duration_minutes: number
-          id?: number
-          image_url?: string | null
-          name: string
-          price: number
-          provider_id?: number | null
-          shop_id: number
-        }
-        Update: {
-          created_at?: string
-          description?: string | null
-          duration_minutes?: number
-          id?: number
-          image_url?: string | null
-          name?: string
-          price?: number
-          provider_id?: number | null
-          shop_id?: number
-        }
-        Relationships: [
-          {
-            foreignKeyName: "services_provider_id_fkey"
-            columns: ["provider_id"]
-            isOneToOne: false
-            referencedRelation: "service_provider"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "services_shop_id_fkey"
-            columns: ["shop_id"]
-            isOneToOne: false
-            referencedRelation: "shops"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "services_shop_id_fkey"
-            columns: ["shop_id"]
-            isOneToOne: false
-            referencedRelation: "shops_with_product_count"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      shop_features: {
-        Row: {
-          feature_key: string
-          feature_value: string
-          id: number
-          shop_id: number
-        }
-        Insert: {
-          feature_key: string
-          feature_value: string
-          id?: number
-          shop_id: number
-        }
-        Update: {
-          feature_key?: string
-          feature_value?: string
-          id?: number
-          shop_id?: number
-        }
-        Relationships: [
-          {
-            foreignKeyName: "shop_features_shop_id_fkey"
-            columns: ["shop_id"]
-            isOneToOne: false
-            referencedRelation: "shops"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "shop_features_shop_id_fkey"
-            columns: ["shop_id"]
-            isOneToOne: false
-            referencedRelation: "shops_with_product_count"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       shop_reviews: {
         Row: {
-          comment: string | null
           created_at: string
           id: number
+          is_verified_purchase: boolean | null
           order_id: number | null
           rating: number
-          shop_id: number
-          user_id: string
+          review_text: string | null
+          shop_id: number | null
+          updated_at: string
+          user_id: string | null
         }
         Insert: {
-          comment?: string | null
           created_at?: string
           id?: number
+          is_verified_purchase?: boolean | null
           order_id?: number | null
           rating: number
-          shop_id: number
-          user_id: string
+          review_text?: string | null
+          shop_id?: number | null
+          updated_at?: string
+          user_id?: string | null
         }
         Update: {
-          comment?: string | null
           created_at?: string
           id?: number
+          is_verified_purchase?: boolean | null
           order_id?: number | null
           rating?: number
-          shop_id?: number
-          user_id?: string
+          review_text?: string | null
+          shop_id?: number | null
+          updated_at?: string
+          user_id?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "shop_reviews_order_id_fkey"
-            columns: ["order_id"]
-            isOneToOne: false
-            referencedRelation: "order"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "shop_reviews_shop_id_fkey"
-            columns: ["shop_id"]
-            isOneToOne: false
-            referencedRelation: "shops"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "shop_reviews_shop_id_fkey"
-            columns: ["shop_id"]
-            isOneToOne: false
-            referencedRelation: "shops_with_product_count"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
-      shops: {
+      service_category: {
         Row: {
-          category: string
           created_at: string
-          description: string | null
-          floor: number | null
           id: number
-          image_url: string | null
-          mall_id: number | null
           name: string
-          opening_hours: string | null
-          phone: string | null
         }
         Insert: {
-          category: string
           created_at?: string
-          description?: string | null
-          floor?: number | null
           id?: number
-          image_url?: string | null
-          mall_id?: number | null
           name: string
-          opening_hours?: string | null
-          phone?: string | null
         }
         Update: {
-          category?: string
           created_at?: string
-          description?: string | null
-          floor?: number | null
           id?: number
-          image_url?: string | null
-          mall_id?: number | null
           name?: string
-          opening_hours?: string | null
-          phone?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "shops_mall_id_fkey"
-            columns: ["mall_id"]
-            isOneToOne: false
-            referencedRelation: "malls"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       ticket_purchases: {
         Row: {
           created_at: string
-          event_id: number
+          event_id: number | null
           id: number
+          payment_intent_id: string | null
+          purchase_date: string
           quantity: number
+          status: string | null
           total_price: number
-          user_id: string
+          user_id: string | null
         }
         Insert: {
           created_at?: string
-          event_id: number
+          event_id?: number | null
           id?: number
+          payment_intent_id?: string | null
+          purchase_date: string
           quantity: number
+          status?: string | null
           total_price: number
-          user_id: string
+          user_id?: string | null
         }
         Update: {
           created_at?: string
-          event_id?: number
+          event_id?: number | null
           id?: number
+          payment_intent_id?: string | null
+          purchase_date?: string
           quantity?: number
+          status?: string | null
           total_price?: number
-          user_id?: string
+          user_id?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "ticket_purchases_event_id_fkey"
-            columns: ["event_id"]
-            isOneToOne: false
-            referencedRelation: "events"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
+      }
+      shops: {
+        Row: {
+          category_id: number | null
+          created_at: string
+          delivery_fee: number | null
+          description: string | null
+          email: string | null
+          estimated_delivery_time: string | null
+          facebook_handle: string | null
+          has_appointment_booking: boolean | null
+          has_collection: boolean | null
+          has_delivery: boolean | null
+          has_online_ordering: boolean | null
+          has_virtual_try_on: boolean | null
+          id: number
+          image_url: string | null
+          instagram_handle: string | null
+          is_active: boolean | null
+          is_featured: boolean | null
+          location: string
+          logo_url: string | null
+          minimum_order_amount: number | null
+          name: string
+          opening_hours: Json | null
+          owner_id: string | null
+          phone: string | null
+          rating: number | null
+          total_reviews: number | null
+          updated_at: string
+          website_url: string | null
+        }
+        Insert: {
+          category_id?: number | null
+          created_at?: string
+          delivery_fee?: number | null
+          description?: string | null
+          email?: string | null
+          estimated_delivery_time?: string | null
+          facebook_handle?: string | null
+          has_appointment_booking?: boolean | null
+          has_collection?: boolean | null
+          has_delivery?: boolean | null
+          has_online_ordering?: boolean | null
+          has_virtual_try_on?: boolean | null
+          id?: number
+          image_url?: string | null
+          instagram_handle?: string | null
+          is_active?: boolean | null
+          is_featured?: boolean | null
+          location: string
+          logo_url?: string | null
+          minimum_order_amount?: number | null
+          name: string
+          opening_hours?: Json | null
+          owner_id?: string | null
+          phone?: string | null
+          rating?: number | null
+          total_reviews?: number | null
+          updated_at?: string
+          website_url?: string | null
+        }
+        Update: {
+          category_id?: number | null
+          created_at?: string
+          delivery_fee?: number | null
+          description?: string | null
+          email?: string | null
+          estimated_delivery_time?: string | null
+          facebook_handle?: string | null
+          has_appointment_booking?: boolean | null
+          has_collection?: boolean | null
+          has_delivery?: boolean | null
+          has_online_ordering?: boolean | null
+          has_virtual_try_on?: boolean | null
+          id?: number
+          image_url?: string | null
+          instagram_handle?: string | null
+          is_active?: boolean | null
+          is_featured?: boolean | null
+          location?: string
+          logo_url?: string | null
+          minimum_order_amount?: number | null
+          name?: string
+          opening_hours?: Json | null
+          owner_id?: string | null
+          phone?: string | null
+          rating?: number | null
+          total_reviews?: number | null
+          updated_at?: string
+          website_url?: string | null
+        }
+        Relationships: []
       }
       users: {
         Row: {
-          avatar_url: string | null
-          created_at: string
+          avatar_url: string
+          bio: string | null
+          created_at: string | null
           email: string
+          full_name: string | null
           id: string
-          loyalty_points: number | null
-          name: string | null
-          phone: string | null
-          preferences: Json | null
+          phone_number: string | null
+          revenue_cat_id: string | null
           role: string | null
+          stripe_account_id: string | null
+          stripe_customer_id: string | null
+          type: string | null
         }
         Insert: {
-          avatar_url?: string | null
-          created_at?: string
+          avatar_url: string
+          bio?: string | null
+          created_at?: string | null
           email: string
+          full_name?: string | null
           id: string
-          loyalty_points?: number | null
-          name?: string | null
-          phone?: string | null
-          preferences?: Json | null
+          phone_number?: string | null
+          revenue_cat_id?: string | null
           role?: string | null
+          stripe_account_id?: string | null
+          stripe_customer_id?: string | null
+          type?: string | null
         }
         Update: {
-          avatar_url?: string | null
-          created_at?: string
+          avatar_url?: string
+          bio?: string | null
+          created_at?: string | null
           email?: string
+          full_name?: string | null
           id?: string
-          loyalty_points?: number | null
-          name?: string | null
-          phone?: string | null
-          preferences?: Json | null
+          phone_number?: string | null
+          revenue_cat_id?: string | null
           role?: string | null
+          stripe_account_id?: string | null
+          stripe_customer_id?: string | null
+          type?: string | null
         }
         Relationships: []
       }
     }
     Views: {
-      shops_with_product_count: {
-        Row: {
-          category: string | null
-          created_at: string | null
-          description: string | null
-          floor: number | null
-          id: number | null
-          image_url: string | null
-          mall_id: number | null
-          name: string | null
-          opening_hours: string | null
-          phone: string | null
-          product_count: number | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "shops_mall_id_fkey"
-            columns: ["mall_id"]
-            isOneToOne: false
-            referencedRelation: "malls"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
+      [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      create_dev_merchant: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
+      }
+      decrement_product_quantity: {
+        Args: {
+          product_id: number
+          quantity: number
+        }
+        Returns: undefined
+      }
+      handle_new_user: {
+        Args: Record<PropertyKey, never>
+        Returns: unknown
+      }
+      increment_tickets_sold: {
+        Args: {
+          event_id: number
+          quantity: number
+        }
+        Returns: undefined
+      }
+      update_shop_rating: {
+        Args: Record<PropertyKey, never>
+        Returns: unknown
+      }
+      update_updated_at_column: {
+        Args: Record<PropertyKey, never>
+        Returns: unknown
+      }
     }
     Enums: {
       [_ in never]: never
@@ -902,101 +1013,9 @@ export type Database = {
   }
 }
 
-type PublicSchema = Database[Extract<keyof Database, "public">]
+// Radical simplification to break TS2589 recursion
+export type Tables<T extends keyof Database['public']['Tables']> = Database['public']['Tables'][T]['Row'];
+export type TablesInsert<T extends keyof Database['public']['Tables']> = Database['public']['Tables'][T]['Insert'];
+export type TablesUpdate<T extends keyof Database['public']['Tables']> = Database['public']['Tables'][T]['Update'];
+export type Enums<T extends keyof Database['public']['Enums']> = Database['public']['Enums'][T];
 
-type SchemaName = keyof Omit<Database, "__InternalSupabase">
-
-export type Tables<
-  PublicTableNameOrOptions extends
-    | keyof (PublicSchema["Tables"] & PublicSchema["Views"])
-    | { schema: SchemaName },
-  TableName extends PublicTableNameOrOptions extends { schema: SchemaName }
-    ? keyof (Database[PublicTableNameOrOptions["schema"]]["Tables"] &
-        Database[PublicTableNameOrOptions["schema"]]["Views"])
-    : never = never,
-> = PublicTableNameOrOptions extends { schema: SchemaName }
-  ? (Database[PublicTableNameOrOptions["schema"]]["Tables"] &
-      Database[PublicTableNameOrOptions["schema"]]["Views"])[TableName] extends {
-      Row: infer R
-    }
-    ? R
-    : never
-  : PublicTableNameOrOptions extends keyof (PublicSchema["Tables"] &
-        PublicSchema["Views"])
-    ? (PublicSchema["Tables"] &
-        PublicSchema["Views"])[PublicTableNameOrOptions] extends {
-        Row: infer R
-      }
-      ? R
-      : never
-    : never
-
-export type TablesInsert<
-  PublicTableNameOrOptions extends
-    | keyof PublicSchema["Tables"]
-    | { schema: SchemaName },
-  TableName extends PublicTableNameOrOptions extends { schema: SchemaName }
-    ? keyof Database[PublicTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
-> = PublicTableNameOrOptions extends { schema: SchemaName }
-  ? Database[PublicTableNameOrOptions["schema"]]["Tables"][TableName] extends {
-      Insert: infer I
-    }
-    ? I
-    : never
-  : PublicTableNameOrOptions extends keyof PublicSchema["Tables"]
-    ? PublicSchema["Tables"][PublicTableNameOrOptions] extends {
-        Insert: infer I
-      }
-      ? I
-      : never
-    : never
-
-export type TablesUpdate<
-  PublicTableNameOrOptions extends
-    | keyof PublicSchema["Tables"]
-    | { schema: SchemaName },
-  TableName extends PublicTableNameOrOptions extends { schema: SchemaName }
-    ? keyof Database[PublicTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
-> = PublicTableNameOrOptions extends { schema: SchemaName }
-  ? Database[PublicTableNameOrOptions["schema"]]["Tables"][TableName] extends {
-      Update: infer U
-    }
-    ? U
-    : never
-  : PublicTableNameOrOptions extends keyof PublicSchema["Tables"]
-    ? PublicSchema["Tables"][PublicTableNameOrOptions] extends {
-        Update: infer U
-      }
-      ? U
-      : never
-    : never
-
-export type Enums<
-  PublicEnumNameOrOptions extends
-    | keyof PublicSchema["Enums"]
-    | { schema: SchemaName },
-  EnumName extends PublicEnumNameOrOptions extends { schema: SchemaName }
-    ? keyof Database[PublicEnumNameOrOptions["schema"]]["Enums"]
-    : never = never,
-> = PublicEnumNameOrOptions extends { schema: SchemaName }
-  ? Database[PublicEnumNameOrOptions["schema"]]["Enums"][EnumName]
-  : PublicEnumNameOrOptions extends keyof PublicSchema["Enums"]
-    ? PublicSchema["Enums"][PublicEnumNameOrOptions]
-    : never
-
-export type CompositeTypes<
-  PublicCompositeTypeNameOrOptions extends
-    | keyof PublicSchema["CompositeTypes"]
-    | { schema: SchemaName },
-  CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
-    schema: SchemaName
-  }
-    ? keyof Database[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
-    : never = never,
-> = PublicCompositeTypeNameOrOptions extends { schema: SchemaName }
-  ? Database[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
-  : PublicCompositeTypeNameOrOptions extends keyof PublicSchema["CompositeTypes"]
-    ? PublicSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
-    : never

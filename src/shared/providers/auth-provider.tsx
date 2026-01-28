@@ -10,10 +10,24 @@ import { supabase } from '../lib/supabase';
 
 type UserRole = 'shopper' | 'merchant';
 
+type User = {
+  id: string;
+  email: string;
+  avatar_url: string;
+  role: 'USER' | 'ADMIN' | 'MERCHANT';
+  full_name: string | null;
+  bio: string | null;
+  phone_number: string | null;
+  stripe_customer_id: string | null;
+  stripe_account_id: string | null;
+  created_at: string;
+  type?: string; // Legacy field, keeping for safety
+};
+
 type AuthData = {
   session: Session | null;
   mounting: boolean;
-  user: any;
+  user: User | null;
   isMerchant: boolean;
   merchantShopId: number | null;
   activeRole: UserRole;
@@ -36,15 +50,7 @@ const AuthContext = createContext<AuthData>({
 
 export default function AuthProvider({ children }: PropsWithChildren) {
   const [session, setSession] = useState<Session | null>(null);
-  const [user, setUser] = useState<{
-    avatar_url: string;
-    created_at: string | null;
-    email: string;
-    expo_notification_token: string | null;
-    id: string;
-    stripe_customer_id: string | null;
-    type: string | null;
-  } | null>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [merchantShopId, setMerchantShopId] = useState<number | null>(null);
   const [activeRole, setActiveRole] = useState<UserRole>('shopper');
   const [mounting, setMounting] = useState(true);
@@ -61,21 +67,23 @@ export default function AuthProvider({ children }: PropsWithChildren) {
       if (error) {
         console.error('error fetching user profile', error);
       } else {
-        setUser(userProfile);
+        setUser(userProfile as User);
       }
 
-      // 2. Fetch Merchant/Provider Profile
-      const { data: provider, error: providerError } = await supabase
-        .from('service_provider')
-        .select('shop_id')
-        .eq('user_id', sessionData.user.id)
+      // 2. Fetch Shop (if Merchant) via owner_id
+      const { data: shop, error: shopError } = await supabase
+        .from('shops')
+        .select('id')
+        .eq('owner_id', sessionData.user.id)
         .single();
       
-      if (provider) {
-        setMerchantShopId(provider.shop_id);
+      if (shop) {
+        setMerchantShopId(shop.id);
+        // If user is a merchant but activeRole is shopper, we let them stay as shopper
+        // unless strictly required. For now, we prefer manual switch or persistence.
       } else {
         setMerchantShopId(null);
-        setActiveRole('shopper'); // Reset if no longer merchant
+        setActiveRole('shopper'); // Reset if no longer merchant owner
       }
     } else {
       setUser(null);
