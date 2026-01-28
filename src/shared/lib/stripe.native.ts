@@ -30,10 +30,6 @@ export const setupStripePaymentSheet = async (totalAmount: number) => {
     paymentIntentClientSecret: paymentIntent,
     customerId: customer,
     customerEphemeralKeySecret: ephemeralKey,
-    billingDetailsCollectionConfiguration: {
-      name: 'always' as 'always',
-      phone: 'always' as 'always',
-    },
   });
 
    if (error) {

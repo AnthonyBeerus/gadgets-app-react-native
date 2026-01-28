@@ -1,20 +1,26 @@
-
 import { useQuery } from '@tanstack/react-query';
-import { apiClient } from '../../../shared/api/client';
+import { getShopProducts } from '../../../shared/api/shops';
+import { supabase } from '../../../shared/lib/supabase';
 import { Tables } from '../../../shared/types/database.types';
 
 export const useProducts = (shopId?: number) => {
   return useQuery({
     queryKey: ['products', shopId],
     queryFn: async () => {
-      let path = '/api/products';
-      if (shopId) {
-        path += `?shop_id=${shopId}`;
-      }
       try {
-        const response = await apiClient.get<Tables<'product'>[]>(path);
-        console.log('useProducts response length:', response?.length);
-        return response;
+        if (shopId) {
+          console.log('Fetching products for shop:', shopId);
+          return await getShopProducts(shopId);
+        }
+        
+        // Fallback for all products if no shopId provided
+        console.log('Fetching all products');
+        const { data, error } = await supabase
+          .from('product')
+          .select('*');
+          
+        if (error) throw error;
+        return data;
       } catch (e) {
         console.error('useProducts error:', e);
         throw e;

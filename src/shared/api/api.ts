@@ -3,7 +3,6 @@ import { supabase } from "../lib/supabase";
 import { useAuth } from "../providers/auth-provider";
 import { generateOrderSlug } from "../utils/utils";
 import { Database, Tables, TablesInsert } from '../types/database.types';
-import { apiClient } from "./client";
 
 export const getProductsAndCategories = () => {
   return useQuery({
@@ -28,7 +27,15 @@ export const getProduct = (slug: string) => {
     queryKey: ["product", slug],
     queryFn: async () => {
       try {
-        const data = await apiClient.get<Tables<'product'>>(`/api/products/${slug}`);
+        const { data, error } = await supabase
+          .from("product")
+          .select("*")
+          .eq("slug", slug)
+          .single();
+          
+        if (error) throw error;
+        if (!data) throw new Error("Product not found");
+        
         return data;
       } catch (error: any) {
         throw new Error(

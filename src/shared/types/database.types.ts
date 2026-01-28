@@ -395,6 +395,7 @@ export type Database = {
           slug: string
           status: string
           stripe_payment_intent_id: string | null
+          stripe_payment_status: string | null
           stripe_session_id: string | null
           totalPrice: number
           user: string
@@ -407,6 +408,7 @@ export type Database = {
           slug: string
           status: string
           stripe_payment_intent_id?: string | null
+          stripe_payment_status?: string | null
           stripe_session_id?: string | null
           totalPrice: number
           user: string
@@ -419,6 +421,7 @@ export type Database = {
           slug?: string
           status?: string
           stripe_payment_intent_id?: string | null
+          stripe_payment_status?: string | null
           stripe_session_id?: string | null
           totalPrice?: number
           user?: string

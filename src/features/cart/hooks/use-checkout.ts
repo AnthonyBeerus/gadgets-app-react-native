@@ -2,34 +2,21 @@
 import { useState } from 'react';
 import { Alert } from 'react-native';
 import { useRouter } from 'expo-router';
-import { useMutation } from '@tanstack/react-query';
-import { apiClient } from '../../../shared/api/client';
 import { useCartStore } from '../../../store/cart-store';
 import { useAuth } from '../../../shared/providers/auth-provider';
-import { setupStripePaymentSheet, openStripeCheckout } from '../../../shared/lib/stripe';
-import { updateOrder } from '../../../shared/api/api'; // Keeping legacy update for now
+import { setupStripePaymentSheet, openStripeCheckout } from '../../../shared/lib/stripe.native';
+import { createOrder, createOrderItem, updateOrder } from '../../../shared/api/api'; 
 
 export const useCheckout = () => {
   const router = useRouter();
   const { session } = useAuth();
   const { items, getTotalPrice, resetCart } = useCartStore();
   const [isProcessing, setIsProcessing] = useState(false);
-  const { mutateAsync: legacyUpdateOrder } = updateOrder();
-
-  const createOrderMutation = useMutation({
-    mutationFn: async (data: {
-      totalPrice: number;
-      paymentIntentId: string;
-      userId: string;
-      items: { productId: number; quantity: number }[];
-    }) => {
-      return apiClient.post<{ id: number; slug: string }>('/api/orders', data, {
-        headers: {
-          Authorization: `Bearer ${session?.access_token}`
-        }
-      });
-    },
-  });
+  
+  // Use direct Supabase mutations
+  const { mutateAsync: createNewOrder } = createOrder();
+  const { mutateAsync: createOrderItems } = createOrderItem();
+  const { mutateAsync: updateOrderStatus } = updateOrder();
 
   const checkout = async () => {
     const totalPrice = parseFloat(getTotalPrice());
@@ -54,7 +41,7 @@ export const useCheckout = () => {
     try {
       setIsProcessing(true);
 
-      // 1. Setup Payment Intent
+      // 1. Setup Payment Intent first to ensure we can pay
       const clientSecret = await setupStripePaymentSheet(Math.floor(totalPrice * 100));
       const paymentIntentId = clientSecret?.split('_secret_')[0];
 
@@ -62,19 +49,24 @@ export const useCheckout = () => {
         throw new Error("Failed to initialize payment.");
       }
 
-      // 2. Create Order via API (BFF)
-      const newOrder = await createOrderMutation.mutateAsync({
+      // 2. Create Order directly in Supabase
+      const newOrder = await createNewOrder({
         totalPrice,
         paymentIntentId,
-        userId: session.user.id,
-        items: items.map(item => ({
-          productId: item.id,
-          quantity: item.quantity,
-          price: item.price
-        }))
+        paymentStatus: 'pending'
       });
 
-      // 3. Present Payment Sheet
+      if (!newOrder) throw new Error("Failed to create order");
+
+      // 3. Create Order Items
+      await createOrderItems(items.map(item => ({
+        orderId: newOrder.id,
+        productId: item.id,
+        quantity: item.quantity,
+        price: item.price
+      })));
+
+      // 4. Present Payment Sheet
       const paymentResult = await openStripeCheckout();
 
       if (!paymentResult) {
@@ -82,16 +74,10 @@ export const useCheckout = () => {
         return;
       }
 
-      // 4. Update Order Status (Legacy for now, or strictly Phase 4 scope is Creation?)
-      // We will perform the update using the existing method to ensure flow completion 
-      // without over-engineering Phase 4 if PATCH isn't explicitly required yet.
-      // But purely for "BFF", we shouldn't use direct DB updates. 
-      // I'll stick to legacy update for this step to minimize success-path risk, 
-      // but creation is now fully API driven.
-      await legacyUpdateOrder({
+      // 5. Update Order Status on success
+      await updateOrderStatus({
         orderId: newOrder.id,
         updates: {
-          // status: 'Completed', // REMOVED: Do not auto-complete. Wait for scan.
           stripe_payment_status: 'succeeded'
         }
       });
@@ -109,6 +95,6 @@ export const useCheckout = () => {
 
   return {
     checkout,
-    isProcessing: isProcessing || createOrderMutation.isPending
+    isProcessing
   };
 };
