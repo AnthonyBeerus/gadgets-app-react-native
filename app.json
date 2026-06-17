@@ -61,8 +61,22 @@
       ],
       "@react-native-community/datetimepicker",
       "@sentry/react-native",
-      "expo-secure-store"
+      "expo-secure-store",
+      [
+        "@stripe/stripe-react-native",
+        {
+          "merchantIdentifier": ""
+        }
+      ],
+      "expo-font",
+      "expo-image"
     ],
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/a2f2ee1e-65a2-4dbb-a3e7-8cb7ae8cd4f6"
+    },
     "extra": {
       "router": {
         "origin": false

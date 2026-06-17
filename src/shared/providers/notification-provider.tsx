@@ -18,8 +18,8 @@ const NotificationProvider = ({ children }: PropsWithChildren) => {
   const [notification, setNotification] = useState<
     Notifications.Notification | undefined
   >(undefined);
-  const notificationListener = useRef<Notifications.Subscription>();
-  const responseListener = useRef<Notifications.Subscription>();
+  const notificationListener = useRef<Notifications.Subscription | null>(null);
+  const responseListener = useRef<Notifications.Subscription | null>(null);
 
   const saveUserPushNotificationToken = async (token: string) => {
     if (!token.length) return;

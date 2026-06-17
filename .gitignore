@@ -4,9 +4,11 @@
 node_modules/
 
 # Expo
+.expo
 .expo/
 dist/
 web-build/
+.tmp/
 muse-ad3a6-firebase-adminsdk-fbsvc-c0ae1ee5fd.json
 google-services.json
 

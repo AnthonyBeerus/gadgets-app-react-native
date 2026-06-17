@@ -12,7 +12,7 @@ import {
 } from "react-native";
 import { useTryOnStore } from "../store/tryOnStore";
 import * as MediaLibrary from "expo-media-library";
-import { File, Paths } from "expo-file-system/next";
+import { File, Paths } from "expo-file-system";
 import { NEO_THEME } from '../../../shared/constants/neobrutalism';
 
 interface ResultOverlayProps {

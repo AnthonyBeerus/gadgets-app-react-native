@@ -10,6 +10,9 @@ When working on tasks related to the following topics, you MUST consult the corr
 | Fetch, API calls, React Query, caching, offline support | @.agent/skills/data-fetching/SKILL.md |
 | App Store, Play Store, web hosting, EAS deploy | @.agent/skills/deployment/SKILL.md |
 | Development builds, TestFlight, custom Expo Go | @.agent/skills/dev-client/SKILL.md |
+| Muse package refreshes and Android EAS preview build validation | @.agent/skills/muse-android-preview-build/SKILL.md |
+| Muse native preview APK builds (eas build, preflight, build-vs-OTA gate) | @.agent/skills/muse-eas-preview-build/SKILL.md |
+| Muse preview-channel OTA updates (eas update, JS-only ship path) | @.agent/skills/muse-ota-preview-update/SKILL.md |
 | Tailwind CSS, NativeWind, react-native-css | @.agent/skills/tailwind-setup/SKILL.md |
 | SDK upgrades, breaking changes, deprecated packages | @.agent/skills/upgrading-expo/SKILL.md |
 | DOM components, web libraries in native, webview | @.agent/skills/use-dom/SKILL.md |
