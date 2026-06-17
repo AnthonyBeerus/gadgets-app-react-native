@@ -1,5 +1,27 @@
 BEGIN;
 
+DROP POLICY IF EXISTS "Public can view shops" ON public.shops;
+DROP POLICY IF EXISTS "Owners and Admins can manage shops" ON public.shops;
+DROP POLICY IF EXISTS "Public can view profiles" ON public.users;
+DROP POLICY IF EXISTS "Users can manage own profile, Admins can manage all" ON public.users;
+DROP POLICY IF EXISTS "Providers and Shop Owners can manage services" ON public.service;
+DROP POLICY IF EXISTS "Providers can manage availability" ON public.service_availability;
+DROP POLICY IF EXISTS "Admins can manage categories" ON public.category;
+DROP POLICY IF EXISTS "Admins can manage service categories" ON public.service_category;
+DROP POLICY IF EXISTS "Admins can insert/delete providers" ON public.service_provider;
+DROP POLICY IF EXISTS "Users can manage their own bookings" ON public.service_booking;
+DROP POLICY IF EXISTS "Users can manage their own service reviews" ON public.service_review;
+DROP POLICY IF EXISTS "Users can manage their own tickets" ON public.ticket_purchases;
+DROP POLICY IF EXISTS "Authenticated users can manage malls" ON public.malls;
+DROP POLICY IF EXISTS "Admins can manage malls" ON public.malls;
+DROP POLICY IF EXISTS "Shop owners can manage events" ON public.events;
+DROP POLICY IF EXISTS "Shop owners can manage challenges" ON public.challenges;
+DROP POLICY IF EXISTS "Users can manage their own orders" ON public."order";
+DROP POLICY IF EXISTS "Users can manage their own order items" ON public.order_item;
+DROP POLICY IF EXISTS "Shop owners can manage products" ON public.product;
+DROP POLICY IF EXISTS "Users can manage their own reviews" ON public.shop_reviews;
+DROP POLICY IF EXISTS "Shop owners can view delivery orders" ON public.delivery_orders;
+
 -- ==============================================================================
 -- 1. CONSOLIDATE & OPTIMIZE POLICIES (Fix 'multiple_permissive_policies')
 -- ==============================================================================

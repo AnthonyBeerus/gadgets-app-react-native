@@ -1,5 +1,8 @@
 BEGIN;
 
+ALTER TABLE public.shops
+ADD COLUMN IF NOT EXISTS owner_id UUID REFERENCES auth.users(id);
+
 -- Appointments
 DROP POLICY IF EXISTS "Allow all appointments operations" ON public.appointments;
 
