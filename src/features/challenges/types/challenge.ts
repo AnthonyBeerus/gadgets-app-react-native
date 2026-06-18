@@ -14,7 +14,6 @@ export interface Challenge {
   is_premium?: boolean; // Subscriber only
   type: 'free' | 'paid' | 'subscriber';
   category?: string;
-  ai_allowed?: boolean;
 }
 
 export interface ChallengeSubmission {
@@ -23,6 +22,7 @@ export interface ChallengeSubmission {
   user_id: string;
   content_url: string;
   media_type: 'image' | 'video';
+  caption?: string | null;
   status: 'pending' | 'approved' | 'rejected';
   created_at: string;
 }

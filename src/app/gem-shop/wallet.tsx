@@ -1,34 +1,49 @@
-import React from 'react';
-import { View, Text, StyleSheet, ScrollView, FlatList } from 'react-native';
+import React, { useEffect } from 'react';
+import { View, Text, StyleSheet, FlatList, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { NEO_THEME } from '../../shared/constants/neobrutalism';
 import { StaticHeader } from '../../shared/components/layout/StaticHeader';
 import { Ionicons } from '@expo/vector-icons';
+import { useGemStore } from '../../features/gems/store/gem-store';
 
-const TRANSACTIONS = [
-  { id: '1', type: 'purchase', title: 'Sack of Gems', amount: '+500', date: 'Today, 10:23 AM', color: NEO_THEME.colors.success },
-  { id: '2', type: 'spend', title: 'Image Generator', amount: '-5', date: 'Yesterday, 2:15 PM', color: NEO_THEME.colors.black },
-  { id: '3', type: 'spend', title: 'Challenge Entry', amount: '-50', date: 'Nov 22, 9:00 AM', color: NEO_THEME.colors.black },
-  { id: '4', type: 'reward', title: 'Ride Reward', amount: '+3', date: 'Nov 20, 6:45 PM', color: NEO_THEME.colors.primary },
-];
+// Transaction history will be backed by a persistent gem ledger in a follow-up.
+// Until that exists, show the real balance and an honest empty state rather than mock rows.
+interface WalletTransaction {
+  id: string;
+  type: 'purchase' | 'spend' | 'reward';
+  title: string;
+  amount: string;
+  date: string;
+}
+
+const TRANSACTIONS: WalletTransaction[] = [];
 
 export default function WalletScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const headerHeight = insets.top + 60;
+  const { balance, loading, fetchBalance } = useGemStore();
+
+  useEffect(() => {
+    fetchBalance();
+  }, []);
 
   return (
     <View style={styles.container}>
       <StaticHeader title="MY WALLET" onBackPress={() => router.back()} />
-      
+
       <View style={[styles.content, { paddingTop: headerHeight }]}>
         {/* Balance Card */}
         <View style={styles.balanceCard}>
           <Text style={styles.balanceLabel}>CURRENT BALANCE</Text>
           <View style={styles.balanceRow}>
             <Ionicons name="diamond" size={32} color={NEO_THEME.colors.white} />
-            <Text style={styles.balanceAmount}>150</Text>
+            {loading ? (
+              <ActivityIndicator size="large" color={NEO_THEME.colors.white} />
+            ) : (
+              <Text style={styles.balanceAmount}>{balance}</Text>
+            )}
           </View>
         </View>
 
@@ -37,15 +52,22 @@ export default function WalletScreen() {
         <FlatList
           data={TRANSACTIONS}
           keyExtractor={(item) => item.id}
-          contentContainerStyle={{ paddingBottom: insets.bottom + 20 }}
+          contentContainerStyle={{ paddingBottom: insets.bottom + 20, flexGrow: 1 }}
           showsVerticalScrollIndicator={false}
+          ListEmptyComponent={
+            <View style={styles.emptyState}>
+              <Ionicons name="receipt-outline" size={40} color={NEO_THEME.colors.grey} />
+              <Text style={styles.emptyTitle}>NO TRANSACTIONS YET</Text>
+              <Text style={styles.emptyText}>Buy or spend gems and your history will appear here.</Text>
+            </View>
+          }
           renderItem={({ item }) => (
             <View style={styles.transactionItem}>
-              <View style={[styles.iconBox, { backgroundColor: item.type === 'purchase' || item.type === 'reward' ? NEO_THEME.colors.successLight : NEO_THEME.colors.greyLight }]}>
-                <Ionicons 
-                  name={item.type === 'purchase' ? 'add' : item.type === 'reward' ? 'gift' : 'remove'} 
-                  size={20} 
-                  color={NEO_THEME.colors.black} 
+              <View style={[styles.iconBox, { backgroundColor: item.type === 'purchase' || item.type === 'reward' ? NEO_THEME.colors.mint : NEO_THEME.colors.greyLight }]}>
+                <Ionicons
+                  name={item.type === 'purchase' ? 'add' : item.type === 'reward' ? 'gift' : 'remove'}
+                  size={20}
+                  color={NEO_THEME.colors.black}
                 />
               </View>
               <View style={styles.transactionInfo}>
@@ -146,5 +168,25 @@ const styles = StyleSheet.create({
   transactionAmount: {
     fontFamily: NEO_THEME.fonts.black,
     fontSize: 18,
+  },
+  emptyState: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 32,
+    gap: 8,
+  },
+  emptyTitle: {
+    fontFamily: NEO_THEME.fonts.black,
+    fontSize: 16,
+    color: NEO_THEME.colors.black,
+    textTransform: 'uppercase',
+    marginTop: 8,
+  },
+  emptyText: {
+    fontFamily: NEO_THEME.fonts.regular,
+    fontSize: 14,
+    color: NEO_THEME.colors.grey,
+    textAlign: 'center',
   },
 });

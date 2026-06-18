@@ -26,14 +26,6 @@ describe('ChallengeBadge', () => {
     expect(getByText('ACTIVE')).toBeTruthy();
   });
 
-  it('renders AI badge correctly', () => {
-    const { getByText } = render(
-      <ChallengeBadge type="ai" text="AI ALLOWED" icon="sparkles" />
-    );
-    
-    expect(getByText('AI ALLOWED')).toBeTruthy();
-  });
-
   it('renders without icon when not provided', () => {
     const { queryByTestId, getByText } = render(
       <ChallengeBadge type="status" text="COMPLETED" />

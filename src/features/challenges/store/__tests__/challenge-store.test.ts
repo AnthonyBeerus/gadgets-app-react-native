@@ -31,7 +31,6 @@ describe('useChallengeStore', () => {
     expect(result.current.challenges.length).toBeGreaterThan(0);
     expect(result.current.challenges[0]).toHaveProperty('id');
     expect(result.current.challenges[0]).toHaveProperty('title');
-    expect(result.current.challenges[0]).toHaveProperty('ai_allowed');
   });
 
   it('should set loading to true during fetch', async () => {
@@ -75,12 +74,10 @@ describe('useChallengeStore', () => {
     expect(challenge).toHaveProperty('requirements');
     expect(challenge).toHaveProperty('status');
     expect(challenge).toHaveProperty('type');
-    expect(challenge).toHaveProperty('ai_allowed');
-    
+
     // Validate types
     expect(typeof challenge.id).toBe('number');
     expect(typeof challenge.title).toBe('string');
-    expect(typeof challenge.ai_allowed).toBe('boolean');
     expect(Array.isArray(challenge.requirements)).toBe(true);
   });
 });

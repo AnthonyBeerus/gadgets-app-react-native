@@ -3,7 +3,6 @@ import { View, Text, StyleSheet, ActivityIndicator, ScrollView } from 'react-nat
 import { useChallengeStore } from '../store/challenge-store';
 import { ChallengeCard } from '../components/challenge-card';
 import { FilterChip } from '../components/FilterChip';
-import { AIBanner } from '../../../shared/components/ui/AIBanner';
 import { Challenge } from '../types/challenge';
 import { useRouter } from 'expo-router';
 import { NEO_THEME } from '../../../shared/constants/neobrutalism';
@@ -19,7 +18,7 @@ interface FlashListPropsWithEstimatedItemSize<T> extends FlashListProps<T> {
 
 const AnimatedFlashList = Animated.createAnimatedComponent(FlashList) as unknown as <T>(props: FlashListPropsWithEstimatedItemSize<T> & { ref?: any }) => React.ReactElement;
 
-type FilterType = 'ALL' | 'FREE' | 'PREMIUM' | 'AI ALLOWED' | 'ENDING SOON';
+type FilterType = 'ALL' | 'FREE' | 'PREMIUM' | 'ENDING SOON';
 
 export default function ChallengesExploreScreen() {
   const { challenges, loading, fetchChallenges } = useChallengeStore();
@@ -46,8 +45,7 @@ export default function ChallengesExploreScreen() {
     switch (activeFilter) {
       case 'FREE': return c.type === 'free';
       case 'PREMIUM': return c.is_premium || c.type === 'subscriber';
-      case 'AI ALLOWED': return c.ai_allowed;
-      case 'ENDING SOON': 
+      case 'ENDING SOON':
         const deadline = new Date(c.deadline);
         const now = new Date();
         const diffTime = Math.abs(deadline.getTime() - now.getTime());
@@ -66,8 +64,7 @@ export default function ChallengesExploreScreen() {
 
   const ListHeader = () => (
     <View style={styles.headerContainer}>
-      <AIBanner onPress={() => router.push('/gem-shop/ai-tools')} />
-      <ScrollView 
+      <ScrollView
         horizontal 
         showsHorizontalScrollIndicator={false} 
         contentContainerStyle={styles.filterContainer}
@@ -75,7 +72,6 @@ export default function ChallengesExploreScreen() {
         <FilterChip label="ALL" isActive={activeFilter === 'ALL'} onPress={() => setActiveFilter('ALL')} />
         <FilterChip label="FREE" isActive={activeFilter === 'FREE'} onPress={() => setActiveFilter('FREE')} />
         <FilterChip label="PREMIUM" type="premium" isActive={activeFilter === 'PREMIUM'} onPress={() => setActiveFilter('PREMIUM')} />
-        <FilterChip label="AI ALLOWED" type="ai" isActive={activeFilter === 'AI ALLOWED'} onPress={() => setActiveFilter('AI ALLOWED')} />
         <FilterChip label="ENDING SOON" type="urgent" isActive={activeFilter === 'ENDING SOON'} onPress={() => setActiveFilter('ENDING SOON')} />
       </ScrollView>
     </View>

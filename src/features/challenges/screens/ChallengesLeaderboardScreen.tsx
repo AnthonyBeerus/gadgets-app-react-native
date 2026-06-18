@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { Text, StyleSheet } from 'react-native';
 import { NEO_THEME } from '../../../shared/constants/neobrutalism';
 import { NeoView } from '../../../shared/components/ui/neo-view';
 import Animated, { useAnimatedScrollHandler } from 'react-native-reanimated';
@@ -34,11 +34,6 @@ export default function ChallengesLeaderboardScreen() {
           Compete with other creators and climb the ranks to win exclusive rewards!
         </Text>
       </NeoView>
-      
-      {/* Dummy content to demonstrate scrolling */}
-      {Array.from({ length: 10 }).map((_, i) => (
-        <View key={i} style={{ height: 100, backgroundColor: 'rgba(0,0,0,0.05)', marginTop: 16, borderRadius: 12 }} />
-      ))}
     </Animated.ScrollView>
   );
 }

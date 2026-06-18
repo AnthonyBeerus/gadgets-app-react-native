@@ -17,8 +17,6 @@ import { Ionicons } from "@expo/vector-icons";
 import { getShopById, getShopProducts } from "../../../shared/api/shops";
 import { supabase } from "../../../shared/lib/supabase";
 import TryOnModal from "../../virtual-try-on/components/TryOnModal";
-import BookingModal from "../../../components/booking-modal";
-import { useBookingStore } from "../../../store/booking-store";
 import { StaticHeader } from "../../../shared/components/layout/StaticHeader";
 import { NEO_THEME } from "../../../shared/constants/neobrutalism";
 import { NuviaButton } from "../../../shared/components/ui/nuvia-button";
@@ -30,7 +28,6 @@ import { NuviaProductCard } from "../../../components/molecules/nuvia-product-ca
 export default function ShopDetailsScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
-  const { openBookingModal } = useBookingStore();
   const { items } = useCartStore(); // Added hook usage
 
   const [shop, setShop] = useState<any>(null);
@@ -130,15 +127,18 @@ export default function ShopDetailsScreen() {
 
   const handleServiceSelect = (service: any) => {
     setServiceSelectionVisible(false);
-    const shopContext = {
-      id: shop.id,
-      name: shop.name,
-      logo_url: shop.logo_url,
-      image_url: shop.image_url,
-      location: shop.location,
-      phone: shop.phone,
-    };
-    openBookingModal(service, shopContext);
+    // Use the canonical booking flow (the services/booking-modal route).
+    router.push({
+      pathname: "/services/booking-modal",
+      params: {
+        serviceId: String(service.id),
+        serviceName: service.name,
+        price: String(service.price),
+        duration: String(service.duration_minutes),
+        providerId: String(service.service_provider?.id ?? ""),
+        providerName: service.service_provider?.name ?? "",
+      },
+    });
   };
 
   const handleCallShop = () => {
@@ -339,8 +339,6 @@ export default function ShopDetailsScreen() {
           </ScrollView>
         </SafeAreaView>
       </Modal>
-
-      <BookingModal />
     </SafeAreaView>
   );
 }

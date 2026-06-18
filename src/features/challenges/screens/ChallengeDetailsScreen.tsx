@@ -10,7 +10,6 @@ import { StaticHeader } from '../../../shared/components/layout/StaticHeader';
 import { ChallengeBadge } from '../components/ChallengeBadge';
 import { RewardCard } from '../components/RewardCard';
 import { RequirementsList } from '../components/RequirementsList';
-import { AIPromoCard } from '../components/AIPromoCard';
 import { MetaInfoCard } from '../components/MetaInfoCard';
 import { useEntitlements } from '../../../shared/hooks/useEntitlements';
 import { useGemStore } from '../../gems/store/gem-store';
@@ -132,15 +131,10 @@ export default function ChallengeDetailsScreen() {
               <ChallengeBadge type="fee" text={`ENTRY: ${challenge.entry_fee} GEMS`} icon="diamond" />
             )}
             <ChallengeBadge type="status" text={challenge.status.toUpperCase()} />
-            {challenge.ai_allowed && (
-              <ChallengeBadge type="ai" text="AI ALLOWED" icon="sparkles" />
-            )}
           </View>
-          
+
           <Text style={styles.title}>{challenge.title.toUpperCase()}</Text>
           <Text style={styles.description}>{challenge.description}</Text>
-
-          <AIPromoCard onPress={() => router.push('/gem-shop/ai-tools')} />
         </View>
 
         {/* Reward Section */}

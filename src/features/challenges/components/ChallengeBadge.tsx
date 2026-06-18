@@ -3,7 +3,7 @@ import { View, Text, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { NEO_THEME } from '../../../shared/constants/neobrutalism';
 
-type BadgeType = 'premium' | 'fee' | 'status' | 'ai';
+type BadgeType = 'premium' | 'fee' | 'status';
 
 interface ChallengeBadgeProps {
   type: BadgeType;
@@ -24,12 +24,6 @@ export function ChallengeBadge({ type, text, icon }: ChallengeBadgeProps) {
         return {
           container: styles.feeBadge,
           text: styles.feeText,
-          iconColor: NEO_THEME.colors.white,
-        };
-      case 'ai':
-        return {
-          container: styles.aiBadge,
-          text: styles.aiText,
           iconColor: NEO_THEME.colors.white,
         };
       default: // status
@@ -99,21 +93,5 @@ const styles = StyleSheet.create({
     fontFamily: NEO_THEME.fonts.bold,
     fontSize: 10,
     color: NEO_THEME.colors.black,
-  },
-  aiBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: NEO_THEME.colors.primary,
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    borderRadius: NEO_THEME.borders.radius,
-    gap: 4,
-    borderWidth: 2,
-    borderColor: NEO_THEME.colors.black,
-  },
-  aiText: {
-    fontFamily: NEO_THEME.fonts.black,
-    fontSize: 10,
-    color: NEO_THEME.colors.white,
   },
 });

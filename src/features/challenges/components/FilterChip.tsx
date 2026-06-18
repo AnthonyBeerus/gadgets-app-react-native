@@ -2,11 +2,11 @@ import React from 'react';
 import { Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { NEO_THEME } from '../../../shared/constants/neobrutalism';
 
-type FilterType = 'ALL' | 'FREE' | 'PREMIUM' | 'AI ALLOWED' | 'ENDING SOON';
+type FilterType = 'ALL' | 'FREE' | 'PREMIUM' | 'ENDING SOON';
 
 interface FilterChipProps {
   label: FilterType;
-  type?: 'default' | 'premium' | 'ai' | 'urgent';
+  type?: 'default' | 'premium' | 'urgent';
   isActive: boolean;
   onPress: () => void;
 }
@@ -14,7 +14,6 @@ interface FilterChipProps {
 export function FilterChip({ label, type = 'default', isActive, onPress }: FilterChipProps) {
   let activeColor = NEO_THEME.colors.black;
   if (type === 'premium') activeColor = NEO_THEME.colors.yellow;
-  if (type === 'ai') activeColor = NEO_THEME.colors.primary;
   if (type === 'urgent') activeColor = NEO_THEME.colors.error;
 
   const getTextColor = () => {
@@ -28,8 +27,7 @@ export function FilterChip({ label, type = 'default', isActive, onPress }: Filte
     <TouchableOpacity
       style={[
         styles.filterChip,
-        isActive && { backgroundColor: activeColor },
-        isActive && type === 'ai' && { borderColor: NEO_THEME.colors.black }
+        isActive && { backgroundColor: activeColor }
       ]}
       onPress={onPress}
       activeOpacity={0.8}

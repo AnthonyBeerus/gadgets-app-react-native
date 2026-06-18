@@ -42,7 +42,6 @@ export const useChallengeStore = create<ChallengeState>((set) => ({
           is_premium: item.is_premium,
           type: item.type as 'free' | 'paid' | 'subscriber',
           category: item.category,
-          ai_allowed: item.ai_allowed,
         }));
         set({ challenges, loading: false });
       } else {

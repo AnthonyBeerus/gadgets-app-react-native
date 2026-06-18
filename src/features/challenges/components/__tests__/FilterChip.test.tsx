@@ -37,15 +37,15 @@ describe('FilterChip', () => {
 
   it('renders inactive state correctly', () => {
     const { getByText } = render(
-      <FilterChip label="AI ALLOWED" type="ai" isActive={false} onPress={mockOnPress} />
+      <FilterChip label="ENDING SOON" type="urgent" isActive={false} onPress={mockOnPress} />
     );
-    
-    const chip = getByText('AI ALLOWED');
+
+    const chip = getByText('ENDING SOON');
     expect(chip).toBeTruthy();
   });
 
   it('handles different types correctly', () => {
-    const types: Array<'default' | 'premium' | 'ai' | 'urgent'> = ['premium', 'ai', 'urgent'];
+    const types: Array<'default' | 'premium' | 'urgent'> = ['premium', 'urgent'];
     
     types.forEach(type => {
       const { getByText } = render(

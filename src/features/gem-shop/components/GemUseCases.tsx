@@ -13,13 +13,6 @@ const USE_CASES = [
     color: NEO_THEME.colors.yellow,
   },
   {
-    id: 'ai',
-    title: 'AI Tools',
-    desc: 'Generate images & audio',
-    icon: 'color-wand',
-    color: NEO_THEME.colors.blue,
-  },
-  {
     id: 'services',
     title: 'Services',
     desc: 'Get booking discounts',
@@ -49,9 +42,6 @@ export const GemUseCases = () => {
     switch (id) {
       case 'challenges':
         router.push('/(shop)/challenges');
-        break;
-      case 'ai':
-        router.push('/gem-shop/ai-tools');
         break;
       case 'services':
         router.push('/services');

@@ -177,6 +177,47 @@ export type Database = {
         }
         Relationships: []
       }
+      challenge_submissions: {
+        Row: {
+          caption: string | null
+          challenge_id: number
+          content_url: string
+          created_at: string
+          id: number
+          media_type: string
+          status: string
+          user_id: string
+        }
+        Insert: {
+          caption?: string | null
+          challenge_id: number
+          content_url: string
+          created_at?: string
+          id?: number
+          media_type?: string
+          status?: string
+          user_id: string
+        }
+        Update: {
+          caption?: string | null
+          challenge_id?: number
+          content_url?: string
+          created_at?: string
+          id?: number
+          media_type?: string
+          status?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "challenge_submissions_challenge_id_fkey"
+            columns: ["challenge_id"]
+            isOneToOne: false
+            referencedRelation: "challenges"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
       delivery_orders: {
         Row: {
           actual_delivery_time: string | null

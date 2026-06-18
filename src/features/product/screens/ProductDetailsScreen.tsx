@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -44,10 +44,13 @@ export default function ProductDetailsScreen() {
   // Get color variants from JSONB column
   const colorVariants = ((product as any)?.color_variants as any[]) || [];
 
-  // Set initial color when variants load
-  if (colorVariants.length > 0 && !selectedColor) {
-    setSelectedColor(colorVariants[0]);
-  }
+  // Set initial color once the product (and its variants) load. Runs in an effect
+  // rather than during render to avoid update-during-render loops.
+  useEffect(() => {
+    if (colorVariants.length > 0 && !selectedColor) {
+      setSelectedColor(colorVariants[0]);
+    }
+  }, [product?.id]);
 
   // Get the current hero image based on selected color variant
   const currentHeroImage = selectedColor?.image_url || product?.heroImage;

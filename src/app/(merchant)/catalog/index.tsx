@@ -77,7 +77,7 @@ export default function MerchantInventory() {
       <PopProductCard
         item={item}
         index={index}
-        onPress={() => console.log('View Product', item.id)} // Placeholder for detail view
+        onPress={() => item.slug && router.push(`/product/${item.slug}`)}
         actionButton={
            <TouchableOpacity onPress={() => handleDelete(item.id)} style={styles.deleteBtn}>
               <MaterialIcons name="delete-outline" size={24} color="black" />
