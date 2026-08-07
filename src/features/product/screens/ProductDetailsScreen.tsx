@@ -121,7 +121,7 @@ export default function ProductDetailsScreen() {
       duration: 1500,
     });
     // Navigate to Cart
-    router.push("/cart");
+    router.push("/bag");
   };
 
   // Check if product supports virtual try-on
@@ -136,7 +136,7 @@ export default function ProductDetailsScreen() {
         title={product.title.toUpperCase()} 
         onBackPress={() => router.back()} 
         rightElement={
-          <TouchableOpacity onPress={() => router.push("/cart")} style={{ position: 'relative' }}>
+          <TouchableOpacity onPress={() => router.push("/bag")} style={{ position: 'relative' }}>
             <Ionicons name="cart" size={24} color={NEO_THEME.colors.black} />
             {items.length > 0 && (
               <NuviaTag 

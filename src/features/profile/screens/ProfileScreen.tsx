@@ -91,10 +91,10 @@ const ProfileScreen = () => {
             onPress={() => router.push("/orders")}
           />
           <ProfileOption
-            icon="favorite"
-            title="SAVED OPPORTUNITIES"
-            subtitle="Products you may want to buy and create for"
-            onPress={() => router.push('/saved-opportunities')}
+            icon="shopping-bag"
+            title="BAG"
+            subtitle="Cart and saved challenges"
+            onPress={() => router.push('/bag')}
           />
           <ProfileOption
             icon="movie"
@@ -125,8 +125,8 @@ const ProfileScreen = () => {
                 // @ts-ignore
                 icon="add-business"
                 title="OPEN A SHOP"
-                subtitle="Set up your merchant storefront"
-                onPress={() => router.replace("/(merchant)")}
+                subtitle="Set up your storefront for products and challenge pots"
+                onPress={() => router.push("/open-shop")}
             />
           )}
         </View>

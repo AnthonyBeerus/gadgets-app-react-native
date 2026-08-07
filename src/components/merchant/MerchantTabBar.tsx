@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, TouchableOpacity, StyleSheet, Platform, Dimensions } from 'react-native';
+import { View, TouchableOpacity, StyleSheet, Platform } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import Animated, { useAnimatedStyle, withTiming } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -11,24 +11,26 @@ interface TabBarProps {
   navigation: any;
 }
 
+/** Primary merchant Tabs only — hide on href:null routes like vouchers. */
+const visibleRoutes = ['index', 'catalog', 'create', 'community', 'profile'] as const;
+
 export default function MerchantTabBar({ state, descriptors, navigation }: TabBarProps) {
   const insets = useSafeAreaInsets();
-
-  // Route Names: 'index', 'catalog', 'create', 'community', 'profile'
-  // FAB: 'create'
-  // Pill: others
+  const focusedRoute = state.routes[state.index]?.name;
+  if (!focusedRoute || !visibleRoutes.includes(focusedRoute as (typeof visibleRoutes)[number])) {
+    return null;
+  }
 
   const fabRouteName = 'create';
   const fabRoute = state.routes.find((r: any) => r.name === fabRouteName);
-  const pillRoutes = state.routes.filter((r: any) => r.name !== fabRouteName);
+  const pillRoutes = state.routes.filter((r: any) =>
+    r.name !== fabRouteName && visibleRoutes.includes(r.name as (typeof visibleRoutes)[number]),
+  );
 
-  // Animation style (placeholder)
-  const animatedStyle = useAnimatedStyle(() => {
-    return {
-      transform: [{ translateY: withTiming(0, { duration: 300 }) }],
-      opacity: withTiming(1, { duration: 300 }),
-    };
-  });
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [{ translateY: withTiming(0, { duration: 300 }) }],
+    opacity: withTiming(1, { duration: 300 }),
+  }));
 
   return (
     <Animated.View
@@ -38,18 +40,15 @@ export default function MerchantTabBar({ state, descriptors, navigation }: TabBa
         animatedStyle,
       ]}
     >
-      {/* 1. Left Pill - Navigation Items */}
       <View style={styles.pillContainer}>
         {pillRoutes.map((route: any) => {
-          const { options } = descriptors[route.key];
           const isFocused = state.index === state.routes.indexOf(route);
 
           let iconName: any = 'circle';
-          
-          if (route.name === 'index') { iconName = 'dashboard'; }
-          else if (route.name === 'catalog') { iconName = 'store'; }
-          else if (route.name === 'community') { iconName = 'groups'; }
-          else if (route.name === 'profile') { iconName = 'person'; }
+          if (route.name === 'index') iconName = 'dashboard';
+          else if (route.name === 'catalog') iconName = 'store';
+          else if (route.name === 'community') iconName = 'groups';
+          else if (route.name === 'profile') iconName = 'person';
 
           const onPress = () => {
             const event = navigation.emit({
@@ -82,20 +81,17 @@ export default function MerchantTabBar({ state, descriptors, navigation }: TabBa
         })}
       </View>
 
-      {/* 2. Right FAB - Create Button */}
       {fabRoute && (
         <TouchableOpacity
           onPress={() => {
-              const event = navigation.emit({
-                type: 'tabPress',
-                target: fabRoute.key,
-                canPreventDefault: true,
-              });
-              // The listener in _layout.tsx calls preventDefault() and navigates to modal
-              // So we don't need default navigation here if prevented.
-              if (!event.defaultPrevented) {
-                navigation.navigate(fabRoute.name, fabRoute.params);
-              }
+            const event = navigation.emit({
+              type: 'tabPress',
+              target: fabRoute.key,
+              canPreventDefault: true,
+            });
+            if (!event.defaultPrevented) {
+              navigation.navigate(fabRoute.name, fabRoute.params);
+            }
           }}
           activeOpacity={0.8}
           style={styles.fab}
@@ -124,14 +120,13 @@ const styles = StyleSheet.create({
     marginRight: 16,
     flexDirection: 'row',
     height: 64,
-    backgroundColor: '#F5F5F5', 
+    backgroundColor: '#F5F5F5',
     borderWidth: NEO_THEME.borders.width,
     borderColor: NEO_THEME.colors.black,
     borderRadius: 32,
     alignItems: 'center',
     justifyContent: 'space-around',
     paddingHorizontal: 8,
-    // Neobrutalist Shadow
     shadowColor: NEO_THEME.colors.black,
     shadowOffset: { width: 4, height: 4 },
     shadowOpacity: 1,
@@ -162,7 +157,6 @@ const styles = StyleSheet.create({
     borderColor: NEO_THEME.colors.black,
     alignItems: 'center',
     justifyContent: 'center',
-    // Neobrutalist Shadow
     shadowColor: NEO_THEME.colors.black,
     shadowOffset: { width: 4, height: 4 },
     shadowOpacity: 1,

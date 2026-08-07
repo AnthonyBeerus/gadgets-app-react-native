@@ -38,7 +38,7 @@ export const ListHeader = ({
           </View>
         </View>
         <View style={styles.headerRight}>
-          <Link style={styles.cartContainer} href='/cart' asChild>
+          <Link style={styles.cartContainer} href='/bag' asChild>
             <Pressable>
               {({ pressed }) => (
                 <View>

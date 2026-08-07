@@ -3,11 +3,14 @@ import { render } from '@testing-library/react-native';
 import MerchantDashboard from '../../../../app/(merchant)/index';
 import { useAuth } from '../../../../shared/providers/auth-provider';
 import { useRouter } from 'expo-router';
-import { getMerchantDashboardStats } from '../../../../shared/api/api';
+import { getMerchantDashboardStats, getShopChallenges, getShopProducts } from '../../../../shared/api/api';
 
-// Mocks
 jest.mock('expo-router', () => ({
   useRouter: jest.fn(),
+  Redirect: ({ href }: { href: string }) => {
+    const ReactNative = require('react-native');
+    return <ReactNative.Text>{`redirect:${href}`}</ReactNative.Text>;
+  },
 }));
 
 jest.mock('../../../../shared/providers/auth-provider', () => ({
@@ -16,6 +19,8 @@ jest.mock('../../../../shared/providers/auth-provider', () => ({
 
 jest.mock('../../../../shared/api/api', () => ({
   getMerchantDashboardStats: jest.fn(),
+  getShopProducts: jest.fn(),
+  getShopChallenges: jest.fn(),
 }));
 
 describe('MerchantDashboard', () => {
@@ -32,6 +37,8 @@ describe('MerchantDashboard', () => {
         todays_sales: 0,
       },
     });
+    (getShopProducts as jest.Mock).mockReturnValue({ data: [] });
+    (getShopChallenges as jest.Mock).mockReturnValue({ data: [] });
     (useAuth as jest.Mock).mockReturnValue({
       isMerchant: true,
       user: mockUser,
@@ -41,12 +48,36 @@ describe('MerchantDashboard', () => {
     });
   });
 
-  it('renders real zero-state merchant metrics and add-product CTA', async () => {
+  it('renders launch checklist and next-step CTA when no products exist', () => {
     const { getByText } = render(<MerchantDashboard />);
 
-    expect(getByText('Pending Orders')).toBeTruthy();
-    expect(getByText("Today's Sales")).toBeTruthy();
-    expect(getByText('Products')).toBeTruthy();
+    expect(getByText('Launch checklist')).toBeTruthy();
+    expect(getByText('Add your first product')).toBeTruthy();
     expect(getByText('Add Product')).toBeTruthy();
+  });
+
+  it('prompts for a challenge pot after the first product exists', () => {
+    (getShopProducts as jest.Mock).mockReturnValue({
+      data: [{ id: 1, is_available: true, maxQuantity: 10 }],
+    });
+    (getMerchantDashboardStats as jest.Mock).mockReturnValue({
+      data: { product_count: 1, pending_order_count: 0, todays_sales: 0 },
+    });
+
+    const { getByText } = render(<MerchantDashboard />);
+    expect(getByText('Fund your first challenge pot')).toBeTruthy();
+  });
+
+  it('redirects non-merchants to open-shop', () => {
+    (useAuth as jest.Mock).mockReturnValue({
+      isMerchant: false,
+      user: mockUser,
+      merchantShopId: null,
+      createMerchantShop: jest.fn(),
+      switchRole: jest.fn(),
+    });
+
+    const { getByText } = render(<MerchantDashboard />);
+    expect(getByText('redirect:/open-shop')).toBeTruthy();
   });
 });

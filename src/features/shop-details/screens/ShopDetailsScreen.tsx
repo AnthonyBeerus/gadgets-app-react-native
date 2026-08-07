@@ -180,7 +180,7 @@ export default function ShopDetailsScreen() {
         title={shop.name} 
         onBackPress={() => router.back()} 
         rightElement={
-          <TouchableOpacity onPress={() => router.push("/cart")} style={{ position: 'relative' }}>
+          <TouchableOpacity onPress={() => router.push("/bag")} style={{ position: 'relative' }}>
             <Ionicons name="cart" size={24} color={NEO_THEME.colors.black} />
             {items.length > 0 && (
               <NuviaTag 

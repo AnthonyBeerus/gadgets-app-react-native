@@ -1,3 +1,6 @@
-import SavedOpportunitiesScreen from '../features/discovery/screens/saved-opportunities-screen';
+import { Redirect } from 'expo-router';
 
-export default SavedOpportunitiesScreen;
+/** Legacy saved route — bag combines cart + saved challenges. */
+export default function SavedOpportunitiesRedirect() {
+  return <Redirect href="/bag?tab=saved" />;
+}

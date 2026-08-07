@@ -4,17 +4,9 @@ import { Pressable, StyleSheet, View } from 'react-native';
 
 import { NuviaText } from '../../../components/atoms/nuvia-text';
 import { NEO_THEME } from '../../../shared/constants/neobrutalism';
-import { useCartStore } from '../../../store/cart-store';
-
-const utilities = [
-  { label: 'Saved', icon: 'heart' as const, route: '/saved-opportunities' as const },
-  { label: 'Activity', icon: 'sparkles' as const, route: '/(shop)/challenges/my-entries' as const },
-  { label: 'Me', icon: 'person' as const, route: '/(shop)/profile' as const },
-];
 
 export function ConsumerUtilityHeader() {
   const router = useRouter();
-  const itemCount = useCartStore(state => state.getItemCount());
 
   return (
     <View style={styles.container}>
@@ -22,29 +14,15 @@ export function ConsumerUtilityHeader() {
         <NuviaText variant="h2">MUSE</NuviaText>
         <NuviaText variant="caption" style={styles.subtitle}>FIND IT. CREATE FOR IT.</NuviaText>
       </View>
-      <View style={styles.utilities}>
-        {utilities.map(item => (
-          <Pressable
-            key={item.label}
-            accessibilityRole="button"
-            accessibilityLabel={item.label}
-            onPress={() => router.push(item.route)}
-            style={styles.utility}
-          >
-            <Ionicons name={item.icon} size={19} color={NEO_THEME.colors.black} />
-            <NuviaText variant="caption" style={styles.utilityLabel}>{item.label}</NuviaText>
-          </Pressable>
-        ))}
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={`Cart, ${itemCount} items`}
-          onPress={() => router.push('/cart')}
-          style={[styles.utility, styles.cartUtility]}
-        >
-          <Ionicons name="bag-handle" size={19} color={NEO_THEME.colors.black} />
-          <NuviaText variant="caption" style={styles.utilityLabel}>{itemCount > 0 ? String(itemCount) : 'Cart'}</NuviaText>
-        </Pressable>
-      </View>
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel="Creator activity"
+        onPress={() => router.push('/(shop)/challenges/my-entries')}
+        style={styles.utility}
+      >
+        <Ionicons name="sparkles" size={19} color={NEO_THEME.colors.black} />
+        <NuviaText variant="caption" style={styles.utilityLabel}>ACTIVITY</NuviaText>
+      </Pressable>
     </View>
   );
 }
@@ -60,9 +38,8 @@ const styles = StyleSheet.create({
   },
   brand: { flex: 1 },
   subtitle: { fontSize: 8, color: NEO_THEME.colors.grey, letterSpacing: 0.5 },
-  utilities: { flexDirection: 'row', alignItems: 'center', gap: 5 },
   utility: {
-    minWidth: 42,
+    minWidth: 52,
     minHeight: 44,
     alignItems: 'center',
     justifyContent: 'center',
@@ -71,7 +48,7 @@ const styles = StyleSheet.create({
     borderColor: NEO_THEME.colors.black,
     borderRadius: 12,
     backgroundColor: NEO_THEME.colors.white,
+    paddingHorizontal: 8,
   },
-  cartUtility: { backgroundColor: NEO_THEME.colors.secondary },
   utilityLabel: { fontSize: 8, fontFamily: NEO_THEME.fonts.bold },
 });

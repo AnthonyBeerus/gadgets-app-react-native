@@ -246,7 +246,7 @@ export default function DiscoverScreen() {
             <Ionicons name="sparkles" size={52} color={NEO_THEME.colors.primary} />
             <NuviaText variant="h1" align="center">YOU'RE CAUGHT UP</NuviaText>
             <NuviaText variant="body" align="center">Passed challenges return after 30 days. Your saved picks are waiting whenever you are ready.</NuviaText>
-            <Pressable onPress={() => router.push('/saved-opportunities')} style={styles.primaryButton}><NuviaText variant="bodyBold">VIEW SAVED</NuviaText></Pressable>
+            <Pressable onPress={() => router.push('/bag?tab=saved')} style={styles.primaryButton}><NuviaText variant="bodyBold">VIEW SAVED</NuviaText></Pressable>
             <Pressable onPress={() => router.push('/(shop)/marketplace')} style={styles.secondaryButton}><NuviaText variant="bodyBold">SEARCH MARKETPLACE</NuviaText></Pressable>
           </View>
         )}

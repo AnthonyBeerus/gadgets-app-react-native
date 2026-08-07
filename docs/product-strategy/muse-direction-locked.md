@@ -100,6 +100,7 @@ Not success: raw GMV as marketplace, content volume without merchant reuse, or c
 | Schema / RPCs | `supabase/migrations/20260807171427_competitive_challenge_pots.sql` (+ feed fix / limit migrations dated 20260807) |
 | Discover | `src/features/discovery/` |
 | Entry / review / settle | challenges screens + `CampaignReviewScreen`, merchant community challenges |
+| Open a shop | `/open-shop` → `src/features/merchant/screens/OpenShopScreen.tsx` (outside merchant guard); Profile + auth intent; dashboard launch checklist |
 | Types | `src/shared/types/database.types.ts` |
 
 Remote project used in this phase: **project-muse-rebuild**. Showcase seed data (100+ pots, Molapo mall) may exist in that DB for demos — **trim before real pilot**.

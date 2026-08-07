@@ -1,17 +1,31 @@
-import { Redirect, Tabs } from "expo-router";
+import { Redirect, Tabs, useRouter } from "expo-router";
 import {
   SafeAreaView,
   useSafeAreaInsets,
 } from "react-native-safe-area-context";
 import { ActivityIndicator, StyleSheet, Platform, View } from "react-native";
 import { FontAwesome, MaterialIcons } from "@expo/vector-icons";
+import { useEffect, useRef } from "react";
 import { useAuth } from "../../shared/providers/auth-provider";
 import { NEO_THEME } from "../../shared/constants/neobrutalism";
 import ShopTabBar from "../../components/shop/ShopTabBar";
+import { consumeOpenShopIntent } from "../../features/merchant/open-shop-intent";
 
 const TabsLayout = () => {
+  const router = useRouter();
   const { session, mounting, isMerchant, activeRole } = useAuth();
   const insets = useSafeAreaInsets();
+  const intentHandled = useRef(false);
+
+  useEffect(() => {
+    if (mounting || !session || isMerchant || intentHandled.current) return;
+    intentHandled.current = true;
+    consumeOpenShopIntent()
+      .then(shouldOpen => {
+        if (shouldOpen) router.replace("/open-shop");
+      })
+      .catch(() => undefined);
+  }, [mounting, session, isMerchant, router]);
 
   if (mounting) return <ActivityIndicator />;
   if (isMerchant && activeRole === 'merchant') return <Redirect href="/(merchant)" />;
@@ -35,6 +49,12 @@ const TabsLayout = () => {
         }}
       />
       <Tabs.Screen
+        name="profile"
+        options={{
+          title: "Profile",
+        }}
+      />
+      <Tabs.Screen
         name="services"
         options={{
           title: "Services",
@@ -53,14 +73,6 @@ const TabsLayout = () => {
         name="events"
         options={{
           title: "Events",
-          href: null,
-        }}
-      />
-
-      <Tabs.Screen
-        name="profile"
-        options={{
-          title: "Profile",
           href: null,
         }}
       />

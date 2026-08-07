@@ -14,8 +14,8 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function MerchantServicesScreen() {
   const router = useRouter();
-  const { merchantShopId } = useAuth();
-  const { data: services, isLoading, error } = getProviderServices(merchantShopId || 0);
+  const { merchantProviderId } = useAuth();
+  const { data: services, isLoading, error } = getProviderServices(merchantProviderId || 0);
   
   // Collapsible Tab Logic
   const { scrollY, headerHeight, tabBarHeight } = useCollapsibleTab();

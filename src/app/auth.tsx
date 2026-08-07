@@ -14,6 +14,7 @@ import { Redirect, Stack } from 'expo-router';
 import { supabase } from '../shared/lib/supabase';
 import { Toast } from 'react-native-toast-notifications';
 import { useAuth } from '../shared/providers/auth-provider';
+import { setOpenShopIntent } from '../features/merchant/open-shop-intent';
 
 const authSchema = zod.object({
   email: zod.string().email({ message: 'Invalid email address' }),
@@ -56,11 +57,23 @@ export default function Auth() {
     if (error) {
       alert(error.message);
     } else {
-      Toast.show(registerAsMerchant ? 'Signed up. Open Merchant Mode to set up your shop.' : 'Signed up successfully', {
-        type: 'success',
-        placement: 'top',
-        duration: 1500,
-      });
+      if (registerAsMerchant) {
+        try {
+          await setOpenShopIntent();
+        } catch {
+          // Intent is best-effort; user can still open a shop from Profile.
+        }
+      }
+      Toast.show(
+        registerAsMerchant
+          ? 'Signed up. Next we will help you open your shop.'
+          : 'Signed up successfully',
+        {
+          type: 'success',
+          placement: 'top',
+          duration: 1500,
+        },
+      );
     }
   };
 

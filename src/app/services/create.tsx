@@ -35,7 +35,7 @@ type ServiceFormData = z.infer<typeof serviceSchema>;
 
 export default function CreateServiceScreen() {
   const router = useRouter();
-  const { merchantShopId } = useAuth(); // Using this as providerId
+  const { merchantProviderId } = useAuth();
   const { mutate: createServiceMutation, isPending } = createService();
   const { data: categories } = getServiceCategories();
 
@@ -55,14 +55,14 @@ export default function CreateServiceScreen() {
   const selectedCategoryId = watch('categoryId');
 
   const onSubmit = (data: ServiceFormData) => {
-    if (!merchantShopId) {
-      Alert.alert("Error", "Merchant Shop ID not found");
+    if (!merchantProviderId) {
+      Alert.alert("Error", "Merchant provider profile not found. Open a shop first.");
       return;
     }
 
     createServiceMutation({
       ...data,
-      providerId: merchantShopId,
+      providerId: merchantProviderId,
     }, {
       onSuccess: () => {
         Alert.alert("Success", "Service created successfully!");

@@ -117,6 +117,30 @@ const AppNavigator = () => {
         options={{ headerShown: false, title: "Auth" }}
       />
       <Stack.Screen
+        name="open-shop"
+        options={{
+          headerShown: false,
+          title: "Open a Shop",
+          animation: "ios_from_right",
+        }}
+      />
+      <Stack.Screen
+        name="bag"
+        options={{
+          headerShown: false,
+          title: "Bag",
+          animation: "ios_from_right",
+        }}
+      />
+      <Stack.Screen
+        name="saved-opportunities"
+        options={{
+          headerShown: false,
+          title: "Saved",
+          animation: "ios_from_right",
+        }}
+      />
+      <Stack.Screen
         name="order-success"
         options={{ headerShown: false, title: "Order Success" }}
       />

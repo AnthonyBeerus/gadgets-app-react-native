@@ -10,7 +10,7 @@ export const CartHeaderButton = () => {
   const { items } = useCartStore();
 
   return (
-    <TouchableOpacity onPress={() => router.push("/cart")} style={styles.container}>
+    <TouchableOpacity onPress={() => router.push("/bag")} style={styles.container}>
       <Ionicons name="cart" size={24} color={NEO_THEME.colors.black} />
       {items.length > 0 && (
         <View style={styles.badge}>
