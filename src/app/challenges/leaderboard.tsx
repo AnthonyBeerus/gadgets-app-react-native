@@ -1,14 +1,18 @@
 import React from 'react';
-import { ActivityIndicator, Linking, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Linking, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { StaticHeader } from '../../shared/components/layout/StaticHeader';
 import { NEO_THEME } from '../../shared/constants/neobrutalism';
 import { useChallengeLeaderboard } from '../../features/challenges/api/submissions';
+import { useNeoStyles } from '../../shared/hooks/useNeoStyles';
+import { useTheme } from '../../shared/providers/theme-provider';
 
 export default function ChallengeLeaderboardRoute() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const styles = useNeoStyles(createStyles);
+  const { theme } = useTheme();
   const { id } = useLocalSearchParams<{ id?: string }>();
   const challengeId = Number(id);
   const board = useChallengeLeaderboard(challengeId);
@@ -17,7 +21,7 @@ export default function ChallengeLeaderboardRoute() {
     <View style={styles.container}>
       <StaticHeader title="LEADERBOARD" onBackPress={() => router.back()} />
       {board.isLoading ? (
-        <ActivityIndicator style={{ marginTop: 40 }} color={NEO_THEME.colors.primary} />
+        <ActivityIndicator style={{ marginTop: 40 }} color={theme.colors.primary} />
       ) : (
         <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: insets.bottom + 24, gap: 10 }}>
           <Text style={styles.helper}>
@@ -47,21 +51,23 @@ export default function ChallengeLeaderboardRoute() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: NEO_THEME.colors.greyLight },
-  helper: { fontFamily: NEO_THEME.fonts.regular, color: NEO_THEME.colors.grey, marginBottom: 8 },
-  row: {
-    flexDirection: 'row',
-    gap: 12,
-    alignItems: 'center',
-    backgroundColor: NEO_THEME.colors.white,
-    borderWidth: 2,
-    borderColor: NEO_THEME.colors.black,
-    borderRadius: 14,
-    padding: 14,
-  },
-  rank: { fontFamily: NEO_THEME.fonts.black, fontSize: 20, width: 44 },
-  score: { fontFamily: NEO_THEME.fonts.bold, fontSize: 16 },
-  meta: { fontFamily: NEO_THEME.fonts.regular, color: NEO_THEME.colors.grey, marginTop: 4 },
-  empty: { fontFamily: NEO_THEME.fonts.bold, textAlign: 'center', marginTop: 40, color: NEO_THEME.colors.grey },
-});
+function createStyles(c: { greyLight: string; grey: string; white: string; border: string }) {
+  return {
+    container: { flex: 1, backgroundColor: c.greyLight },
+    helper: { fontFamily: NEO_THEME.fonts.regular, color: c.grey, marginBottom: 8 },
+    row: {
+      flexDirection: 'row' as const,
+      gap: 12,
+      alignItems: 'center' as const,
+      backgroundColor: c.white,
+      borderWidth: 1,
+      borderColor: c.border,
+      borderRadius: 14,
+      padding: 14,
+    },
+    rank: { fontFamily: NEO_THEME.fonts.black, fontSize: 20, width: 44 },
+    score: { fontFamily: NEO_THEME.fonts.bold, fontSize: 16 },
+    meta: { fontFamily: NEO_THEME.fonts.regular, color: c.grey, marginTop: 4 },
+    empty: { fontFamily: NEO_THEME.fonts.bold, textAlign: 'center' as const, marginTop: 40, color: c.grey },
+  };
+}

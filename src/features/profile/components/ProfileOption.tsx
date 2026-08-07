@@ -1,7 +1,7 @@
 import React from 'react';
 import { TouchableOpacity, View, Text, StyleSheet } from 'react-native';
 import { MaterialIcons, FontAwesome } from '@expo/vector-icons';
-import { NEO_THEME } from '../../../shared/constants/neobrutalism';
+import { fonts, radii, useDesignTokens } from '../../../shared/design-system';
 
 interface ProfileOptionProps {
   icon: string;
@@ -20,26 +20,28 @@ export const ProfileOption = ({
   iconType = "MaterialIcons",
   showArrow = true,
 }: ProfileOptionProps) => {
+  const { colors } = useDesignTokens();
   const IconComponent =
     iconType === "FontAwesome" ? FontAwesome : MaterialIcons;
 
   return (
-    <TouchableOpacity style={styles.optionItem} onPress={onPress}>
+    <TouchableOpacity
+      style={[styles.optionItem, { borderBottomColor: colors.border }]}
+      onPress={onPress}
+    >
       <View style={styles.optionLeft}>
-        <View style={styles.iconContainer}>
-          <IconComponent name={icon as any} size={20} color={NEO_THEME.colors.white} />
+        <View style={[styles.iconContainer, { backgroundColor: colors.gray100 }]}>
+          <IconComponent name={icon as any} size={20} color={colors.ink} />
         </View>
         <View style={styles.optionText}>
-          <Text style={styles.optionTitle}>{title}</Text>
-          {subtitle && <Text style={styles.optionSubtitle}>{subtitle}</Text>}
+          <Text style={[styles.optionTitle, { color: colors.ink }]}>{title}</Text>
+          {subtitle && (
+            <Text style={[styles.optionSubtitle, { color: colors.inkMuted }]}>{subtitle}</Text>
+          )}
         </View>
       </View>
       {showArrow && (
-        <MaterialIcons
-          name="chevron-right"
-          size={24}
-          color={NEO_THEME.colors.black}
-        />
+        <MaterialIcons name="chevron-right" size={24} color={colors.inkMuted} />
       )}
     </TouchableOpacity>
   );
@@ -52,8 +54,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     paddingHorizontal: 16,
     paddingVertical: 16,
-    borderBottomWidth: 2,
-    borderBottomColor: NEO_THEME.colors.black,
+    borderBottomWidth: 1,
   },
   optionLeft: {
     flexDirection: "row",
@@ -63,28 +64,22 @@ const styles = StyleSheet.create({
   iconContainer: {
     width: 40,
     height: 40,
-    borderRadius: NEO_THEME.borders.radius,
-    backgroundColor: NEO_THEME.colors.primary,
+    borderRadius: radii.md,
     alignItems: "center",
     justifyContent: "center",
     marginRight: 12,
-    borderWidth: 2,
-    borderColor: NEO_THEME.colors.black,
   },
   optionText: {
     flex: 1,
   },
   optionTitle: {
     fontSize: 16,
-    fontWeight: "900",
-    color: NEO_THEME.colors.black,
+    fontWeight: '600',
     marginBottom: 2,
-    fontFamily: NEO_THEME.fonts.black,
+    fontFamily: fonts.semibold,
   },
   optionSubtitle: {
     fontSize: 14,
-    color: NEO_THEME.colors.grey,
-    fontWeight: "700",
-    fontFamily: NEO_THEME.fonts.bold,
+    fontFamily: fonts.regular,
   },
 });

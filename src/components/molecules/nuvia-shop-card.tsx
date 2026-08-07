@@ -1,3 +1,5 @@
+import { useNeoStyles } from '../../shared/hooks/useNeoStyles';
+import { useTheme } from '../../shared/providers/theme-provider';
 import React from 'react';
 import { View, StyleSheet, Pressable } from 'react-native';
 import { Image } from 'expo-image';
@@ -23,6 +25,8 @@ interface NuviaShopCardProps {
 }
 
 export const NuviaShopCard: React.FC<NuviaShopCardProps> = ({ shop, onPress }) => {
+  const styles = useNeoStyles(createStyles);
+  const { theme } = useTheme();
   const scale = useSharedValue<number>(SCALE.normal);
 
   const rStyle = useAnimatedStyle(() => ({
@@ -54,15 +58,15 @@ export const NuviaShopCard: React.FC<NuviaShopCardProps> = ({ shop, onPress }) =
         {shop.is_open === false ? (
           <NuviaTag 
             label="CLOSED" 
-            color={NEO_THEME.colors.black} 
+            color={theme.colors.black} 
             style={styles.closedBadge} 
-            textStyle={{ color: NEO_THEME.colors.white }}
+            textStyle={{ color: theme.colors.white }}
           />
         ) : null}
         {Number(shop.rating) > 0 ? (
           <View style={styles.ratingBadge}>
-            <Ionicons name="star" size={14} color={NEO_THEME.colors.secondary} />
-            <NuviaText variant="label" color={NEO_THEME.colors.white} style={{ fontSize: 12 }}>
+            <Ionicons name="star" size={14} color={theme.colors.secondary} />
+            <NuviaText variant="label" color={theme.colors.white} style={{ fontSize: 12 }}>
               {String(shop.rating)}
             </NuviaText>
           </View>
@@ -77,10 +81,10 @@ export const NuviaShopCard: React.FC<NuviaShopCardProps> = ({ shop, onPress }) =
         <View style={styles.footer}>
           <NuviaTag 
             label={shop.category?.name || 'SHOP'} 
-            color={NEO_THEME.colors.mint} 
+            color={theme.colors.mint} 
           />
           <View style={styles.arrowCircle}>
-             <Ionicons name="arrow-forward" size={18} color={NEO_THEME.colors.black} />
+             <Ionicons name="arrow-forward" size={18} color={theme.colors.black} />
           </View>
         </View>
       </View>
@@ -88,27 +92,28 @@ export const NuviaShopCard: React.FC<NuviaShopCardProps> = ({ shop, onPress }) =
   );
 };
 
-const styles = StyleSheet.create({
+function createStyles(c) {
+  return {
   container: {
-    backgroundColor: NEO_THEME.colors.white,
+    backgroundColor: c.white,
     borderRadius: 16,
-    borderWidth: 2,
-    borderColor: NEO_THEME.colors.black,
+    borderWidth: 1,
+    borderColor: c.border,
     marginBottom: 20,
     overflow: 'hidden',
     // Hard Shadow
-    shadowColor: NEO_THEME.colors.black,
-    shadowOffset: { width: 4, height: 4 },
-    shadowOpacity: 1,
-    shadowRadius: 0,
-    elevation: 4,
+    shadowColor: c.black,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 2,
   },
   imageContainer: {
     width: '100%',
     height: 180,
-    backgroundColor: NEO_THEME.colors.background,
-    borderBottomWidth: 2,
-    borderColor: NEO_THEME.colors.black,
+    backgroundColor: c.background,
+    borderBottomWidth: 1,
+    borderColor: c.border,
     position: 'relative',
   },
   image: {
@@ -126,7 +131,7 @@ const styles = StyleSheet.create({
     left: 12,
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: NEO_THEME.colors.dark,
+    backgroundColor: c.dark,
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 8,
@@ -148,10 +153,11 @@ const styles = StyleSheet.create({
       width: 36,
       height: 36,
       borderRadius: 18,
-      backgroundColor: NEO_THEME.colors.background,
-      borderWidth: 1.5,
-      borderColor: NEO_THEME.colors.black,
+      backgroundColor: c.background,
+      borderWidth: 1,
+      borderColor: c.border,
       alignItems: 'center',
       justifyContent: 'center',
   }
-});
+  };
+}

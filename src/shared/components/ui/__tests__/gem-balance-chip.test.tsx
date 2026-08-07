@@ -4,27 +4,12 @@ import { GemBalanceChip } from '../gem-balance-chip';
 import { useGemStore } from '../../../../features/gems/store/gem-store';
 import { useRouter } from 'expo-router';
 
-// Mocks
 jest.mock('expo-router', () => ({
   useRouter: jest.fn(),
 }));
 
 jest.mock('../../../../features/gems/store/gem-store', () => ({
   useGemStore: jest.fn(),
-}));
-
-jest.mock('../../../constants/neobrutalism', () => ({
-  NEO_THEME: {
-    colors: { 
-      primary: '#6B46C1',
-      gemGold: '#F6AD55',
-      black: '#1A202C',
-      success: '#48BB78'
-    },
-    fonts: { bold: 'Inter_700Bold' },
-    borders: { width: 3 },
-    shadows: { hardSmall: '2px 2px 0px #1A202C' }
-  }
 }));
 
 jest.mock('react-native-purchases', () => ({
@@ -36,7 +21,6 @@ jest.mock('@expo/vector-icons', () => ({
   Ionicons: 'Ionicons',
 }));
 
-// Global Reanimated mock
 global.ReanimatedDataMock = {
   now: () => 0,
 };
@@ -65,7 +49,6 @@ describe('GemBalanceChip', () => {
 
   it('should display formatted balance', () => {
     const { getByText } = render(<GemBalanceChip />);
-    // Balance 1250 formatted as "1,250"
     expect(getByText(/1.?250/)).toBeTruthy();
   });
 });

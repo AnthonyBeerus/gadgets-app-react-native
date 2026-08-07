@@ -10,11 +10,15 @@ import {
 import { useLocalSearchParams, router } from "expo-router";
 import { MaterialIcons } from "@expo/vector-icons";
 import { NEO_THEME } from "../../shared/constants/neobrutalism";
+import { useNeoStyles } from "../../shared/hooks/useNeoStyles";
+import { useTheme } from "../../shared/providers/theme-provider";
 
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const ServiceDetailsScreen = () => {
   const insets = useSafeAreaInsets();
+  const styles = useNeoStyles(createStyles);
+  const { theme } = useTheme();
   const params = useLocalSearchParams<{
     serviceId: string;
     serviceName: string;
@@ -44,7 +48,7 @@ const ServiceDetailsScreen = () => {
       {/* Header */}
       <View style={[styles.header, { paddingTop: insets.top + 16 }]}>
         <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-          <MaterialIcons name="arrow-back" size={24} color={NEO_THEME.colors.black} />
+          <MaterialIcons name="arrow-back" size={24} color={theme.colors.black} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>SERVICE DETAILS</Text>
         <View style={styles.headerSpacer} />
@@ -55,7 +59,7 @@ const ServiceDetailsScreen = () => {
         <View style={styles.serviceHeader}>
           <Text style={styles.serviceName}>{params.serviceName}</Text>
           <View style={styles.ratingBadge}>
-            <MaterialIcons name="star" size={18} color={NEO_THEME.colors.black} />
+            <MaterialIcons name="star" size={18} color={theme.colors.black} />
             <Text style={styles.ratingText}>{params.rating || "5.0"}</Text>
           </View>
         </View>
@@ -64,7 +68,7 @@ const ServiceDetailsScreen = () => {
         <View style={styles.providerSection}>
           <Text style={styles.sectionTitle}>PROVIDER</Text>
           <View style={styles.providerCard}>
-            <MaterialIcons name="store" size={32} color={NEO_THEME.colors.primary} />
+            <MaterialIcons name="store" size={32} color={theme.colors.primary} />
             <Text style={styles.providerName}>{params.providerName}</Text>
           </View>
         </View>
@@ -74,14 +78,14 @@ const ServiceDetailsScreen = () => {
           <Text style={styles.sectionTitle}>DETAILS</Text>
           <View style={styles.detailsCard}>
             <View style={styles.detailRow}>
-              <MaterialIcons name="schedule" size={24} color={NEO_THEME.colors.grey} />
+              <MaterialIcons name="schedule" size={24} color={theme.colors.grey} />
               <View style={styles.detailContent}>
                 <Text style={styles.detailLabel}>Duration</Text>
                 <Text style={styles.detailValue}>{params.duration} minutes</Text>
               </View>
             </View>
             <View style={styles.detailRow}>
-              <MaterialIcons name="payments" size={24} color={NEO_THEME.colors.grey} />
+              <MaterialIcons name="payments" size={24} color={theme.colors.grey} />
               <View style={styles.detailContent}>
                 <Text style={styles.detailLabel}>Price</Text>
                 <Text style={styles.detailValue}>${params.price}</Text>
@@ -116,24 +120,33 @@ const ServiceDetailsScreen = () => {
 
 export default ServiceDetailsScreen;
 
-const styles = StyleSheet.create({
+function createStyles(c: {
+  backgroundLight: string;
+  white: string;
+  border: string;
+  black: string;
+  grey: string;
+  yellow: string;
+  primary: string;
+}) {
+  return {
   container: {
     flex: 1,
-    backgroundColor: NEO_THEME.colors.backgroundLight,
+    backgroundColor: c.backgroundLight,
   },
   header: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
+    justifyContent: "space-between" as const,
     paddingHorizontal: 16,
     paddingBottom: 16,
-    backgroundColor: NEO_THEME.colors.white,
-    borderBottomWidth: NEO_THEME.borders.width,
-    borderBottomColor: NEO_THEME.colors.black,
-    shadowColor: NEO_THEME.colors.black,
+    backgroundColor: c.white,
+    borderBottomWidth: 1,
+    borderBottomColor: c.border,
+    shadowColor: c.black,
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 1,
-    shadowRadius: 0,
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
     elevation: 0,
   },
   backButton: {
@@ -141,8 +154,8 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     fontSize: 18,
-    fontWeight: "900",
-    color: NEO_THEME.colors.black,
+    fontWeight: '600' as const,
+    color: c.black,
     fontFamily: NEO_THEME.fonts.black,
   },
   headerSpacer: {
@@ -152,40 +165,40 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   serviceHeader: {
-    backgroundColor: NEO_THEME.colors.white,
+    backgroundColor: c.white,
     padding: 24,
     marginBottom: 16,
-    borderBottomWidth: NEO_THEME.borders.width,
-    borderBottomColor: NEO_THEME.colors.black,
-    shadowColor: NEO_THEME.colors.black,
+    borderBottomWidth: 1,
+    borderBottomColor: c.border,
+    shadowColor: c.black,
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 1,
-    shadowRadius: 0,
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
     elevation: 0,
   },
   serviceName: {
     fontSize: 28,
-    fontWeight: "900",
-    color: NEO_THEME.colors.black,
+    fontWeight: '600' as const,
+    color: c.black,
     fontFamily: NEO_THEME.fonts.black,
-    textTransform: "uppercase",
+    textTransform: "uppercase" as const,
     marginBottom: 12,
   },
   ratingBadge: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: NEO_THEME.colors.yellow,
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
+    backgroundColor: c.yellow,
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: NEO_THEME.borders.radius,
-    alignSelf: "flex-start",
-    borderWidth: 2,
-    borderColor: NEO_THEME.colors.black,
+    alignSelf: "flex-start" as const,
+    borderWidth: 1,
+    borderColor: c.border,
   },
   ratingText: {
     fontSize: 16,
-    fontWeight: "900",
-    color: NEO_THEME.colors.black,
+    fontWeight: '600' as const,
+    color: c.black,
     fontFamily: NEO_THEME.fonts.black,
     marginLeft: 6,
   },
@@ -195,29 +208,29 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 16,
-    fontWeight: "900",
-    color: NEO_THEME.colors.black,
+    fontWeight: '600' as const,
+    color: c.black,
     fontFamily: NEO_THEME.fonts.black,
     marginBottom: 12,
   },
   providerCard: {
-    backgroundColor: NEO_THEME.colors.white,
-    flexDirection: "row",
-    alignItems: "center",
+    backgroundColor: c.white,
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
     padding: 16,
     borderRadius: NEO_THEME.borders.radius,
-    borderWidth: NEO_THEME.borders.width,
-    borderColor: NEO_THEME.colors.black,
-    shadowColor: NEO_THEME.colors.black,
-    shadowOffset: { width: 3, height: 3 },
-    shadowOpacity: 1,
-    shadowRadius: 0,
+    borderWidth: 1,
+    borderColor: c.border,
+    shadowColor: c.black,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
     elevation: 0,
   },
   providerName: {
     fontSize: 18,
-    fontWeight: "900",
-    color: NEO_THEME.colors.black,
+    fontWeight: '600' as const,
+    color: c.black,
     fontFamily: NEO_THEME.fonts.black,
     marginLeft: 12,
   },
@@ -226,20 +239,20 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   detailsCard: {
-    backgroundColor: NEO_THEME.colors.white,
+    backgroundColor: c.white,
     borderRadius: NEO_THEME.borders.radius,
-    borderWidth: NEO_THEME.borders.width,
-    borderColor: NEO_THEME.colors.black,
-    shadowColor: NEO_THEME.colors.black,
-    shadowOffset: { width: 3, height: 3 },
-    shadowOpacity: 1,
-    shadowRadius: 0,
+    borderWidth: 1,
+    borderColor: c.border,
+    shadowColor: c.black,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
     elevation: 0,
     padding: 16,
   },
   detailRow: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
     marginBottom: 16,
   },
   detailContent: {
@@ -248,15 +261,15 @@ const styles = StyleSheet.create({
   },
   detailLabel: {
     fontSize: 14,
-    color: NEO_THEME.colors.grey,
-    fontWeight: "700",
+    color: c.grey,
+    fontWeight: "700" as const,
     fontFamily: NEO_THEME.fonts.bold,
     marginBottom: 4,
   },
   detailValue: {
     fontSize: 18,
-    fontWeight: "900",
-    color: NEO_THEME.colors.black,
+    fontWeight: '600' as const,
+    color: c.black,
     fontFamily: NEO_THEME.fonts.black,
   },
   descriptionSection: {
@@ -264,54 +277,55 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   descriptionCard: {
-    backgroundColor: NEO_THEME.colors.white,
+    backgroundColor: c.white,
     borderRadius: NEO_THEME.borders.radius,
-    borderWidth: NEO_THEME.borders.width,
-    borderColor: NEO_THEME.colors.black,
-    shadowColor: NEO_THEME.colors.black,
-    shadowOffset: { width: 3, height: 3 },
-    shadowOpacity: 1,
-    shadowRadius: 0,
+    borderWidth: 1,
+    borderColor: c.border,
+    shadowColor: c.black,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
     elevation: 0,
     padding: 16,
   },
   descriptionText: {
     fontSize: 16,
     lineHeight: 24,
-    color: NEO_THEME.colors.black,
-    fontWeight: "500",
+    color: c.black,
+    fontWeight: "500" as const,
   },
   bottomSpacing: {
     height: 120,
   },
   bookButtonContainer: {
     padding: 20,
-    backgroundColor: NEO_THEME.colors.white,
-    borderTopWidth: NEO_THEME.borders.width,
-    borderTopColor: NEO_THEME.colors.black,
-    shadowColor: NEO_THEME.colors.black,
+    backgroundColor: c.white,
+    borderTopWidth: 1,
+    borderTopColor: c.border,
+    shadowColor: c.black,
     shadowOffset: { width: 0, height: -4 },
-    shadowOpacity: 1,
-    shadowRadius: 0,
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
     elevation: 0,
   },
   bookButton: {
-    backgroundColor: NEO_THEME.colors.primary,
+    backgroundColor: c.primary,
     borderRadius: NEO_THEME.borders.radius,
     paddingVertical: 18,
-    alignItems: "center",
-    borderWidth: NEO_THEME.borders.width,
-    borderColor: NEO_THEME.colors.black,
-    shadowColor: NEO_THEME.colors.black,
-    shadowOffset: { width: 4, height: 4 },
-    shadowOpacity: 1,
-    shadowRadius: 0,
+    alignItems: "center" as const,
+    borderWidth: 1,
+    borderColor: c.border,
+    shadowColor: c.black,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
     elevation: 0,
   },
   bookButtonText: {
     fontSize: 18,
-    fontWeight: "900",
-    color: NEO_THEME.colors.white,
+    fontWeight: '600' as const,
+    color: c.white,
     fontFamily: NEO_THEME.fonts.black,
   },
-});
+  };
+}

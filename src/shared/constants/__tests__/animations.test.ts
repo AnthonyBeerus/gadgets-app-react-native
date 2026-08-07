@@ -46,9 +46,9 @@ describe('Animation Constants', () => {
 
   describe('SCALE', () => {
     it('should export scale values', () => {
-      expect(SCALE.pressed).toBe(0.97);
+      expect(SCALE.pressed).toBe(0.98);
       expect(SCALE.normal).toBe(1);
-      expect(SCALE.active).toBe(1.02);
+      expect(SCALE.active).toBe(1.01);
     });
   });
 

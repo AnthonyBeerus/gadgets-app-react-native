@@ -1,3 +1,5 @@
+import { useNeoStyles } from '../../../shared/hooks/useNeoStyles';
+import { useTheme } from '../../../shared/providers/theme-provider';
 import React, { useEffect } from "react";
 import {
   View,
@@ -31,6 +33,8 @@ import { NuviaText } from "../../../components/atoms/nuvia-text";
 const { width } = Dimensions.get("window");
 
 export default function ShopsScreen() {
+  const styles = useNeoStyles(createStyles);
+  const { theme } = useTheme();
   const router = useRouter();
   const scrollViewRef = React.useRef<ScrollView>(null);
   const [currentSlide, setCurrentSlide] = React.useState(0);
@@ -100,7 +104,7 @@ export default function ShopsScreen() {
   const renderSmallTitle = () => (
     <TouchableOpacity onPress={() => router.push("/mall-selector")} activeOpacity={0.7} style={{ flexDirection: 'row', alignItems: 'center' }}>
       <NuviaText variant="label" style={{ marginRight: 4 }}>{mallName}</NuviaText>
-      <Ionicons name="chevron-down" size={16} color={NEO_THEME.colors.black} />
+      <Ionicons name="chevron-down" size={16} color={theme.colors.black} />
     </TouchableOpacity>
   );
 
@@ -112,7 +116,7 @@ export default function ShopsScreen() {
     >
       <View>
         <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 4 }}>
-           <NuviaTag label="CURRENT LOCATION" color={NEO_THEME.colors.secondary} />
+           <NuviaTag label="CURRENT LOCATION" color={theme.colors.secondary} />
         </View>
 
         <NuviaText variant="display" style={{ fontSize: 36, lineHeight: 42, marginBottom: 8 }}>
@@ -123,7 +127,7 @@ export default function ShopsScreen() {
             <NuviaText variant="label" style={{ textDecorationLine: 'underline', marginRight: 4 }}>
               CHANGE
             </NuviaText>
-            <Ionicons name="arrow-forward" size={14} color={NEO_THEME.colors.black} />
+            <Ionicons name="arrow-forward" size={14} color={theme.colors.black} />
          </View>
       </View>
     </TouchableOpacity>
@@ -146,7 +150,7 @@ export default function ShopsScreen() {
             placeholder="Search shops or categories..."
             value={searchQuery}
             onChangeText={setSearchQuery}
-            leftIcon={<Ionicons name="search" size={20} color={NEO_THEME.colors.grey} />}
+            leftIcon={<Ionicons name="search" size={20} color={theme.colors.grey} />}
           />
         </Animated.View>
 
@@ -181,11 +185,11 @@ export default function ShopsScreen() {
                         transition={200}
                       />
                       <View style={styles.heroOverlay}>
-                        <NuviaText variant="h1" color={NEO_THEME.colors.white}>
+                        <NuviaText variant="h1" color={theme.colors.white}>
                             {shop.name}
                         </NuviaText>
                         {shop.category && (
-                          <NuviaTag label={shop.category.name} color={NEO_THEME.colors.primary} style={{ marginTop: 4 }} />
+                          <NuviaTag label={shop.category.name} color={theme.colors.primary} style={{ marginTop: 4 }} />
                         )}
                       </View>
                     </View>
@@ -212,7 +216,7 @@ export default function ShopsScreen() {
               >
                 <NuviaTag 
                     label={item.name} 
-                    color={selectedCategory === item.id ? NEO_THEME.colors.primary : NEO_THEME.colors.white}
+                    color={selectedCategory === item.id ? theme.colors.primary : theme.colors.white}
                     style={{ 
                         paddingHorizontal: 16, 
                         paddingVertical: 8,
@@ -227,12 +231,12 @@ export default function ShopsScreen() {
         <View style={styles.listContainer}>
           {error && (
             <View style={styles.inlineError}>
-              <Ionicons name="warning-outline" size={22} color={NEO_THEME.colors.black} />
+              <Ionicons name="warning-outline" size={22} color={theme.colors.black} />
               <NuviaText variant="body" style={styles.inlineErrorText}>{error}</NuviaText>
             </View>
           )}
           {loading ? (
-            <ActivityIndicator size="large" color={NEO_THEME.colors.primary} style={{ marginTop: 40 }} />
+            <ActivityIndicator size="large" color={theme.colors.primary} style={{ marginTop: 40 }} />
           ) : (
             <FlashList
               data={shops}
@@ -242,7 +246,7 @@ export default function ShopsScreen() {
               scrollEnabled={false}
               ListEmptyComponent={
                 <View style={styles.emptyState}>
-                  <Ionicons name="storefront-outline" size={48} color={NEO_THEME.colors.grey} />
+                  <Ionicons name="storefront-outline" size={48} color={theme.colors.grey} />
                   <NuviaText variant="h2" style={styles.emptyTitle}>No shops yet</NuviaText>
                   <NuviaText variant="body" style={styles.emptyCopy}>
                     Merchants are setting up their storefronts. Check back soon or open your own shop from Merchant Mode.
@@ -257,7 +261,8 @@ export default function ShopsScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+function createStyles(c) {
+  return {
   smallHeaderContent: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -265,8 +270,8 @@ const styles = StyleSheet.create({
   },
   smallHeaderTitle: {
     fontSize: 16,
-    fontWeight: "900",
-    color: NEO_THEME.colors.black,
+    fontWeight: '600',
+    color: c.black,
     fontFamily: NEO_THEME.fonts.black,
     textTransform: "uppercase",
   },
@@ -288,17 +293,17 @@ const styles = StyleSheet.create({
   searchWrapper: {
     flexDirection: 'row',
     height: 48,
-    borderWidth: NEO_THEME.borders.width,
-    borderColor: NEO_THEME.colors.black,
-    backgroundColor: NEO_THEME.colors.white,
+    borderWidth: 1,
+    borderColor: c.border,
+    backgroundColor: c.white,
     borderRadius: NEO_THEME.borders.radius,
     overflow: 'hidden',
     // Hard shadow for search bar
-    shadowColor: NEO_THEME.colors.black,
-    shadowOffset: { width: 4, height: 4 },
-    shadowOpacity: 1,
-    shadowRadius: 0,
-    elevation: 4,
+    shadowColor: c.black,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 2,
   },
   searchInput: {
     flex: 1,
@@ -306,18 +311,18 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     fontFamily: NEO_THEME.fonts.regular,
     fontSize: 14,
-    color: NEO_THEME.colors.black,
+    color: c.black,
   },
   searchButton: {
-    backgroundColor: NEO_THEME.colors.secondary, // Yellow CTA
+    backgroundColor: c.secondary, // Yellow CTA
     paddingHorizontal: 24,
     justifyContent: 'center',
-    borderLeftWidth: NEO_THEME.borders.width,
-    borderColor: NEO_THEME.colors.black,
+    borderLeftWidth: 1,
+    borderColor: c.border,
   },
   searchButtonText: {
     fontFamily: NEO_THEME.fonts.bold,
-    color: NEO_THEME.colors.black,
+    color: c.black,
     fontSize: 14,
     fontWeight: '700',
   },
@@ -334,15 +339,15 @@ const styles = StyleSheet.create({
     width: width - 32, // Account for padding
   },
   heroBorder: {
-    borderWidth: NEO_THEME.borders.width,
-    borderColor: NEO_THEME.colors.black,
+    borderWidth: 1,
+    borderColor: c.border,
     borderRadius: NEO_THEME.borders.radius,
-    shadowColor: NEO_THEME.colors.black,
-    shadowOffset: { width: 4, height: 4 },
-    shadowOpacity: 1,
-    shadowRadius: 0,
-    elevation: 4,
-    backgroundColor: NEO_THEME.colors.white,
+    shadowColor: c.black,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 2,
+    backgroundColor: c.white,
     overflow: 'hidden',
   },
   heroImageContainer: {
@@ -363,17 +368,17 @@ const styles = StyleSheet.create({
   heroTitle: {
     fontFamily: NEO_THEME.fonts.black,
     fontSize: 28,
-    color: NEO_THEME.colors.white,
-    textShadowColor: NEO_THEME.colors.black,
+    color: c.white,
+    textShadowColor: c.black,
     textShadowOffset: { width: 2, height: 2 },
     textShadowRadius: 0,
-    fontWeight: '900',
+    fontWeight: '600',
   },
   heroSubtitle: {
     fontFamily: NEO_THEME.fonts.bold,
     fontSize: 14,
-    color: NEO_THEME.colors.white,
-    textShadowColor: NEO_THEME.colors.black,
+    color: c.white,
+    textShadowColor: c.black,
     textShadowOffset: { width: 1, height: 1 },
     textShadowRadius: 0,
     marginTop: 4,
@@ -387,13 +392,13 @@ const styles = StyleSheet.create({
   dot: {
     width: 12,
     height: 12,
-    backgroundColor: NEO_THEME.colors.white,
-    borderWidth: NEO_THEME.borders.width,
-    borderColor: NEO_THEME.colors.black,
+    backgroundColor: c.white,
+    borderWidth: 1,
+    borderColor: c.border,
     borderRadius: 6,
   },
   activeDot: {
-    backgroundColor: NEO_THEME.colors.black,
+    backgroundColor: c.black,
   },
   filtersContainer: {
     paddingHorizontal: 16,
@@ -402,21 +407,21 @@ const styles = StyleSheet.create({
   filterPill: {
     paddingHorizontal: 20,
     paddingVertical: 10,
-    borderWidth: NEO_THEME.borders.width,
-    borderColor: NEO_THEME.colors.black,
+    borderWidth: 1,
+    borderColor: c.border,
     borderRadius: 20, // Pill shape
   },
   activeFilterPill: {
-    backgroundColor: NEO_THEME.colors.primary, // Lilac for active
-    shadowColor: NEO_THEME.colors.black,
-    shadowOffset: { width: 2, height: 2 },
-    shadowOpacity: 1,
-    shadowRadius: 0,
+    backgroundColor: c.primary, // Lilac for active
+    shadowColor: c.black,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
     elevation: 2,
     transform: [{ translateY: -2 }], // Pop up slightly
   },
   inactiveFilterPill: {
-    backgroundColor: NEO_THEME.colors.white,
+    backgroundColor: c.white,
   },
   filterText: {
     fontFamily: NEO_THEME.fonts.bold,
@@ -424,10 +429,10 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
   activeFilterText: {
-    color: NEO_THEME.colors.white,
+    color: c.white,
   },
   inactiveFilterText: {
-    color: NEO_THEME.colors.black,
+    color: c.black,
   },
   listContainer: {
     paddingHorizontal: 16,
@@ -436,9 +441,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
-    backgroundColor: NEO_THEME.colors.yellow,
-    borderWidth: NEO_THEME.borders.width,
-    borderColor: NEO_THEME.colors.black,
+    backgroundColor: c.yellow,
+    borderWidth: 1,
+    borderColor: c.border,
     borderRadius: NEO_THEME.borders.radius,
     padding: 12,
     marginBottom: 16,
@@ -459,9 +464,10 @@ const styles = StyleSheet.create({
   emptyCopy: {
     marginTop: 8,
     textAlign: 'center',
-    color: NEO_THEME.colors.grey,
+    color: c.grey,
   },
   columnWrapper: {
     justifyContent: 'space-between',
   },
-});
+  };
+}

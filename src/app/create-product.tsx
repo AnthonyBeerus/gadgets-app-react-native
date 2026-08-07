@@ -1,15 +1,18 @@
 import React from 'react';
-import { View, StyleSheet, Alert, Text } from 'react-native';
+import { View, Alert } from 'react-native';
 import { Stack, useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import ProductForm, { ProductFormData } from '../components/products/ProductForm';
 import { createProduct, uploadProductImage } from '../shared/api/api';
-import { NEO_THEME } from '../shared/constants/neobrutalism';
 import { useAuth } from '../shared/providers/auth-provider';
+import { useTheme } from '../shared/providers/theme-provider';
+import { useNeoStyles } from '../shared/hooks/useNeoStyles';
 
 export default function CreateProductScreen() {
   const router = useRouter();
   const { merchantShopId } = useAuth();
+  const { theme } = useTheme();
+  const styles = useNeoStyles(createStyles);
   const createProductMutation = createProduct();
   
   const [isSubmitting, setIsSubmitting] = React.useState(false);
@@ -27,10 +30,8 @@ export default function CreateProductScreen() {
 
     setIsSubmitting(true);
     try {
-      // 1. Upload images
       const imageUrls: string[] = [];
       for (const uri of images) {
-        // Check if it's already a remote URL (in case of edit, but here it's create)
         if (uri.startsWith('http')) {
             imageUrls.push(uri);
         } else {
@@ -39,12 +40,11 @@ export default function CreateProductScreen() {
         }
       }
 
-      // 2. Create product
       await createProductMutation.mutateAsync({
         ...data,
         shop_id: merchantShopId,
         imagesUrl: imageUrls,
-        heroImage: imageUrls[0], // First image is hero
+        heroImage: imageUrls[0],
       });
 
       Alert.alert("Success", "Product created successfully", [
@@ -64,8 +64,8 @@ export default function CreateProductScreen() {
         options={{
             headerShown: true,
             title: "Add Product",
-            headerStyle: { backgroundColor: NEO_THEME.colors.backgroundLight },
-            headerTintColor: NEO_THEME.colors.black,
+            headerStyle: { backgroundColor: theme.colors.backgroundLight },
+            headerTintColor: theme.colors.black,
         }} 
       />
       <View style={styles.content}>
@@ -75,12 +75,14 @@ export default function CreateProductScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: NEO_THEME.colors.backgroundLight,
-  },
-  content: {
-    flex: 1,
-  },
-});
+function createStyles(c: { backgroundLight: string }) {
+  return {
+    container: {
+      flex: 1,
+      backgroundColor: c.backgroundLight,
+    },
+    content: {
+      flex: 1,
+    },
+  };
+}

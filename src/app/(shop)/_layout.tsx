@@ -7,7 +7,6 @@ import { ActivityIndicator, StyleSheet, Platform, View } from "react-native";
 import { FontAwesome, MaterialIcons } from "@expo/vector-icons";
 import { useEffect, useRef } from "react";
 import { useAuth } from "../../shared/providers/auth-provider";
-import { NEO_THEME } from "../../shared/constants/neobrutalism";
 import ShopTabBar from "../../components/shop/ShopTabBar";
 import { consumeOpenShopIntent } from "../../features/merchant/open-shop-intent";
 

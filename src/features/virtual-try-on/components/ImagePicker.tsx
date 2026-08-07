@@ -4,9 +4,7 @@ import {
   View,
   TouchableOpacity,
   Text,
-  Image,
-  StyleSheet,
-  Alert,
+  Image, Alert,
   ScrollView,
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
@@ -14,6 +12,7 @@ import { useTryOnStore } from "../store/tryOnStore";
 import PoseSelector from "./PoseSelector";
 import BackgroundSelector from "./BackgroundSelector";
 import { NEO_THEME } from '../../../shared/constants/neobrutalism';
+import { useNeoStyles } from '../../../shared/hooks/useNeoStyles';
 
 interface ImagePickerProps {
   onImageSelected?: (uri: string) => void;
@@ -24,6 +23,7 @@ export default function ImagePickerComponent({
   onImageSelected,
   onReadyToGenerate,
 }: ImagePickerProps) {
+  const styles = useNeoStyles(createStyles);
   const { setUserImage } = useTryOnStore();
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
@@ -146,10 +146,11 @@ export default function ImagePickerComponent({
 }
 
 
-const styles = StyleSheet.create({
+function createStyles(c) {
+  return {
   scrollContainer: {
     flex: 1,
-    backgroundColor: NEO_THEME.colors.backgroundLight,
+    backgroundColor: c.backgroundLight,
   },
   container: {
     padding: 24,
@@ -159,8 +160,8 @@ const styles = StyleSheet.create({
     fontSize: 20,
     marginBottom: 32,
     textAlign: "center",
-    fontWeight: "900",
-    color: NEO_THEME.colors.black,
+    fontWeight: '600',
+    color: c.black,
     fontFamily: NEO_THEME.fonts.black,
     textTransform: "uppercase",
   },
@@ -170,23 +171,23 @@ const styles = StyleSheet.create({
     gap: 16,
   },
   button: {
-    backgroundColor: NEO_THEME.colors.primary,
+    backgroundColor: c.primary,
     paddingVertical: 18,
     paddingHorizontal: 24,
     borderRadius: NEO_THEME.borders.radius,
     alignItems: "center",
-    borderWidth: NEO_THEME.borders.width,
-    borderColor: NEO_THEME.colors.black,
-    shadowColor: NEO_THEME.colors.black,
-    shadowOffset: { width: 4, height: 4 },
-    shadowOpacity: 1,
-    shadowRadius: 0,
+    borderWidth: 1,
+    borderColor: c.border,
+    shadowColor: c.black,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
     elevation: 0,
   },
   buttonText: {
-    color: NEO_THEME.colors.white,
+    color: c.white,
     fontSize: 18,
-    fontWeight: "900",
+    fontWeight: '600',
     fontFamily: NEO_THEME.fonts.black,
   },
   imageContainer: {
@@ -198,26 +199,26 @@ const styles = StyleSheet.create({
     width: 280,
     height: 280,
     borderRadius: NEO_THEME.borders.radius,
-    borderWidth: NEO_THEME.borders.width,
-    borderColor: NEO_THEME.colors.black,
+    borderWidth: 1,
+    borderColor: c.border,
   },
   changeButton: {
-    backgroundColor: NEO_THEME.colors.yellow,
+    backgroundColor: c.yellow,
     paddingHorizontal: 32,
     paddingVertical: 14,
     borderRadius: NEO_THEME.borders.radius,
-    borderWidth: NEO_THEME.borders.width,
-    borderColor: NEO_THEME.colors.black,
-    shadowColor: NEO_THEME.colors.black,
-    shadowOffset: { width: 3, height: 3 },
-    shadowOpacity: 1,
-    shadowRadius: 0,
+    borderWidth: 1,
+    borderColor: c.border,
+    shadowColor: c.black,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
     elevation: 0,
   },
   changeButtonText: {
-    color: NEO_THEME.colors.black,
+    color: c.black,
     fontSize: 16,
-    fontWeight: "900",
+    fontWeight: '600',
     fontFamily: NEO_THEME.fonts.black,
   },
   selectorSection: {
@@ -225,24 +226,25 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   generateButton: {
-    backgroundColor: NEO_THEME.colors.primary,
+    backgroundColor: c.primary,
     paddingVertical: 18,
     paddingHorizontal: 48,
     borderRadius: NEO_THEME.borders.radius,
     alignItems: "center",
     marginTop: 16,
-    borderWidth: NEO_THEME.borders.width,
-    borderColor: NEO_THEME.colors.black,
-    shadowColor: NEO_THEME.colors.black,
-    shadowOffset: { width: 5, height: 5 },
-    shadowOpacity: 1,
-    shadowRadius: 0,
+    borderWidth: 1,
+    borderColor: c.border,
+    shadowColor: c.black,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
     elevation: 0,
   },
   generateButtonText: {
-    color: NEO_THEME.colors.white,
+    color: c.white,
     fontSize: 18,
-    fontWeight: "900",
+    fontWeight: '600',
     fontFamily: NEO_THEME.fonts.black,
   },
-});
+  };
+}

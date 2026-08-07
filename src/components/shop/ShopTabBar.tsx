@@ -5,13 +5,10 @@ import Animated, { useAnimatedStyle, withTiming } from 'react-native-reanimated'
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 
-import { NuviaText } from '../../components/atoms/nuvia-text';
-import { NEO_THEME } from '../../shared/constants/neobrutalism';
+import { Text, radii, space, useDesignTokens } from '../../shared/design-system';
 import { useCartStore } from '../../store/cart-store';
 
-/** Primary shop tabs — mirrors Yapanese: left pill + right FAB. */
 const pillRoutes = ['index', 'marketplace', 'profile'] as const;
-
 type PillRoute = (typeof pillRoutes)[number];
 
 function routeIcon(name: PillRoute): keyof typeof Ionicons.glyphMap {
@@ -29,6 +26,7 @@ function routeLabel(name: PillRoute) {
 export default function ShopTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
   const insets = useSafeAreaInsets();
   const router = useRouter();
+  const { colors, elevation } = useDesignTokens();
   const itemCount = useCartStore(s => s.getItemCount());
   const focusedRoute = state.routes[state.index]?.name;
 
@@ -54,8 +52,16 @@ export default function ShopTabBar({ state, descriptors, navigation }: BottomTab
         animatedStyle,
       ]}
     >
-      {/* Left pill — navigation */}
-      <View style={styles.pill}>
+      <View
+        style={[
+          styles.pill,
+          {
+            backgroundColor: colors.surface,
+            borderColor: colors.border,
+            ...elevation.soft,
+          },
+        ]}
+      >
         {routes.map(route => {
           const index = state.routes.indexOf(route);
           const focused = state.index === index;
@@ -79,32 +85,30 @@ export default function ShopTabBar({ state, descriptors, navigation }: BottomTab
                   navigation.navigate(route.name, route.params);
                 }
               }}
-              style={styles.tab}
+              style={[styles.tab, focused && { backgroundColor: colors.gray100 }]}
             >
-              {focused ? <View style={styles.activeHalo} /> : null}
               <Ionicons
                 name={routeIcon(name)}
-                size={focused ? 26 : 24}
-                color={focused ? NEO_THEME.colors.primary : NEO_THEME.colors.grey}
+                size={22}
+                color={focused ? colors.ink : colors.inkMuted}
               />
             </Pressable>
           );
         })}
       </View>
 
-      {/* Right FAB — bag (cart + saved) */}
       <Pressable
         accessibilityRole="button"
         accessibilityLabel={itemCount > 0 ? `Bag, ${itemCount} items` : 'Bag and saved'}
         onPress={() => router.push('/bag')}
-        style={styles.fab}
+        style={[styles.fab, { backgroundColor: colors.ink, ...elevation.soft }]}
       >
-        <Ionicons name="bag-handle" size={28} color={NEO_THEME.colors.white} />
+        <Ionicons name="bag-handle" size={24} color={colors.surface} />
         {itemCount > 0 ? (
-          <View style={styles.badge}>
-            <NuviaText variant="caption" style={styles.badgeText}>
+          <View style={[styles.badge, { backgroundColor: colors.accent }]}>
+            <Text variant="caption" style={[styles.badgeText, { color: colors.surface }]}>
               {itemCount > 9 ? '9+' : String(itemCount)}
-            </NuviaText>
+            </Text>
           </View>
         ) : null}
       </Pressable>
@@ -120,55 +124,33 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 20,
+    paddingHorizontal: space.md,
     height: 64,
   },
   pill: {
     flex: 1,
-    marginRight: 16,
+    marginRight: space.md,
     flexDirection: 'row',
-    height: 64,
-    backgroundColor: NEO_THEME.colors.white,
-    borderWidth: NEO_THEME.borders.width,
-    borderColor: NEO_THEME.colors.black,
-    borderRadius: 32,
+    height: 56,
+    borderRadius: radii.lg,
     alignItems: 'center',
     justifyContent: 'space-around',
-    paddingHorizontal: 8,
-    shadowColor: NEO_THEME.colors.black,
-    shadowOffset: { width: 4, height: 4 },
-    shadowOpacity: 1,
-    shadowRadius: 0,
-    elevation: 8,
+    paddingHorizontal: space.xxs,
+    borderWidth: 1,
   },
   tab: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
     height: '100%',
-  },
-  activeHalo: {
-    position: 'absolute',
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: NEO_THEME.colors.secondary,
-    opacity: 0.55,
+    borderRadius: radii.md,
   },
   fab: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
+    width: 56,
+    height: 56,
+    borderRadius: radii.lg,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: NEO_THEME.colors.primary,
-    borderWidth: NEO_THEME.borders.width,
-    borderColor: NEO_THEME.colors.black,
-    shadowColor: NEO_THEME.colors.black,
-    shadowOffset: { width: 4, height: 4 },
-    shadowOpacity: 1,
-    shadowRadius: 0,
-    elevation: 8,
   },
   badge: {
     position: 'absolute',
@@ -179,14 +161,9 @@ const styles = StyleSheet.create({
     borderRadius: 9,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: NEO_THEME.colors.secondary,
-    borderWidth: 1.5,
-    borderColor: NEO_THEME.colors.black,
     paddingHorizontal: 3,
   },
   badgeText: {
-    fontSize: 9,
-    fontFamily: NEO_THEME.fonts.bold,
-    color: NEO_THEME.colors.black,
+    fontSize: 10,
   },
 });

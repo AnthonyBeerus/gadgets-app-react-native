@@ -1,3 +1,5 @@
+import { useNeoStyles } from '../../../shared/hooks/useNeoStyles';
+import { useTheme } from '../../../shared/providers/theme-provider';
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, Image, ScrollView, TouchableOpacity, ActivityIndicator, Linking } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
@@ -14,6 +16,8 @@ import { MetaInfoCard } from '../components/MetaInfoCard';
 import { useChallengeLeaderboard, useOpportunityEligibility } from '../api/submissions';
 
 export default function ChallengeDetailsScreen() {
+  const styles = useNeoStyles(createStyles);
+  const { theme } = useTheme();
   const { id } = useLocalSearchParams();
   const router = useRouter();
   const insets = useSafeAreaInsets();
@@ -65,7 +69,7 @@ export default function ChallengeDetailsScreen() {
   if (notFound) {
     return (
       <View style={styles.loadingContainer}>
-        <Text style={{ fontFamily: NEO_THEME.fonts.bold, color: NEO_THEME.colors.grey }}>
+        <Text style={{ fontFamily: NEO_THEME.fonts.bold, color: theme.colors.grey }}>
           Challenge not found.
         </Text>
       </View>
@@ -75,7 +79,7 @@ export default function ChallengeDetailsScreen() {
   if (!challenge || loading) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color={NEO_THEME.colors.primary} />
+        <ActivityIndicator size="large" color={theme.colors.primary} />
       </View>
     );
   }
@@ -93,7 +97,7 @@ export default function ChallengeDetailsScreen() {
           <Image source={{ uri: challenge.image_url }} style={styles.image} />
           <View style={styles.overlay}>
             <View style={styles.brandBadge}>
-              <Ionicons name="business" size={14} color={NEO_THEME.colors.white} />
+              <Ionicons name="business" size={14} color={theme.colors.white} />
               <Text style={styles.brandText}>{challenge.brand_name}</Text>
             </View>
           </View>
@@ -155,43 +159,45 @@ export default function ChallengeDetailsScreen() {
 
       <View style={[styles.footer, { paddingBottom: insets.bottom + 16 }]}>
         <TouchableOpacity
-          style={[styles.ctaButton, { backgroundColor: NEO_THEME.colors.black }]}
+          style={[styles.ctaButton, { backgroundColor: theme.colors.black }]}
           activeOpacity={0.9}
           onPress={handlePrimary}
         >
-          <Text style={[styles.ctaText, { color: NEO_THEME.colors.white }]}>
+          <Text style={[styles.ctaText, { color: theme.colors.white }]}>
             {canEnter ? 'SUBMIT ENTRY' : 'BUY TO ENTER / CLAIM CODE'}
           </Text>
-          <Ionicons name="arrow-forward" size={20} color={NEO_THEME.colors.white} />
+          <Ionicons name="arrow-forward" size={20} color={theme.colors.white} />
         </TouchableOpacity>
       </View>
     </View>
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: NEO_THEME.colors.backgroundLight },
+function createStyles(c) {
+  return {
+  container: { flex: 1, backgroundColor: c.backgroundLight },
   loadingContainer: { flex: 1, justifyContent: 'center', alignItems: 'center' },
   content: { padding: 0 },
-  imageContainer: { height: 250, width: '100%', position: 'relative', borderBottomWidth: NEO_THEME.borders.width, borderColor: NEO_THEME.colors.black },
+  imageContainer: { height: 250, width: '100%', position: 'relative', borderBottomWidth: 1, borderColor: c.border },
   image: { width: '100%', height: '100%', resizeMode: 'cover' },
   overlay: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,0,0,0.2)', padding: 16, justifyContent: 'flex-end', alignItems: 'flex-start' },
-  brandBadge: { flexDirection: 'row', alignItems: 'center', backgroundColor: NEO_THEME.colors.black, paddingHorizontal: 12, paddingVertical: 6, borderRadius: NEO_THEME.borders.radius, gap: 6 },
-  brandText: { fontFamily: NEO_THEME.fonts.bold, fontSize: 12, color: NEO_THEME.colors.white, textTransform: 'uppercase' },
-  headerSection: { padding: 20, borderBottomWidth: NEO_THEME.borders.width, borderColor: NEO_THEME.colors.black, backgroundColor: NEO_THEME.colors.white },
+  brandBadge: { flexDirection: 'row', alignItems: 'center', backgroundColor: c.black, paddingHorizontal: 12, paddingVertical: 6, borderRadius: NEO_THEME.borders.radius, gap: 6 },
+  brandText: { fontFamily: NEO_THEME.fonts.bold, fontSize: 12, color: c.white, textTransform: 'uppercase' },
+  headerSection: { padding: 20, borderBottomWidth: 1, borderColor: c.border, backgroundColor: c.white },
   badgesRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 12 },
-  title: { fontFamily: NEO_THEME.fonts.black, fontSize: 28, color: NEO_THEME.colors.black, marginBottom: 8, lineHeight: 32 },
-  description: { fontFamily: NEO_THEME.fonts.regular, fontSize: 16, color: NEO_THEME.colors.black, lineHeight: 22 },
-  section: { padding: 20, borderBottomWidth: NEO_THEME.borders.width, borderColor: NEO_THEME.colors.black },
-  sectionTitle: { fontFamily: NEO_THEME.fonts.black, fontSize: 18, color: NEO_THEME.colors.black, marginBottom: 16, textTransform: 'uppercase' },
-  helper: { marginTop: 10, fontFamily: NEO_THEME.fonts.regular, color: NEO_THEME.colors.grey, lineHeight: 20 },
+  title: { fontFamily: NEO_THEME.fonts.black, fontSize: 28, color: c.black, marginBottom: 8, lineHeight: 32 },
+  description: { fontFamily: NEO_THEME.fonts.regular, fontSize: 16, color: c.black, lineHeight: 22 },
+  section: { padding: 20, borderBottomWidth: 1, borderColor: c.border },
+  sectionTitle: { fontFamily: NEO_THEME.fonts.black, fontSize: 18, color: c.black, marginBottom: 16, textTransform: 'uppercase' },
+  helper: { marginTop: 10, fontFamily: NEO_THEME.fonts.regular, color: c.grey, lineHeight: 20 },
   boardHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  link: { fontFamily: NEO_THEME.fonts.bold, color: NEO_THEME.colors.primary, marginBottom: 16 },
-  boardRow: { flexDirection: 'row', gap: 12, alignItems: 'center', paddingVertical: 10, borderBottomWidth: 1, borderColor: NEO_THEME.colors.greyLight },
+  link: { fontFamily: NEO_THEME.fonts.bold, color: c.primary, marginBottom: 16 },
+  boardRow: { flexDirection: 'row', gap: 12, alignItems: 'center', paddingVertical: 10, borderBottomWidth: 1, borderColor: c.border },
   rank: { fontFamily: NEO_THEME.fonts.black, fontSize: 18, width: 40 },
   score: { fontFamily: NEO_THEME.fonts.bold },
-  meta: { fontFamily: NEO_THEME.fonts.regular, color: NEO_THEME.colors.grey, marginTop: 2 },
-  footer: { position: 'absolute', bottom: 0, left: 0, right: 0, backgroundColor: NEO_THEME.colors.white, padding: 16, borderTopWidth: NEO_THEME.borders.width, borderColor: NEO_THEME.colors.black },
-  ctaButton: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', padding: 16, borderRadius: NEO_THEME.borders.radius, gap: 8, borderWidth: NEO_THEME.borders.width, borderColor: NEO_THEME.colors.black },
+  meta: { fontFamily: NEO_THEME.fonts.regular, color: c.grey, marginTop: 2 },
+  footer: { position: 'absolute', bottom: 0, left: 0, right: 0, backgroundColor: c.white, padding: 16, borderTopWidth: 1, borderColor: c.border },
+  ctaButton: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', padding: 16, borderRadius: NEO_THEME.borders.radius, gap: 8, borderWidth: 1, borderColor: c.border },
   ctaText: { fontFamily: NEO_THEME.fonts.black, fontSize: 16, textTransform: 'uppercase' },
-});
+  };
+}

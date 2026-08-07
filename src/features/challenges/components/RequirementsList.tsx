@@ -1,18 +1,23 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { NEO_THEME } from '../../../shared/constants/neobrutalism';
+import { useNeoStyles } from '../../../shared/hooks/useNeoStyles';
+import { useTheme } from '../../../shared/providers/theme-provider';
 
 interface RequirementsListProps {
   requirements: string[];
 }
 
 export function RequirementsList({ requirements }: RequirementsListProps) {
+  const styles = useNeoStyles(createStyles);
+  const { theme } = useTheme();
+
   return (
     <View style={styles.requirementsList}>
       {requirements.map((req, index) => (
         <View key={index} style={styles.reqItem}>
-          <Ionicons name="checkmark-circle" size={20} color={NEO_THEME.colors.success} />
+          <Ionicons name="checkmark-circle" size={20} color={theme.colors.success} />
           <Text style={styles.reqText}>{req}</Text>
         </View>
       ))}
@@ -20,20 +25,22 @@ export function RequirementsList({ requirements }: RequirementsListProps) {
   );
 }
 
-const styles = StyleSheet.create({
-  requirementsList: {
-    gap: 12,
-  },
-  reqItem: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: 12,
-  },
-  reqText: {
-    fontFamily: NEO_THEME.fonts.regular,
-    fontSize: 16,
-    color: NEO_THEME.colors.black,
-    flex: 1,
-    lineHeight: 22,
-  },
-});
+function createStyles(c: { black: string }) {
+  return {
+    requirementsList: {
+      gap: 12,
+    },
+    reqItem: {
+      flexDirection: 'row' as const,
+      alignItems: 'flex-start' as const,
+      gap: 12,
+    },
+    reqText: {
+      fontFamily: NEO_THEME.fonts.regular,
+      fontSize: 16,
+      color: c.black,
+      flex: 1,
+      lineHeight: 22,
+    },
+  };
+}

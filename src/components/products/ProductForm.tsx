@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TextInput, Image, TouchableOpacity, ScrollView, Switch } from 'react-native';
+import { View, Text, TextInput, Image, TouchableOpacity, ScrollView, Switch } from 'react-native';
 import { Controller, useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as ImagePicker from 'expo-image-picker';
 import { MaterialIcons } from '@expo/vector-icons';
 import { NEO_THEME } from '../../shared/constants/neobrutalism';
+import { useNeoStyles } from '../../shared/hooks/useNeoStyles';
+import { useTheme } from '../../shared/providers/theme-provider';
 import { NeoButton } from '../../shared/components/ui/neo-button';
 
 const productSchema = z.object({
@@ -28,6 +30,8 @@ type ProductFormProps = {
 };
 
 export default function ProductForm({ initialValues, onSubmit, isSubmitting }: ProductFormProps) {
+  const styles = useNeoStyles(createStyles);
+  const { theme } = useTheme();
   const [images, setImages] = useState<string[]>(initialValues?.imagesUrl || (initialValues?.heroImage ? [initialValues.heroImage] : []));
   const [imageError, setImageError] = useState<string | null>(null);
   
@@ -177,7 +181,7 @@ export default function ProductForm({ initialValues, onSubmit, isSubmitting }: P
             <Switch
               value={value}
               onValueChange={onChange}
-              trackColor={{ false: '#767577', true: NEO_THEME.colors.primary }}
+              trackColor={{ false: '#767577', true: theme.colors.primary }}
             />
           </View>
         )}
@@ -195,7 +199,7 @@ export default function ProductForm({ initialValues, onSubmit, isSubmitting }: P
           </View>
         ))}
         <TouchableOpacity style={styles.addImageBtn} onPress={pickImage}>
-          <MaterialIcons name="add-photo-alternate" size={32} color={NEO_THEME.colors.grey} />
+          <MaterialIcons name="add-photo-alternate" size={32} color={theme.colors.grey} />
           <Text style={styles.addImageText}>Add Image</Text>
         </TouchableOpacity>
       </View>
@@ -213,10 +217,11 @@ export default function ProductForm({ initialValues, onSubmit, isSubmitting }: P
   );
 }
 
-const styles = StyleSheet.create({
+function createStyles(c) {
+  return {
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: c.white,
   },
   content: {
     padding: 20,
@@ -227,7 +232,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginBottom: 15,
     marginTop: 10,
-    color: NEO_THEME.colors.black,
+    color: c.black,
   },
   inputGroup: {
     marginBottom: 15,
@@ -236,22 +241,22 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '600',
     marginBottom: 5,
-    color: NEO_THEME.colors.black,
+    color: c.black,
   },
   input: {
-    borderWidth: 2,
-    borderColor: NEO_THEME.colors.black,
+    borderWidth: 1,
+    borderColor: c.border,
     borderRadius: 8,
     padding: 12,
     fontSize: 16,
-    backgroundColor: NEO_THEME.colors.white,
+    backgroundColor: c.white,
   },
   textArea: {
     height: 100,
     textAlignVertical: 'top',
   },
   error: {
-    color: NEO_THEME.colors.error || 'red',
+    color: c.error || 'red',
     fontSize: 12,
     marginTop: 4,
   },
@@ -304,7 +309,7 @@ const styles = StyleSheet.create({
     width: 100,
     height: 100,
     borderRadius: 8,
-    borderWidth: 2,
+    borderWidth: 1,
     borderColor: '#ddd',
     borderStyle: 'dashed',
     alignItems: 'center',
@@ -320,24 +325,25 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   submitBtn: {
-    backgroundColor: NEO_THEME.colors.primary,
+    backgroundColor: c.primary,
     padding: 16,
     borderRadius: 12,
     alignItems: 'center',
-    shadowColor: "#000",
-    shadowOffset: { width: 4, height: 4 },
-    shadowOpacity: 1,
-    shadowRadius: 0,
-    elevation: 4,
-    borderWidth: 2,
-    borderColor: 'black',
+    shadowColor: c.black,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 2,
+    borderWidth: 1,
+    borderColor: c.border,
   },
   submitBtnDisabled: {
     opacity: 0.7,
   },
   submitBtnText: {
-    color: 'white',
+    color: c.white,
     fontSize: 16,
     fontWeight: 'bold',
   },
-});
+  };
+}

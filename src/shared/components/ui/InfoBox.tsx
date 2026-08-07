@@ -1,7 +1,9 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { NEO_THEME } from '../../constants/neobrutalism';
+import { useNeoStyles } from '../../hooks/useNeoStyles';
+import { useTheme } from '../../providers/theme-provider';
 
 type InfoBoxType = 'info' | 'warning' | 'success' | 'error';
 
@@ -12,6 +14,10 @@ interface InfoBoxProps {
 }
 
 export function InfoBox({ message, type = 'info', icon }: InfoBoxProps) {
+  const styles = useNeoStyles(createStyles);
+  const { theme } = useTheme();
+  const c = theme.colors;
+
   const getStyles = () => {
     switch (type) {
       case 'warning':
@@ -41,58 +47,67 @@ export function InfoBox({ message, type = 'info', icon }: InfoBoxProps) {
 
   return (
     <View style={boxStyles.container}>
-      <Ionicons name={boxStyles.icon} size={24} color={NEO_THEME.colors.black} />
+      <Ionicons name={boxStyles.icon} size={24} color={c.black} />
       <Text style={styles.infoText}>{message}</Text>
     </View>
   );
 }
 
-const styles = StyleSheet.create({
-  infoBox: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    backgroundColor: NEO_THEME.colors.greyLight,
-    padding: 16,
-    borderRadius: NEO_THEME.borders.radius,
-    borderWidth: NEO_THEME.borders.width,
-    borderColor: NEO_THEME.colors.black,
-    gap: 12,
-  },
-  warningBox: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    backgroundColor: NEO_THEME.colors.yellow,
-    padding: 16,
-    borderRadius: NEO_THEME.borders.radius,
-    borderWidth: NEO_THEME.borders.width,
-    borderColor: NEO_THEME.colors.black,
-    gap: 12,
-  },
-  successBox: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    backgroundColor: NEO_THEME.colors.success,
-    padding: 16,
-    borderRadius: NEO_THEME.borders.radius,
-    borderWidth: NEO_THEME.borders.width,
-    borderColor: NEO_THEME.colors.black,
-    gap: 12,
-  },
-  errorBox: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    backgroundColor: NEO_THEME.colors.error,
-    padding: 16,
-    borderRadius: NEO_THEME.borders.radius,
-    borderWidth: NEO_THEME.borders.width,
-    borderColor: NEO_THEME.colors.black,
-    gap: 12,
-  },
-  infoText: {
-    flex: 1,
-    fontFamily: NEO_THEME.fonts.regular,
-    fontSize: 12,
-    color: NEO_THEME.colors.black,
-    lineHeight: 18,
-  },
-});
+function createStyles(c: {
+  black: string;
+  greyLight: string;
+  yellow: string;
+  success: string;
+  error: string;
+  border: string;
+}) {
+  return {
+    infoBox: {
+      flexDirection: 'row' as const,
+      alignItems: 'flex-start' as const,
+      backgroundColor: c.greyLight,
+      padding: 16,
+      borderRadius: NEO_THEME.borders.radius,
+      borderWidth: 1,
+      borderColor: c.border,
+      gap: 12,
+    },
+    warningBox: {
+      flexDirection: 'row' as const,
+      alignItems: 'flex-start' as const,
+      backgroundColor: c.yellow,
+      padding: 16,
+      borderRadius: NEO_THEME.borders.radius,
+      borderWidth: 1,
+      borderColor: c.border,
+      gap: 12,
+    },
+    successBox: {
+      flexDirection: 'row' as const,
+      alignItems: 'flex-start' as const,
+      backgroundColor: c.success,
+      padding: 16,
+      borderRadius: NEO_THEME.borders.radius,
+      borderWidth: 1,
+      borderColor: c.border,
+      gap: 12,
+    },
+    errorBox: {
+      flexDirection: 'row' as const,
+      alignItems: 'flex-start' as const,
+      backgroundColor: c.error,
+      padding: 16,
+      borderRadius: NEO_THEME.borders.radius,
+      borderWidth: 1,
+      borderColor: c.border,
+      gap: 12,
+    },
+    infoText: {
+      flex: 1,
+      fontFamily: NEO_THEME.fonts.regular,
+      fontSize: 12,
+      color: c.black,
+      lineHeight: 18,
+    },
+  };
+}

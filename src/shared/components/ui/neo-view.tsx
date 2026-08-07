@@ -1,6 +1,9 @@
+/**
+ * @deprecated Use `Surface` from `shared/design-system`.
+ */
 import React from 'react';
-import { View, ViewStyle, StyleProp, StyleSheet } from 'react-native';
-import { NEO_THEME } from '../../constants/neobrutalism';
+import { StyleProp, ViewStyle } from 'react-native';
+import { Surface } from '../../design-system';
 
 interface NeoViewProps {
   children?: React.ReactNode;
@@ -17,55 +20,16 @@ export const NeoView = ({
   children,
   style,
   containerStyle,
-  shadowOffset = 5,
-  backgroundColor = NEO_THEME.colors.white,
-  borderColor = NEO_THEME.colors.black,
-  borderWidth = NEO_THEME.borders.width,
+  backgroundColor,
   hideShadow = false,
 }: NeoViewProps) => {
   return (
-    <View style={[styles.container, containerStyle]}>
-      {!hideShadow && (
-        <View
-          style={[
-            styles.shadow,
-            {
-              top: shadowOffset,
-              left: shadowOffset,
-              backgroundColor: NEO_THEME.colors.black,
-            },
-          ]}
-        />
-      )}
-      <View
-        style={[
-          styles.content,
-          {
-            backgroundColor,
-            borderColor,
-            borderWidth,
-          },
-          style,
-        ]}
-      >
-        {children}
-      </View>
-    </View>
+    <Surface
+      elevation={hideShadow ? 'none' : 'hairline'}
+      backgroundColor={backgroundColor}
+      style={[containerStyle, style]}
+    >
+      {children}
+    </Surface>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    position: 'relative',
-    alignSelf: 'flex-start', // KEY: Don't stretch to fill parent
-  },
-  shadow: {
-    position: 'absolute',
-    width: '100%',
-    height: '100%',
-    zIndex: -1,
-  },
-  content: {
-    zIndex: 1,
-  },
-});

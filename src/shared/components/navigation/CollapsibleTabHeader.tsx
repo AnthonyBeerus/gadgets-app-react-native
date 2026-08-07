@@ -1,10 +1,11 @@
 import React from 'react';
-import { Text, View, TouchableOpacity, StyleSheet } from 'react-native';
+import { Text, View, TouchableOpacity } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, { useAnimatedStyle, interpolate, Extrapolation } from 'react-native-reanimated';
 import { MaterialTopTabBarProps } from '@react-navigation/material-top-tabs';
 import { NEO_THEME } from '../../constants/neobrutalism';
 import { useCollapsibleTab } from '../../context/CollapsibleTabContext';
+import { useNeoStyles } from '../../hooks/useNeoStyles';
 
 interface CollapsibleTabHeaderProps extends MaterialTopTabBarProps {
   title: string;
@@ -22,6 +23,7 @@ export const CollapsibleTabHeader: React.FC<CollapsibleTabHeaderProps> = ({
   renderHeaderRight,
   tabNames
 }) => {
+  const styles = useNeoStyles(createStyles);
   const { top } = useSafeAreaInsets();
   const { scrollY, headerHeight, smallHeaderHeight, tabBarHeight } = useCollapsibleTab();
 
@@ -34,7 +36,6 @@ export const CollapsibleTabHeader: React.FC<CollapsibleTabHeaderProps> = ({
 
   const scrollDistance = headerHeight - smallHeaderHeight;
 
-  // Animate the entire header container up/down
   const containerStyle = useAnimatedStyle(() => {
     const translateY = interpolate(
       scrollY.value,
@@ -47,7 +48,6 @@ export const CollapsibleTabHeader: React.FC<CollapsibleTabHeaderProps> = ({
     };
   });
 
-  // Animate the large title opacity/scale
   const largeHeaderStyle = useAnimatedStyle(() => {
     const opacity = interpolate(
       scrollY.value,
@@ -67,7 +67,6 @@ export const CollapsibleTabHeader: React.FC<CollapsibleTabHeaderProps> = ({
     };
   });
 
-  // Animate the small header (sticky) opacity
   const smallHeaderStyle = useAnimatedStyle(() => {
     const opacity = interpolate(
       scrollY.value,
@@ -82,11 +81,7 @@ export const CollapsibleTabHeader: React.FC<CollapsibleTabHeaderProps> = ({
 
   return (
     <Animated.View style={[styles.headerWrapper, { paddingTop: top }, containerStyle]}>
-      
-      {/* Header Area Container */}
       <View style={{ height: headerHeight }}>
-        
-        {/* Large Title Area (Fades Out) */}
         <Animated.View style={[styles.largeTitleContainer, largeHeaderStyle]}>
           <View style={styles.largeTitleRow}>
             <View>
@@ -97,7 +92,6 @@ export const CollapsibleTabHeader: React.FC<CollapsibleTabHeaderProps> = ({
           </View>
         </Animated.View>
 
-        {/* Small Header Area (Fades In, positioned at bottom of header area) */}
         <Animated.View 
           style={[
             styles.smallHeaderContainer, 
@@ -108,10 +102,8 @@ export const CollapsibleTabHeader: React.FC<CollapsibleTabHeaderProps> = ({
            <Text style={styles.smallHeaderTitle}>{title}</Text>
            {renderHeaderRight && renderHeaderRight({ small: true })}
         </Animated.View>
-
       </View>
 
-      {/* Tab Bar (Sticky Part, sits below Header Area) */}
       <View style={[styles.tabBarContainer, { height: tabBarHeight }]}>
         {state.routes.map((route: { key: any; name: string; params?: any }, index: number) => {
           const { options } = descriptors[route.key];
@@ -168,100 +160,108 @@ export const CollapsibleTabHeader: React.FC<CollapsibleTabHeaderProps> = ({
   );
 };
 
-const styles = StyleSheet.create({
-  headerWrapper: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    zIndex: 10,
-    backgroundColor: NEO_THEME.colors.backgroundLight,
-  },
-  largeTitleContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    paddingHorizontal: 20,
-    paddingBottom: 10,
-  },
-  largeTitleRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  largeHeaderTitle: {
-    fontSize: 32,
-    fontWeight: '900',
-    color: NEO_THEME.colors.black,
-    fontFamily: NEO_THEME.fonts.black,
-    textTransform: 'uppercase',
-  },
-  largeHeaderSubtitle: {
-    fontSize: 14,
-    color: NEO_THEME.colors.grey,
-    marginTop: 4,
-    fontWeight: '700',
-    fontFamily: NEO_THEME.fonts.bold,
-    textTransform: 'uppercase',
-  },
-  smallHeaderContainer: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 20,
-    backgroundColor: NEO_THEME.colors.backgroundLight,
-    borderBottomWidth: NEO_THEME.borders.width,
-    borderBottomColor: NEO_THEME.colors.black,
-    zIndex: 20,
-  },
-  smallHeaderTitle: {
-    fontSize: 20,
-    fontWeight: '900',
-    color: NEO_THEME.colors.black,
-    fontFamily: NEO_THEME.fonts.black,
-    textTransform: 'uppercase',
-  },
-  tabBarContainer: {
-    flexDirection: 'row',
-    marginHorizontal: 16,
-    marginBottom: 10,
-    borderRadius: NEO_THEME.borders.radius,
-    borderWidth: NEO_THEME.borders.width,
-    borderColor: NEO_THEME.colors.black,
-    backgroundColor: NEO_THEME.colors.white,
-    overflow: 'hidden',
-    // Hard shadow
-    shadowColor: NEO_THEME.colors.black,
-    shadowOffset: { width: 4, height: 4 },
-    shadowOpacity: 1,
-    shadowRadius: 0,
-    elevation: 4,
-  },
-  tabItem: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 12,
-    paddingHorizontal: 4,
-    backgroundColor: NEO_THEME.colors.white,
-  },
-  tabItemFocused: {
-    backgroundColor: NEO_THEME.colors.primary,
-  },
-  tabItemBorder: {
-    borderRightWidth: NEO_THEME.borders.width,
-    borderRightColor: NEO_THEME.colors.black,
-  },
-  tabLabel: {
-    fontSize: 12,
-    fontFamily: NEO_THEME.fonts.bold,
-    color: NEO_THEME.colors.black,
-    fontWeight: '700',
-    textTransform: 'uppercase',
-  },
-  tabLabelFocused: {
-    color: NEO_THEME.colors.white,
-  },
-});
+function createStyles(c: {
+  black: string;
+  white: string;
+  grey: string;
+  border: string;
+  background: string;
+  primary: string;
+}) {
+  return {
+    headerWrapper: {
+      position: 'absolute' as const,
+      top: 0,
+      left: 0,
+      right: 0,
+      zIndex: 10,
+      backgroundColor: c.background,
+    },
+    largeTitleContainer: {
+      flex: 1,
+      justifyContent: 'center' as const,
+      paddingHorizontal: 20,
+      paddingBottom: 10,
+    },
+    largeTitleRow: {
+      flexDirection: 'row' as const,
+      justifyContent: 'space-between' as const,
+      alignItems: 'center' as const,
+    },
+    largeHeaderTitle: {
+      fontSize: 32,
+      fontWeight: '600' as const,
+      color: c.black,
+      fontFamily: NEO_THEME.fonts.black,
+      textTransform: 'uppercase' as const,
+    },
+    largeHeaderSubtitle: {
+      fontSize: 14,
+      color: c.grey,
+      marginTop: 4,
+      fontWeight: '700' as const,
+      fontFamily: NEO_THEME.fonts.bold,
+      textTransform: 'uppercase' as const,
+    },
+    smallHeaderContainer: {
+      position: 'absolute' as const,
+      left: 0,
+      right: 0,
+      flexDirection: 'row' as const,
+      alignItems: 'center' as const,
+      justifyContent: 'space-between' as const,
+      paddingHorizontal: 20,
+      backgroundColor: c.background,
+      borderBottomWidth: 1,
+      borderBottomColor: c.border,
+      zIndex: 20,
+    },
+    smallHeaderTitle: {
+      fontSize: 20,
+      fontWeight: '600' as const,
+      color: c.black,
+      fontFamily: NEO_THEME.fonts.black,
+      textTransform: 'uppercase' as const,
+    },
+    tabBarContainer: {
+      flexDirection: 'row' as const,
+      marginHorizontal: 16,
+      marginBottom: 10,
+      borderRadius: NEO_THEME.borders.radius,
+      borderWidth: 1,
+      borderColor: c.border,
+      backgroundColor: c.white,
+      overflow: 'hidden' as const,
+      shadowColor: c.black,
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.08,
+      shadowRadius: 8,
+      elevation: 2,
+    },
+    tabItem: {
+      flex: 1,
+      alignItems: 'center' as const,
+      justifyContent: 'center' as const,
+      paddingVertical: 12,
+      paddingHorizontal: 4,
+      backgroundColor: c.white,
+    },
+    tabItemFocused: {
+      backgroundColor: c.primary,
+    },
+    tabItemBorder: {
+      borderRightWidth: 1,
+      borderRightColor: c.black,
+    },
+    tabLabel: {
+      fontSize: 12,
+      fontFamily: NEO_THEME.fonts.bold,
+      color: c.black,
+      fontWeight: '700' as const,
+      textTransform: 'uppercase' as const,
+    },
+    tabLabelFocused: {
+      color: c.white,
+    },
+  };
+}

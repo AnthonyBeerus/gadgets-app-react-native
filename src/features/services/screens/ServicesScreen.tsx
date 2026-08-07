@@ -1,3 +1,5 @@
+import { useNeoStyles } from '../../../shared/hooks/useNeoStyles';
+import { useTheme } from '../../../shared/providers/theme-provider';
 import React from "react";
 import {
   View,
@@ -14,6 +16,8 @@ import { HeaderRightGroup } from "../../../shared/components/ui/header-right-gro
 import { SmallHeaderTitle, LargeHeaderTitle } from "../../../shared/components/layout/header-titles";
 
 const ServicesScreen = () => {
+  const styles = useNeoStyles(createStyles);
+  const { theme } = useTheme();
   const {
     data: categories,
     isLoading: categoriesLoading,
@@ -101,37 +105,38 @@ const ServicesScreen = () => {
 
 export default ServicesScreen;
 
-const styles = StyleSheet.create({
+function createStyles(c) {
+  return {
   container: {
     flex: 1,
-    backgroundColor: NEO_THEME.colors.backgroundLight,
+    backgroundColor: c.backgroundLight,
     justifyContent: "center",
     alignItems: "center",
   },
   featuredBanner: {
-    backgroundColor: NEO_THEME.colors.yellow,
+    backgroundColor: c.yellow,
     marginHorizontal: 20,
     borderRadius: NEO_THEME.borders.radius,
     padding: 20,
     marginBottom: 24,
-    borderWidth: NEO_THEME.borders.width,
-    borderColor: NEO_THEME.colors.black,
-    shadowColor: NEO_THEME.colors.black,
-    shadowOffset: { width: 4, height: 4 },
-    shadowOpacity: 1,
-    shadowRadius: 0,
+    borderWidth: 1,
+    borderColor: c.border,
+    shadowColor: c.black,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
     elevation: 0,
   },
   bannerTitle: {
     fontSize: 18,
-    fontWeight: "900",
-    color: NEO_THEME.colors.black,
+    fontWeight: '600',
+    color: c.black,
     marginBottom: 4,
     fontFamily: NEO_THEME.fonts.black,
   },
   bannerText: {
     fontSize: 14,
-    color: NEO_THEME.colors.black,
+    color: c.black,
     fontWeight: "700",
     fontFamily: NEO_THEME.fonts.bold,
   },
@@ -141,8 +146,8 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 20,
-    fontWeight: "900",
-    color: NEO_THEME.colors.black,
+    fontWeight: '600',
+    color: c.black,
     marginBottom: 16,
     fontFamily: NEO_THEME.fonts.black,
     textTransform: "uppercase",
@@ -157,14 +162,15 @@ const styles = StyleSheet.create({
   },
   loadingText: {
     fontSize: 16,
-    color: NEO_THEME.colors.grey,
+    color: c.grey,
     fontWeight: "700",
     fontFamily: NEO_THEME.fonts.bold,
   },
   errorText: {
     fontSize: 16,
-    color: NEO_THEME.colors.black,
-    fontWeight: "900",
+    color: c.black,
+    fontWeight: '600',
     fontFamily: NEO_THEME.fonts.black,
   },
-});
+  };
+}

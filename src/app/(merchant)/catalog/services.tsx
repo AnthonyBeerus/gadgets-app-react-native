@@ -1,11 +1,11 @@
 import React from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, Image, ActivityIndicator } from 'react-native';
-import { useRouter } from 'expo-router';
+import { View, Text, FlatList, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { NEO_THEME } from '../../../shared/constants/neobrutalism';
+import { useNeoStyles } from '../../../shared/hooks/useNeoStyles';
+import { useTheme } from '../../../shared/providers/theme-provider';
 import { useAuth } from '../../../shared/providers/auth-provider';
 import { getProviderServices, deleteService } from '../../../shared/api/api';
-import { Alert } from 'react-native';
 import { PopProductCard } from "../../../components/shop/PopProductCard";
 
 import Animated, { useAnimatedScrollHandler } from "react-native-reanimated";
@@ -13,19 +13,17 @@ import { useCollapsibleTab } from "../../../shared/context/CollapsibleTabContext
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function MerchantServicesScreen() {
-  const router = useRouter();
+  const styles = useNeoStyles(createStyles);
+  const { theme } = useTheme();
   const { merchantProviderId } = useAuth();
   const { data: services, isLoading, error } = getProviderServices(merchantProviderId || 0);
   
-  // Collapsible Tab Logic
   const { scrollY, headerHeight, tabBarHeight } = useCollapsibleTab();
   const insets = useSafeAreaInsets();
   
   const scrollHandler = useAnimatedScrollHandler((event) => {
     scrollY.value = event.contentOffset.y;
   });
-
-
 
   const { mutate: deleteServiceMutation } = deleteService();
   
@@ -57,7 +55,7 @@ export default function MerchantServicesScreen() {
             type="service"
             actionButton={
                 <TouchableOpacity onPress={() => handleDelete(item.id)} style={styles.deleteBtn}>
-                    <MaterialIcons name="delete-outline" size={24} color="black" />
+                    <MaterialIcons name="delete-outline" size={24} color={theme.colors.text} />
                 </TouchableOpacity>
             }
         />
@@ -67,7 +65,7 @@ export default function MerchantServicesScreen() {
   if (isLoading) {
     return (
         <View style={[styles.center, { paddingTop: headerHeight + tabBarHeight }]}>
-            <ActivityIndicator size="large" color={NEO_THEME.colors.primary} />
+            <ActivityIndicator size="large" color={theme.colors.primary} />
         </View>
     );
   }
@@ -105,43 +103,46 @@ export default function MerchantServicesScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#FAFAFA',
-  },
-  center: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  deleteBtn: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: 'white',
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderWidth: 2,
-    borderColor: 'black',
-  },
-  errorText: {
-    color: NEO_THEME.colors.red,
-    fontWeight: 'bold',
-  },
-  emptyState: {
-    padding: 40,
-    alignItems: 'center',
-  },
-  emptyText: {
-    fontFamily: NEO_THEME.fonts.black,
-    fontSize: 24,
-    marginBottom: 8,
-    textTransform: 'uppercase',
-  },
-  emptySubtext: {
-    fontFamily: NEO_THEME.fonts.bold,
-    color: NEO_THEME.colors.grey,
-    textAlign: 'center',
-  },
-});
+function createStyles(c: { background: string; white: string; border: string; red: string; grey: string; text: string }) {
+  return {
+    container: {
+      flex: 1,
+      backgroundColor: c.background,
+    },
+    center: {
+      flex: 1,
+      justifyContent: 'center' as const,
+      alignItems: 'center' as const,
+    },
+    deleteBtn: {
+      width: 40,
+      height: 40,
+      borderRadius: 20,
+      backgroundColor: c.white,
+      justifyContent: 'center' as const,
+      alignItems: 'center' as const,
+      borderWidth: 1,
+      borderColor: c.border,
+    },
+    errorText: {
+      color: c.red,
+      fontWeight: 'bold' as const,
+    },
+    emptyState: {
+      padding: 40,
+      alignItems: 'center' as const,
+    },
+    emptyText: {
+      fontFamily: NEO_THEME.fonts.black,
+      fontSize: 24,
+      marginBottom: 8,
+      textTransform: 'uppercase' as const,
+      color: c.text,
+    },
+    emptySubtext: {
+      fontFamily: NEO_THEME.fonts.bold,
+      color: c.grey,
+      textAlign: 'center' as const,
+    },
+  };
+}

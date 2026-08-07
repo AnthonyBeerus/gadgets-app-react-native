@@ -15,6 +15,8 @@ import { MaterialIcons } from "@expo/vector-icons";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { createServiceBooking } from "../../shared/api/api";
 import { NEO_THEME } from "../../shared/constants/neobrutalism";
+import { useNeoStyles } from "../../shared/hooks/useNeoStyles";
+import { useTheme } from "../../shared/providers/theme-provider";
 
 import { StaticHeader } from "../../shared/components/layout/StaticHeader";
 
@@ -22,6 +24,8 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const BookingModalScreen = () => {
   const insets = useSafeAreaInsets();
+  const styles = useNeoStyles(createStyles);
+  const { theme } = useTheme();
   const params = useLocalSearchParams<{
     serviceId: string;
     serviceName: string;
@@ -121,7 +125,7 @@ const BookingModalScreen = () => {
           <Text style={styles.providerName}>{params.providerName}</Text>
           <View style={styles.detailsRow}>
             <View style={styles.detailItem}>
-              <MaterialIcons name="schedule" size={18} color={NEO_THEME.colors.grey} />
+              <MaterialIcons name="schedule" size={18} color={theme.colors.grey} />
               <Text style={styles.detailText}>{params.duration} min</Text>
             </View>
             <View style={styles.priceBadge}>
@@ -137,7 +141,7 @@ const BookingModalScreen = () => {
             style={styles.dateButton}
             onPress={() => setShowDatePicker(true)}
           >
-            <MaterialIcons name="calendar-today" size={24} color={NEO_THEME.colors.black} />
+            <MaterialIcons name="calendar-today" size={24} color={theme.colors.black} />
             <Text style={styles.dateText}>{formatDate(selectedDate)}</Text>
           </TouchableOpacity>
 
@@ -206,7 +210,7 @@ const BookingModalScreen = () => {
           disabled={!selectedTime || createBookingMutation.isPending}
         >
           {createBookingMutation.isPending ? (
-            <ActivityIndicator color={NEO_THEME.colors.white} />
+            <ActivityIndicator color={theme.colors.white} />
           ) : (
             <Text style={styles.bookButtonText}>CONFIRM BOOKING</Text>
           )}
@@ -218,69 +222,78 @@ const BookingModalScreen = () => {
 
 export default BookingModalScreen;
 
-const styles = StyleSheet.create({
+function createStyles(c: {
+  backgroundLight: string;
+  white: string;
+  border: string;
+  black: string;
+  grey: string;
+  yellow: string;
+  primary: string;
+}) {
+  return {
   container: {
     flex: 1,
-    backgroundColor: NEO_THEME.colors.backgroundLight,
+    backgroundColor: c.backgroundLight,
   },
   scrollView: {
     flex: 1,
   },
   serviceInfo: {
-    backgroundColor: NEO_THEME.colors.white,
+    backgroundColor: c.white,
     padding: 20,
     marginBottom: 16,
-    borderBottomWidth: NEO_THEME.borders.width,
-    borderBottomColor: NEO_THEME.colors.black,
-    shadowColor: NEO_THEME.colors.black,
+    borderBottomWidth: 1,
+    borderBottomColor: c.border,
+    shadowColor: c.black,
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 1,
-    shadowRadius: 0,
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
     elevation: 0,
   },
   serviceName: {
     fontSize: 22,
-    fontWeight: "900",
-    color: NEO_THEME.colors.black,
+    fontWeight: '600' as const,
+    color: c.black,
     fontFamily: NEO_THEME.fonts.black,
-    textTransform: "uppercase",
+    textTransform: "uppercase" as const,
     marginBottom: 4,
   },
   providerName: {
     fontSize: 16,
-    color: NEO_THEME.colors.grey,
-    fontWeight: "700",
+    color: c.grey,
+    fontWeight: "700" as const,
     fontFamily: NEO_THEME.fonts.bold,
     marginBottom: 12,
   },
   detailsRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
+    flexDirection: "row" as const,
+    justifyContent: "space-between" as const,
+    alignItems: "center" as const,
   },
   detailItem: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
   },
   detailText: {
     fontSize: 14,
-    color: NEO_THEME.colors.grey,
+    color: c.grey,
     marginLeft: 6,
-    fontWeight: "700",
+    fontWeight: "700" as const,
     fontFamily: NEO_THEME.fonts.bold,
   },
   priceBadge: {
-    backgroundColor: NEO_THEME.colors.yellow,
+    backgroundColor: c.yellow,
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: NEO_THEME.borders.radius,
-    borderWidth: 2,
-    borderColor: NEO_THEME.colors.black,
+    borderWidth: 1,
+    borderColor: c.border,
   },
   priceText: {
     fontSize: 18,
-    fontWeight: "900",
-    color: NEO_THEME.colors.black,
+    fontWeight: '600' as const,
+    color: c.black,
     fontFamily: NEO_THEME.fonts.black,
   },
   section: {
@@ -289,75 +302,75 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 16,
-    fontWeight: "900",
-    color: NEO_THEME.colors.black,
+    fontWeight: '600' as const,
+    color: c.black,
     fontFamily: NEO_THEME.fonts.black,
     marginBottom: 12,
   },
   dateButton: {
-    backgroundColor: NEO_THEME.colors.white,
-    flexDirection: "row",
-    alignItems: "center",
+    backgroundColor: c.white,
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
     padding: 16,
     borderRadius: NEO_THEME.borders.radius,
-    borderWidth: NEO_THEME.borders.width,
-    borderColor: NEO_THEME.colors.black,
-    shadowColor: NEO_THEME.colors.black,
-    shadowOffset: { width: 3, height: 3 },
-    shadowOpacity: 1,
-    shadowRadius: 0,
+    borderWidth: 1,
+    borderColor: c.border,
+    shadowColor: c.black,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
     elevation: 0,
   },
   dateText: {
     fontSize: 16,
-    fontWeight: "700",
-    color: NEO_THEME.colors.black,
+    fontWeight: "700" as const,
+    color: c.black,
     fontFamily: NEO_THEME.fonts.bold,
     marginLeft: 12,
   },
   timeSlotsGrid: {
-    flexDirection: "row",
-    flexWrap: "wrap",
+    flexDirection: "row" as const,
+    flexWrap: "wrap" as const,
     gap: 8,
   },
   timeSlot: {
-    backgroundColor: NEO_THEME.colors.white,
+    backgroundColor: c.white,
     paddingHorizontal: 16,
     paddingVertical: 12,
     borderRadius: NEO_THEME.borders.radius,
-    borderWidth: NEO_THEME.borders.width,
-    borderColor: NEO_THEME.colors.black,
-    shadowColor: NEO_THEME.colors.black,
-    shadowOffset: { width: 2, height: 2 },
-    shadowOpacity: 1,
-    shadowRadius: 0,
+    borderWidth: 1,
+    borderColor: c.border,
+    shadowColor: c.black,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
     elevation: 0,
   },
   timeSlotSelected: {
-    backgroundColor: NEO_THEME.colors.primary,
-    borderColor: NEO_THEME.colors.black,
-    shadowOffset: { width: 3, height: 3 },
+    backgroundColor: c.primary,
+    borderColor: c.border,
+    shadowOffset: { width: 0, height: 2 },
   },
   timeSlotText: {
     fontSize: 14,
-    fontWeight: "900",
-    color: NEO_THEME.colors.black,
+    fontWeight: '600' as const,
+    color: c.black,
     fontFamily: NEO_THEME.fonts.black,
   },
   timeSlotTextSelected: {
-    color: NEO_THEME.colors.white,
+    color: c.white,
   },
   notesInput: {
-    backgroundColor: NEO_THEME.colors.white,
+    backgroundColor: c.white,
     borderRadius: NEO_THEME.borders.radius,
-    borderWidth: NEO_THEME.borders.width,
-    borderColor: NEO_THEME.colors.black,
+    borderWidth: 1,
+    borderColor: c.border,
     padding: 16,
     fontSize: 14,
-    shadowColor: NEO_THEME.colors.black,
-    shadowOffset: { width: 3, height: 3 },
-    shadowOpacity: 1,
-    shadowRadius: 0,
+    shadowColor: c.black,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
     elevation: 0,
     minHeight: 100,
   },
@@ -366,36 +379,37 @@ const styles = StyleSheet.create({
   },
   bookingButtonContainer: {
     padding: 20,
-    backgroundColor: NEO_THEME.colors.white,
-    borderTopWidth: NEO_THEME.borders.width,
-    borderTopColor: NEO_THEME.colors.black,
-    shadowColor: NEO_THEME.colors.black,
+    backgroundColor: c.white,
+    borderTopWidth: 1,
+    borderTopColor: c.border,
+    shadowColor: c.black,
     shadowOffset: { width: 0, height: -4 },
-    shadowOpacity: 1,
-    shadowRadius: 0,
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
     elevation: 0,
   },
   bookButton: {
-    backgroundColor: NEO_THEME.colors.primary,
+    backgroundColor: c.primary,
     borderRadius: NEO_THEME.borders.radius,
     paddingVertical: 16,
-    alignItems: "center",
-    borderWidth: NEO_THEME.borders.width,
-    borderColor: NEO_THEME.colors.black,
-    shadowColor: NEO_THEME.colors.black,
-    shadowOffset: { width: 4, height: 4 },
-    shadowOpacity: 1,
-    shadowRadius: 0,
+    alignItems: "center" as const,
+    borderWidth: 1,
+    borderColor: c.border,
+    shadowColor: c.black,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
     elevation: 0,
   },
   bookButtonDisabled: {
-    backgroundColor: NEO_THEME.colors.grey,
+    backgroundColor: c.grey,
     opacity: 0.5,
   },
   bookButtonText: {
     fontSize: 18,
-    fontWeight: "900",
-    color: NEO_THEME.colors.white,
+    fontWeight: '600' as const,
+    color: c.white,
     fontFamily: NEO_THEME.fonts.black,
   },
-});
+  };
+}

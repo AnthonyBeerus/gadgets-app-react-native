@@ -2,53 +2,73 @@ import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { Pressable, StyleSheet, View } from 'react-native';
 
-import { NuviaText } from '../../../components/atoms/nuvia-text';
-import { NEO_THEME } from '../../../shared/constants/neobrutalism';
+import {
+  Text,
+  space,
+  radii,
+  useDesignTokens,
+  useThemedStyles,
+  type DesignTokens,
+  type SemanticColors,
+} from '../../../shared/design-system';
 
 export function ConsumerUtilityHeader() {
   const router = useRouter();
+  const { colors, elevation } = useDesignTokens();
+  const styles = useThemedStyles(createStyles);
 
   return (
     <View style={styles.container}>
       <View style={styles.brand}>
-        <NuviaText variant="h2">MUSE</NuviaText>
-        <NuviaText variant="caption" style={styles.subtitle}>FIND IT. CREATE FOR IT.</NuviaText>
+        <Text variant="h2">Muse</Text>
+        <Text variant="caption" style={styles.subtitle}>
+          Find it. Create for it.
+        </Text>
       </View>
       <Pressable
         accessibilityRole="button"
         accessibilityLabel="Creator activity"
         onPress={() => router.push('/(shop)/challenges/my-entries')}
-        style={styles.utility}
+        style={[styles.utility, elevation.hairline]}
       >
-        <Ionicons name="sparkles" size={19} color={NEO_THEME.colors.black} />
-        <NuviaText variant="caption" style={styles.utilityLabel}>ACTIVITY</NuviaText>
+        <Ionicons name="sparkles-outline" size={18} color={colors.ink} />
+        <Text variant="caption" style={styles.utilityLabel}>
+          Activity
+        </Text>
       </Pressable>
     </View>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: 8,
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-  },
-  brand: { flex: 1 },
-  subtitle: { fontSize: 8, color: NEO_THEME.colors.grey, letterSpacing: 0.5 },
-  utility: {
-    minWidth: 52,
-    minHeight: 44,
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 1,
-    borderWidth: 2,
-    borderColor: NEO_THEME.colors.black,
-    borderRadius: 12,
-    backgroundColor: NEO_THEME.colors.white,
-    paddingHorizontal: 8,
-  },
-  utilityLabel: { fontSize: 8, fontFamily: NEO_THEME.fonts.bold },
-});
+function createStyles(c: SemanticColors, _tokens: DesignTokens) {
+  return {
+    container: {
+      flexDirection: 'row' as const,
+      alignItems: 'center' as const,
+      justifyContent: 'space-between' as const,
+      gap: space.xs,
+      paddingHorizontal: space.md,
+      paddingVertical: space.sm,
+      backgroundColor: c.canvas,
+    },
+    brand: { flex: 1 },
+    subtitle: {
+      marginTop: 2,
+      color: c.inkMuted,
+    },
+    utility: {
+      minWidth: 52,
+      minHeight: 44,
+      alignItems: 'center' as const,
+      justifyContent: 'center' as const,
+      gap: 2,
+      borderRadius: radii.md,
+      backgroundColor: c.surface,
+      paddingHorizontal: space.sm,
+    },
+    utilityLabel: {
+      fontSize: 10,
+      color: c.inkMuted,
+    },
+  };
+}

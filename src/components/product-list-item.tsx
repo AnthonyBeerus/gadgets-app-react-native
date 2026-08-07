@@ -3,6 +3,8 @@ import { Image, Pressable, StyleSheet, Text, View } from "react-native";
 import { Link } from "expo-router";
 import { Tables } from "../shared/types/database.types";
 import { NEO_THEME } from "../shared/constants/neobrutalism";
+import { useNeoStyles } from '../shared/hooks/useNeoStyles';
+import { useTheme } from '../shared/providers/theme-provider';
 
 type ProductWithShop = Tables<"product"> & {
   shops?: {
@@ -14,6 +16,8 @@ type ProductWithShop = Tables<"product"> & {
 };
 
 export const ProductListItem = ({ product }: { product: ProductWithShop }) => {
+  const styles = useNeoStyles(createStyles);
+  const { theme } = useTheme();
   return (
     <Link asChild href={`/product/${product.slug}`}>
       <Pressable style={styles.item}>
@@ -39,20 +43,20 @@ export const ProductListItem = ({ product }: { product: ProductWithShop }) => {
   );
 };
 
-const styles = StyleSheet.create({
+function createStyles(c) {
+  return {
   item: {
     width: "48%",
-    backgroundColor: NEO_THEME.colors.white,
+    backgroundColor: c.white,
     marginVertical: 8,
     borderRadius: NEO_THEME.borders.radius,
-    borderWidth: NEO_THEME.borders.width,
-    borderColor: NEO_THEME.colors.black,
+    borderWidth: 1,
+    borderColor: c.border,
     overflow: "hidden",
-    // Hard shadow
-    shadowColor: NEO_THEME.colors.black,
-    shadowOffset: { width: 4, height: 4 },
-    shadowOpacity: 1,
-    shadowRadius: 0,
+    shadowColor: c.black,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
     elevation: 0,
   },
   itemImageContainer: {
@@ -60,8 +64,8 @@ const styles = StyleSheet.create({
     width: "100%",
     height: 150,
     position: "relative",
-    borderBottomWidth: NEO_THEME.borders.width,
-    borderBottomColor: NEO_THEME.colors.black,
+    borderBottomWidth: 1,
+    borderBottomColor: c.border,
   },
   itemImage: {
     width: "100%",
@@ -72,15 +76,15 @@ const styles = StyleSheet.create({
     position: "absolute",
     top: 8,
     right: 8,
-    backgroundColor: NEO_THEME.colors.black,
+    backgroundColor: c.black,
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: NEO_THEME.borders.radius,
-    borderWidth: 2,
-    borderColor: NEO_THEME.colors.white,
+    borderWidth: 1,
+    borderColor: c.white,
   },
   shopBadgeText: {
-    color: NEO_THEME.colors.white,
+    color: c.white,
     fontSize: 10,
     fontWeight: "700",
     fontFamily: NEO_THEME.fonts.bold,
@@ -94,29 +98,30 @@ const styles = StyleSheet.create({
   itemTitle: {
     fontSize: 14,
     fontWeight: "700",
-    color: NEO_THEME.colors.black,
+    color: c.black,
     fontFamily: NEO_THEME.fonts.bold,
     textTransform: "uppercase",
     lineHeight: 18,
   },
   priceTag: {
-    backgroundColor: NEO_THEME.colors.yellow,
+    backgroundColor: c.yellow,
     paddingHorizontal: 8,
     paddingVertical: 4,
-    borderWidth: 2,
-    borderColor: NEO_THEME.colors.black,
+    borderWidth: 1,
+    borderColor: c.border,
     alignSelf: "flex-start",
   },
   itemPrice: {
     fontSize: 14,
-    fontWeight: "900",
-    color: NEO_THEME.colors.black,
+    fontWeight: '600',
+    color: c.black,
     fontFamily: NEO_THEME.fonts.black,
   },
   shopName: {
     fontSize: 12,
-    color: NEO_THEME.colors.grey,
+    color: c.grey,
     fontWeight: "600",
     textTransform: "uppercase",
   },
-});
+  };
+}

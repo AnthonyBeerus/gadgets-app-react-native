@@ -16,7 +16,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useToast } from "react-native-toast-notifications";
 import { useCartStore } from "../../../store/cart-store";
 import { getProduct } from "../../../shared/api/api";
-import { NEO_THEME } from "../../../shared/constants/neobrutalism";
+import { useDesignTokens, useThemedStyles, radii, fonts, type DesignTokens, type SemanticColors } from "../../../shared/design-system";
 import { useQuery } from '@tanstack/react-query';
 import { getOpportunityForProduct, recordCreatorOpportunityEvent } from '../../discovery/api';
 import type { DiscoverySource } from '../../../store/cart-store';
@@ -27,7 +27,344 @@ import { NuviaTag } from "../../../shared/components/ui/nuvia-tag";
 
 const { width } = Dimensions.get("window");
 
+function createStyles(c: SemanticColors, _tokens: DesignTokens) {
+  return {
+    container: {
+      flex: 1,
+      backgroundColor: c.canvas,
+    },
+    header: {
+      flexDirection: "row" as const,
+      alignItems: "center" as const,
+      paddingHorizontal: 16,
+      paddingVertical: 12,
+      backgroundColor: c.surface,
+      borderBottomWidth: 1,
+      borderBottomColor: c.border,
+    },
+    backButton: {
+      padding: 4,
+      marginRight: 12,
+    },
+    headerTitle: {
+      fontSize: 18,
+      fontWeight: '600' as const,
+      color: c.ink,
+      fontFamily: fonts.semibold,
+      flex: 1,
+    },
+    scrollView: {
+      flex: 1,
+    },
+    scrollContent: {
+      paddingBottom: 100,
+    },
+    loadingContainer: {
+      flex: 1,
+      justifyContent: "center" as const,
+      alignItems: "center" as const,
+      backgroundColor: c.canvas,
+    },
+    heroContainer: {
+      backgroundColor: c.surface,
+      height: width * 1.1,
+      borderBottomWidth: 1,
+      borderBottomColor: c.border,
+      marginBottom: 20,
+      borderBottomLeftRadius: 32,
+      borderBottomRightRadius: 32,
+      overflow: 'hidden' as const,
+      shadowColor: c.ink,
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.1,
+      shadowRadius: 10,
+      elevation: 2,
+    },
+    heroImage: {
+      width: "100%" as const,
+      height: "100%" as const,
+    },
+    detailsContainer: {
+      paddingHorizontal: 20,
+    },
+    headerSection: {
+      marginBottom: 20,
+    },
+    priceRow: {
+      flexDirection: "row" as const,
+      alignItems: "center" as const,
+      justifyContent: "space-between" as const,
+    },
+    priceTag: {
+      backgroundColor: c.accent,
+      paddingHorizontal: 16,
+      paddingVertical: 8,
+      borderWidth: 1,
+      borderColor: c.border,
+      borderRadius: radii.md,
+      shadowColor: c.ink,
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.08,
+      shadowRadius: 8,
+      elevation: 0,
+    },
+    price: {
+      fontSize: 24,
+      fontWeight: '600' as const,
+      color: c.ink,
+      fontFamily: fonts.bold,
+    },
+    ratingContainer: {
+      flexDirection: "row" as const,
+      alignItems: "center" as const,
+      backgroundColor: c.surface,
+      paddingHorizontal: 12,
+      paddingVertical: 6,
+      borderRadius: radii.md,
+      borderWidth: 1,
+      borderColor: c.border,
+      gap: 4,
+    },
+    ratingText: {
+      fontSize: 14,
+      fontWeight: "700" as const,
+      color: c.ink,
+      fontFamily: fonts.semibold,
+    },
+    section: {
+      marginBottom: 24,
+    },
+    sectionTitle: {
+      fontSize: 18,
+      fontWeight: '600' as const,
+      color: c.ink,
+      marginBottom: 12,
+      fontFamily: fonts.semibold,
+    },
+    variantContainer: {
+      gap: 12,
+      paddingRight: 20,
+    },
+    variantImageBox: {
+      width: 60,
+      height: 60,
+      borderRadius: 30,
+      borderWidth: 1,
+      borderColor: c.inkMuted,
+      overflow: "hidden" as const,
+      position: "relative" as const,
+    },
+    selectedVariantBox: {
+      borderColor: c.border,
+      borderWidth: 1,
+      transform: [{ scale: 1.1 }],
+    },
+    variantImage: {
+      width: "100%" as const,
+      height: "100%" as const,
+    },
+    variantCheckMark: {
+      position: "absolute" as const,
+      top: 0,
+      right: 0,
+      bottom: 0,
+      left: 0,
+      backgroundColor: 'rgba(167, 139, 250, 0.3)',
+      borderRadius: 30,
+      alignItems: 'center' as const,
+      justifyContent: 'center' as const,
+    },
+    sizeContainer: {
+      flexDirection: "row" as const,
+      gap: 12,
+    },
+    sizeOption: {
+      width: 48,
+      height: 48,
+      borderRadius: 24,
+      backgroundColor: c.surface,
+      borderWidth: 1,
+      borderColor: c.border,
+      alignItems: "center" as const,
+      justifyContent: "center" as const,
+      shadowColor: c.ink,
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.08,
+      shadowRadius: 8,
+      elevation: 2,
+    },
+    selectedSize: {
+      backgroundColor: c.ink,
+      borderColor: c.border,
+      transform: [{ translateY: -2 }],
+    },
+    sizeText: {
+      fontSize: 14,
+      fontWeight: "700" as const,
+      color: c.ink,
+      fontFamily: fonts.semibold,
+    },
+    selectedSizeText: {
+      color: c.surface,
+    },
+    description: {
+      fontSize: 16,
+      color: c.ink,
+      lineHeight: 24,
+      fontFamily: fonts.regular,
+    },
+    opportunityCard: {
+      gap: 10,
+      backgroundColor: c.accent,
+      borderWidth: 1,
+      borderColor: c.border,
+      borderRadius: 18,
+      padding: 16,
+      marginBottom: 20,
+      boxShadow: '0px 2px 8px rgba(0,0,0,0.08)',
+    },
+    opportunityHeading: {
+      flexDirection: 'row' as const,
+      alignItems: 'center' as const,
+      gap: 10,
+    },
+    tiktokIcon: {
+      width: 44,
+      height: 44,
+      alignItems: 'center' as const,
+      justifyContent: 'center' as const,
+      backgroundColor: c.ink,
+      borderRadius: 12,
+    },
+    requirementRow: {
+      flexDirection: 'row' as const,
+      alignItems: 'center' as const,
+      gap: 7,
+    },
+    unlockNote: {
+      flexDirection: 'row' as const,
+      alignItems: 'flex-start' as const,
+      gap: 8,
+      backgroundColor: c.surface,
+      borderWidth: 1,
+      borderColor: c.border,
+      borderRadius: 12,
+      padding: 10,
+    },
+    tryOnButtonContainer: {
+      paddingHorizontal: 20,
+      marginTop: -40,
+      marginBottom: 20,
+      zIndex: 10,
+    },
+    tryOnButtonProminent: {
+      flexDirection: "row" as const,
+      alignItems: "center" as const,
+      justifyContent: "space-between" as const,
+      backgroundColor: c.accent,
+      paddingVertical: 16,
+      paddingHorizontal: 20,
+      borderRadius: 20,
+      borderWidth: 1,
+      borderColor: c.border,
+      shadowColor: c.ink,
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.08,
+      shadowRadius: 8,
+      elevation: 2,
+    },
+    tryOnIconContainer: {
+      width: 48,
+      height: 48,
+      borderRadius: 24,
+      backgroundColor: c.ink,
+      alignItems: "center" as const,
+      justifyContent: "center" as const,
+    },
+    tryOnTextContainer: {
+      flex: 1,
+      marginLeft: 16,
+    },
+    tryOnButtonTitle: {
+      color: c.ink,
+      fontSize: 16,
+      fontWeight: '600' as const,
+      marginBottom: 2,
+      fontFamily: fonts.semibold,
+    },
+    tryOnButtonSubtitle: {
+      color: c.ink,
+      fontSize: 12,
+      fontWeight: "600" as const,
+    },
+    thumbnailContainer: {
+      gap: 12,
+    },
+    thumbnailImage: {
+      width: 80,
+      height: 80,
+      borderRadius: 16,
+      backgroundColor: c.inkMuted,
+      borderWidth: 1,
+      borderColor: c.border,
+    },
+    bottomBar: {
+      position: "absolute" as const,
+      bottom: 0,
+      left: 0,
+      right: 0,
+      backgroundColor: c.surface,
+      flexDirection: "row" as const,
+      alignItems: "center" as const,
+      paddingHorizontal: 20,
+      paddingVertical: 16,
+      gap: 16,
+      borderTopWidth: 1,
+      borderTopColor: c.border,
+      shadowColor: c.ink,
+      shadowOffset: { width: 0, height: -5 },
+      shadowOpacity: 0.05,
+      shadowRadius: 10,
+      elevation: 2,
+    },
+    quantityControl: {
+      flexDirection: "row" as const,
+      alignItems: "center" as const,
+      backgroundColor: c.canvas,
+      borderRadius: 24,
+      padding: 6,
+      gap: 12,
+      borderWidth: 1,
+      borderColor: c.border,
+    },
+    quantityButton: {
+      width: 36,
+      height: 36,
+      borderRadius: 18,
+      backgroundColor: c.surface,
+      alignItems: "center" as const,
+      justifyContent: "center" as const,
+      borderWidth: 1,
+      borderColor: c.border,
+    },
+    disabledButton: {
+      backgroundColor: c.gray200,
+      borderColor: c.inkMuted,
+      opacity: 0.5,
+    },
+    quantityText: {
+      minWidth: 24,
+      textAlign: "center" as const,
+    },
+    buyButton: {
+      flex: 1,
+    },
+  };
+}
+
 export default function ProductDetailsScreen() {
+  const styles = useThemedStyles(createStyles);
+  const { colors } = useDesignTokens();
   const { slug, source, opportunityId } = useLocalSearchParams<{
     slug: string;
     source?: DiscoverySource;
@@ -46,11 +383,8 @@ export default function ProductDetailsScreen() {
   const [selectedColor, setSelectedColor] = useState<any>(null);
   const [selectedSize, setSelectedSize] = useState("M");
 
-  // Get color variants from JSONB column
   const colorVariants = ((product as any)?.color_variants as any[]) || [];
 
-  // Set initial color once the product (and its variants) load. Runs in an effect
-  // rather than during render to avoid update-during-render loops.
   useEffect(() => {
     if (colorVariants.length > 0 && !selectedColor) {
       setSelectedColor(colorVariants[0]);
@@ -70,13 +404,12 @@ export default function ProductDetailsScreen() {
     recordCreatorOpportunityEvent(parsedOpportunityId, 'detail_open', source).catch(() => undefined);
   }, [parsedOpportunityId, source]);
 
-  // Get the current hero image based on selected color variant
   const currentHeroImage = selectedColor?.image_url || product?.heroImage;
 
   if (isLoading)
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color={NEO_THEME.colors.primary} />
+        <ActivityIndicator size="large" color={colors.ink} />
       </View>
     );
   if (error) return <View style={styles.loadingContainer}><Text>Error: {(error as Error).message}</Text></View>;
@@ -120,11 +453,9 @@ export default function ProductDetailsScreen() {
       placement: "top",
       duration: 1500,
     });
-    // Navigate to Cart
     router.push("/bag");
   };
 
-  // Check if product supports virtual try-on
   const isClothing = product.category === 2;
   const isBeautyService = product.category === 4;
   const supportsVirtualTryOn = isClothing || isBeautyService;
@@ -137,11 +468,11 @@ export default function ProductDetailsScreen() {
         onBackPress={() => router.back()} 
         rightElement={
           <TouchableOpacity onPress={() => router.push("/bag")} style={{ position: 'relative' }}>
-            <Ionicons name="cart" size={24} color={NEO_THEME.colors.black} />
+            <Ionicons name="cart" size={24} color={colors.ink} />
             {items.length > 0 && (
               <NuviaTag 
                 label={items.length.toString()} 
-                color={NEO_THEME.colors.primary} 
+                color={colors.ink} 
                 style={{
                     position: 'absolute',
                     top: -6,
@@ -151,7 +482,7 @@ export default function ProductDetailsScreen() {
                     height: 18,
                     borderRadius: 9,
                 }}
-                textStyle={{ fontSize: 10, color: NEO_THEME.colors.white }}
+                textStyle={{ fontSize: 10, color: colors.surface }}
               />
             )}
           </TouchableOpacity>
@@ -159,7 +490,6 @@ export default function ProductDetailsScreen() {
       />
 
       <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
-        {/* Hero Image */}
         <View style={styles.heroContainer}>
           <Image
             source={{ uri: currentHeroImage || 'https://placeholder.com/placeholder.png' }}
@@ -168,19 +498,17 @@ export default function ProductDetailsScreen() {
           />
         </View>
 
-          {/* Product Details */}
           <View style={styles.detailsContainer}>
-            {/* Price and Rating */}
             <View style={styles.headerSection}>
               <View style={styles.priceRow}>
                  <NuviaTag 
                     label={`P${(product.price || 0).toFixed(2)}`} 
-                    color={NEO_THEME.colors.secondary} 
+                    color={colors.accent} 
                     style={{ paddingHorizontal: 20, paddingVertical: 10 }}
                     textStyle={{ fontSize: 24 }}
                  />
                 <View style={styles.ratingContainer}>
-                  <Ionicons name="star" size={16} color={NEO_THEME.colors.secondary} />
+                  <Ionicons name="star" size={16} color={colors.accent} />
                   <NuviaText variant="label">4.5</NuviaText>
                 </View>
               </View>
@@ -190,7 +518,7 @@ export default function ProductDetailsScreen() {
               <View style={styles.opportunityCard}>
                 <View style={styles.opportunityHeading}>
                   <View style={styles.tiktokIcon}>
-                    <Ionicons name="logo-tiktok" size={22} color={NEO_THEME.colors.white} />
+                    <Ionicons name="logo-tiktok" size={22} color={colors.surface} />
                   </View>
                   <View style={{ flex: 1 }}>
                     <NuviaText variant="caption">CREATOR OPPORTUNITY</NuviaText>
@@ -201,12 +529,12 @@ export default function ProductDetailsScreen() {
                 <NuviaText variant="body">{opportunity.data.description}</NuviaText>
                 {(opportunity.data.requirements ?? []).slice(0, 3).map((requirement: string) => (
                   <View key={requirement} style={styles.requirementRow}>
-                    <Ionicons name="checkmark-circle" size={17} color={NEO_THEME.colors.black} />
+                    <Ionicons name="checkmark-circle" size={17} color={colors.ink} />
                     <NuviaText variant="caption" style={{ flex: 1 }}>{requirement}</NuviaText>
                   </View>
                 ))}
                 <View style={styles.unlockNote}>
-                  <Ionicons name="lock-closed" size={16} color={NEO_THEME.colors.black} />
+                  <Ionicons name="lock-closed" size={16} color={colors.ink} />
                   <NuviaText variant="caption" style={{ flex: 1 }}>
                     Complete this purchase to unlock eligibility. Muse verifies your external TikTok before the merchant voucher is issued.
                   </NuviaText>
@@ -214,7 +542,6 @@ export default function ProductDetailsScreen() {
               </View>
             )}
 
-            {/* Color Variants */}
             {supportsVirtualTryOn && colorVariants.length > 0 && (
               <View style={styles.section}>
                 <Text style={styles.sectionTitle}>
@@ -249,7 +576,7 @@ export default function ProductDetailsScreen() {
                             <Ionicons
                               name="checkmark-circle"
                               size={24}
-                              color={NEO_THEME.colors.primary}
+                              color={colors.ink}
                             />
                           </View>
                         )}
@@ -259,7 +586,6 @@ export default function ProductDetailsScreen() {
               </View>
             )}
 
-            {/* Size Selection */}
             {isClothing && (
               <View style={styles.section}>
                 <NuviaText variant="h3" style={styles.sectionTitle}>SIZE</NuviaText>
@@ -288,7 +614,6 @@ export default function ProductDetailsScreen() {
               </View>
             )}
 
-            {/* Description */}
             <View style={styles.section}>
               <NuviaText variant="h3" style={styles.sectionTitle}>DETAILS</NuviaText>
               <NuviaText variant="body" style={styles.description}>
@@ -296,7 +621,6 @@ export default function ProductDetailsScreen() {
               </NuviaText>
             </View>
 
-            {/* Additional Images */}
             {product.imagesUrl && product.imagesUrl.length > 0 && (
               <View style={styles.section}>
                 <Text style={styles.sectionTitle}>MORE IMAGES</Text>
@@ -315,7 +639,6 @@ export default function ProductDetailsScreen() {
           </View>
         </ScrollView>
 
-        {/* Bottom Action Bar - Fixed at bottom */}
         <View style={styles.bottomBar}>
           <View style={styles.quantityControl}>
             <TouchableOpacity
@@ -327,7 +650,7 @@ export default function ProductDetailsScreen() {
               disabled={quantity <= 1}
               activeOpacity={0.7}
             >
-              <Ionicons name="remove" size={20} color={NEO_THEME.colors.white} />
+              <Ionicons name="remove" size={20} color={colors.surface} />
             </TouchableOpacity>
 
           <NuviaText variant="h3" style={styles.quantityText}>{quantity}</NuviaText>
@@ -341,348 +664,15 @@ export default function ProductDetailsScreen() {
             disabled={quantity >= (product.maxQuantity || 0)}
             activeOpacity={0.7}
           >
-            <Ionicons name="add" size={20} color={NEO_THEME.colors.black} />
+            <Ionicons name="add" size={20} color={colors.ink} />
           </TouchableOpacity>
         </View>
 
         <NuviaButton onPress={addToCart} variant="primary" style={styles.buyButton}>
-          <NuviaText variant="label" color={NEO_THEME.colors.white}>BUY NOW</NuviaText>
+          <NuviaText variant="label" color={colors.surface}>BUY NOW</NuviaText>
         </NuviaButton>
       </View>
 
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: NEO_THEME.colors.background,
-  },
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    backgroundColor: NEO_THEME.colors.white,
-    borderBottomWidth: NEO_THEME.borders.width,
-    borderBottomColor: NEO_THEME.colors.black,
-  },
-  backButton: {
-    padding: 4,
-    marginRight: 12,
-  },
-  headerTitle: {
-    fontSize: 18,
-    fontWeight: "900",
-    color: NEO_THEME.colors.black,
-    fontFamily: NEO_THEME.fonts.bold,
-    flex: 1,
-  },
-  scrollView: {
-    flex: 1,
-  },
-  scrollContent: {
-    paddingBottom: 100,
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: NEO_THEME.colors.background,
-  },
-  heroContainer: {
-    backgroundColor: NEO_THEME.colors.white,
-    height: width * 1.1,
-    borderBottomWidth: NEO_THEME.borders.width,
-    borderBottomColor: NEO_THEME.colors.black,
-    marginBottom: 20,
-    borderBottomLeftRadius: 32,
-    borderBottomRightRadius: 32,
-    overflow: 'hidden',
-    shadowColor: NEO_THEME.colors.black,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 10,
-    elevation: 5,
-  },
-  heroImage: {
-    width: "100%",
-    height: "100%",
-  },
-  detailsContainer: {
-    paddingHorizontal: 20,
-  },
-  headerSection: {
-    marginBottom: 20,
-  },
-  priceRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-  },
-  priceTag: {
-    backgroundColor: NEO_THEME.colors.secondary, // Yellow
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderWidth: NEO_THEME.borders.width,
-    borderColor: NEO_THEME.colors.black,
-    borderRadius: NEO_THEME.borders.radius,
-    shadowColor: NEO_THEME.colors.black,
-    shadowOffset: { width: 4, height: 4 },
-    shadowOpacity: 1,
-    shadowRadius: 0,
-    elevation: 0,
-  },
-  price: {
-    fontSize: 24,
-    fontWeight: "900",
-    color: NEO_THEME.colors.black,
-    fontFamily: NEO_THEME.fonts.black,
-  },
-  ratingContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: NEO_THEME.colors.white,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: NEO_THEME.borders.radius,
-    borderWidth: NEO_THEME.borders.width,
-    borderColor: NEO_THEME.colors.black,
-    gap: 4,
-  },
-  ratingText: {
-    fontSize: 14,
-    fontWeight: "700",
-    color: NEO_THEME.colors.black,
-    fontFamily: NEO_THEME.fonts.bold,
-  },
-  section: {
-    marginBottom: 24,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: "900",
-    color: NEO_THEME.colors.black,
-    marginBottom: 12,
-    fontFamily: NEO_THEME.fonts.bold,
-  },
-  variantContainer: {
-    gap: 12,
-    paddingRight: 20,
-  },
-  variantImageBox: {
-    width: 60,
-    height: 60,
-    borderRadius: 30, // Circle
-    borderWidth: NEO_THEME.borders.width,
-    borderColor: NEO_THEME.colors.grey,
-    overflow: "hidden",
-    position: "relative",
-  },
-  selectedVariantBox: {
-    borderColor: NEO_THEME.colors.primary,
-    borderWidth: 2,
-    transform: [{ scale: 1.1 }],
-  },
-  variantImage: {
-    width: "100%",
-    height: "100%",
-  },
-  variantCheckMark: {
-    position: "absolute",
-    top: 0,
-    right: 0,
-    bottom: 0,
-    left: 0,
-    backgroundColor: 'rgba(167, 139, 250, 0.3)', // Lilac overlay
-    borderRadius: 30,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  sizeContainer: {
-    flexDirection: "row",
-    gap: 12,
-  },
-  sizeOption: {
-    width: 48,
-    height: 48,
-    borderRadius: 24, // Circle
-    backgroundColor: NEO_THEME.colors.white,
-    borderWidth: NEO_THEME.borders.width,
-    borderColor: NEO_THEME.colors.black,
-    alignItems: "center",
-    justifyContent: "center",
-    shadowColor: NEO_THEME.colors.black,
-    shadowOffset: { width: 2, height: 2 },
-    shadowOpacity: 1,
-    shadowRadius: 0,
-    elevation: 2,
-  },
-  selectedSize: {
-    backgroundColor: NEO_THEME.colors.primary,
-    borderColor: NEO_THEME.colors.black,
-    transform: [{ translateY: -2 }],
-  },
-  sizeText: {
-    fontSize: 14,
-    fontWeight: "700",
-    color: NEO_THEME.colors.black,
-    fontFamily: NEO_THEME.fonts.bold,
-  },
-  selectedSizeText: {
-    color: NEO_THEME.colors.white,
-  },
-  description: {
-    fontSize: 16,
-    color: NEO_THEME.colors.dark,
-    lineHeight: 24,
-    fontFamily: NEO_THEME.fonts.regular,
-  },
-  opportunityCard: {
-    gap: 10,
-    backgroundColor: NEO_THEME.colors.secondary,
-    borderWidth: 3,
-    borderColor: NEO_THEME.colors.black,
-    borderRadius: 18,
-    padding: 16,
-    marginBottom: 20,
-    boxShadow: '5px 5px 0px #000000',
-  },
-  opportunityHeading: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-  },
-  tiktokIcon: {
-    width: 44,
-    height: 44,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: NEO_THEME.colors.black,
-    borderRadius: 12,
-  },
-  requirementRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 7,
-  },
-  unlockNote: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: 8,
-    backgroundColor: NEO_THEME.colors.white,
-    borderWidth: 2,
-    borderColor: NEO_THEME.colors.black,
-    borderRadius: 12,
-    padding: 10,
-  },
-  tryOnButtonContainer: {
-    paddingHorizontal: 20,
-    marginTop: -40,
-    marginBottom: 20,
-    zIndex: 10,
-  },
-  tryOnButtonProminent: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    backgroundColor: NEO_THEME.colors.secondary, // Yellow
-    paddingVertical: 16,
-    paddingHorizontal: 20,
-    borderRadius: 20,
-    borderWidth: NEO_THEME.borders.width,
-    borderColor: NEO_THEME.colors.black,
-    shadowColor: NEO_THEME.colors.black,
-    shadowOffset: { width: 4, height: 4 },
-    shadowOpacity: 1,
-    shadowRadius: 0,
-    elevation: 4,
-  },
-  tryOnIconContainer: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: NEO_THEME.colors.black,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  tryOnTextContainer: {
-    flex: 1,
-    marginLeft: 16,
-  },
-  tryOnButtonTitle: {
-    color: NEO_THEME.colors.black,
-    fontSize: 16,
-    fontWeight: "900",
-    marginBottom: 2,
-    fontFamily: NEO_THEME.fonts.bold,
-  },
-  tryOnButtonSubtitle: {
-    color: NEO_THEME.colors.black,
-    fontSize: 12,
-    fontWeight: "600",
-  },
-  thumbnailContainer: {
-    gap: 12,
-  },
-  thumbnailImage: {
-    width: 80,
-    height: 80,
-    borderRadius: 16,
-    backgroundColor: NEO_THEME.colors.grey,
-    borderWidth: NEO_THEME.borders.width,
-    borderColor: NEO_THEME.colors.black,
-  },
-  bottomBar: {
-    position: "absolute",
-    bottom: 0,
-    left: 0,
-    right: 0,
-    backgroundColor: NEO_THEME.colors.white,
-    flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: 20,
-    paddingVertical: 16,
-    gap: 16,
-    borderTopWidth: NEO_THEME.borders.width,
-    borderTopColor: NEO_THEME.colors.black,
-    shadowColor: NEO_THEME.colors.black,
-    shadowOffset: { width: 0, height: -5 },
-    shadowOpacity: 0.05,
-    shadowRadius: 10,
-    elevation: 5,
-  },
-  quantityControl: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: NEO_THEME.colors.background,
-    borderRadius: 24,
-    padding: 6,
-    gap: 12,
-    borderWidth: NEO_THEME.borders.width,
-    borderColor: NEO_THEME.colors.black,
-  },
-  quantityButton: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: NEO_THEME.colors.white,
-    alignItems: "center",
-    justifyContent: "center",
-    borderWidth: 1.5,
-    borderColor: NEO_THEME.colors.black,
-  },
-  disabledButton: {
-    backgroundColor: NEO_THEME.colors.greyLight,
-    borderColor: NEO_THEME.colors.grey,
-    opacity: 0.5,
-  },
-  quantityText: {
-    minWidth: 24,
-    textAlign: "center",
-  },
-  buyButton: {
-    flex: 1,
-  },
-});

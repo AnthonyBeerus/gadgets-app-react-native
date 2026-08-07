@@ -1,6 +1,6 @@
 // filepath: src/features/virtual-try-on/components/TryOnModal.tsx
 import React, { useEffect } from "react";
-import { Modal, View, StyleSheet, Text, TouchableOpacity } from "react-native";
+import { Modal, View, Text, TouchableOpacity } from "react-native";
 import { useTryOnStore } from "../store/tryOnStore";
 import { useProcessTryOn } from "../api/processTryOn";
 import {
@@ -12,7 +12,8 @@ import {
 import ProductSelector from "./ProductSelector";
 import ImagePickerComponent from "./ImagePicker";
 import ResultOverlay from "./ResultOverlay";
-import { NEO_THEME } from "../../../shared/constants/neobrutalism";
+import { NEO_THEME } from '../../../shared/constants/neobrutalism';
+import { useNeoStyles } from '../../../shared/hooks/useNeoStyles';
 // Use cross-fetch to avoid whatwg-fetch issues
 import fetch from "cross-fetch";
 
@@ -74,6 +75,7 @@ export default function TryOnModal({
   onClose,
   shopProducts = [],
 }: TryOnModalProps) {
+  const styles = useNeoStyles(createStyles);
   const {
     selectedProduct,
     userImage,
@@ -246,10 +248,11 @@ export default function TryOnModal({
 }
 
 
-const styles = StyleSheet.create({
+function createStyles(c) {
+  return {
   container: {
     flex: 1,
-    backgroundColor: NEO_THEME.colors.backgroundLight,
+    backgroundColor: c.backgroundLight,
   },
   header: {
     flexDirection: "row",
@@ -257,40 +260,41 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingHorizontal: 20,
     paddingVertical: 16,
-    backgroundColor: NEO_THEME.colors.white,
-    borderBottomWidth: NEO_THEME.borders.width,
-    borderBottomColor: NEO_THEME.colors.black,
-    shadowColor: NEO_THEME.colors.black,
+    backgroundColor: c.white,
+    borderBottomWidth: 1,
+    borderBottomColor: c.border,
+    shadowColor: c.black,
     shadowOffset: { width: 0, height: 5 },
-    shadowOpacity: 1,
-    shadowRadius: 0,
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
     elevation: 0,
   },
   title: {
     fontSize: 22,
-    fontWeight: "900",
-    color: NEO_THEME.colors.black,
+    fontWeight: '600',
+    color: c.black,
     fontFamily: NEO_THEME.fonts.black,
     textTransform: "uppercase",
   },
   closeButtonContainer: {
     width: 40,
     height: 40,
-    backgroundColor: NEO_THEME.colors.yellow,
+    backgroundColor: c.yellow,
     borderRadius: NEO_THEME.borders.radius,
-    borderWidth: NEO_THEME.borders.width,
-    borderColor: NEO_THEME.colors.black,
+    borderWidth: 1,
+    borderColor: c.border,
     alignItems: "center",
     justifyContent: "center",
-    shadowColor: NEO_THEME.colors.black,
-    shadowOffset: { width: 3, height: 3 },
-    shadowOpacity: 1,
-    shadowRadius: 0,
+    shadowColor: c.black,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
     elevation: 0,
   },
   closeButton: {
     fontSize: 24,
-    color: NEO_THEME.colors.black,
-    fontWeight: "900",
+    color: c.black,
+    fontWeight: '600',
   },
-});
+  };
+}

@@ -1,49 +1,39 @@
-import React, { useEffect } from 'react';
-import { StyleSheet, View, Dimensions } from 'react-native';
+import React, { useEffect, useMemo } from 'react';
+import { View, Dimensions } from 'react-native';
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
   withDelay,
   withTiming,
   withRepeat,
-  withSequence,
   Easing,
-  cancelAnimation,
 } from 'react-native-reanimated';
-import { NEO_THEME } from '../../constants/neobrutalism';
+import { useNeoStyles } from '../../hooks/useNeoStyles';
+import { useTheme } from '../../providers/theme-provider';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 const NUM_PARTICLES = 50;
-const COLORS = [
-  NEO_THEME.colors.primary,
-  NEO_THEME.colors.vibrantOrange,
-  NEO_THEME.colors.gemGold,
-  NEO_THEME.colors.electricBlue,
-  NEO_THEME.colors.success,
-  NEO_THEME.colors.warning,
-];
 
 interface ParticleProps {
-  index: number;
+  color: string;
+  borderColor: string;
+  particleStyle: { position: 'absolute'; borderWidth: number };
 }
 
-const Particle: React.FC<ParticleProps> = ({ index }) => {
+const Particle: React.FC<ParticleProps> = ({ color, borderColor, particleStyle }) => {
   const x = useSharedValue(Math.random() * SCREEN_WIDTH);
   const y = useSharedValue(-50);
   const rotation = useSharedValue(0);
   const opacity = useSharedValue(1);
 
-  const color = COLORS[index % COLORS.length];
-  const size = Math.random() * 8 + 6; // 6-14px
+  const size = Math.random() * 8 + 6;
   const delay = Math.random() * 500;
-  const duration = Math.random() * 2000 + 2000; // 2-4s
+  const duration = Math.random() * 2000 + 2000;
 
   useEffect(() => {
-    // Reset positions
     y.value = -50;
     opacity.value = 1;
     
-    // Animate falling
     y.value = withDelay(
       delay,
       withTiming(SCREEN_HEIGHT + 100, {
@@ -52,7 +42,6 @@ const Particle: React.FC<ParticleProps> = ({ index }) => {
       })
     );
 
-    // Animate rotation
     rotation.value = withDelay(
       delay,
       withRepeat(
@@ -60,10 +49,6 @@ const Particle: React.FC<ParticleProps> = ({ index }) => {
         -1
       )
     );
-    
-    // Animate x sway
-    // (Simplification: linear falling first, maybe add sine sway later if needed)
-
   }, []);
 
   const rStyle = useAnimatedStyle(() => {
@@ -77,10 +62,11 @@ const Particle: React.FC<ParticleProps> = ({ index }) => {
       width: size,
       height: size,
       backgroundColor: color,
+      borderColor,
     };
   });
 
-  return <Animated.View style={[styles.particle, rStyle]} />;
+  return <Animated.View style={[particleStyle, rStyle]} />;
 };
 
 interface ConfettiProps {
@@ -88,25 +74,50 @@ interface ConfettiProps {
 }
 
 export const Confetti: React.FC<ConfettiProps> = ({ active = false }) => {
+  const styles = useNeoStyles(createStyles);
+  const { theme } = useTheme();
+
+  const accentColors = useMemo(
+    () => [
+      theme.colors.primary,
+      theme.colors.vibrantOrange,
+      theme.colors.gemGold,
+      theme.colors.electricBlue,
+      theme.colors.success,
+      theme.colors.warning,
+    ],
+    [theme],
+  );
+
   if (!active) return null;
 
   return (
     <View style={styles.container} pointerEvents="none">
       {Array.from({ length: NUM_PARTICLES }).map((_, i) => (
-        <Particle key={i} index={i} />
+        <Particle
+          key={i}
+          color={accentColors[i % accentColors.length]}
+          borderColor={theme.colors.border}
+          particleStyle={styles.particle}
+        />
       ))}
     </View>
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    ...StyleSheet.absoluteFillObject,
-    zIndex: 9999, // On top of everything
-  },
-  particle: {
-    position: 'absolute',
-    borderWidth: 1, // Neobrutalist hard edge
-    borderColor: 'rgba(0,0,0,0.1)',
-  },
-});
+function createStyles(_c: unknown) {
+  return {
+    container: {
+      position: 'absolute' as const,
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      zIndex: 9999,
+    },
+    particle: {
+      position: 'absolute' as const,
+      borderWidth: 1,
+    },
+  };
+}

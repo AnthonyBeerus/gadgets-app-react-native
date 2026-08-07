@@ -1,20 +1,31 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   View,
   Text,
   StyleSheet,
   Image,
+  Pressable,
 } from "react-native";
 import { useAuth } from "../../../shared/providers/auth-provider";
 import { supabase } from "../../../shared/lib/supabase";
-import { NEO_THEME } from "../../../shared/constants/neobrutalism";
+import { useTheme, type ThemePreference } from "../../../shared/providers/theme-provider";
+import { useNeoStyles } from "../../../shared/hooks/useNeoStyles";
 import { ProfileOption } from "../components/ProfileOption";
 import { AnimatedHeaderLayout } from "../../../shared/components/layout/AnimatedHeaderLayout";
 import { router } from "expo-router";
 import { HeaderRightGroup } from "../../../shared/components/ui/header-right-group";
+import { NEO_THEME } from "../../../shared/constants/neobrutalism";
+
+const PREFERENCE_OPTIONS: { value: ThemePreference; label: string }[] = [
+  { value: 'system', label: 'System' },
+  { value: 'light', label: 'Light' },
+  { value: 'dark', label: 'Dark' },
+];
 
 const ProfileScreen = () => {
   const { user, isMerchant, isAdmin, switchRole } = useAuth();
+  const { preference, setPreference } = useTheme();
+  const styles = useNeoStyles(createStyles);
 
   const renderSmallTitle = () => (
     <Text style={styles.headerTitle}>
@@ -48,6 +59,11 @@ const ProfileScreen = () => {
     await supabase.auth.signOut();
   };
 
+  const preferenceLabel = useMemo(
+    () => PREFERENCE_OPTIONS.find(o => o.value === preference)?.label ?? 'System',
+    [preference],
+  );
+
   return (
     <AnimatedHeaderLayout
       renderSmallTitle={renderSmallTitle}
@@ -55,7 +71,6 @@ const ProfileScreen = () => {
       smallHeaderRight={<HeaderRightGroup />}
       largeHeaderRight={<HeaderRightGroup />}
     >
-      {/* Account Section */}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>ACCOUNT</Text>
         <View style={styles.optionsContainer}>
@@ -77,10 +92,31 @@ const ProfileScreen = () => {
             subtitle="Password, two-factor authentication"
             onPress={() => {}}
           />
+          <View style={styles.appearanceBlock}>
+            <Text style={styles.appearanceTitle}>APPEARANCE</Text>
+            <Text style={styles.appearanceSubtitle}>Currently {preferenceLabel}</Text>
+            <View style={styles.appearanceRow}>
+              {PREFERENCE_OPTIONS.map(option => {
+                const active = preference === option.value;
+                return (
+                  <Pressable
+                    key={option.value}
+                    accessibilityRole="button"
+                    accessibilityState={{ selected: active }}
+                    onPress={() => setPreference(option.value)}
+                    style={[styles.appearanceChip, active && styles.appearanceChipActive]}
+                  >
+                    <Text style={[styles.appearanceChipText, active && styles.appearanceChipTextActive]}>
+                      {option.label}
+                    </Text>
+                  </Pressable>
+                );
+              })}
+            </View>
+          </View>
         </View>
       </View>
 
-      {/* Shopping Section */}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>SHOPPING</Text>
         <View style={styles.optionsContainer}>
@@ -105,7 +141,6 @@ const ProfileScreen = () => {
         </View>
       </View>
 
-      {/* Merchant Section */}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>MERCHANT</Text>
         <View style={styles.optionsContainer}>
@@ -146,7 +181,6 @@ const ProfileScreen = () => {
         </View>
       ) : null}
 
-      {/* Sign Out */}
       <View style={styles.section}>
         <View style={styles.optionsContainer}>
           <ProfileOption
@@ -158,7 +192,6 @@ const ProfileScreen = () => {
         </View>
       </View>
 
-      {/* Bottom Spacing */}
       <View style={styles.bottomSpacing} />
     </AnimatedHeaderLayout>
   );
@@ -166,92 +199,125 @@ const ProfileScreen = () => {
 
 export default ProfileScreen;
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: NEO_THEME.colors.backgroundLight,
-  },
-  section: {
-    marginBottom: 20,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: "900",
-    color: NEO_THEME.colors.black,
-    marginHorizontal: 20,
-    marginBottom: 12,
-    fontFamily: NEO_THEME.fonts.black,
-    textTransform: "uppercase",
-  },
-  optionsContainer: {
-    backgroundColor: NEO_THEME.colors.white,
-    marginHorizontal: 20,
-    borderRadius: NEO_THEME.borders.radius,
-    overflow: "hidden",
-    borderWidth: NEO_THEME.borders.width,
-    borderColor: NEO_THEME.colors.black,
-    shadowColor: NEO_THEME.colors.black,
-    shadowOffset: { width: 4, height: 4 },
-    shadowOpacity: 1,
-    shadowRadius: 0,
-    elevation: 0,
-  },
-  headerTitle: {
-    fontSize: 18,
-    fontWeight: "900",
-    color: NEO_THEME.colors.black,
-    fontFamily: NEO_THEME.fonts.black,
-    textTransform: "uppercase",
-  },
-  largeHeaderContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  largeAvatar: {
-    width: 80,
-    height: 80,
-    borderRadius: NEO_THEME.borders.radius,
-    marginRight: 16,
-    borderWidth: NEO_THEME.borders.width,
-    borderColor: NEO_THEME.colors.black,
-  },
-  largeUserInfo: {
-    flex: 1,
-  },
-  largeUserName: {
-    fontSize: 24,
-    fontWeight: "900",
-    color: NEO_THEME.colors.black,
-    marginBottom: 4,
-    fontFamily: NEO_THEME.fonts.black,
-    textTransform: "uppercase",
-  },
-  largeUserEmail: {
-    fontSize: 16,
-    color: NEO_THEME.colors.grey,
-    marginBottom: 8,
-  },
-  userTypeBadge: {
-    backgroundColor: NEO_THEME.colors.yellow,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: NEO_THEME.borders.radius,
-    alignSelf: "flex-start",
-    borderWidth: 2,
-    borderColor: NEO_THEME.colors.black,
-    shadowColor: NEO_THEME.colors.black,
-    shadowOffset: { width: 2, height: 2 },
-    shadowOpacity: 1,
-    shadowRadius: 0,
-  },
-  userTypeText: {
-    color: NEO_THEME.colors.black,
-    fontSize: 12,
-    fontWeight: "900",
-    fontFamily: NEO_THEME.fonts.black,
-    textTransform: "uppercase",
-  },
-  bottomSpacing: {
-    height: 100,
-  },
-});
+function createStyles(c: ReturnType<typeof useTheme>['theme']['colors']) {
+  return {
+    section: {
+      marginBottom: 20,
+    },
+    sectionTitle: {
+      fontSize: 16,
+      fontWeight: '600' as const,
+      color: c.black,
+      marginHorizontal: 20,
+      marginBottom: 12,
+      fontFamily: NEO_THEME.fonts.semibold,
+    },
+    optionsContainer: {
+      backgroundColor: c.white,
+      marginHorizontal: 20,
+      borderRadius: NEO_THEME.borders.radius,
+      overflow: "hidden" as const,
+      borderWidth: 1,
+      borderColor: c.border,
+      shadowColor: c.black,
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.08,
+      shadowRadius: 8,
+      elevation: 0,
+    },
+    appearanceBlock: {
+      paddingHorizontal: 16,
+      paddingVertical: 16,
+    },
+    appearanceTitle: {
+      fontSize: 16,
+      fontWeight: '600' as const,
+      color: c.black,
+      fontFamily: NEO_THEME.fonts.semibold,
+      marginBottom: 2,
+    },
+    appearanceSubtitle: {
+      fontSize: 14,
+      color: c.grey,
+      marginBottom: 12,
+      fontFamily: NEO_THEME.fonts.regular,
+    },
+    appearanceRow: {
+      flexDirection: 'row' as const,
+      gap: 8,
+    },
+    appearanceChip: {
+      flex: 1,
+      minHeight: 40,
+      alignItems: 'center' as const,
+      justifyContent: 'center' as const,
+      borderRadius: NEO_THEME.borders.radius,
+      borderWidth: 1,
+      borderColor: c.border,
+      backgroundColor: c.greyLight,
+    },
+    appearanceChipActive: {
+      backgroundColor: c.black,
+      borderColor: c.black,
+    },
+    appearanceChipText: {
+      fontSize: 13,
+      fontFamily: NEO_THEME.fonts.medium,
+      color: c.black,
+    },
+    appearanceChipTextActive: {
+      color: c.white,
+    },
+    headerTitle: {
+      fontSize: 18,
+      fontWeight: '600' as const,
+      color: c.black,
+      fontFamily: NEO_THEME.fonts.semibold,
+    },
+    largeHeaderContainer: {
+      flexDirection: "row" as const,
+      alignItems: "center" as const,
+    },
+    largeAvatar: {
+      width: 80,
+      height: 80,
+      borderRadius: NEO_THEME.borders.radius,
+      marginRight: 16,
+      borderWidth: 1,
+      borderColor: c.border,
+    },
+    largeUserInfo: {
+      flex: 1,
+    },
+    largeUserName: {
+      fontSize: 24,
+      fontWeight: '600' as const,
+      color: c.black,
+      marginBottom: 4,
+      fontFamily: NEO_THEME.fonts.semibold,
+    },
+    largeUserEmail: {
+      fontSize: 16,
+      color: c.grey,
+      marginBottom: 8,
+    },
+    userTypeBadge: {
+      backgroundColor: c.greyLight,
+      paddingHorizontal: 12,
+      paddingVertical: 6,
+      borderRadius: NEO_THEME.borders.radius,
+      alignSelf: "flex-start" as const,
+      borderWidth: 1,
+      borderColor: c.border,
+    },
+    userTypeText: {
+      color: c.black,
+      fontSize: 12,
+      fontWeight: '500' as const,
+      fontFamily: NEO_THEME.fonts.medium,
+    },
+    bottomSpacing: {
+      height: 100,
+    },
+  };
+}

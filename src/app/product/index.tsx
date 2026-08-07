@@ -13,8 +13,12 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { PopProductCard } from "../../components/shop/PopProductCard";
 import { useProducts } from "../../features/product/hooks/use-products";
 import { NEO_THEME } from "../../shared/constants/neobrutalism";
+import { useNeoStyles } from "../../shared/hooks/useNeoStyles";
+import { useTheme } from "../../shared/providers/theme-provider";
 
 const ProductsPage = () => {
+  const styles = useNeoStyles(createStyles);
+  const { theme } = useTheme();
   const { shop, shopName } = useLocalSearchParams<{
     shop: string;
     shopName: string;
@@ -46,7 +50,7 @@ const ProductsPage = () => {
           }}
         />
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color={NEO_THEME.colors.primary} />
+          <ActivityIndicator size="large" color={theme.colors.primary} />
           <Text style={styles.loadingText}>LOADING PRODUCTS...</Text>
         </View>
       </SafeAreaView>
@@ -81,11 +85,11 @@ const ProductsPage = () => {
                             width: 32,
                             height: 32,
                             borderRadius: 16,
-                            backgroundColor: NEO_THEME.colors.yellow,
+                            backgroundColor: theme.colors.yellow,
                             justifyContent: 'center',
                             alignItems: 'center',
-                            borderWidth: 2,
-                            borderColor: 'black',
+                            borderWidth: 1,
+                            borderColor: theme.colors.border,
                         }}
                         onPress={(e) => {
                              e.stopPropagation();
@@ -93,7 +97,7 @@ const ProductsPage = () => {
                              console.log('Add to cart', item.id);
                         }}
                      >
-                         <Ionicons name="bag-add" size={16} color="black" />
+                         <Ionicons name="bag-add" size={16} color={theme.colors.black} />
                      </TouchableOpacity>
                  }
             />
@@ -103,7 +107,7 @@ const ProductsPage = () => {
         />
       ) : (
         <View style={styles.emptyContainer}>
-          <Ionicons name="storefront-outline" size={64} color={NEO_THEME.colors.grey} />
+          <Ionicons name="storefront-outline" size={64} color={theme.colors.grey} />
           <Text style={styles.emptyTitle}>NO PRODUCTS FOUND</Text>
           <Text style={styles.emptySubtitle}>
             This shop doesn't have any products listed yet.
@@ -121,69 +125,69 @@ const ProductsPage = () => {
 
 export default ProductsPage;
 
-const styles = StyleSheet.create({
+function createStyles(c: { backgroundLight: string; black: string; grey: string; primary: string; border: string; white: string }) {
+  return {
   container: {
     flex: 1,
-    backgroundColor: NEO_THEME.colors.backgroundLight,
+    backgroundColor: c.backgroundLight,
   },
   loadingContainer: {
     flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
+    justifyContent: "center" as const,
+    alignItems: "center" as const,
     paddingTop: 100,
   },
   loadingText: {
     marginTop: 16,
     fontSize: 16,
-    fontWeight: "700",
-    color: NEO_THEME.colors.black,
+    fontWeight: "700" as const,
+    color: c.black,
     fontFamily: NEO_THEME.fonts.bold,
-    textTransform: "uppercase",
+    textTransform: "uppercase" as const,
   },
-
   productsList: {
     padding: 16,
   },
   emptyContainer: {
     flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
+    justifyContent: "center" as const,
+    alignItems: "center" as const,
     paddingHorizontal: 32,
   },
   emptyTitle: {
     fontSize: 20,
-    fontWeight: "900",
-    color: NEO_THEME.colors.black,
+    fontWeight: '600' as const,
+    color: c.black,
     marginTop: 16,
     marginBottom: 8,
     fontFamily: NEO_THEME.fonts.black,
-    textTransform: "uppercase",
+    textTransform: "uppercase" as const,
   },
   emptySubtitle: {
     fontSize: 16,
-    color: NEO_THEME.colors.grey,
-    textAlign: "center",
+    color: c.grey,
+    textAlign: "center" as const,
     marginBottom: 32,
   },
   backButton: {
-    backgroundColor: NEO_THEME.colors.primary,
+    backgroundColor: c.primary,
     paddingHorizontal: 24,
     paddingVertical: 12,
     borderRadius: NEO_THEME.borders.radius,
-    borderWidth: NEO_THEME.borders.width,
-    borderColor: NEO_THEME.colors.black,
-    // Hard shadow
-    shadowColor: NEO_THEME.colors.black,
-    shadowOffset: { width: 5, height: 5 },
-    shadowOpacity: 1,
-    shadowRadius: 0,
+    borderWidth: 1,
+    borderColor: c.border,
+    shadowColor: c.black,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
     elevation: 0,
   },
   backButtonText: {
-    color: NEO_THEME.colors.white,
+    color: c.white,
     fontSize: 16,
-    fontWeight: "900",
+    fontWeight: '600' as const,
     fontFamily: NEO_THEME.fonts.black,
-    textTransform: "uppercase",
+    textTransform: "uppercase" as const,
   },
-});
+  };
+}

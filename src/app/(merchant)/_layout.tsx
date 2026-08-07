@@ -3,8 +3,6 @@ import { useAuth } from "../../shared/providers/auth-provider";
 import {
   useSafeAreaInsets,
 } from "react-native-safe-area-context";
-import { StyleSheet, Platform, View } from "react-native";
-import { NEO_THEME } from "../../shared/constants/neobrutalism";
 import React from "react";
 import MerchantTabBar from "../../components/merchant/MerchantTabBar";
 

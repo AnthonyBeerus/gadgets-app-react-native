@@ -11,8 +11,16 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 
-import { NuviaText } from '../../../components/atoms/nuvia-text';
-import { NEO_THEME } from '../../../shared/constants/neobrutalism';
+import {
+  Text,
+  fonts,
+  radii,
+  space,
+  useDesignTokens,
+  useThemedStyles,
+  type DesignTokens,
+  type SemanticColors,
+} from '../../../shared/design-system';
 import type { CreatorOpportunityFeedItem, OpportunityPreferenceState } from '../types';
 
 type Props = {
@@ -31,6 +39,8 @@ function daysLeft(deadline: string) {
 
 export function OpportunityCard({ item, reduceMotion, onAction, onDetails, compact }: Props) {
   const { width } = useWindowDimensions();
+  const { colors, elevation } = useDesignTokens();
+  const styles = useThemedStyles(createStyles);
   const translateX = useSharedValue(0);
   const translateY = useSharedValue(0);
   const leaving = useSharedValue(false);
@@ -39,9 +49,17 @@ export function OpportunityCard({ item, reduceMotion, onAction, onDetails, compa
   const competitive = item.contest_mode === 'competitive_pot';
   const eligible = Boolean(item.eligibility_proof_id && !item.eligibility_consumed);
   const remaining = daysLeft(item.deadline);
-  const potLabel = competitive && item.pot_value != null
-    ? `P${Number(item.pot_value).toFixed(0)} POT · TOP 5`
-    : `P${Number(item.reward_value).toFixed(0)} VOUCHER`;
+
+  const potLine = competitive && item.pot_value != null
+    ? `P${Number(item.pot_value).toFixed(0)} pot`
+    : `P${Number(item.reward_value).toFixed(0)} voucher`;
+
+  const metaParts = [
+    potLine,
+    competitive ? 'Top 5' : null,
+    remaining != null ? `${remaining}d left` : null,
+    `From P${item.price.toFixed(0)}`,
+  ].filter(Boolean);
 
   useEffect(() => {
     settled.current = false;
@@ -70,14 +88,14 @@ export function OpportunityCard({ item, reduceMotion, onAction, onDetails, compa
     .onUpdate(event => {
       if (leaving.value) return;
       translateX.value = event.translationX;
-      translateY.value = event.translationY * 0.12;
+      translateY.value = event.translationY * 0.08;
     })
     .onEnd(event => {
       if (event.translationX > threshold) finish('saved');
       else if (event.translationX < -threshold) finish('dismissed');
       else {
-        translateX.value = withSpring(0, { damping: 16, stiffness: 180 });
-        translateY.value = withSpring(0, { damping: 16, stiffness: 180 });
+        translateX.value = withSpring(0, { damping: 18, stiffness: 200 });
+        translateY.value = withSpring(0, { damping: 18, stiffness: 200 });
       }
     });
 
@@ -85,7 +103,7 @@ export function OpportunityCard({ item, reduceMotion, onAction, onDetails, compa
     transform: [
       { translateX: translateX.value },
       { translateY: translateY.value },
-      { rotate: `${interpolate(translateX.value, [-width, 0, width], [-8, 0, 8])}deg` },
+      { rotate: `${interpolate(translateX.value, [-width, 0, width], [-5, 0, 5])}deg` },
     ],
   }));
   const saveStyle = useAnimatedStyle(() => ({
@@ -97,90 +115,93 @@ export function OpportunityCard({ item, reduceMotion, onAction, onDetails, compa
 
   const body = (
     <Animated.View
-      style={[styles.card, compact && styles.compactCard, !compact && cardStyle]}
+      style={[
+        styles.card,
+        elevation.soft,
+        compact && styles.compactCard,
+        !compact && cardStyle,
+      ]}
       accessibilityLabel={`${item.opportunity_title} from ${item.merchant_name}`}
     >
-      <Image source={{ uri: item.hero_image }} style={styles.image} contentFit="cover" transition={150} />
-      <View style={styles.imageShade} />
-      {!compact && (
-        <>
-          <Animated.View style={[styles.decisionStamp, styles.saveStamp, saveStyle]}>
-            <NuviaText variant="h2">SAVE</NuviaText>
-          </Animated.View>
-          <Animated.View style={[styles.decisionStamp, styles.passStamp, passStyle]}>
-            <NuviaText variant="h2">PASS</NuviaText>
-          </Animated.View>
-        </>
-      )}
-
-      <View style={styles.topRow}>
-        <View style={styles.merchantBadge}>
-          <Ionicons name="storefront" size={14} color={NEO_THEME.colors.white} />
-          <NuviaText variant="caption" color={NEO_THEME.colors.white} numberOfLines={1} style={styles.merchantText}>
-            {item.merchant_name} · {item.merchant_location}
-          </NuviaText>
-        </View>
-        <View style={[styles.statusBadge, eligible && styles.eligibleBadge]}>
-          <NuviaText variant="caption" style={styles.statusText}>
-            {eligible ? 'READY TO ENTER' : 'BUY TO ENTER'}
-          </NuviaText>
-        </View>
+      <View style={[styles.media, compact && styles.compactMedia]}>
+        <Image source={{ uri: item.hero_image }} style={styles.image} contentFit="cover" transition={150} />
+        {!compact && (
+          <>
+            <Animated.View style={[styles.decisionHint, styles.saveHint, saveStyle]}>
+              <Text variant="caption" color={colors.ink} style={styles.decisionLabel}>
+                Save
+              </Text>
+            </Animated.View>
+            <Animated.View style={[styles.decisionHint, styles.passHint, passStyle]}>
+              <Text variant="caption" color={colors.ink} style={styles.decisionLabel}>
+                Pass
+              </Text>
+            </Animated.View>
+          </>
+        )}
       </View>
 
       <View style={styles.content}>
-        <NuviaText variant="display" color={NEO_THEME.colors.white} numberOfLines={2} style={styles.title}>
+        <Text variant="caption" color={colors.inkMuted} numberOfLines={1}>
+          {item.merchant_name}
+          {item.merchant_location ? ` · ${item.merchant_location}` : ''}
+        </Text>
+
+        <Text variant="h2" numberOfLines={2} style={styles.title}>
           {item.opportunity_title || item.product_title}
-        </NuviaText>
-        <View style={styles.economics}>
-          <View style={[styles.priceBadge, competitive && styles.potBadge]}>
-            <NuviaText variant="bodyBold">{potLabel}</NuviaText>
-          </View>
-          {remaining != null && (
-            <View style={styles.deadlineBadge}>
-              <NuviaText variant="caption">{remaining}D LEFT</NuviaText>
+        </Text>
+
+        <View style={styles.metaRow}>
+          <Text variant="caption" style={styles.potMeta} numberOfLines={1}>
+            {metaParts.join(' · ')}
+          </Text>
+          <Text
+            variant="caption"
+            color={eligible ? colors.success : colors.inkMuted}
+            style={styles.status}
+          >
+            {eligible ? 'Ready' : 'Buy to enter'}
+          </Text>
+        </View>
+
+        {!!item.opportunity_description && (
+          <Text variant="body" color={colors.inkMuted} numberOfLines={2} style={styles.brief}>
+            {item.opportunity_description}
+          </Text>
+        )}
+
+        <View style={styles.footer}>
+          <Pressable
+            accessibilityRole="button"
+            onPress={onDetails}
+            hitSlop={8}
+            style={styles.detailsLink}
+          >
+            <Text variant="bodyBold">{competitive ? 'View challenge' : 'View product'}</Text>
+            <Ionicons name="arrow-forward" size={16} color={colors.ink} />
+          </Pressable>
+
+          {!compact && (
+            <View style={styles.actions}>
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel="Pass for 30 days"
+                onPress={() => finish('dismissed')}
+                style={styles.iconButton}
+              >
+                <Ionicons name="close" size={22} color={colors.ink} />
+              </Pressable>
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel="Save opportunity"
+                onPress={() => finish('saved')}
+                style={[styles.iconButton, styles.saveButton]}
+              >
+                <Ionicons name="bookmark-outline" size={20} color={colors.surface} />
+              </Pressable>
             </View>
           )}
-          <View style={styles.priceBadge}>
-            <NuviaText variant="caption">FROM P{item.price.toFixed(0)}</NuviaText>
-          </View>
         </View>
-        <NuviaText variant="bodyBold" color={NEO_THEME.colors.white} numberOfLines={2} style={styles.brief}>
-          {item.opportunity_description}
-        </NuviaText>
-        <View style={styles.explainer}>
-          <Ionicons name={competitive ? 'trophy' : 'lock-closed'} size={15} color={NEO_THEME.colors.black} />
-          <NuviaText variant="caption" style={styles.explainerText}>
-            {competitive
-              ? 'Buy a qualifying item, post the visit, climb the board. Saving does not enter you.'
-              : 'Buying unlocks the TikTok opportunity. Saving does not.'}
-          </NuviaText>
-        </View>
-        <Pressable accessibilityRole="button" onPress={onDetails} style={styles.detailsButton}>
-          <NuviaText variant="bodyBold">{competitive ? 'VIEW CHALLENGE' : 'VIEW PRODUCT + BRIEF'}</NuviaText>
-          <Ionicons name="arrow-forward" size={18} color={NEO_THEME.colors.black} />
-        </Pressable>
-        {!compact && (
-          <View style={styles.actions}>
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel="Pass for 30 days"
-              onPress={() => finish('dismissed')}
-              style={[styles.actionButton, styles.passButton]}
-            >
-              <Ionicons name="close" size={28} color={NEO_THEME.colors.black} />
-              <NuviaText variant="caption">PASS 30D</NuviaText>
-            </Pressable>
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel="Save opportunity"
-              onPress={() => finish('saved')}
-              style={[styles.actionButton, styles.saveButton]}
-            >
-              <Ionicons name="heart" size={28} color={NEO_THEME.colors.black} />
-              <NuviaText variant="caption">SAVE</NuviaText>
-            </Pressable>
-          </View>
-        )}
       </View>
     </Animated.View>
   );
@@ -189,40 +210,111 @@ export function OpportunityCard({ item, reduceMotion, onAction, onDetails, compa
   return <GestureDetector gesture={pan}>{body}</GestureDetector>;
 }
 
-const styles = StyleSheet.create({
-  card: {
-    flex: 1,
-    overflow: 'hidden',
-    borderRadius: 24,
-    borderWidth: 3,
-    borderColor: NEO_THEME.colors.black,
-    backgroundColor: NEO_THEME.colors.black,
-    boxShadow: '6px 6px 0px #000000',
-  },
-  compactCard: { flex: 0, minHeight: 420, marginBottom: 14 },
-  image: { ...StyleSheet.absoluteFillObject },
-  imageShade: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,0,0,0.36)' },
-  topRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', gap: 8, padding: 14 },
-  merchantBadge: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: NEO_THEME.colors.black, borderWidth: 2, borderColor: NEO_THEME.colors.white, borderRadius: 999, paddingHorizontal: 10, paddingVertical: 7 },
-  merchantText: { flex: 1, fontFamily: NEO_THEME.fonts.bold },
-  statusBadge: { backgroundColor: NEO_THEME.colors.secondary, borderWidth: 2, borderColor: NEO_THEME.colors.black, borderRadius: 999, paddingHorizontal: 9, paddingVertical: 7 },
-  eligibleBadge: { backgroundColor: NEO_THEME.colors.success },
-  statusText: { fontFamily: NEO_THEME.fonts.bold, fontSize: 9 },
-  content: { marginTop: 'auto', gap: 10, padding: 16 },
-  title: { fontSize: 34, lineHeight: 37, textShadowColor: NEO_THEME.colors.black, textShadowOffset: { width: 2, height: 2 }, textShadowRadius: 0 },
-  economics: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-  priceBadge: { backgroundColor: NEO_THEME.colors.white, borderWidth: 2, borderColor: NEO_THEME.colors.black, borderRadius: 12, paddingHorizontal: 12, paddingVertical: 7 },
-  potBadge: { backgroundColor: NEO_THEME.colors.secondary },
-  deadlineBadge: { backgroundColor: NEO_THEME.colors.accent, borderWidth: 2, borderColor: NEO_THEME.colors.black, borderRadius: 12, paddingHorizontal: 12, paddingVertical: 7 },
-  brief: { textShadowColor: NEO_THEME.colors.black, textShadowOffset: { width: 1, height: 1 }, textShadowRadius: 0 },
-  explainer: { flexDirection: 'row', alignItems: 'center', gap: 7, backgroundColor: NEO_THEME.colors.white, borderRadius: 10, borderWidth: 2, borderColor: NEO_THEME.colors.black, padding: 9 },
-  explainerText: { flex: 1, fontFamily: NEO_THEME.fonts.bold },
-  detailsButton: { minHeight: 46, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', backgroundColor: NEO_THEME.colors.white, borderWidth: 2, borderColor: NEO_THEME.colors.black, borderRadius: 14, paddingHorizontal: 14 },
-  actions: { flexDirection: 'row', justifyContent: 'center', gap: 16 },
-  actionButton: { minWidth: 108, minHeight: 52, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 7, borderWidth: 2, borderColor: NEO_THEME.colors.black, borderRadius: 999 },
-  passButton: { backgroundColor: NEO_THEME.colors.white },
-  saveButton: { backgroundColor: NEO_THEME.colors.accent },
-  decisionStamp: { position: 'absolute', top: 88, zIndex: 5, borderWidth: 4, borderColor: NEO_THEME.colors.black, borderRadius: 12, paddingHorizontal: 14, paddingVertical: 8 },
-  saveStamp: { left: 20, backgroundColor: NEO_THEME.colors.success, transform: [{ rotate: '-8deg' }] },
-  passStamp: { right: 20, backgroundColor: NEO_THEME.colors.error, transform: [{ rotate: '8deg' }] },
-});
+function createStyles(c: SemanticColors, _tokens: DesignTokens) {
+  return {
+    card: {
+      flex: 1,
+      overflow: 'hidden' as const,
+      borderRadius: radii.lg,
+      backgroundColor: c.surface,
+    },
+    compactCard: {
+      flex: 0,
+      minHeight: 440,
+      marginBottom: space.md,
+    },
+    media: {
+      flex: 1.15,
+      backgroundColor: c.gray100,
+      minHeight: 180,
+    },
+    compactMedia: {
+      flex: 0,
+      height: 220,
+    },
+    image: {
+      ...StyleSheet.absoluteFillObject,
+    },
+    content: {
+      gap: space.xs,
+      paddingHorizontal: space.md,
+      paddingTop: space.md,
+      paddingBottom: space.md,
+    },
+    title: {
+      fontSize: 22,
+      lineHeight: 28,
+    },
+    metaRow: {
+      flexDirection: 'row' as const,
+      alignItems: 'center' as const,
+      justifyContent: 'space-between' as const,
+      gap: space.sm,
+    },
+    potMeta: {
+      flex: 1,
+      fontFamily: fonts.medium,
+      color: c.ink,
+    },
+    status: {
+      fontFamily: fonts.medium,
+    },
+    brief: {
+      fontSize: 14,
+      lineHeight: 20,
+    },
+    footer: {
+      marginTop: space.xs,
+      flexDirection: 'row' as const,
+      alignItems: 'center' as const,
+      justifyContent: 'space-between' as const,
+      gap: space.md,
+    },
+    detailsLink: {
+      flexDirection: 'row' as const,
+      alignItems: 'center' as const,
+      gap: 6,
+      minHeight: 44,
+    },
+    actions: {
+      flexDirection: 'row' as const,
+      alignItems: 'center' as const,
+      gap: space.sm,
+    },
+    iconButton: {
+      width: 44,
+      height: 44,
+      alignItems: 'center' as const,
+      justifyContent: 'center' as const,
+      borderRadius: radii.md,
+      borderWidth: 1,
+      borderColor: c.border,
+      backgroundColor: c.surface,
+    },
+    saveButton: {
+      backgroundColor: c.ink,
+      borderColor: c.ink,
+    },
+    decisionHint: {
+      position: 'absolute' as const,
+      top: space.md,
+      zIndex: 5,
+      borderWidth: 1,
+      borderColor: c.ink,
+      backgroundColor: c.surface,
+      borderRadius: radii.sm,
+      paddingHorizontal: space.sm,
+      paddingVertical: 6,
+    },
+    saveHint: {
+      left: space.md,
+    },
+    passHint: {
+      right: space.md,
+    },
+    decisionLabel: {
+      fontFamily: fonts.semibold,
+      letterSpacing: 0.4,
+    },
+  };
+}

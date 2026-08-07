@@ -53,7 +53,7 @@ describe('MerchantDashboard', () => {
 
     expect(getByText('Launch checklist')).toBeTruthy();
     expect(getByText('Add your first product')).toBeTruthy();
-    expect(getByText('Add Product')).toBeTruthy();
+    expect(getByText('Add product')).toBeTruthy();
   });
 
   it('prompts for a challenge pot after the first product exists', () => {

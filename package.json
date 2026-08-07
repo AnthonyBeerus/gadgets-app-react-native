@@ -10,6 +10,7 @@
     "test": "jest --watchAll",
     "test:ci": "jest",
     "test:coverage": "jest --coverage",
+    "lint:design-system": "node scripts/ban-neobrutalism-imports.js",
     "preflight:preview": "node scripts/preflight-preview.mjs",
     "build:dev:android": "eas build --profile development --platform android",
     "build:preview:android": "npm run preflight:preview && eas build --profile preview --platform android",

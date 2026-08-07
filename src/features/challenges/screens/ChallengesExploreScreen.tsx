@@ -1,17 +1,18 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, ActivityIndicator, ScrollView } from 'react-native';
+import { View, Text, ActivityIndicator, ScrollView } from 'react-native';
 import { useChallengeStore } from '../store/challenge-store';
 import { ChallengeCard } from '../components/challenge-card';
 import { FilterChip } from '../components/FilterChip';
 import { Challenge } from '../types/challenge';
 import { useRouter } from 'expo-router';
 import { NEO_THEME } from '../../../shared/constants/neobrutalism';
+import { useNeoStyles } from '../../../shared/hooks/useNeoStyles';
+import { useTheme } from '../../../shared/providers/theme-provider';
 import { FlashList, FlashListProps } from '@shopify/flash-list';
 import Animated, { useAnimatedScrollHandler } from 'react-native-reanimated';
 import { useCollapsibleTab } from '../../../shared/context/CollapsibleTabContext';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-// Fix for missing estimatedItemSize in FlashListProps
 interface FlashListPropsWithEstimatedItemSize<T> extends FlashListProps<T> {
   estimatedItemSize: number;
 }
@@ -21,6 +22,8 @@ const AnimatedFlashList = Animated.createAnimatedComponent(FlashList) as unknown
 type FilterType = 'ALL' | 'ENDING SOON';
 
 export default function ChallengesExploreScreen() {
+  const styles = useNeoStyles(createStyles);
+  const { theme } = useTheme();
   const { challenges, loading, fetchChallenges } = useChallengeStore();
   const router = useRouter();
   const { scrollY, headerHeight, tabBarHeight } = useCollapsibleTab();
@@ -76,7 +79,7 @@ export default function ChallengesExploreScreen() {
   if (loading && challenges.length === 0) {
     return (
       <View style={[styles.loadingContainer, { paddingTop: headerHeight + tabBarHeight + top }]}>
-        <ActivityIndicator size="large" color={NEO_THEME.colors.primary} />
+        <ActivityIndicator size="large" color={theme.colors.primary} />
       </View>
     );
   }
@@ -104,27 +107,29 @@ export default function ChallengesExploreScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  headerContainer: {
-    gap: 16,
-    marginBottom: 16,
-  },
-  filterContainer: {
-    gap: 8,
-    paddingBottom: 4,
-  },
-  emptyState: {
-    padding: 40,
-    alignItems: 'center',
-  },
-  emptyText: {
-    fontFamily: NEO_THEME.fonts.regular,
-    fontSize: 14,
-    color: NEO_THEME.colors.grey,
-  },
-});
+function createStyles(c: { grey: string }) {
+  return {
+    loadingContainer: {
+      flex: 1,
+      justifyContent: 'center' as const,
+      alignItems: 'center' as const,
+    },
+    headerContainer: {
+      gap: 16,
+      marginBottom: 16,
+    },
+    filterContainer: {
+      gap: 8,
+      paddingBottom: 4,
+    },
+    emptyState: {
+      padding: 40,
+      alignItems: 'center' as const,
+    },
+    emptyText: {
+      fontFamily: NEO_THEME.fonts.regular,
+      fontSize: 14,
+      color: c.grey,
+    },
+  };
+}

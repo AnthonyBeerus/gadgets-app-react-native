@@ -8,7 +8,6 @@ import {
   ActivityIndicator,
   Pressable,
   ScrollView,
-  StyleSheet,
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -17,7 +16,7 @@ import { FlashList } from '@shopify/flash-list';
 import { NuviaText } from '../../../components/atoms/nuvia-text';
 import { CartItem } from '../../cart/components/CartItem';
 import { useCheckout } from '../../cart/hooks/use-checkout';
-import { NEO_THEME } from '../../../shared/constants/neobrutalism';
+import { useDesignTokens, useThemedStyles, type DesignTokens, type SemanticColors } from '../../../shared/design-system';
 import { NuviaButton } from '../../../shared/components/ui/nuvia-button';
 import { useCartStore } from '../../../store/cart-store';
 import { getSavedCreatorOpportunities, restoreCreatorOpportunityPreference } from '../api';
@@ -28,7 +27,104 @@ const FlashListFixed = FlashList as unknown as <T>(
   props: React.ComponentProps<typeof FlashList<T>> & { estimatedItemSize: number },
 ) => React.ReactElement;
 
+function createStyles(c: SemanticColors, tokens: DesignTokens) {
+  return {
+    container: { flex: 1, backgroundColor: c.canvas },
+    topBar: { flexDirection: 'row' as const, alignItems: 'flex-start' as const, gap: 12, paddingHorizontal: 16, paddingTop: 8 },
+    headerCopy: { flex: 1, gap: 2 },
+    iconButton: {
+      width: 46,
+      height: 46,
+      alignItems: 'center' as const,
+      justifyContent: 'center' as const,
+      borderWidth: 1,
+      borderColor: c.border,
+      borderRadius: 14,
+      backgroundColor: c.surface,
+    },
+    segments: {
+      flexDirection: 'row' as const,
+      gap: 8,
+      paddingHorizontal: 16,
+      paddingVertical: 12,
+    },
+    segment: {
+      flex: 1,
+      minHeight: 44,
+      flexDirection: 'row' as const,
+      alignItems: 'center' as const,
+      justifyContent: 'center' as const,
+      gap: 6,
+      borderWidth: 1,
+      borderColor: c.border,
+      borderRadius: 999,
+      backgroundColor: c.surface,
+    },
+    segmentActive: { backgroundColor: c.accentMuted },
+    panel: { flex: 1 },
+    listWrap: { flex: 1, minHeight: 2 },
+    listContent: { padding: 16, paddingBottom: 24 },
+    savedContent: { gap: 14, padding: 16, paddingBottom: 48 },
+    empty: {
+      alignItems: 'center' as const,
+      gap: 14,
+      margin: 16,
+      borderWidth: 1,
+      borderColor: c.border,
+      borderRadius: 20,
+      backgroundColor: c.surface,
+      padding: 28,
+    },
+    footer: {
+      padding: 16,
+      backgroundColor: c.surface,
+      borderTopWidth: 1,
+      borderColor: c.border,
+      gap: 12,
+    },
+    totalRow: { flexDirection: 'row' as const, justifyContent: 'space-between' as const, alignItems: 'center' as const },
+    checkoutButton: { width: '100%' as const },
+    card: {
+      overflow: 'hidden' as const,
+      borderWidth: 1,
+      borderColor: c.border,
+      borderRadius: 20,
+      backgroundColor: c.surface,
+      ...tokens.elevation.hairline,
+    },
+    image: { width: '100%' as const, aspectRatio: 1.8 },
+    cardBody: { gap: 8, padding: 14 },
+    badges: { flexDirection: 'row' as const, flexWrap: 'wrap' as const, gap: 7 },
+    badge: {
+      borderWidth: 1,
+      borderColor: c.border,
+      borderRadius: 999,
+      backgroundColor: c.surface,
+      paddingHorizontal: 9,
+      paddingVertical: 5,
+    },
+    eligibleBadge: { backgroundColor: c.success },
+    potBadge: { backgroundColor: c.accentMuted },
+    action: {
+      minHeight: 48,
+      flexDirection: 'row' as const,
+      alignItems: 'center' as const,
+      justifyContent: 'center' as const,
+      gap: 8,
+      borderWidth: 1,
+      borderColor: c.border,
+      borderRadius: 999,
+      backgroundColor: c.accentMuted,
+      paddingHorizontal: 18,
+    },
+    eligibleAction: { backgroundColor: c.success },
+    removeButton: { alignSelf: 'center' as const, padding: 8 },
+  };
+}
+
 export default function BagScreen() {
+  const styles = useThemedStyles(createStyles);
+  const { colors } = useDesignTokens();
   const router = useRouter();
   const params = useLocalSearchParams<{ tab?: string }>();
   const [tab, setTab] = useState<BagTab>(params.tab === 'saved' ? 'saved' : 'cart');
@@ -76,7 +172,7 @@ export default function BagScreen() {
     <SafeAreaView edges={['top']} style={styles.container}>
       <View style={styles.topBar}>
         <Pressable accessibilityRole="button" accessibilityLabel="Go back" onPress={() => router.back()} style={styles.iconButton}>
-          <Ionicons name="arrow-back" size={22} color={NEO_THEME.colors.black} />
+          <Ionicons name="arrow-back" size={22} color={colors.ink} />
         </Pressable>
         <View style={styles.headerCopy}>
           <NuviaText variant="display">BAG</NuviaText>
@@ -91,7 +187,7 @@ export default function BagScreen() {
           onPress={() => setTab('cart')}
           style={[styles.segment, tab === 'cart' && styles.segmentActive]}
         >
-          <Ionicons name="bag-handle" size={18} color={NEO_THEME.colors.black} />
+          <Ionicons name="bag-handle" size={18} color={colors.ink} />
           <NuviaText variant="caption">CART{cartCount > 0 ? ` (${cartCount})` : ''}</NuviaText>
         </Pressable>
         <Pressable
@@ -100,7 +196,7 @@ export default function BagScreen() {
           onPress={() => setTab('saved')}
           style={[styles.segment, tab === 'saved' && styles.segmentActive]}
         >
-          <Ionicons name="heart" size={18} color={NEO_THEME.colors.black} />
+          <Ionicons name="heart" size={18} color={colors.ink} />
           <NuviaText variant="caption">SAVED{savedCount > 0 ? ` (${savedCount})` : ''}</NuviaText>
         </Pressable>
       </View>
@@ -137,13 +233,13 @@ export default function BagScreen() {
               <View style={styles.footer}>
                 <View style={styles.totalRow}>
                   <NuviaText variant="h3">TOTAL</NuviaText>
-                  <NuviaText variant="h1" color={NEO_THEME.colors.primary}>P{getTotalPrice()}</NuviaText>
+                  <NuviaText variant="h1" color={colors.ink}>P{getTotalPrice()}</NuviaText>
                 </View>
                 <NuviaButton onPress={() => checkout()} disabled={isProcessing} variant="primary" style={styles.checkoutButton}>
                   {isProcessing ? (
-                    <ActivityIndicator color={NEO_THEME.colors.white} />
+                    <ActivityIndicator color={colors.surface} />
                   ) : (
-                    <NuviaText variant="bodyBold" color={NEO_THEME.colors.white}>CHECKOUT</NuviaText>
+                    <NuviaText variant="bodyBold" color={colors.surface}>CHECKOUT</NuviaText>
                   )}
                 </NuviaButton>
               </View>
@@ -153,7 +249,7 @@ export default function BagScreen() {
       ) : (
         <ScrollView contentContainerStyle={styles.savedContent} contentInsetAdjustmentBehavior="automatic">
           {saved.isLoading ? (
-            <ActivityIndicator size="large" color={NEO_THEME.colors.primary} />
+            <ActivityIndicator size="large" color={colors.ink} />
           ) : saved.error ? (
             <View style={styles.empty}>
               <NuviaText variant="h2">COULDN'T LOAD SAVED</NuviaText>
@@ -190,7 +286,7 @@ export default function BagScreen() {
                       <NuviaText variant="bodyBold">
                         {eligible ? 'ENTER CHALLENGE' : competitive ? 'VIEW CHALLENGE' : 'VIEW PRODUCT + BRIEF'}
                       </NuviaText>
-                      <Ionicons name="arrow-forward" size={18} color={NEO_THEME.colors.black} />
+                      <Ionicons name="arrow-forward" size={18} color={colors.ink} />
                     </Pressable>
                     <Pressable accessibilityRole="button" onPress={() => removeSaved(item.opportunity_id)} style={styles.removeButton}>
                       <NuviaText variant="caption">REMOVE FROM SAVED</NuviaText>
@@ -201,7 +297,7 @@ export default function BagScreen() {
             })
           ) : (
             <View style={styles.empty}>
-              <Ionicons name="heart-outline" size={54} color={NEO_THEME.colors.primary} />
+              <Ionicons name="heart-outline" size={54} color={colors.ink} />
               <NuviaText variant="h2">NO SAVED CHALLENGES</NuviaText>
               <NuviaText variant="body" align="center">
                 Swipe right in Discover to shortlist pots. Buy from Cart when you are ready to enter.
@@ -216,96 +312,3 @@ export default function BagScreen() {
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: NEO_THEME.colors.background },
-  topBar: { flexDirection: 'row', alignItems: 'flex-start', gap: 12, paddingHorizontal: 16, paddingTop: 8 },
-  headerCopy: { flex: 1, gap: 2 },
-  iconButton: {
-    width: 46,
-    height: 46,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 2,
-    borderColor: NEO_THEME.colors.black,
-    borderRadius: 14,
-    backgroundColor: NEO_THEME.colors.white,
-  },
-  segments: {
-    flexDirection: 'row',
-    gap: 8,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-  },
-  segment: {
-    flex: 1,
-    minHeight: 44,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 6,
-    borderWidth: 2,
-    borderColor: NEO_THEME.colors.black,
-    borderRadius: 999,
-    backgroundColor: NEO_THEME.colors.white,
-  },
-  segmentActive: { backgroundColor: NEO_THEME.colors.secondary },
-  panel: { flex: 1 },
-  listWrap: { flex: 1, minHeight: 2 },
-  listContent: { padding: 16, paddingBottom: 24 },
-  savedContent: { gap: 14, padding: 16, paddingBottom: 48 },
-  empty: {
-    alignItems: 'center',
-    gap: 14,
-    margin: 16,
-    borderWidth: 3,
-    borderColor: NEO_THEME.colors.black,
-    borderRadius: 20,
-    backgroundColor: NEO_THEME.colors.white,
-    padding: 28,
-  },
-  footer: {
-    padding: 16,
-    backgroundColor: NEO_THEME.colors.white,
-    borderTopWidth: 2,
-    borderColor: NEO_THEME.colors.black,
-    gap: 12,
-  },
-  totalRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  checkoutButton: { width: '100%' },
-  card: {
-    overflow: 'hidden',
-    borderWidth: 3,
-    borderColor: NEO_THEME.colors.black,
-    borderRadius: 20,
-    backgroundColor: NEO_THEME.colors.white,
-    boxShadow: '5px 5px 0px #000000',
-  },
-  image: { width: '100%', aspectRatio: 1.8 },
-  cardBody: { gap: 8, padding: 14 },
-  badges: { flexDirection: 'row', flexWrap: 'wrap', gap: 7 },
-  badge: {
-    borderWidth: 2,
-    borderColor: NEO_THEME.colors.black,
-    borderRadius: 999,
-    backgroundColor: NEO_THEME.colors.white,
-    paddingHorizontal: 9,
-    paddingVertical: 5,
-  },
-  eligibleBadge: { backgroundColor: NEO_THEME.colors.success },
-  potBadge: { backgroundColor: NEO_THEME.colors.secondary },
-  action: {
-    minHeight: 48,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-    borderWidth: 2,
-    borderColor: NEO_THEME.colors.black,
-    borderRadius: 999,
-    backgroundColor: NEO_THEME.colors.secondary,
-    paddingHorizontal: 18,
-  },
-  eligibleAction: { backgroundColor: NEO_THEME.colors.success },
-  removeButton: { alignSelf: 'center', padding: 8 },
-});

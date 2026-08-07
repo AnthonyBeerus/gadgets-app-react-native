@@ -11,6 +11,8 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { NEO_THEME } from "../shared/constants/neobrutalism";
+import { useNeoStyles } from '../shared/hooks/useNeoStyles';
+import { useTheme } from '../shared/providers/theme-provider';
 
 const { height } = Dimensions.get("window");
 
@@ -40,6 +42,8 @@ export default function MallSelectorModal({
   selectedMallId,
   onSelectMall,
 }: MallSelectorModalProps) {
+  const styles = useNeoStyles(createStyles);
+  const { theme } = useTheme();
   const handleSelectMall = (mallId: number | null) => {
     onSelectMall(mallId);
     onClose();
@@ -66,7 +70,7 @@ export default function MallSelectorModal({
           <View style={styles.modalHeader}>
             <Text style={styles.modalTitle}>SELECT LOCATION</Text>
             <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-              <Ionicons name="close" size={24} color={NEO_THEME.colors.black} />
+              <Ionicons name="close" size={24} color={theme.colors.black} />
             </TouchableOpacity>
           </View>
 
@@ -91,7 +95,7 @@ export default function MallSelectorModal({
                   <Ionicons
                     name="apps"
                     size={32}
-                    color={selectedMallId === null ? NEO_THEME.colors.white : NEO_THEME.colors.primary}
+                    color={selectedMallId === null ? theme.colors.white : theme.colors.primary}
                   />
                 </View>
                 <View style={styles.mallInfo}>
@@ -103,7 +107,7 @@ export default function MallSelectorModal({
                 </View>
               </View>
               {selectedMallId === null && (
-                <Ionicons name="checkmark-circle" size={28} color={NEO_THEME.colors.primary} />
+                <Ionicons name="checkmark-circle" size={28} color={theme.colors.primary} />
               )}
             </TouchableOpacity>
 
@@ -132,7 +136,7 @@ export default function MallSelectorModal({
                       <Ionicons
                         name={mall.is_physical ? "storefront" : "globe"}
                         size={32}
-                        color={selectedMallId === mall.id ? NEO_THEME.colors.white : NEO_THEME.colors.primary}
+                        color={selectedMallId === mall.id ? theme.colors.white : theme.colors.primary}
                       />
                     )}
                   </View>
@@ -141,7 +145,7 @@ export default function MallSelectorModal({
                       <Text style={styles.mallName}>{mall.name}</Text>
                       {mall.is_featured && (
                         <View style={styles.featuredBadge}>
-                          <Ionicons name="star" size={12} color={NEO_THEME.colors.black} />
+                          <Ionicons name="star" size={12} color={theme.colors.black} />
                           <Text style={styles.featuredText}>FEATURED</Text>
                         </View>
                       )}
@@ -150,7 +154,7 @@ export default function MallSelectorModal({
                       <Ionicons
                         name={mall.is_physical ? "location" : "globe"}
                         size={14}
-                        color={NEO_THEME.colors.primary}
+                        color={theme.colors.primary}
                       />
                       <Text style={styles.mallLocation}>{mall.location}</Text>
                     </View>
@@ -162,7 +166,7 @@ export default function MallSelectorModal({
                   </View>
                 </View>
                 {selectedMallId === mall.id && (
-                  <Ionicons name="checkmark-circle" size={28} color={NEO_THEME.colors.primary} />
+                  <Ionicons name="checkmark-circle" size={28} color={theme.colors.primary} />
                 )}
               </TouchableOpacity>
             ))}
@@ -174,7 +178,8 @@ export default function MallSelectorModal({
 }
 
 
-const styles = StyleSheet.create({
+function createStyles(c) {
+  return {
   modalOverlay: {
     flex: 1,
     backgroundColor: "rgba(0, 0, 0, 0.7)",
@@ -184,20 +189,20 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   modalContent: {
-    backgroundColor: NEO_THEME.colors.white,
+    backgroundColor: c.white,
     borderTopLeftRadius: 0,
     borderTopRightRadius: 0,
     maxHeight: height * 0.85,
     paddingBottom: 40,
-    borderTopWidth: NEO_THEME.borders.width,
-    borderLeftWidth: NEO_THEME.borders.width,
-    borderRightWidth: NEO_THEME.borders.width,
-    borderColor: NEO_THEME.colors.black,
+    borderTopWidth: 1,
+    borderLeftWidth: 1,
+    borderRightWidth: 1,
+    borderColor: c.border,
   },
   handleBar: {
     width: 60,
     height: 6,
-    backgroundColor: NEO_THEME.colors.black,
+    backgroundColor: c.black,
     borderRadius: 0,
     alignSelf: "center",
     marginTop: 16,
@@ -209,13 +214,13 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingHorizontal: 24,
     paddingVertical: 20,
-    borderBottomWidth: NEO_THEME.borders.width,
-    borderBottomColor: NEO_THEME.colors.black,
+    borderBottomWidth: 1,
+    borderBottomColor: c.border,
   },
   modalTitle: {
     fontSize: 28,
-    fontWeight: "900",
-    color: NEO_THEME.colors.black,
+    fontWeight: '600',
+    color: c.black,
     fontFamily: NEO_THEME.fonts.black,
     textTransform: "uppercase",
   },
@@ -223,11 +228,11 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: NEO_THEME.borders.radius,
-    backgroundColor: NEO_THEME.colors.backgroundLight,
+    backgroundColor: c.backgroundLight,
     alignItems: "center",
     justifyContent: "center",
-    borderWidth: 2,
-    borderColor: NEO_THEME.colors.black,
+    borderWidth: 1,
+    borderColor: c.border,
   },
   scrollView: {
     flex: 1,
@@ -240,25 +245,25 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    backgroundColor: NEO_THEME.colors.backgroundLight,
+    backgroundColor: c.backgroundLight,
     padding: 16,
     borderRadius: NEO_THEME.borders.radius,
-    borderWidth: NEO_THEME.borders.width,
-    borderColor: NEO_THEME.colors.black,
+    borderWidth: 1,
+    borderColor: c.border,
     marginBottom: 4,
-    shadowColor: NEO_THEME.colors.black,
-    shadowOffset: { width: 3, height: 3 },
-    shadowOpacity: 1,
-    shadowRadius: 0,
+    shadowColor: c.black,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
     elevation: 0,
   },
   selectedMallCard: {
-    backgroundColor: NEO_THEME.colors.yellow,
-    borderColor: NEO_THEME.colors.black,
-    shadowColor: NEO_THEME.colors.black,
-    shadowOffset: { width: 5, height: 5 },
-    shadowOpacity: 1,
-    shadowRadius: 0,
+    backgroundColor: c.yellow,
+    borderColor: c.border,
+    shadowColor: c.black,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
     elevation: 0,
   },
   mallCardLeft: {
@@ -270,16 +275,16 @@ const styles = StyleSheet.create({
     width: 64,
     height: 64,
     borderRadius: NEO_THEME.borders.radius,
-    backgroundColor: NEO_THEME.colors.white,
+    backgroundColor: c.white,
     alignItems: "center",
     justifyContent: "center",
     marginRight: 16,
     overflow: "hidden",
-    borderWidth: 2,
-    borderColor: NEO_THEME.colors.black,
+    borderWidth: 1,
+    borderColor: c.border,
   },
   selectedMallIcon: {
-    backgroundColor: NEO_THEME.colors.primary,
+    backgroundColor: c.primary,
   },
   mallImage: {
     width: "100%",
@@ -297,30 +302,30 @@ const styles = StyleSheet.create({
   },
   mallName: {
     fontSize: 18,
-    fontWeight: "900",
-    color: NEO_THEME.colors.black,
+    fontWeight: '600',
+    color: c.black,
     fontFamily: NEO_THEME.fonts.black,
     textTransform: "uppercase",
   },
   featuredBadge: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: NEO_THEME.colors.yellow,
+    backgroundColor: c.yellow,
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: NEO_THEME.borders.radius,
     gap: 4,
-    borderWidth: 2,
-    borderColor: NEO_THEME.colors.black,
-    shadowColor: NEO_THEME.colors.black,
-    shadowOffset: { width: 2, height: 2 },
-    shadowOpacity: 1,
-    shadowRadius: 0,
+    borderWidth: 1,
+    borderColor: c.border,
+    shadowColor: c.black,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
   },
   featuredText: {
     fontSize: 11,
-    fontWeight: "900",
-    color: NEO_THEME.colors.black,
+    fontWeight: '600',
+    color: c.black,
     fontFamily: NEO_THEME.fonts.black,
     textTransform: "uppercase",
   },
@@ -332,15 +337,16 @@ const styles = StyleSheet.create({
   },
   mallLocation: {
     fontSize: 14,
-    color: NEO_THEME.colors.grey,
+    color: c.grey,
     fontWeight: "700",
     fontFamily: NEO_THEME.fonts.bold,
     textTransform: "uppercase",
   },
   mallDescription: {
     fontSize: 13,
-    color: NEO_THEME.colors.grey,
+    color: c.grey,
     lineHeight: 18,
     marginTop: 4,
   },
-});
+  };
+}

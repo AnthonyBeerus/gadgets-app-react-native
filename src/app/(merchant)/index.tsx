@@ -1,15 +1,27 @@
 import { MaterialIcons } from "@expo/vector-icons";
 import { Redirect, useRouter } from "expo-router";
 import { useMemo } from "react";
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { ScrollView, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { getMerchantDashboardStats, getShopChallenges, getShopProducts } from "../../shared/api/api";
-import { NEO_THEME } from "../../shared/constants/neobrutalism";
+import {
+  Text,
+  Button,
+  Surface,
+  space,
+  radii,
+  useDesignTokens,
+  useThemedStyles,
+  type SemanticColors,
+  type DesignTokens,
+} from "../../shared/design-system";
 import { useAuth } from "../../shared/providers/auth-provider";
 
 export default function MerchantDashboard() {
   const router = useRouter();
+  const styles = useThemedStyles(createStyles);
+  const { colors } = useDesignTokens();
   const { isMerchant, merchantShopId, user, switchRole } = useAuth();
   const { data: stats } = getMerchantDashboardStats(merchantShopId);
   const { data: products = [] } = getShopProducts(merchantShopId || 0);
@@ -49,25 +61,25 @@ export default function MerchantDashboard() {
         <View style={styles.header}>
           <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
             <View>
-              <Text style={styles.greeting}>Welcome back,</Text>
-              <Text style={styles.username}>{user?.email?.split("@")[0] || "Merchant"}</Text>
+              <Text variant="caption">Welcome back,</Text>
+              <Text variant="h1">{user?.email?.split("@")[0] || "Merchant"}</Text>
             </View>
             <TouchableOpacity
-              style={[styles.miniButton, { backgroundColor: NEO_THEME.colors.sky }]}
+              style={styles.miniButton}
               onPress={() => {
                 switchRole("shopper");
                 router.replace("/(shop)");
               }}
             >
-              <MaterialIcons name="shopping-bag" size={20} color={NEO_THEME.colors.black} />
-              <Text style={styles.miniButtonText}>Exit</Text>
+              <MaterialIcons name="shopping-bag" size={18} color={colors.ink} />
+              <Text variant="label">Exit</Text>
             </TouchableOpacity>
           </View>
         </View>
 
-        <View style={styles.checklistCard}>
-          <Text style={styles.checklistTitle}>Launch checklist</Text>
-          <Text style={styles.checklistSubtitle}>
+        <Surface style={styles.checklistCard} elevation="hairline">
+          <Text variant="h3">Launch checklist</Text>
+          <Text variant="body" color={colors.inkMuted}>
             Shoppers only see you on Discover after a product and an active competitive pot are live.
           </Text>
 
@@ -85,71 +97,76 @@ export default function MerchantDashboard() {
 
           {nextStep ? (
             <>
-              <Text style={styles.nextHint}>{nextStep.hint}</Text>
-              <TouchableOpacity style={styles.primaryButton} onPress={() => router.push(nextStep.route)}>
-                <Text style={styles.primaryButtonText}>{nextStep.label}</Text>
-                <MaterialIcons name="arrow-forward" size={20} color={NEO_THEME.colors.black} />
-              </TouchableOpacity>
+              <Text variant="caption">{nextStep.hint}</Text>
+              <Button onPress={() => router.push(nextStep.route)} style={styles.primaryButton}>
+                {nextStep.label}
+              </Button>
             </>
           ) : (
             <View style={styles.liveBadge}>
-              <MaterialIcons name="check-circle" size={18} color={NEO_THEME.colors.black} />
-              <Text style={styles.liveBadgeText}>Launch ready — your pots can reach Discover</Text>
+              <MaterialIcons name="check-circle" size={18} color={colors.success} />
+              <Text variant="label" style={{ flex: 1 }}>
+                Launch ready — your pots can reach Discover
+              </Text>
             </View>
           )}
-        </View>
+        </Surface>
 
         <View style={styles.statsContainer}>
-          <View style={styles.statCard}>
-            <Text style={styles.statValue}>{pendingOrderCount}</Text>
-            <Text style={styles.statLabel}>Pending Orders</Text>
-          </View>
-          <View style={[styles.statCard, { backgroundColor: NEO_THEME.colors.yellow }]}>
-            <Text style={styles.statValue}>P{todaysSales.toFixed(0)}</Text>
-            <Text style={styles.statLabel}>Today's Sales</Text>
-          </View>
-          <View style={[styles.statCard, { backgroundColor: NEO_THEME.colors.sky }]}>
-            <Text style={styles.statValue}>{productCount}</Text>
-            <Text style={styles.statLabel}>Products</Text>
-          </View>
+          <Surface style={styles.statCard} elevation="hairline">
+            <Text variant="h2">{pendingOrderCount}</Text>
+            <Text variant="caption">Pending orders</Text>
+          </Surface>
+          <Surface style={[styles.statCard, styles.statAccent]} elevation="none">
+            <Text variant="h2">P{todaysSales.toFixed(0)}</Text>
+            <Text variant="caption">Today&apos;s sales</Text>
+          </Surface>
+          <Surface style={styles.statCard} elevation="hairline">
+            <Text variant="h2">{productCount}</Text>
+            <Text variant="caption">Products</Text>
+          </Surface>
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Quick Actions</Text>
+          <Text variant="h3" style={styles.sectionTitle}>Quick actions</Text>
           <View style={styles.actionGrid}>
-            <TouchableOpacity style={styles.actionCard} onPress={() => router.push("/(merchant)/catalog")}>
-              <MaterialIcons name="inventory" size={32} color={NEO_THEME.colors.black} />
-              <Text style={styles.actionText}>Manage Catalog</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.actionCard} onPress={() => router.push("/create-product")}>
-              <MaterialIcons name="add-box" size={32} color={NEO_THEME.colors.black} />
-              <Text style={styles.actionText}>Add Product</Text>
-            </TouchableOpacity>
+            <ActionCard
+              icon="inventory"
+              label="Manage catalog"
+              onPress={() => router.push("/(merchant)/catalog")}
+            />
+            <ActionCard
+              icon="add-box"
+              label="Add product"
+              onPress={() => router.push("/create-product")}
+            />
           </View>
 
-          <View style={[styles.actionGrid, { marginTop: 16 }]}>
-            <TouchableOpacity
-              style={[styles.actionCard, !launchComplete && styles.actionCardEmphasis]}
+          <View style={[styles.actionGrid, { marginTop: space.md }]}>
+            <ActionCard
+              icon="emoji-events"
+              label={hasPot ? "New challenge pot" : "Fund a pot"}
+              emphasis={!launchComplete}
               onPress={() => router.push("/challenges/create")}
-            >
-              <MaterialIcons name="emoji-events" size={32} color={NEO_THEME.colors.black} />
-              <Text style={styles.actionText}>{hasPot ? "New Challenge Pot" : "Fund a Pot"}</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.actionCard} onPress={() => router.push("/(merchant)/community/challenges")}>
-              <MaterialIcons name="leaderboard" size={32} color={NEO_THEME.colors.black} />
-              <Text style={styles.actionText}>Review & Settle</Text>
-            </TouchableOpacity>
+            />
+            <ActionCard
+              icon="leaderboard"
+              label="Review & settle"
+              onPress={() => router.push("/(merchant)/community/challenges")}
+            />
           </View>
 
-          <View style={[styles.actionGrid, { marginTop: 16 }]}>
-            <TouchableOpacity style={styles.actionCard} onPress={() => router.push("/scan-order")}>
-              <MaterialIcons name="qr-code-scanner" size={32} color={NEO_THEME.colors.black} />
-              <Text style={styles.actionText}>Scan Order</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.actionCard} onPress={() => router.push("/(merchant)/vouchers")}>
-              <MaterialIcons name="redeem" size={32} color={NEO_THEME.colors.black} />
-              <Text style={styles.actionText}>Redeem Voucher</Text>
-            </TouchableOpacity>
+          <View style={[styles.actionGrid, { marginTop: space.md }]}>
+            <ActionCard
+              icon="qr-code-scanner"
+              label="Scan order"
+              onPress={() => router.push("/scan-order")}
+            />
+            <ActionCard
+              icon="redeem"
+              label="Redeem voucher"
+              onPress={() => router.push("/(merchant)/vouchers")}
+            />
           </View>
         </View>
       </ScrollView>
@@ -158,196 +175,133 @@ export default function MerchantDashboard() {
 }
 
 function ChecklistRow({ done, label, detail }: { done: boolean; label: string; detail: string }) {
+  const styles = useThemedStyles(createStyles);
+  const { colors } = useDesignTokens();
   return (
     <View style={styles.checklistRow}>
       <MaterialIcons
         name={done ? "check-circle" : "radio-button-unchecked"}
         size={22}
-        color={NEO_THEME.colors.black}
+        color={done ? colors.success : colors.inkMuted}
       />
       <View style={{ flex: 1 }}>
-        <Text style={styles.checklistLabel}>{label}</Text>
-        <Text style={styles.checklistDetail}>{detail}</Text>
+        <Text variant="bodyBold">{label}</Text>
+        <Text variant="caption">{detail}</Text>
       </View>
     </View>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#F0F0F0",
-  },
-  scrollContent: {
-    padding: 20,
-  },
-  header: {
-    marginBottom: 24,
-  },
-  greeting: {
-    fontSize: 16,
-    fontFamily: NEO_THEME.fonts.bold,
-    color: NEO_THEME.colors.grey,
-  },
-  username: {
-    fontSize: 32,
-    fontFamily: NEO_THEME.fonts.bold,
-    color: NEO_THEME.colors.black,
-  },
-  checklistCard: {
-    backgroundColor: NEO_THEME.colors.white,
-    borderWidth: 3,
-    borderColor: NEO_THEME.colors.black,
-    borderRadius: NEO_THEME.borders.radius,
-    padding: 18,
-    marginBottom: 24,
-    gap: 12,
-    shadowColor: NEO_THEME.colors.black,
-    shadowOffset: { width: 4, height: 4 },
-    shadowOpacity: 1,
-    shadowRadius: 0,
-  },
-  checklistTitle: {
-    fontSize: 20,
-    fontFamily: NEO_THEME.fonts.bold,
-    color: NEO_THEME.colors.black,
-  },
-  checklistSubtitle: {
-    fontSize: 14,
-    fontFamily: NEO_THEME.fonts.regular,
-    color: NEO_THEME.colors.grey,
-  },
-  checklistRow: {
-    flexDirection: "row",
-    alignItems: "flex-start",
-    gap: 10,
-  },
-  checklistLabel: {
-    fontFamily: NEO_THEME.fonts.bold,
-    fontSize: 15,
-    color: NEO_THEME.colors.black,
-  },
-  checklistDetail: {
-    fontFamily: NEO_THEME.fonts.regular,
-    fontSize: 13,
-    color: NEO_THEME.colors.grey,
-    marginTop: 2,
-  },
-  nextHint: {
-    fontFamily: NEO_THEME.fonts.regular,
-    fontSize: 13,
-    color: NEO_THEME.colors.dark,
-  },
-  primaryButton: {
-    minHeight: 48,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 8,
-    backgroundColor: NEO_THEME.colors.secondary,
-    borderWidth: 2,
-    borderColor: NEO_THEME.colors.black,
-    borderRadius: 999,
-    paddingHorizontal: 16,
-  },
-  primaryButtonText: {
-    fontFamily: NEO_THEME.fonts.bold,
-    fontSize: 15,
-    color: NEO_THEME.colors.black,
-  },
-  liveBadge: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    backgroundColor: NEO_THEME.colors.success,
-    borderWidth: 2,
-    borderColor: NEO_THEME.colors.black,
-    borderRadius: 12,
-    padding: 10,
-  },
-  liveBadgeText: {
-    flex: 1,
-    fontFamily: NEO_THEME.fonts.bold,
-    fontSize: 13,
-    color: NEO_THEME.colors.black,
-  },
-  statsContainer: {
-    flexDirection: "row",
-    gap: 16,
-    marginBottom: 24,
-    flexWrap: "wrap",
-  },
-  statCard: {
-    flexGrow: 1,
-    flexBasis: 140,
-    backgroundColor: NEO_THEME.colors.white,
-    padding: 16,
-    borderRadius: NEO_THEME.borders.radius,
-    borderWidth: NEO_THEME.borders.width,
-    borderColor: NEO_THEME.colors.black,
-    shadowColor: NEO_THEME.colors.black,
-    shadowOffset: { width: 4, height: 4 },
-    shadowOpacity: 1,
-    shadowRadius: 0,
-  },
-  statValue: {
-    fontSize: 28,
-    fontFamily: NEO_THEME.fonts.bold,
-    color: NEO_THEME.colors.black,
-  },
-  statLabel: {
-    fontSize: 14,
-    fontFamily: NEO_THEME.fonts.regular,
-    color: NEO_THEME.colors.grey,
-  },
-  section: {
-    marginTop: 8,
-  },
-  sectionTitle: {
-    fontSize: 20,
-    fontFamily: NEO_THEME.fonts.bold,
-    marginBottom: 16,
-  },
-  actionGrid: {
-    flexDirection: "row",
-    gap: 16,
-  },
-  actionCard: {
-    flex: 1,
-    backgroundColor: NEO_THEME.colors.white,
-    padding: 20,
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 12,
-    borderRadius: NEO_THEME.borders.radius,
-    borderWidth: NEO_THEME.borders.width,
-    borderColor: NEO_THEME.colors.black,
-    shadowColor: NEO_THEME.colors.black,
-    shadowOffset: { width: 4, height: 4 },
-    shadowOpacity: 1,
-    shadowRadius: 0,
-  },
-  actionCardEmphasis: {
-    backgroundColor: NEO_THEME.colors.secondary,
-  },
-  actionText: {
-    fontFamily: NEO_THEME.fonts.bold,
-    fontSize: 14,
-    textAlign: "center",
-  },
-  miniButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingVertical: 6,
-    paddingHorizontal: 12,
-    borderRadius: 12,
-    borderWidth: 2,
-    borderColor: NEO_THEME.colors.black,
-    gap: 4,
-  },
-  miniButtonText: {
-    fontFamily: NEO_THEME.fonts.bold,
-    fontSize: 12,
-    color: NEO_THEME.colors.black,
-  },
-});
+function ActionCard({
+  icon,
+  label,
+  onPress,
+  emphasis,
+}: {
+  icon: keyof typeof MaterialIcons.glyphMap;
+  label: string;
+  onPress: () => void;
+  emphasis?: boolean;
+}) {
+  const styles = useThemedStyles(createStyles);
+  const { colors } = useDesignTokens();
+  return (
+    <TouchableOpacity
+      style={[styles.actionCard, emphasis && styles.actionCardEmphasis]}
+      onPress={onPress}
+    >
+      <MaterialIcons name={icon} size={28} color={colors.ink} />
+      <Text variant="label" align="center">
+        {label}
+      </Text>
+    </TouchableOpacity>
+  );
+}
+
+function createStyles(c: SemanticColors, tokens: DesignTokens) {
+  return {
+    container: {
+      flex: 1,
+      backgroundColor: c.canvas,
+    },
+    scrollContent: {
+      padding: space.lg,
+    },
+    header: {
+      marginBottom: space.lg,
+    },
+    miniButton: {
+      flexDirection: "row" as const,
+      alignItems: "center" as const,
+      paddingVertical: space.xs,
+      paddingHorizontal: space.sm,
+      borderRadius: radii.md,
+      gap: space.xxs,
+      backgroundColor: c.surface,
+      ...tokens.elevation.hairline,
+    },
+    checklistCard: {
+      padding: space.md,
+      marginBottom: space.lg,
+      gap: space.sm,
+    },
+    checklistRow: {
+      flexDirection: "row" as const,
+      alignItems: "flex-start" as const,
+      gap: space.sm,
+    },
+    primaryButton: {
+      marginTop: space.xxs,
+    },
+    liveBadge: {
+      flexDirection: "row" as const,
+      alignItems: "center" as const,
+      gap: space.xs,
+      backgroundColor: c.gray100,
+      borderRadius: radii.md,
+      padding: space.sm,
+    },
+    statsContainer: {
+      flexDirection: "row" as const,
+      gap: space.md,
+      marginBottom: space.lg,
+      flexWrap: "wrap" as const,
+    },
+    statCard: {
+      flexGrow: 1,
+      flexBasis: 140,
+      padding: space.md,
+      gap: space.xxs,
+    },
+    statAccent: {
+      backgroundColor: c.accentMuted,
+      borderWidth: 1,
+      borderColor: c.accent,
+    },
+    section: {
+      marginTop: space.xs,
+    },
+    sectionTitle: {
+      marginBottom: space.md,
+    },
+    actionGrid: {
+      flexDirection: "row" as const,
+      gap: space.md,
+    },
+    actionCard: {
+      flex: 1,
+      backgroundColor: c.surface,
+      padding: space.md,
+      alignItems: "center" as const,
+      justifyContent: "center" as const,
+      gap: space.sm,
+      borderRadius: radii.lg,
+      minHeight: 112,
+      ...tokens.elevation.hairline,
+    },
+    actionCardEmphasis: {
+      backgroundColor: c.accentMuted,
+      borderColor: c.accent,
+    },
+  };
+}

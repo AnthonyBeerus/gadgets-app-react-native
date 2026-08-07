@@ -1,3 +1,5 @@
+import { useNeoStyles } from '../../../shared/hooks/useNeoStyles';
+import { useTheme } from '../../../shared/providers/theme-provider';
 import React, { useState, useEffect } from "react";
 import {
   View,
@@ -26,6 +28,8 @@ import { useCartStore } from "../../../store/cart-store";
 import { NuviaProductCard } from "../../../components/molecules/nuvia-product-card";
 
 export default function ShopDetailsScreen() {
+  const styles = useNeoStyles(createStyles);
+  const { theme } = useTheme();
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const { items } = useCartStore(); // Added hook usage
@@ -161,7 +165,7 @@ export default function ShopDetailsScreen() {
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color={NEO_THEME.colors.primary} />
+        <ActivityIndicator size="large" color={theme.colors.primary} />
       </View>
     );
   }
@@ -181,11 +185,11 @@ export default function ShopDetailsScreen() {
         onBackPress={() => router.back()} 
         rightElement={
           <TouchableOpacity onPress={() => router.push("/bag")} style={{ position: 'relative' }}>
-            <Ionicons name="cart" size={24} color={NEO_THEME.colors.black} />
+            <Ionicons name="cart" size={24} color={theme.colors.black} />
             {items.length > 0 && (
               <NuviaTag 
                 label={items.length.toString()} 
-                color={NEO_THEME.colors.primary} 
+                color={theme.colors.primary} 
                 style={{
                   position: 'absolute',
                   top: -6,
@@ -195,7 +199,7 @@ export default function ShopDetailsScreen() {
                   height: 18,
                   borderRadius: 9,
                 }}
-                textStyle={{ fontSize: 10, color: NEO_THEME.colors.white }}
+                textStyle={{ fontSize: 10, color: theme.colors.white }}
               />
             )}
           </TouchableOpacity>
@@ -223,8 +227,8 @@ export default function ShopDetailsScreen() {
               variant="primary"
               style={styles.primaryActionButton}
             >
-                <Ionicons name="storefront" size={20} color={NEO_THEME.colors.white} style={{ marginRight: 8 }} />
-                <NuviaText variant="label" color={NEO_THEME.colors.white}>
+                <Ionicons name="storefront" size={20} color={theme.colors.white} style={{ marginRight: 8 }} />
+                <NuviaText variant="label" color={theme.colors.white}>
                     BROWSE PRODUCTS
                 </NuviaText>
             </NuviaButton>
@@ -235,7 +239,7 @@ export default function ShopDetailsScreen() {
                   style={styles.secondaryActionButton}
                   onPress={handleBookAppointment}
                 >
-                  <Ionicons name="calendar" size={18} color={NEO_THEME.colors.black} />
+                  <Ionicons name="calendar" size={18} color={theme.colors.black} />
                   <NuviaText variant="label">BOOK</NuviaText>
                 </TouchableOpacity>
               )}
@@ -245,7 +249,7 @@ export default function ShopDetailsScreen() {
                   style={styles.secondaryActionButton}
                   onPress={handleCallShop}
                 >
-                  <Ionicons name="call" size={18} color={NEO_THEME.colors.black} />
+                  <Ionicons name="call" size={18} color={theme.colors.black} />
                   <NuviaText variant="label">CALL</NuviaText>
                 </TouchableOpacity>
               )}
@@ -261,7 +265,7 @@ export default function ShopDetailsScreen() {
               {shop.has_delivery && (
                 <View style={styles.featureCard}>
                    <View style={styles.featureIconContainer}>
-                    <Ionicons name="bicycle" size={24} color={NEO_THEME.colors.black} />
+                    <Ionicons name="bicycle" size={24} color={theme.colors.black} />
                    </View>
                    <NuviaText variant="label">DELIVERY</NuviaText>
                 </View>
@@ -269,15 +273,15 @@ export default function ShopDetailsScreen() {
               {shop.has_collection && (
                 <View style={styles.featureCard}>
                    <View style={styles.featureIconContainer}>
-                    <Ionicons name="bag-handle" size={24} color={NEO_THEME.colors.black} />
+                    <Ionicons name="bag-handle" size={24} color={theme.colors.black} />
                    </View>
                    <NuviaText variant="label">COLLECTION</NuviaText>
                 </View>
               )}
               {shop.has_virtual_try_on && (
                 <TouchableOpacity style={styles.featureCard} onPress={handleVirtualTryOn}>
-                   <View style={[styles.featureIconContainer, { backgroundColor: NEO_THEME.colors.primary }]}>
-                    <Ionicons name="glasses" size={24} color={NEO_THEME.colors.white} />
+                   <View style={[styles.featureIconContainer, { backgroundColor: theme.colors.primary }]}>
+                    <Ionicons name="glasses" size={24} color={theme.colors.white} />
                    </View>
                    <NuviaText variant="label">TRY-ON</NuviaText>
                 </TouchableOpacity>
@@ -290,13 +294,13 @@ export default function ShopDetailsScreen() {
             <NuviaText variant="h3" style={styles.sectionTitle}>DETAILS</NuviaText>
             {shop.location && (
               <View style={styles.detailRow}>
-                <Ionicons name="location" size={20} color={NEO_THEME.colors.black} />
+                <Ionicons name="location" size={20} color={theme.colors.black} />
                 <NuviaText variant="body">{shop.location}</NuviaText>
               </View>
             )}
             {shop.rating && (
               <View style={styles.detailRow}>
-                <Ionicons name="star" size={20} color={NEO_THEME.colors.secondary} />
+                <Ionicons name="star" size={20} color={theme.colors.secondary} />
                 <NuviaText variant="bodyBold">{shop.rating.toFixed(1)} RATING</NuviaText>
               </View>
             )}
@@ -320,7 +324,7 @@ export default function ShopDetailsScreen() {
           <View style={styles.modalHeader}>
             <Text style={styles.modalTitle}>SELECT SERVICE</Text>
             <TouchableOpacity onPress={() => setServiceSelectionVisible(false)}>
-              <Ionicons name="close" size={28} color={NEO_THEME.colors.black} />
+              <Ionicons name="close" size={28} color={theme.colors.black} />
             </TouchableOpacity>
           </View>
           <ScrollView style={styles.servicesList}>
@@ -331,7 +335,7 @@ export default function ShopDetailsScreen() {
                 onPress={() => handleServiceSelect(service)}
               >
                 <NuviaText variant="bodyBold">{service.name}</NuviaText>
-                <NuviaText variant="h3" color={NEO_THEME.colors.primary}>
+                <NuviaText variant="h3" color={theme.colors.primary}>
                   P{service.price.toFixed(2)}
                 </NuviaText>
               </TouchableOpacity>
@@ -343,10 +347,11 @@ export default function ShopDetailsScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+function createStyles(c) {
+  return {
   container: {
     flex: 1,
-    backgroundColor: NEO_THEME.colors.backgroundLight,
+    backgroundColor: c.backgroundLight,
   },
   scrollView: {
     flex: 1,
@@ -367,8 +372,8 @@ const styles = StyleSheet.create({
   },
   emptyTitle: {
     fontSize: 20,
-    fontWeight: "900",
-    color: NEO_THEME.colors.black,
+    fontWeight: '600',
+    color: c.black,
     fontFamily: NEO_THEME.fonts.black,
   },
   shopImage: {
@@ -377,15 +382,15 @@ const styles = StyleSheet.create({
     resizeMode: "cover",
     borderBottomLeftRadius: 32,
     borderBottomRightRadius: 32,
-    borderBottomWidth: NEO_THEME.borders.width,
-    borderColor: NEO_THEME.colors.black,
+    borderBottomWidth: 1,
+    borderColor: c.border,
   },
   shopInfo: {
     padding: 20,
   },
   description: {
     fontSize: 16,
-    color: NEO_THEME.colors.black,
+    color: c.black,
     marginBottom: 24,
     lineHeight: 24,
     fontFamily: NEO_THEME.fonts.regular,
@@ -397,8 +402,8 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   primaryActionText: {
-    color: NEO_THEME.colors.white,
-    fontWeight: "900",
+    color: c.white,
+    fontWeight: '600',
     fontFamily: NEO_THEME.fonts.bold,
     fontSize: 16,
   },
@@ -412,20 +417,20 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     padding: 12,
-    backgroundColor: NEO_THEME.colors.white,
-    borderWidth: NEO_THEME.borders.width,
-    borderColor: NEO_THEME.colors.black,
+    backgroundColor: c.white,
+    borderWidth: 1,
+    borderColor: c.border,
     borderRadius: 24, // Pill
     gap: 8,
-    shadowColor: NEO_THEME.colors.black,
-    shadowOffset: { width: 4, height: 4 },
-    shadowOpacity: 1,
-    shadowRadius: 0,
+    shadowColor: c.black,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
   },
   secondaryActionText: {
-    fontWeight: "900",
+    fontWeight: '600',
     fontFamily: NEO_THEME.fonts.bold,
-    color: NEO_THEME.colors.black,
+    color: c.black,
   },
   section: {
     marginBottom: 24,
@@ -438,12 +443,12 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 18,
-    fontWeight: "900",
-    color: NEO_THEME.colors.black,
+    fontWeight: '600',
+    color: c.black,
     fontFamily: NEO_THEME.fonts.bold,
   },
   viewAllText: {
-    color: NEO_THEME.colors.primary,
+    color: c.primary,
     fontWeight: "700",
     fontFamily: NEO_THEME.fonts.bold,
   },
@@ -454,9 +459,9 @@ const styles = StyleSheet.create({
   productCard: {
     width: 140,
     marginRight: 12,
-    backgroundColor: NEO_THEME.colors.white,
-    borderWidth: NEO_THEME.borders.width,
-    borderColor: NEO_THEME.colors.black,
+    backgroundColor: c.white,
+    borderWidth: 1,
+    borderColor: c.border,
     borderRadius: NEO_THEME.borders.radius,
     padding: 8,
   },
@@ -472,12 +477,12 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   productPrice: {
-    fontWeight: "900",
+    fontWeight: '600',
     fontFamily: NEO_THEME.fonts.black,
-    color: NEO_THEME.colors.primary,
+    color: c.primary,
   },
   emptyText: {
-    color: NEO_THEME.colors.grey,
+    color: c.grey,
     fontStyle: "italic",
   },
   featuresGrid: {
@@ -487,20 +492,20 @@ const styles = StyleSheet.create({
   },
   featureCard: {
     width: "48%",
-    backgroundColor: NEO_THEME.colors.white,
-    borderWidth: NEO_THEME.borders.width,
-    borderColor: NEO_THEME.colors.black,
+    backgroundColor: c.white,
+    borderWidth: 1,
+    borderColor: c.border,
     borderRadius: NEO_THEME.borders.radius,
     padding: 16,
     alignItems: "center",
     gap: 8,
-    shadowColor: NEO_THEME.colors.black,
-    shadowOffset: { width: 4, height: 4 },
-    shadowOpacity: 1,
-    shadowRadius: 0,
+    shadowColor: c.black,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
   },
   featureLabel: {
-    fontWeight: "900",
+    fontWeight: '600',
     fontFamily: NEO_THEME.fonts.bold,
     fontSize: 12,
   },
@@ -512,24 +517,24 @@ const styles = StyleSheet.create({
   },
   detailText: {
     fontSize: 16,
-    color: NEO_THEME.colors.black,
+    color: c.black,
   },
   modalContainer: {
     flex: 1,
-    backgroundColor: NEO_THEME.colors.backgroundLight,
+    backgroundColor: c.backgroundLight,
   },
   modalHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
     padding: 20,
-    borderBottomWidth: NEO_THEME.borders.width,
-    borderColor: NEO_THEME.colors.black,
-    backgroundColor: NEO_THEME.colors.white,
+    borderBottomWidth: 1,
+    borderColor: c.border,
+    backgroundColor: c.white,
   },
   modalTitle: {
     fontSize: 20,
-    fontWeight: "900",
+    fontWeight: '600',
     fontFamily: NEO_THEME.fonts.black,
   },
   servicesList: {
@@ -537,30 +542,31 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   serviceCard: {
-    backgroundColor: NEO_THEME.colors.white,
-    borderWidth: NEO_THEME.borders.width,
-    borderColor: NEO_THEME.colors.black,
+    backgroundColor: c.white,
+    borderWidth: 1,
+    borderColor: c.border,
     borderRadius: 16,
     padding: 16,
     marginBottom: 12,
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    shadowColor: NEO_THEME.colors.black,
-    shadowOffset: { width: 3, height: 3 },
-    shadowOpacity: 1,
-    shadowRadius: 0,
+    shadowColor: c.black,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
     elevation: 2,
   },
   featureIconContainer: {
       width: 48,
       height: 48,
       borderRadius: 24,
-      backgroundColor: NEO_THEME.colors.background,
-      borderWidth: 1.5,
-      borderColor: NEO_THEME.colors.black,
+      backgroundColor: c.background,
+      borderWidth: 1,
+      borderColor: c.border,
       alignItems: 'center',
       justifyContent: 'center',
       marginBottom: 8,
   }
-});
+  };
+}

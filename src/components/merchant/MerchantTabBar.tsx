@@ -3,7 +3,7 @@ import { View, TouchableOpacity, StyleSheet, Platform } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import Animated, { useAnimatedStyle, withTiming } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { NEO_THEME } from '../../shared/constants/neobrutalism';
+import { radii, space, useDesignTokens } from '../../shared/design-system';
 
 interface TabBarProps {
   state: any;
@@ -11,11 +11,11 @@ interface TabBarProps {
   navigation: any;
 }
 
-/** Primary merchant Tabs only — hide on href:null routes like vouchers. */
 const visibleRoutes = ['index', 'catalog', 'create', 'community', 'profile'] as const;
 
 export default function MerchantTabBar({ state, descriptors, navigation }: TabBarProps) {
   const insets = useSafeAreaInsets();
+  const { colors, elevation } = useDesignTokens();
   const focusedRoute = state.routes[state.index]?.name;
   if (!focusedRoute || !visibleRoutes.includes(focusedRoute as (typeof visibleRoutes)[number])) {
     return null;
@@ -40,7 +40,16 @@ export default function MerchantTabBar({ state, descriptors, navigation }: TabBa
         animatedStyle,
       ]}
     >
-      <View style={styles.pillContainer}>
+      <View
+        style={[
+          styles.pillContainer,
+          {
+            backgroundColor: colors.surface,
+            borderColor: colors.border,
+            ...elevation.soft,
+          },
+        ]}
+      >
         {pillRoutes.map((route: any) => {
           const isFocused = state.index === state.routes.indexOf(route);
 
@@ -68,20 +77,22 @@ export default function MerchantTabBar({ state, descriptors, navigation }: TabBa
               accessibilityRole="button"
               accessibilityState={isFocused ? { selected: true } : {}}
               onPress={onPress}
-              style={styles.tabItem}
+              style={[styles.tabItem, isFocused && { backgroundColor: colors.gray100 }]}
             >
               <MaterialIcons
                 name={iconName}
-                size={24}
-                color={isFocused ? NEO_THEME.colors.primary : NEO_THEME.colors.grey}
+                size={22}
+                color={isFocused ? colors.ink : colors.inkMuted}
               />
-              {isFocused && <View style={styles.activeDot} />}
+              {isFocused ? (
+                <View style={[styles.activeDot, { backgroundColor: colors.ink }]} />
+              ) : null}
             </TouchableOpacity>
           );
         })}
       </View>
 
-      {fabRoute && (
+      {fabRoute ? (
         <TouchableOpacity
           onPress={() => {
             const event = navigation.emit({
@@ -94,11 +105,11 @@ export default function MerchantTabBar({ state, descriptors, navigation }: TabBa
             }
           }}
           activeOpacity={0.8}
-          style={styles.fab}
+          style={[styles.fab, { backgroundColor: colors.ink, ...elevation.soft }]}
         >
-          <MaterialIcons name="add" size={32} color="white" />
+          <MaterialIcons name="add" size={28} color={colors.surface} />
         </TouchableOpacity>
-      )}
+      ) : null}
     </Animated.View>
   );
 }
@@ -111,56 +122,41 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 20,
+    paddingHorizontal: space.md,
     height: 64,
     pointerEvents: 'box-none',
   },
   pillContainer: {
     flex: 1,
-    marginRight: 16,
+    marginRight: space.md,
     flexDirection: 'row',
-    height: 64,
-    backgroundColor: '#F5F5F5',
-    borderWidth: NEO_THEME.borders.width,
-    borderColor: NEO_THEME.colors.black,
-    borderRadius: 32,
+    height: 56,
+    borderRadius: radii.lg,
     alignItems: 'center',
     justifyContent: 'space-around',
-    paddingHorizontal: 8,
-    shadowColor: NEO_THEME.colors.black,
-    shadowOffset: { width: 4, height: 4 },
-    shadowOpacity: 1,
-    shadowRadius: 0,
-    elevation: 8,
+    paddingHorizontal: space.xxs,
+    borderWidth: 1,
   },
   tabItem: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
     height: '100%',
+    borderRadius: radii.md,
     position: 'relative',
   },
   activeDot: {
     position: 'absolute',
-    bottom: 12,
+    bottom: 8,
     width: 4,
     height: 4,
     borderRadius: 2,
-    backgroundColor: NEO_THEME.colors.primary,
   },
   fab: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
-    backgroundColor: NEO_THEME.colors.primary,
-    borderWidth: NEO_THEME.borders.width,
-    borderColor: NEO_THEME.colors.black,
+    width: 56,
+    height: 56,
+    borderRadius: radii.lg,
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: NEO_THEME.colors.black,
-    shadowOffset: { width: 4, height: 4 },
-    shadowOpacity: 1,
-    shadowRadius: 0,
-    elevation: 8,
   },
 });

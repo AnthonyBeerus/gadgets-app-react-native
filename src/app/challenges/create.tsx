@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TextInput, ScrollView, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, TextInput, ScrollView, TouchableOpacity, Alert } from 'react-native';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { useRouter } from 'expo-router';
 import DateTimePicker from '@react-native-community/datetimepicker'; 
 import { NEO_THEME } from '../../shared/constants/neobrutalism';
+import { useNeoStyles } from '../../shared/hooks/useNeoStyles';
 import { createChallenge, getShopProducts } from '../../shared/api/api';
 import { useAuth } from '../../shared/providers/auth-provider';
 
@@ -30,6 +31,7 @@ type ChallengeFormData = z.infer<typeof challengeSchema>;
 
 export default function CreateChallengeScreen() {
   const router = useRouter();
+  const styles = useNeoStyles(createStyles);
   const { merchantShopId } = useAuth();
   const { mutate: createChallengeMutation, isPending } = createChallenge();
   const { data: products } = getShopProducts(merchantShopId ?? 0);
@@ -336,17 +338,18 @@ export default function CreateChallengeScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+function createStyles(c) {
+  return {
   container: {
     flex: 1,
-    backgroundColor: '#F0F0F0',
+    backgroundColor: c.backgroundLight,
   },
   header: {
     paddingTop: 60,
     padding: 20,
-    backgroundColor: 'white',
-    borderBottomWidth: NEO_THEME.borders.width,
-    borderBottomColor: NEO_THEME.colors.black,
+    backgroundColor: c.white,
+    borderBottomWidth: 1,
+    borderBottomColor: c.border,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
@@ -357,7 +360,7 @@ const styles = StyleSheet.create({
   },
   cancelText: {
     fontFamily: NEO_THEME.fonts.bold,
-    color: NEO_THEME.colors.grey,
+    color: c.grey,
   },
   content: {
     padding: 20,
@@ -376,34 +379,37 @@ const styles = StyleSheet.create({
   },
   helperText: {
       fontFamily: NEO_THEME.fonts.regular,
-      color: NEO_THEME.colors.grey,
+      color: c.grey,
       fontSize: 12,
       marginTop: 4,
   },
   input: {
-    backgroundColor: 'white',
-    borderWidth: NEO_THEME.borders.width,
-    borderColor: NEO_THEME.colors.black,
+    backgroundColor: c.white,
+    borderWidth: 1,
+    borderColor: c.border,
     borderRadius: NEO_THEME.borders.radius,
     padding: 12,
     fontSize: 16,
     fontFamily: NEO_THEME.fonts.regular,
-    shadowColor: NEO_THEME.colors.black,
-    shadowOffset: { width: 2, height: 2 },
-    shadowOpacity: 1,
-    shadowRadius: 0,
+    shadowColor: c.black,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
   },
   textArea: {
     height: 100,
     textAlignVertical: 'top',
   },
   dateButton: {
-    backgroundColor: 'white',
-    borderWidth: NEO_THEME.borders.width,
-    borderColor: NEO_THEME.colors.black,
+    backgroundColor: c.white,
+    borderWidth: 1,
+    borderColor: c.border,
     borderRadius: NEO_THEME.borders.radius,
     padding: 12,
     alignItems: 'center',
+    shadowColor: c.black,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
   },
   dateText: {
       fontFamily: NEO_THEME.fonts.bold,
@@ -420,22 +426,23 @@ const styles = StyleSheet.create({
       alignItems: 'center',
       borderRadius: NEO_THEME.borders.radius,
       borderWidth: 1,
-      borderColor: NEO_THEME.colors.grey,
-      backgroundColor: 'white',
+      borderColor: c.grey,
+      backgroundColor: c.white,
   },
   typeChipSelected: {
-      backgroundColor: NEO_THEME.colors.primary,
-      borderColor: NEO_THEME.colors.black,
-      borderWidth: NEO_THEME.borders.width,
+      backgroundColor: c.primary,
+      borderColor: c.border,
+      borderWidth: 1,
   },
   typeText: {
       fontFamily: NEO_THEME.fonts.regular,
-      color: NEO_THEME.colors.black,
+      color: c.black,
   },
   typeTextSelected: {
       fontFamily: NEO_THEME.fonts.bold,
-      color: 'white',
+      color: c.white,
   },
+  
   errorText: {
     color: 'red',
     marginTop: 4,
@@ -443,25 +450,26 @@ const styles = StyleSheet.create({
     fontSize: 12,
   },
   createButton: {
-    backgroundColor: NEO_THEME.colors.primary,
+    backgroundColor: c.primary,
     padding: 16,
     borderRadius: NEO_THEME.borders.radius,
     alignItems: 'center',
-    borderWidth: NEO_THEME.borders.width,
-    borderColor: NEO_THEME.colors.black,
+    borderWidth: 1,
+    borderColor: c.border,
     marginTop: 20,
     marginBottom: 40,
-    shadowColor: NEO_THEME.colors.black,
-    shadowOffset: { width: 4, height: 4 },
-    shadowOpacity: 1,
-    shadowRadius: 0,
+    shadowColor: c.black,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
   },
   disabledButton: {
       opacity: 0.7,
   },
   createButtonText: {
-    color: 'white',
+    color: c.white,
     fontFamily: NEO_THEME.fonts.bold,
     fontSize: 18,
   },
-});
+  };
+}

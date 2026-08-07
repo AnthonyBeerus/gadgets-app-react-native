@@ -1,7 +1,7 @@
 import React from 'react';
 import { render } from '@testing-library/react-native';
 import { NuviaTag } from './nuvia-tag';
-import { NEO_THEME } from '../../constants/neobrutalism';
+import { colors } from '../../design-system/tokens';
 
 describe('NuviaTag', () => {
   it('renders label correctly', () => {
@@ -9,32 +9,24 @@ describe('NuviaTag', () => {
     expect(getByText('New')).toBeTruthy();
   });
 
-  it('applies primary color by default', () => {
+  it('applies neutral tone by default', () => {
     const { getByTestId } = render(<NuviaTag label="Test" testID="tag" />);
     const tag = getByTestId('tag');
     expect(tag.props.style).toEqual(
       expect.arrayContaining([
-        expect.objectContaining({ backgroundColor: NEO_THEME.colors.primary }),
+        expect.objectContaining({ backgroundColor: colors.gray100 }),
       ])
     );
   });
 
-  it('renders different colors from theme', () => {
-    const { getByTestId } = render(<NuviaTag label="Mint" color="#6EE7B7" testID="tag" />);
+  it('renders custom color override', () => {
+    const { getByTestId } = render(
+      <NuviaTag label="Mint" color="#6EE7B7" testID="tag" />
+    );
     const tag = getByTestId('tag');
     expect(tag.props.style).toEqual(
       expect.arrayContaining([
         expect.objectContaining({ backgroundColor: '#6EE7B7' }),
-      ])
-    );
-  });
-
-  it('is always a pill shape', () => {
-    const { getByTestId } = render(<NuviaTag label="Pill" testID="tag" />);
-    const tag = getByTestId('tag');
-    expect(tag.props.style).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({ borderRadius: 9999 }),
       ])
     );
   });

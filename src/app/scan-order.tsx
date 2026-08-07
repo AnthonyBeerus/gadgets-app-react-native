@@ -1,19 +1,21 @@
-import React, { useState, useEffect } from "react";
-import { View, Text, StyleSheet, Button, Alert, ActivityIndicator, TouchableOpacity } from "react-native";
-import { CameraView, CameraType, useCameraPermissions } from "expo-camera";
+import React, { useState } from "react";
+import { View, Text, Button, Alert, ActivityIndicator } from "react-native";
+import { CameraView, useCameraPermissions } from "expo-camera";
 import * as Clipboard from 'expo-clipboard';
 import { NEO_THEME } from "../shared/constants/neobrutalism";
+import { useNeoStyles } from "../shared/hooks/useNeoStyles";
+import { useTheme } from "../shared/providers/theme-provider";
 import { supabase } from "../shared/lib/supabase";
-import { MaterialIcons } from "@expo/vector-icons";
 
 export default function MerchantScanScreen() {
+  const styles = useNeoStyles(createStyles);
+  const { theme } = useTheme();
   const [permission, requestPermission] = useCameraPermissions();
   const [scanned, setScanned] = useState(false);
   const [verifying, setVerifying] = useState(false);
   const [lastScannedData, setLastScannedData] = useState<string | null>(null);
 
   if (!permission) {
-    // Camera permissions are still loading
     return <View />;
   }
 
@@ -29,7 +31,6 @@ export default function MerchantScanScreen() {
   const handleBarCodeScanned = async ({ type, data }: { type: string; data: string }) => {
     if (scanned || verifying) return;
     
-    // Prevent duplicate scans of the same code immediately
     if (data === lastScannedData) {
         return;
     }
@@ -109,7 +110,7 @@ export default function MerchantScanScreen() {
             <Text style={styles.overlayText}>
                 {verifying ? "VERIFYING..." : "Scan Handover Code"}
             </Text>
-            {verifying && <ActivityIndicator size="large" color={NEO_THEME.colors.primary} style={{ marginTop: 20 }} />}
+            {verifying && <ActivityIndicator size="large" color={theme.colors.primary} style={{ marginTop: 20 }} />}
         </View>
       </CameraView>
       
@@ -119,7 +120,6 @@ export default function MerchantScanScreen() {
         </View>
       )}
 
-      {/* Dev Mode: Paste Scan */}
       {!scanned && !verifying && (
          <View style={[styles.buttonContainer, { bottom: 100 }]}>
              <Button title="Paste QR (Dev)" onPress={async () => {
@@ -139,45 +139,47 @@ export default function MerchantScanScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: "center",
-  },
-  message: {
-    textAlign: "center",
-    paddingBottom: 10,
-  },
-  camera: {
-    flex: 1,
-  },
-  overlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  scanBox: {
-    width: 250,
-    height: 250,
-    borderWidth: 2,
-    borderColor: NEO_THEME.colors.primary,
-    backgroundColor: 'transparent',
-    borderRadius: 20,
-  },
-  overlayText: {
-    color: 'white',
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginTop: 20,
-    fontFamily: NEO_THEME.fonts.bold,
-  },
-  buttonContainer: {
-    position: 'absolute',
-    bottom: 50,
-    alignSelf: 'center',
-    backgroundColor: 'white',
-    padding: 10,
-    borderRadius: 8,
-  }
-});
+function createStyles(c: { primary: string; white: string }) {
+  return {
+    container: {
+      flex: 1,
+      justifyContent: "center" as const,
+    },
+    message: {
+      textAlign: "center" as const,
+      paddingBottom: 10,
+    },
+    camera: {
+      flex: 1,
+    },
+    overlay: {
+      flex: 1,
+      backgroundColor: 'rgba(0,0,0,0.5)',
+      justifyContent: 'center' as const,
+      alignItems: 'center' as const,
+    },
+    scanBox: {
+      width: 250,
+      height: 250,
+      borderWidth: 1,
+      borderColor: c.primary,
+      backgroundColor: 'transparent',
+      borderRadius: 20,
+    },
+    overlayText: {
+      color: 'white',
+      fontSize: 18,
+      fontWeight: 'bold' as const,
+      marginTop: 20,
+      fontFamily: NEO_THEME.fonts.bold,
+    },
+    buttonContainer: {
+      position: 'absolute' as const,
+      bottom: 50,
+      alignSelf: 'center' as const,
+      backgroundColor: c.white,
+      padding: 10,
+      borderRadius: 8,
+    },
+  };
+}

@@ -53,7 +53,7 @@ describe('OpenShopScreen', () => {
 
     fireEvent.changeText(getByPlaceholderText("e.g. Mama T's Soul Food"), 'Test Kitchen');
     fireEvent.changeText(getByPlaceholderText('Molapo Crossing, Unit B12'), 'Molapo Crossing');
-    fireEvent.press(getByText('CREATE SHOP'));
+    fireEvent.press(getByText('Create shop'));
 
     await waitFor(() => {
       expect(createMerchantShop).toHaveBeenCalledWith(expect.objectContaining({

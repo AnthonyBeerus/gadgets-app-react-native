@@ -2,6 +2,8 @@ import { Image, Pressable, StyleSheet, Text, View } from "react-native";
 import { Link } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { Tables } from "../shared/types/database.types";
+import { useNeoStyles } from '../shared/hooks/useNeoStyles';
+import { useTheme } from '../shared/providers/theme-provider';
 
 type ShopWithProductCount = Tables<"shops"> & {
   products?: { count: number }[];
@@ -12,6 +14,8 @@ type ShopWithProductCount = Tables<"shops"> & {
 };
 
 export const ShopListItem = ({ shop }: { shop: ShopWithProductCount }) => {
+  const styles = useNeoStyles(createStyles);
+  const { theme } = useTheme();
   const productCount = shop.products?.[0]?.count || 0;
 
   return (
@@ -39,7 +43,7 @@ export const ShopListItem = ({ shop }: { shop: ShopWithProductCount }) => {
             <Text style={styles.shopName} numberOfLines={1}>
               {shop.name}
             </Text>
-            <Ionicons name="chevron-forward" size={20} color="#9C27B0" />
+            <Ionicons name="chevron-forward" size={20} color={theme.colors.primary} />
           </View>
 
           <Text style={styles.shopDescription} numberOfLines={2}>
@@ -49,7 +53,7 @@ export const ShopListItem = ({ shop }: { shop: ShopWithProductCount }) => {
           {/* Footer Row */}
           <View style={styles.footerRow}>
             <View style={styles.productCountContainer}>
-              <Ionicons name="pricetag-outline" size={14} color="#9C27B0" />
+              <Ionicons name="pricetag-outline" size={14} color={theme.colors.primary} />
               <Text style={styles.productCount}>
                 {productCount} {productCount !== 1 ? "products" : "product"}
               </Text>
@@ -62,48 +66,49 @@ export const ShopListItem = ({ shop }: { shop: ShopWithProductCount }) => {
   );
 };
 
-const styles = StyleSheet.create({
+function createStyles(c) {
+  return {
   item: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: c.white,
     marginHorizontal: 20,
     marginVertical: 10,
     borderRadius: 16,
-    overflow: "hidden",
-    elevation: 4,
-    shadowColor: "#000",
+    overflow: "hidden" as const,
+    elevation: 2,
+    shadowColor: c.black,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.08,
     shadowRadius: 8,
   },
   imageWrapper: {
-    width: "100%",
+    width: "100%" as const,
     height: 200,
-    position: "relative",
+    position: "relative" as const,
   },
   shopImage: {
-    width: "100%",
-    height: "100%",
-    resizeMode: "cover",
+    width: "100%" as const,
+    height: "100%" as const,
+    resizeMode: "cover" as const,
   },
   categoryBadge: {
-    position: "absolute",
+    position: "absolute" as const,
     top: 12,
     right: 12,
-    backgroundColor: "rgba(156, 39, 176, 0.95)",
+    backgroundColor: c.primary,
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 20,
     elevation: 2,
-    shadowColor: "#000",
+    shadowColor: c.black,
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.2,
     shadowRadius: 3,
   },
   categoryBadgeText: {
     fontSize: 11,
-    fontWeight: "700",
-    color: "#FFFFFF",
-    textTransform: "uppercase",
+    fontWeight: "700" as const,
+    color: c.white,
+    textTransform: "uppercase" as const,
     letterSpacing: 0.8,
   },
   contentContainer: {
@@ -111,44 +116,45 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   headerRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
+    flexDirection: "row" as const,
+    justifyContent: "space-between" as const,
+    alignItems: "center" as const,
   },
   shopName: {
     flex: 1,
     fontSize: 20,
-    fontWeight: "700",
-    color: "#1A1A1A",
+    fontWeight: "700" as const,
+    color: c.black,
     letterSpacing: -0.3,
   },
   shopDescription: {
     fontSize: 14,
-    color: "#666666",
+    color: c.grey,
     lineHeight: 20,
     letterSpacing: 0.2,
   },
   footerRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
+    flexDirection: "row" as const,
+    justifyContent: "space-between" as const,
+    alignItems: "center" as const,
     paddingTop: 4,
   },
   productCountContainer: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
     gap: 6,
   },
   productCount: {
     fontSize: 13,
-    fontWeight: "600",
-    color: "#9C27B0",
+    fontWeight: "600" as const,
+    color: c.primary,
     letterSpacing: 0.2,
   },
   exploreText: {
     fontSize: 14,
-    fontWeight: "600",
-    color: "#9C27B0",
+    fontWeight: "600" as const,
+    color: c.primary,
     letterSpacing: 0.3,
   },
-});
+  };
+}

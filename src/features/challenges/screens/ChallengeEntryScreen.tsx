@@ -6,6 +6,8 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useToast } from 'react-native-toast-notifications';
 import { NEO_THEME } from '../../../shared/constants/neobrutalism';
+import { useNeoStyles } from '../../../shared/hooks/useNeoStyles';
+import { useTheme } from '../../../shared/providers/theme-provider';
 import { StaticHeader } from '../../../shared/components/layout/StaticHeader';
 import { useChallengeStore } from '../store/challenge-store';
 import { CONSENT_TERMS, tiktokApi, useClaimPurchaseCode, useCreateSubmission, useCreatorAccount, useOpportunityEligibility, useTikTokVideos } from '../api/submissions';
@@ -17,6 +19,8 @@ const REDIRECT_URI = 'muse://tiktok/callback';
 const toBase64Url = (value: string) => value.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/g, '');
 
 export default function ChallengeEntryScreen() {
+  const styles = useNeoStyles(createStyles);
+  const { theme } = useTheme();
   const { id } = useLocalSearchParams();
   const router = useRouter();
   const insets = useSafeAreaInsets();
@@ -124,7 +128,7 @@ export default function ChallengeEntryScreen() {
         <StaticHeader title="SUBMIT TIKTOK POST" onBackPress={() => router.back()} />
         <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
           {loadingChallenge ? (
-            <ActivityIndicator size="large" color={NEO_THEME.colors.primary} />
+            <ActivityIndicator size="large" color={theme.colors.primary} />
           ) : (
             <Text style={styles.body}>Opportunity not found.</Text>
           )}
@@ -160,7 +164,7 @@ export default function ChallengeEntryScreen() {
             <Text style={styles.success}>CONNECTED AS {accountQuery.data.display_name ?? 'TIKTOK CREATOR'}</Text>
           ) : (
             <TouchableOpacity style={styles.primaryButton} disabled={connecting} onPress={connectTikTok}>
-              {connecting ? <ActivityIndicator color={NEO_THEME.colors.white} /> : <Text style={styles.primaryText}>CONNECT TIKTOK</Text>}
+              {connecting ? <ActivityIndicator color={theme.colors.white} /> : <Text style={styles.primaryText}>CONNECT TIKTOK</Text>}
             </TouchableOpacity>
           )}
         </View>
@@ -168,7 +172,7 @@ export default function ChallengeEntryScreen() {
         {accountQuery.data?.connection_status === 'connected' ? (
           <View style={styles.card}>
             <Text style={styles.cardTitle}>2. SELECT YOUR PUBLIC POST</Text>
-            {videosQuery.isLoading ? <ActivityIndicator color={NEO_THEME.colors.primary} /> : null}
+            {videosQuery.isLoading ? <ActivityIndicator color={theme.colors.primary} /> : null}
             {videosQuery.error ? <Text style={styles.error}>{(videosQuery.error as Error).message}</Text> : null}
             {videosQuery.data?.map(video => (
               <TouchableOpacity key={video.id} style={[styles.videoRow, selectedVideo?.id === video.id && styles.selected]}
@@ -204,39 +208,41 @@ export default function ChallengeEntryScreen() {
         </View>
 
         <TouchableOpacity style={[styles.primaryButton, !canSubmit && styles.disabled]} disabled={!canSubmit || submit.isPending} onPress={submitPost}>
-          {submit.isPending ? <ActivityIndicator color={NEO_THEME.colors.white} /> : <Text style={styles.primaryText}>SUBMIT TO MUSE FOR REVIEW</Text>}
+          {submit.isPending ? <ActivityIndicator color={theme.colors.white} /> : <Text style={styles.primaryText}>SUBMIT TO MUSE FOR REVIEW</Text>}
         </TouchableOpacity>
       </ScrollView>
     </View>
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: NEO_THEME.colors.backgroundLight },
+function createStyles(c) {
+  return {
+  container: { flex: 1, backgroundColor: c.backgroundLight },
   content: { padding: 20, gap: 16 },
-  card: { backgroundColor: NEO_THEME.colors.white, borderWidth: NEO_THEME.borders.width, borderColor: NEO_THEME.colors.black, borderRadius: NEO_THEME.borders.radius, padding: 16, gap: 10 },
-  warning: { backgroundColor: NEO_THEME.colors.yellow },
-  eyebrow: { fontFamily: NEO_THEME.fonts.bold, fontSize: 11, color: NEO_THEME.colors.primary },
-  title: { fontFamily: NEO_THEME.fonts.black, fontSize: 22, color: NEO_THEME.colors.black },
-  cardTitle: { fontFamily: NEO_THEME.fonts.black, fontSize: 15, color: NEO_THEME.colors.black },
-  body: { fontFamily: NEO_THEME.fonts.regular, fontSize: 14, lineHeight: 20, color: NEO_THEME.colors.black },
-  success: { fontFamily: NEO_THEME.fonts.bold, color: NEO_THEME.colors.success },
-  error: { fontFamily: NEO_THEME.fonts.bold, color: NEO_THEME.colors.error },
-  primaryButton: { minHeight: 52, alignItems: 'center', justifyContent: 'center', padding: 14, borderRadius: NEO_THEME.borders.radius, borderWidth: NEO_THEME.borders.width, borderColor: NEO_THEME.colors.black, backgroundColor: NEO_THEME.colors.black },
-  primaryText: { fontFamily: NEO_THEME.fonts.black, fontSize: 14, color: NEO_THEME.colors.white },
+  card: { backgroundColor: c.white, borderWidth: 1, borderColor: c.border, borderRadius: NEO_THEME.borders.radius, padding: 16, gap: 10 },
+  warning: { backgroundColor: c.yellow },
+  eyebrow: { fontFamily: NEO_THEME.fonts.bold, fontSize: 11, color: c.primary },
+  title: { fontFamily: NEO_THEME.fonts.black, fontSize: 22, color: c.black },
+  cardTitle: { fontFamily: NEO_THEME.fonts.black, fontSize: 15, color: c.black },
+  body: { fontFamily: NEO_THEME.fonts.regular, fontSize: 14, lineHeight: 20, color: c.black },
+  success: { fontFamily: NEO_THEME.fonts.bold, color: c.success },
+  error: { fontFamily: NEO_THEME.fonts.bold, color: c.error },
+  primaryButton: { minHeight: 52, alignItems: 'center', justifyContent: 'center', padding: 14, borderRadius: NEO_THEME.borders.radius, borderWidth: 1, borderColor: c.border, backgroundColor: c.black },
+  primaryText: { fontFamily: NEO_THEME.fonts.black, fontSize: 14, color: c.white },
   disabled: { opacity: 0.4 },
-  videoRow: { flexDirection: 'row', alignItems: 'center', gap: 12, borderWidth: 2, borderColor: NEO_THEME.colors.black, padding: 12, borderRadius: NEO_THEME.borders.radius },
-  selected: { backgroundColor: NEO_THEME.colors.secondary },
-  videoTitle: { fontFamily: NEO_THEME.fonts.bold, fontSize: 13, color: NEO_THEME.colors.black },
-  videoMeta: { fontFamily: NEO_THEME.fonts.regular, fontSize: 10, color: NEO_THEME.colors.grey },
-  check: { fontFamily: NEO_THEME.fonts.black, fontSize: 10, color: NEO_THEME.colors.black },
-  input: { minHeight: 48, borderWidth: 2, borderColor: NEO_THEME.colors.black, borderRadius: NEO_THEME.borders.radius, paddingHorizontal: 12, fontFamily: NEO_THEME.fonts.regular, color: NEO_THEME.colors.black },
-  secondaryButton: { minHeight: 46, alignItems: 'center', justifyContent: 'center', backgroundColor: NEO_THEME.colors.white, borderWidth: 2, borderColor: NEO_THEME.colors.black, borderRadius: NEO_THEME.borders.radius },
-  secondaryText: { fontFamily: NEO_THEME.fonts.black, fontSize: 12, color: NEO_THEME.colors.black },
-  term: { fontFamily: NEO_THEME.fonts.regular, fontSize: 13, lineHeight: 19, color: NEO_THEME.colors.black },
+  videoRow: { flexDirection: 'row', alignItems: 'center', gap: 12, borderWidth: 1, borderColor: c.border, padding: 12, borderRadius: NEO_THEME.borders.radius },
+  selected: { backgroundColor: c.secondary },
+  videoTitle: { fontFamily: NEO_THEME.fonts.bold, fontSize: 13, color: c.black },
+  videoMeta: { fontFamily: NEO_THEME.fonts.regular, fontSize: 10, color: c.grey },
+  check: { fontFamily: NEO_THEME.fonts.black, fontSize: 10, color: c.black },
+  input: { minHeight: 48, borderWidth: 1, borderColor: c.border, borderRadius: NEO_THEME.borders.radius, paddingHorizontal: 12, fontFamily: NEO_THEME.fonts.regular, color: c.black },
+  secondaryButton: { minHeight: 46, alignItems: 'center', justifyContent: 'center', backgroundColor: c.white, borderWidth: 1, borderColor: c.border, borderRadius: NEO_THEME.borders.radius },
+  secondaryText: { fontFamily: NEO_THEME.fonts.black, fontSize: 12, color: c.black },
+  term: { fontFamily: NEO_THEME.fonts.regular, fontSize: 13, lineHeight: 19, color: c.black },
   consentRow: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingTop: 8 },
-  checkbox: { width: 26, height: 26, alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: NEO_THEME.colors.black, borderRadius: 4 },
-  checkboxChecked: { backgroundColor: NEO_THEME.colors.black },
-  checkboxMark: { color: NEO_THEME.colors.white, fontFamily: NEO_THEME.fonts.black },
-  consentText: { fontFamily: NEO_THEME.fonts.bold, color: NEO_THEME.colors.black },
-});
+  checkbox: { width: 26, height: 26, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: c.border, borderRadius: 4 },
+  checkboxChecked: { backgroundColor: c.black },
+  checkboxMark: { color: c.white, fontFamily: NEO_THEME.fonts.black },
+  consentText: { fontFamily: NEO_THEME.fonts.bold, color: c.black },
+  };
+}

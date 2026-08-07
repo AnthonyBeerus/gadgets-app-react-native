@@ -1,9 +1,7 @@
 import React, { useEffect } from "react";
 import {
   View,
-  Text,
-  StyleSheet,
-  FlatList,
+  Text, FlatList,
   TouchableOpacity,
   TextInput,
   ScrollView,
@@ -17,9 +15,13 @@ import { useShopStore } from "../store/shop-store";
 import { NeoView } from "../shared/components/ui/neo-view";
 import { NeoShopCard } from "./shop/neo-shop-card";
 import { NEO_THEME } from "../shared/constants/neobrutalism";
+import { useNeoStyles } from "../shared/hooks/useNeoStyles";
+import { useTheme } from "../shared/providers/theme-provider";
 
 export default function ShopsScreen() {
   const router = useRouter();
+  const styles = useNeoStyles(createStyles);
+  const { theme } = useTheme();
 
   // Global Zustand store for all shop data and filters
   const {
@@ -78,7 +80,7 @@ export default function ShopsScreen() {
             <Text style={styles.mallSelectorText}>
               {selectedMallData?.name?.toUpperCase() || "MALL OF METROPOLIS"}
             </Text>
-            <Ionicons name="chevron-down" size={24} color={NEO_THEME.colors.black} />
+            <Ionicons name="chevron-down" size={24} color={theme.colors.black} />
           </NeoView>
         </TouchableOpacity>
 
@@ -88,7 +90,7 @@ export default function ShopsScreen() {
             <TextInput
               style={styles.searchInput}
               placeholder="Search for products, brands..."
-              placeholderTextColor={NEO_THEME.colors.grey}
+              placeholderTextColor={theme.colors.grey}
               value={searchQuery}
               onChangeText={setSearchQuery}
             />
@@ -152,7 +154,7 @@ export default function ShopsScreen() {
         {/* Shop List */}
         <View style={styles.listContainer}>
           {loading ? (
-            <ActivityIndicator size="large" color={NEO_THEME.colors.primary} style={{ marginTop: 40 }} />
+            <ActivityIndicator size="large" color={theme.colors.primary} style={{ marginTop: 40 }} />
           ) : (
             <FlatList
               data={shops}
@@ -169,13 +171,14 @@ export default function ShopsScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+function createStyles(c) {
+  return {
   container: {
     flex: 1,
-    backgroundColor: NEO_THEME.colors.backgroundLight,
+    backgroundColor: c.backgroundLight,
   },
   header: {
-    backgroundColor: NEO_THEME.colors.backgroundLight,
+    backgroundColor: c.backgroundLight,
     padding: 16,
     gap: 16,
   },
@@ -190,7 +193,7 @@ const styles = StyleSheet.create({
   mallSelectorText: {
     fontFamily: NEO_THEME.fonts.bold,
     fontSize: 14,
-    color: NEO_THEME.colors.black,
+    color: c.black,
     fontWeight: '700',
   },
   searchContainer: {
@@ -199,9 +202,9 @@ const styles = StyleSheet.create({
   searchWrapper: {
     flexDirection: 'row',
     height: 48,
-    borderWidth: NEO_THEME.borders.width,
-    borderColor: NEO_THEME.colors.black,
-    backgroundColor: NEO_THEME.colors.white,
+    borderWidth: 1,
+    borderColor: c.border,
+    backgroundColor: c.white,
   },
   searchInput: {
     flex: 1,
@@ -209,18 +212,18 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     fontFamily: NEO_THEME.fonts.regular,
     fontSize: 14,
-    color: NEO_THEME.colors.black,
+    color: c.black,
   },
   searchButton: {
-    backgroundColor: NEO_THEME.colors.blue,
+    backgroundColor: c.blue,
     paddingHorizontal: 24,
     justifyContent: 'center',
-    borderLeftWidth: NEO_THEME.borders.width,
-    borderColor: NEO_THEME.colors.black,
+    borderLeftWidth: 1,
+    borderColor: c.border,
   },
   searchButtonText: {
     fontFamily: NEO_THEME.fonts.bold,
-    color: NEO_THEME.colors.white,
+    color: c.white,
     fontSize: 14,
     fontWeight: '700',
   },
@@ -231,8 +234,8 @@ const styles = StyleSheet.create({
     padding: 16,
   },
   heroBorder: {
-    borderWidth: NEO_THEME.borders.width,
-    borderColor: NEO_THEME.colors.black,
+    borderWidth: 1,
+    borderColor: c.border,
   },
   heroImage: {
     width: '100%',
@@ -245,12 +248,12 @@ const styles = StyleSheet.create({
   heroTitle: {
     fontFamily: NEO_THEME.fonts.black,
     fontSize: 28,
-    color: NEO_THEME.colors.white,
-    textShadowColor: NEO_THEME.colors.black,
+    color: c.white,
+    textShadowColor: c.black,
     textShadowOffset: { width: 2, height: 2 },
     textShadowRadius: 0,
     textTransform: 'uppercase',
-    fontWeight: '900',
+    fontWeight: '600',
   },
   pagination: {
     flexDirection: 'row',
@@ -261,12 +264,12 @@ const styles = StyleSheet.create({
   dot: {
     width: 12,
     height: 12,
-    backgroundColor: NEO_THEME.colors.white,
-    borderWidth: NEO_THEME.borders.width,
-    borderColor: NEO_THEME.colors.black,
+    backgroundColor: c.white,
+    borderWidth: 1,
+    borderColor: c.border,
   },
   activeDot: {
-    backgroundColor: NEO_THEME.colors.black,
+    backgroundColor: c.black,
   },
   filtersContainer: {
     paddingHorizontal: 16,
@@ -275,14 +278,14 @@ const styles = StyleSheet.create({
   filterPill: {
     paddingHorizontal: 24,
     paddingVertical: 10,
-    borderWidth: NEO_THEME.borders.width,
-    borderColor: NEO_THEME.colors.black,
+    borderWidth: 1,
+    borderColor: c.border,
   },
   activeFilterPill: {
-    backgroundColor: NEO_THEME.colors.black,
+    backgroundColor: c.black,
   },
   inactiveFilterPill: {
-    backgroundColor: NEO_THEME.colors.white,
+    backgroundColor: c.white,
   },
   filterText: {
     fontFamily: NEO_THEME.fonts.bold,
@@ -290,10 +293,10 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
   activeFilterText: {
-    color: NEO_THEME.colors.white,
+    color: c.white,
   },
   inactiveFilterText: {
-    color: NEO_THEME.colors.black,
+    color: c.black,
   },
   listContainer: {
     padding: 16,
@@ -302,5 +305,5 @@ const styles = StyleSheet.create({
   columnWrapper: {
     justifyContent: 'space-between',
   },
-});
-
+  };
+}

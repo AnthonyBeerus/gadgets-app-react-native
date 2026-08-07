@@ -1,5 +1,6 @@
 import { lightTheme, darkTheme } from '../theme';
 import { NEO_THEME } from '../neobrutalism';
+import { colors } from '../../design-system/tokens';
 
 describe('Theme Configuration', () => {
   describe('Light Theme', () => {
@@ -11,9 +12,10 @@ describe('Theme Configuration', () => {
       expect(lightTheme.colors.primary).toBe(NEO_THEME.colors.primary);
     });
 
-    it('should have correct semantic colors', () => {
-      expect(lightTheme.colors.background).toBe('#FFFFFF');
-      expect(lightTheme.colors.text).toBe('#000000');
+    it('should use quiet commerce canvas and ink', () => {
+      expect(lightTheme.colors.background).toBe(colors.canvas);
+      expect(lightTheme.colors.text).toBe(colors.ink);
+      expect(lightTheme.colors.border).toBe(colors.border);
     });
   });
 
@@ -23,12 +25,14 @@ describe('Theme Configuration', () => {
     });
 
     it('should have correct semantic colors', () => {
-      expect(darkTheme.colors.background).toBe(NEO_THEME.colors.dark);
-      expect(darkTheme.colors.text).toBe('#FFFFFF');
+      expect(darkTheme.colors.background).toBe(colors.darkCanvas);
+      expect(darkTheme.colors.text).toBe(colors.darkInk);
+      expect(darkTheme.colors.white).toBe(colors.darkSurface);
+      expect(darkTheme.colors.black).toBe(colors.darkInk);
     });
 
-    it('should have high contrast border', () => {
-      expect(darkTheme.colors.border).toBe('#E2E8F0');
+    it('should use dark border token', () => {
+      expect(darkTheme.colors.border).toBe(colors.darkBorder);
     });
   });
 });

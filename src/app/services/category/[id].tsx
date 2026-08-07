@@ -11,12 +11,16 @@ import { useLocalSearchParams, router } from "expo-router";
 import { MaterialIcons } from "@expo/vector-icons";
 import { getServicesByCategory } from "../../../shared/api/api";
 import { NEO_THEME } from "../../../shared/constants/neobrutalism";
+import { useNeoStyles } from "../../../shared/hooks/useNeoStyles";
+import { useTheme } from "../../../shared/providers/theme-provider";
 import { ServiceCard } from "../../../features/services/components/ServiceCard";
 
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const CategoryServicesScreen = () => {
   const insets = useSafeAreaInsets();
+  const styles = useNeoStyles(createStyles);
+  const { theme } = useTheme();
   const params = useLocalSearchParams<{
     id: string;
     categoryName: string;
@@ -47,7 +51,7 @@ const CategoryServicesScreen = () => {
       {/* Header */}
       <View style={[styles.header, { paddingTop: insets.top + 16 }]}>
         <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-          <MaterialIcons name="arrow-back" size={24} color={NEO_THEME.colors.black} />
+          <MaterialIcons name="arrow-back" size={24} color={theme.colors.black} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>{params.categoryName?.toUpperCase()}</Text>
         <View style={styles.headerSpacer} />
@@ -55,7 +59,7 @@ const CategoryServicesScreen = () => {
 
       {servicesLoading ? (
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color={NEO_THEME.colors.primary} />
+          <ActivityIndicator size="large" color={theme.colors.primary} />
           <Text style={styles.loadingText}>LOADING SERVICES...</Text>
         </View>
       ) : servicesError ? (
@@ -63,7 +67,7 @@ const CategoryServicesScreen = () => {
           <MaterialIcons
             name="error-outline"
             size={48}
-            color={NEO_THEME.colors.yellow}
+            color={theme.colors.yellow}
           />
           <Text style={styles.errorText}>FAILED TO LOAD SERVICES</Text>
         </View>
@@ -106,24 +110,25 @@ const CategoryServicesScreen = () => {
 
 export default CategoryServicesScreen;
 
-const styles = StyleSheet.create({
+function createStyles(c: { backgroundLight: string; white: string; border: string; black: string; grey: string }) {
+  return {
   container: {
     flex: 1,
-    backgroundColor: NEO_THEME.colors.backgroundLight,
+    backgroundColor: c.backgroundLight,
   },
   header: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
+    justifyContent: "space-between" as const,
     paddingHorizontal: 16,
     paddingBottom: 16,
-    backgroundColor: NEO_THEME.colors.white,
-    borderBottomWidth: NEO_THEME.borders.width,
-    borderBottomColor: NEO_THEME.colors.black,
-    shadowColor: NEO_THEME.colors.black,
+    backgroundColor: c.white,
+    borderBottomWidth: 1,
+    borderBottomColor: c.border,
+    shadowColor: c.black,
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 1,
-    shadowRadius: 0,
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
     elevation: 0,
   },
   backButton: {
@@ -131,8 +136,8 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     fontSize: 18,
-    fontWeight: "900",
-    color: NEO_THEME.colors.black,
+    fontWeight: '600' as const,
+    color: c.black,
     fontFamily: NEO_THEME.fonts.black,
   },
   headerSpacer: {
@@ -145,31 +150,32 @@ const styles = StyleSheet.create({
   },
   loadingContainer: {
     flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
+    justifyContent: "center" as const,
+    alignItems: "center" as const,
     paddingVertical: 50,
   },
   loadingText: {
     fontSize: 16,
-    color: NEO_THEME.colors.grey,
+    color: c.grey,
     marginTop: 12,
-    fontWeight: "700",
+    fontWeight: "700" as const,
     fontFamily: NEO_THEME.fonts.bold,
-    textTransform: "uppercase",
+    textTransform: "uppercase" as const,
   },
   errorContainer: {
     flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
+    justifyContent: "center" as const,
+    alignItems: "center" as const,
     paddingVertical: 50,
   },
   errorText: {
     fontSize: 18,
-    fontWeight: "900",
-    color: NEO_THEME.colors.black,
+    fontWeight: '600' as const,
+    color: c.black,
     marginTop: 12,
-    textAlign: "center",
+    textAlign: "center" as const,
     fontFamily: NEO_THEME.fonts.black,
-    textTransform: "uppercase",
+    textTransform: "uppercase" as const,
   },
-});
+  };
+}

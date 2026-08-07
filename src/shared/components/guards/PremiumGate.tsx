@@ -1,9 +1,11 @@
 import React, { ReactNode } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, TouchableOpacity } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useEntitlements } from '../../hooks/useEntitlements';
 import { NEO_THEME } from '../../constants/neobrutalism';
+import { useNeoStyles } from '../../hooks/useNeoStyles';
+import { useTheme } from '../../providers/theme-provider';
 
 interface PremiumGateProps {
   children: ReactNode;
@@ -18,6 +20,9 @@ interface PremiumGateProps {
 export function PremiumGate({ children, feature = 'this feature', fallback }: PremiumGateProps) {
   const { isMusePro } = useEntitlements();
   const router = useRouter();
+  const styles = useNeoStyles(createStyles);
+  const { theme } = useTheme();
+  const c = theme.colors;
 
   if (isMusePro) {
     return <>{children}</>;
@@ -30,7 +35,7 @@ export function PremiumGate({ children, feature = 'this feature', fallback }: Pr
   return (
     <View style={styles.container}>
       <View style={styles.lockIcon}>
-        <Ionicons name="lock-closed" size={48} color={NEO_THEME.colors.primary} />
+        <Ionicons name="lock-closed" size={48} color={c.primary} />
       </View>
       
       <Text style={styles.title}>MUSE PRO REQUIRED</Text>
@@ -43,66 +48,76 @@ export function PremiumGate({ children, feature = 'this feature', fallback }: Pr
         activeOpacity={0.9}
         onPress={() => router.push('/paywall')}
       >
-        <Ionicons name="star" size={20} color={NEO_THEME.colors.white} />
+        <Ionicons name="star" size={20} color={c.white} />
         <Text style={styles.upgradeText}>UPGRADE TO PRO</Text>
       </TouchableOpacity>
     </View>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 40,
-    backgroundColor: NEO_THEME.colors.backgroundLight,
-  },
-  lockIcon: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    backgroundColor: NEO_THEME.colors.greyLight,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 24,
-    borderWidth: NEO_THEME.borders.width,
-    borderColor: NEO_THEME.colors.black,
-  },
-  title: {
-    fontFamily: NEO_THEME.fonts.black,
-    fontSize: 24,
-    color: NEO_THEME.colors.black,
-    marginBottom: 12,
-    textAlign: 'center',
-  },
-  description: {
-    fontFamily: NEO_THEME.fonts.regular,
-    fontSize: 16,
-    color: NEO_THEME.colors.grey,
-    textAlign: 'center',
-    marginBottom: 32,
-    lineHeight: 24,
-  },
-  upgradeButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: NEO_THEME.colors.primary,
-    paddingHorizontal: 32,
-    paddingVertical: 16,
-    borderRadius: NEO_THEME.borders.radius,
-    borderWidth: NEO_THEME.borders.width,
-    borderColor: NEO_THEME.colors.black,
-    gap: 8,
-    shadowColor: NEO_THEME.colors.grey,
-    shadowOffset: { width: 4, height: 4 },
-    shadowOpacity: 1,
-    shadowRadius: 0,
-    elevation: 4,
-  },
-  upgradeText: {
-    fontFamily: NEO_THEME.fonts.black,
-    fontSize: 16,
-    color: NEO_THEME.colors.white,
-  },
-});
+function createStyles(c: {
+  black: string;
+  white: string;
+  grey: string;
+  greyLight: string;
+  border: string;
+  background: string;
+  primary: string;
+}) {
+  return {
+    container: {
+      flex: 1,
+      justifyContent: 'center' as const,
+      alignItems: 'center' as const,
+      padding: 40,
+      backgroundColor: c.background,
+    },
+    lockIcon: {
+      width: 80,
+      height: 80,
+      borderRadius: 40,
+      backgroundColor: c.greyLight,
+      alignItems: 'center' as const,
+      justifyContent: 'center' as const,
+      marginBottom: 24,
+      borderWidth: 1,
+      borderColor: c.border,
+    },
+    title: {
+      fontFamily: NEO_THEME.fonts.black,
+      fontSize: 24,
+      color: c.black,
+      marginBottom: 12,
+      textAlign: 'center' as const,
+    },
+    description: {
+      fontFamily: NEO_THEME.fonts.regular,
+      fontSize: 16,
+      color: c.grey,
+      textAlign: 'center' as const,
+      marginBottom: 32,
+      lineHeight: 24,
+    },
+    upgradeButton: {
+      flexDirection: 'row' as const,
+      alignItems: 'center' as const,
+      backgroundColor: c.primary,
+      paddingHorizontal: 32,
+      paddingVertical: 16,
+      borderRadius: NEO_THEME.borders.radius,
+      borderWidth: 1,
+      borderColor: c.border,
+      gap: 8,
+      shadowColor: c.grey,
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.08,
+      shadowRadius: 8,
+      elevation: 2,
+    },
+    upgradeText: {
+      fontFamily: NEO_THEME.fonts.black,
+      fontSize: 16,
+      color: c.white,
+    },
+  };
+}

@@ -2,15 +2,14 @@
 import React from "react";
 import {
   View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
+  Text, TouchableOpacity,
   ScrollView,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { BackgroundScene } from '../types/TryOnTypes';
 import { useTryOnStore } from "../store/tryOnStore";
 import { NEO_THEME } from '../../../shared/constants/neobrutalism';
+import { useNeoStyles } from '../../../shared/hooks/useNeoStyles';
 
 const BACKGROUND_OPTIONS = [
   {
@@ -58,6 +57,7 @@ const BACKGROUND_OPTIONS = [
 ];
 
 export default function BackgroundSelector() {
+  const styles = useNeoStyles(createStyles);
   const { background, setBackground } = useTryOnStore();
 
   return (
@@ -102,14 +102,15 @@ export default function BackgroundSelector() {
 }
 
 
-const styles = StyleSheet.create({
+function createStyles(c) {
+  return {
   container: {
     marginBottom: 16,
   },
   title: {
     fontSize: 16,
-    fontWeight: "900",
-    color: NEO_THEME.colors.black,
+    fontWeight: '600',
+    color: c.black,
     marginBottom: 10,
     paddingHorizontal: 4,
     fontFamily: NEO_THEME.fonts.black,
@@ -121,45 +122,46 @@ const styles = StyleSheet.create({
   optionCard: {
     width: 90,
     padding: 12,
-    backgroundColor: NEO_THEME.colors.white,
+    backgroundColor: c.white,
     borderRadius: NEO_THEME.borders.radius,
     alignItems: "center",
-    borderWidth: NEO_THEME.borders.width,
-    borderColor: NEO_THEME.colors.black,
-    shadowColor: NEO_THEME.colors.black,
-    shadowOffset: { width: 3, height: 3 },
-    shadowOpacity: 1,
-    shadowRadius: 0,
+    borderWidth: 1,
+    borderColor: c.border,
+    shadowColor: c.black,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
     elevation: 0,
   },
   selectedCard: {
-    borderColor: NEO_THEME.colors.black,
-    backgroundColor: NEO_THEME.colors.yellow,
+    borderColor: c.border,
+    backgroundColor: c.yellow,
   },
   iconContainer: {
     width: 48,
     height: 48,
     borderRadius: NEO_THEME.borders.radius,
-    backgroundColor: NEO_THEME.colors.backgroundLight,
+    backgroundColor: c.backgroundLight,
     alignItems: "center",
     justifyContent: "center",
     marginBottom: 6,
-    borderWidth: 2,
-    borderColor: NEO_THEME.colors.black,
+    borderWidth: 1,
+    borderColor: c.border,
   },
   selectedIcon: {
-    backgroundColor: NEO_THEME.colors.primary,
+    backgroundColor: c.primary,
   },
   optionLabel: {
     fontSize: 11,
     fontWeight: "700",
-    color: NEO_THEME.colors.black,
+    color: c.black,
     textAlign: "center",
     fontFamily: NEO_THEME.fonts.bold,
   },
   selectedLabel: {
-    color: NEO_THEME.colors.black,
-    fontWeight: "900",
+    color: c.black,
+    fontWeight: '600',
     fontFamily: NEO_THEME.fonts.black,
   },
-});
+  };
+}

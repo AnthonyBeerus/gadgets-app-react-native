@@ -10,8 +10,6 @@
 import React from "react";
 import {
   View,
-  Text,
-  StyleSheet,
   TouchableOpacity,
   ViewStyle,
 } from "react-native";
@@ -29,6 +27,8 @@ import { Ionicons } from "@expo/vector-icons";
 import { NEO_THEME } from "../../constants/neobrutalism";
 import { SCROLL_THRESHOLDS, EASING, DURATION } from "../../constants/animations";
 import { SmallHeaderTitle, LargeHeaderTitle } from "./header-titles";
+import { useNeoStyles } from "../../hooks/useNeoStyles";
+import { useTheme } from "../../providers/theme-provider";
 
 interface AnimatedHeaderLayoutProps {
   children: React.ReactNode;
@@ -55,6 +55,9 @@ export const AnimatedHeaderLayout: React.FC<AnimatedHeaderLayoutProps> = ({
   contentContainerStyle,
   stickyFooter,
 }) => {
+  const styles = useNeoStyles(createStyles);
+  const { theme } = useTheme();
+  const c = theme.colors;
   const { top, bottom } = useSafeAreaInsets();
   const scrollY = useSharedValue(0);
 
@@ -64,7 +67,6 @@ export const AnimatedHeaderLayout: React.FC<AnimatedHeaderLayoutProps> = ({
     },
   });
 
-  // Large title: fades and translates up
   const largeTitleStyle = useAnimatedStyle(() => {
     const opacity = interpolate(
       scrollY.value,
@@ -81,7 +83,6 @@ export const AnimatedHeaderLayout: React.FC<AnimatedHeaderLayoutProps> = ({
     return { opacity, transform: [{ translateY }] };
   });
 
-  // Small header & Background: fades in
   const headerAnimatedStyle = useAnimatedStyle(() => {
     const opacity = interpolate(
       scrollY.value,
@@ -91,8 +92,6 @@ export const AnimatedHeaderLayout: React.FC<AnimatedHeaderLayoutProps> = ({
     );
     return { opacity };
   });
-
-  const headerHeight = 52 + top;
 
   const DefaultSmallTitle = () => (
     <TouchableOpacity 
@@ -116,17 +115,14 @@ export const AnimatedHeaderLayout: React.FC<AnimatedHeaderLayoutProps> = ({
 
   return (
     <View style={styles.container}>
-      {/* Background (Fades in) */}
       <Animated.View style={[styles.headerBackground, headerAnimatedStyle]} />
       
-      {/* Status Bar Spacer */}
       <View style={{ height: top + 10 }} />
 
-      {/* Small Header (Fixed, Fades in) */}
       <Animated.View style={[styles.smallHeader, headerAnimatedStyle]}>
         {onBackPress && (
           <TouchableOpacity onPress={onBackPress} style={styles.backButton}>
-            <Ionicons name="arrow-back" size={24} color={NEO_THEME.colors.black} />
+            <Ionicons name="arrow-back" size={24} color={c.black} />
           </TouchableOpacity>
         )}
         <View style={styles.smallHeaderTitleContainer}>
@@ -139,14 +135,12 @@ export const AnimatedHeaderLayout: React.FC<AnimatedHeaderLayoutProps> = ({
         )}
       </Animated.View>
 
-      {/* Content */}
       <Animated.ScrollView
         onScroll={scrollHandler}
         scrollEventThrottle={16}
         contentContainerStyle={{ paddingTop: 0, paddingBottom: 100 }}
         showsVerticalScrollIndicator={false}
       >
-        {/* Large Header Content */}
         <Animated.View 
           style={[
             styles.largeHeaderContainer, 
@@ -160,7 +154,7 @@ export const AnimatedHeaderLayout: React.FC<AnimatedHeaderLayoutProps> = ({
                 onPress={onBackPress}
                 style={styles.largeBackButton}
               >
-                <Ionicons name="arrow-back" size={24} color={NEO_THEME.colors.black} />
+                <Ionicons name="arrow-back" size={24} color={c.black} />
               </TouchableOpacity>
             </Animated.View>
           )}
@@ -187,7 +181,6 @@ export const AnimatedHeaderLayout: React.FC<AnimatedHeaderLayoutProps> = ({
         {children}
       </Animated.ScrollView>
 
-      {/* Sticky Footer */}
       {stickyFooter && (
         <View style={[styles.stickyFooter, { paddingBottom: bottom || 20 }]}>
           {stickyFooter}
@@ -197,93 +190,97 @@ export const AnimatedHeaderLayout: React.FC<AnimatedHeaderLayoutProps> = ({
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: NEO_THEME.colors.background,
-  },
-  headerBackground: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    height: 100, // Sufficient to cover status bar + small header
-    backgroundColor: NEO_THEME.colors.backgroundLight,
-    borderBottomWidth: NEO_THEME.borders.width,
-    borderColor: NEO_THEME.colors.black,
-    borderBottomLeftRadius: 32,
-    borderBottomRightRadius: 32,
-    zIndex: 10,
-    // Add a slight shadow to the sticky header
-    shadowColor: NEO_THEME.colors.black,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 4,
-  },
-  smallHeader: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    height: 100, // Matches background
-    flexDirection: "row",
-    alignItems: "flex-end",
-    paddingBottom: 16,
-    paddingHorizontal: 16,
-    zIndex: 20,
-  },
-  backButton: {
-    marginRight: 16,
-    marginBottom: 2,
-  },
-  smallHeaderTitleContainer: {
-    flex: 1,
-    justifyContent: "flex-end",
-  },
-  smallHeaderRight: {
-    marginRight: 0,
-    marginBottom: 2,
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  largeHeaderContainer: {
-    // Structural container
-  },
-  largeHeaderRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "flex-start",
-  },
-  largeBackButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    borderWidth: NEO_THEME.borders.width,
-    borderColor: NEO_THEME.colors.black,
-    backgroundColor: NEO_THEME.colors.white,
-    alignItems: "center",
-    justifyContent: "center",
-    marginBottom: 16,
-  },
-  largeTitleContainer: {
-    flex: 1,
-  },
-  largeHeaderRight: {
-    marginLeft: 12,
-    marginTop: 4,
-  },
-  stickyFooter: {
-    position: "absolute",
-    bottom: 0,
-    left: 0,
-    right: 0,
-    backgroundColor: NEO_THEME.colors.backgroundLight,
-    borderTopWidth: NEO_THEME.borders.width,
-    borderColor: NEO_THEME.colors.black,
-    paddingTop: 16,
-    paddingHorizontal: 20,
-    elevation: 10,
-    zIndex: 100,
-  },
-});
+function createStyles(c: {
+  black: string;
+  white: string;
+  background: string;
+  border: string;
+}) {
+  return {
+    container: {
+      flex: 1,
+      backgroundColor: c.background,
+    },
+    headerBackground: {
+      position: "absolute" as const,
+      top: 0,
+      left: 0,
+      right: 0,
+      height: 100,
+      backgroundColor: c.background,
+      borderBottomWidth: 1,
+      borderColor: c.border,
+      borderBottomLeftRadius: 32,
+      borderBottomRightRadius: 32,
+      zIndex: 10,
+      shadowColor: c.black,
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.1,
+      shadowRadius: 8,
+      elevation: 2,
+    },
+    smallHeader: {
+      position: "absolute" as const,
+      top: 0,
+      left: 0,
+      right: 0,
+      height: 100,
+      flexDirection: "row" as const,
+      alignItems: "flex-end" as const,
+      paddingBottom: 16,
+      paddingHorizontal: 16,
+      zIndex: 20,
+    },
+    backButton: {
+      marginRight: 16,
+      marginBottom: 2,
+    },
+    smallHeaderTitleContainer: {
+      flex: 1,
+      justifyContent: "flex-end" as const,
+    },
+    smallHeaderRight: {
+      marginRight: 0,
+      marginBottom: 2,
+      flexDirection: "row" as const,
+      alignItems: "center" as const,
+    },
+    largeHeaderContainer: {},
+    largeHeaderRow: {
+      flexDirection: "row" as const,
+      justifyContent: "space-between" as const,
+      alignItems: "flex-start" as const,
+    },
+    largeBackButton: {
+      width: 40,
+      height: 40,
+      borderRadius: 20,
+      borderWidth: 1,
+      borderColor: c.border,
+      backgroundColor: c.white,
+      alignItems: "center" as const,
+      justifyContent: "center" as const,
+      marginBottom: 16,
+    },
+    largeTitleContainer: {
+      flex: 1,
+    },
+    largeHeaderRight: {
+      marginLeft: 12,
+      marginTop: 4,
+    },
+    stickyFooter: {
+      position: "absolute" as const,
+      bottom: 0,
+      left: 0,
+      right: 0,
+      backgroundColor: c.background,
+      borderTopWidth: 1,
+      borderColor: c.border,
+      paddingTop: 16,
+      paddingHorizontal: 20,
+      elevation: 10,
+      zIndex: 100,
+    },
+  };
+}

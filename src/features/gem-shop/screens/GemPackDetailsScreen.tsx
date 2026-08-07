@@ -1,3 +1,5 @@
+import { useNeoStyles } from '../../../shared/hooks/useNeoStyles';
+import { useTheme } from '../../../shared/providers/theme-provider';
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
@@ -7,6 +9,8 @@ import { StaticHeader } from '../../../shared/components/layout/StaticHeader';
 import { Ionicons } from '@expo/vector-icons';
 
 export default function GemPackDetailsScreen() {
+  const styles = useNeoStyles(createStyles);
+  const { theme } = useTheme();
   const router = useRouter();
   const { id } = useLocalSearchParams();
   const insets = useSafeAreaInsets();
@@ -18,7 +22,7 @@ export default function GemPackDetailsScreen() {
     amount: id === 'gems_100' ? 100 : id === 'gems_500' ? 500 : 1200,
     price: id === 'gems_100' ? 'P10' : id === 'gems_500' ? 'P45' : 'P99',
     name: id === 'gems_100' ? 'Handful of Gems' : id === 'gems_500' ? 'Sack of Gems' : 'Chest of Gems',
-    color: id === 'gems_100' ? NEO_THEME.colors.yellow : id === 'gems_500' ? NEO_THEME.colors.blue : NEO_THEME.colors.primary,
+    color: id === 'gems_100' ? theme.colors.yellow : id === 'gems_500' ? theme.colors.blue : theme.colors.primary,
   };
 
   const handlePurchase = () => {
@@ -38,7 +42,7 @@ export default function GemPackDetailsScreen() {
       <View style={[styles.content, { paddingTop: headerHeight }]}>
         <View style={[styles.card, { backgroundColor: pack.color }]}>
           <View style={styles.iconContainer}>
-            <Ionicons name="diamond" size={64} color={NEO_THEME.colors.black} />
+            <Ionicons name="diamond" size={64} color={theme.colors.black} />
           </View>
           <Text style={styles.amount}>{pack.amount} GEMS</Text>
           <Text style={styles.name}>{pack.name}</Text>
@@ -86,10 +90,11 @@ export default function GemPackDetailsScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+function createStyles(c) {
+  return {
   container: {
     flex: 1,
-    backgroundColor: NEO_THEME.colors.backgroundLight,
+    backgroundColor: c.backgroundLight,
   },
   content: {
     flex: 1,
@@ -99,16 +104,16 @@ const styles = StyleSheet.create({
   card: {
     alignItems: 'center',
     padding: 40,
-    borderWidth: NEO_THEME.borders.width,
-    borderColor: NEO_THEME.colors.black,
+    borderWidth: 1,
+    borderColor: c.border,
     borderRadius: NEO_THEME.borders.radius,
     marginBottom: 40,
     // Hard shadow
-    shadowColor: NEO_THEME.colors.black,
-    shadowOffset: { width: 4, height: 4 },
-    shadowOpacity: 1,
-    shadowRadius: 0,
-    elevation: 4,
+    shadowColor: c.black,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 2,
   },
   iconContainer: {
     width: 100,
@@ -118,27 +123,27 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 20,
-    borderWidth: 3,
-    borderColor: NEO_THEME.colors.black,
+    borderWidth: 1,
+    borderColor: c.border,
   },
   amount: {
     fontFamily: NEO_THEME.fonts.black,
     fontSize: 40,
-    color: NEO_THEME.colors.black,
+    color: c.black,
     marginBottom: 8,
     textAlign: 'center',
   },
   name: {
     fontFamily: NEO_THEME.fonts.bold,
     fontSize: 20,
-    color: NEO_THEME.colors.black,
+    color: c.black,
     opacity: 0.7,
   },
   receiptContainer: {
-    backgroundColor: NEO_THEME.colors.white,
+    backgroundColor: c.white,
     padding: 24,
-    borderWidth: NEO_THEME.borders.width,
-    borderColor: NEO_THEME.colors.black,
+    borderWidth: 1,
+    borderColor: c.border,
     marginBottom: 30,
     // Receipt styling
     borderStyle: 'dashed', // Fallback, though we use solid border usually
@@ -152,21 +157,21 @@ const styles = StyleSheet.create({
   receiptTitle: {
     fontFamily: NEO_THEME.fonts.black,
     fontSize: 18,
-    color: NEO_THEME.colors.black,
+    color: c.black,
     letterSpacing: 1,
   },
   receiptDate: {
     fontFamily: NEO_THEME.fonts.regular,
     fontSize: 12,
-    color: NEO_THEME.colors.grey,
+    color: c.grey,
   },
   divider: {
     height: 1,
-    backgroundColor: NEO_THEME.colors.black,
+    backgroundColor: c.black,
     marginVertical: 16,
     borderStyle: 'dashed',
     borderWidth: 1,
-    borderColor: NEO_THEME.colors.grey,
+    borderColor: c.grey,
   },
   row: {
     flexDirection: 'row',
@@ -176,43 +181,44 @@ const styles = StyleSheet.create({
   label: {
     fontFamily: NEO_THEME.fonts.regular,
     fontSize: 16,
-    color: NEO_THEME.colors.grey,
+    color: c.grey,
   },
   value: {
     fontFamily: NEO_THEME.fonts.bold,
     fontSize: 16,
-    color: NEO_THEME.colors.black,
+    color: c.black,
   },
   totalLabel: {
     fontFamily: NEO_THEME.fonts.black,
     fontSize: 20,
-    color: NEO_THEME.colors.black,
+    color: c.black,
   },
   totalPrice: {
     fontFamily: NEO_THEME.fonts.black,
     fontSize: 24,
-    color: NEO_THEME.colors.primary,
+    color: c.primary,
   },
   confirmButtonDisabled: {
     opacity: 0.7,
-    backgroundColor: NEO_THEME.colors.grey,
+    backgroundColor: c.grey,
   },
   confirmButton: {
-    backgroundColor: NEO_THEME.colors.black,
+    backgroundColor: c.black,
     paddingVertical: 16,
     alignItems: 'center',
-    borderWidth: NEO_THEME.borders.width,
-    borderColor: NEO_THEME.colors.black,
+    borderWidth: 1,
+    borderColor: c.border,
     // Hard shadow
-    shadowColor: NEO_THEME.colors.grey,
-    shadowOffset: { width: 4, height: 4 },
-    shadowOpacity: 1,
-    shadowRadius: 0,
-    elevation: 4,
+    shadowColor: c.grey,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 2,
   },
   confirmText: {
     fontFamily: NEO_THEME.fonts.black,
     fontSize: 18,
-    color: NEO_THEME.colors.white,
+    color: c.white,
   },
-});
+  };
+}

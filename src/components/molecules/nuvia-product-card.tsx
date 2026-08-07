@@ -1,3 +1,5 @@
+import { useNeoStyles } from '../../shared/hooks/useNeoStyles';
+import { useTheme } from '../../shared/providers/theme-provider';
 import React from 'react';
 import { StyleSheet, Image, View, Pressable, ViewStyle } from 'react-native';
 import Animated, { 
@@ -41,6 +43,8 @@ export const NuviaProductCard: React.FC<NuviaProductCardProps> = ({
   style,
   testID,
 }) => {
+  const styles = useNeoStyles(createStyles);
+  const { theme } = useTheme();
   const scale = useSharedValue<number>(SCALE.normal);
 
   const rStyle = useAnimatedStyle(() => ({
@@ -73,7 +77,7 @@ export const NuviaProductCard: React.FC<NuviaProductCardProps> = ({
         {badge && (
           <NuviaTag 
             label={badge} 
-            color={badgeColor || NEO_THEME.colors.secondary} 
+            color={badgeColor || theme.colors.secondary} 
             style={styles.badge} 
           />
         )}
@@ -84,7 +88,7 @@ export const NuviaProductCard: React.FC<NuviaProductCardProps> = ({
         <NuviaText variant="bodyBold" numberOfLines={1}>
           {product.title}
         </NuviaText>
-        <NuviaText variant="h3" color={NEO_THEME.colors.primary}>
+        <NuviaText variant="h3" color={theme.colors.primary}>
           ${product.price}
         </NuviaText>
       </View>
@@ -92,28 +96,29 @@ export const NuviaProductCard: React.FC<NuviaProductCardProps> = ({
   );
 };
 
-const styles = StyleSheet.create({
+function createStyles(c) {
+  return {
   container: {
-    backgroundColor: NEO_THEME.colors.white,
+    backgroundColor: c.white,
     borderRadius: 16,
     padding: 12,
-    borderWidth: 2,
-    borderColor: NEO_THEME.colors.black,
+    borderWidth: 1,
+    borderColor: c.border,
     // Hard Shadow
-    shadowColor: NEO_THEME.colors.black,
-    shadowOffset: { width: 4, height: 4 },
-    shadowOpacity: 1,
-    shadowRadius: 0,
-    elevation: 4,
+    shadowColor: c.black,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 2,
   },
   imageWrapper: {
     width: '100%',
     aspectRatio: 1,
     borderRadius: 12,
-    borderWidth: 1.5,
-    borderColor: NEO_THEME.colors.black,
+    borderWidth: 1,
+    borderColor: c.border,
     overflow: 'hidden',
-    backgroundColor: NEO_THEME.colors.background,
+    backgroundColor: c.background,
     position: 'relative',
   },
   image: {
@@ -129,4 +134,5 @@ const styles = StyleSheet.create({
     marginTop: 12,
     gap: 4,
   },
-});
+  };
+}

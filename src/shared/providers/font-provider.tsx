@@ -7,38 +7,23 @@ import {
   Inter_600SemiBold,
   Inter_700Bold,
 } from '@expo-google-fonts/inter';
-import {
-  Poppins_600SemiBold,
-  Poppins_700Bold,
-  Poppins_900Black,
-} from '@expo-google-fonts/poppins';
 import * as SplashScreen from 'expo-splash-screen';
-import { NEO_THEME } from '../constants/neobrutalism';
+import { useDesignTokens } from '../design-system';
 
-// Prevent splash screen from auto-hiding
 SplashScreen.preventAutoHideAsync();
 
 interface FontProviderProps {
   children: React.ReactNode;
 }
 
-/**
- * Font Provider - Loads Inter (body) and Poppins (display) fonts
- * per Brand Guidelines specification.
- * 
- * @see .agent/skills/brand-guidelines/SKILL.md
- */
+/** Loads Inter for quiet-commerce UI type. */
 export const FontProvider: React.FC<FontProviderProps> = ({ children }) => {
+  const { colors } = useDesignTokens();
   const [fontsLoaded, fontError] = useFonts({
-    // Inter - Body text (UI utility)
     Inter_400Regular,
     Inter_500Medium,
     Inter_600SemiBold,
     Inter_700Bold,
-    // Poppins - Display headlines (Personality areas)
-    Poppins_600SemiBold,
-    Poppins_700Bold,
-    Poppins_900Black,
   });
 
   const onLayoutRootView = useCallback(async () => {
@@ -49,8 +34,8 @@ export const FontProvider: React.FC<FontProviderProps> = ({ children }) => {
 
   if (!fontsLoaded && !fontError) {
     return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color={NEO_THEME.colors.primary} />
+      <View style={[styles.loadingContainer, { backgroundColor: colors.canvas }]}>
+        <ActivityIndicator size="large" color={colors.ink} />
       </View>
     );
   }
@@ -70,7 +55,6 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: NEO_THEME.colors.backgroundLight,
   },
 });
 

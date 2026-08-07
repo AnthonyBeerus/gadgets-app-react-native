@@ -2,11 +2,20 @@ import { Ionicons } from '@expo/vector-icons';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'expo-router';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { AccessibilityInfo, ActivityIndicator, FlatList, Pressable, StyleSheet, View } from 'react-native';
+import { AccessibilityInfo, ActivityIndicator, FlatList, Pressable, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { NuviaText } from '../../../components/atoms/nuvia-text';
-import { NEO_THEME } from '../../../shared/constants/neobrutalism';
+import {
+  Text,
+  Button,
+  useDesignTokens,
+  useThemedStyles,
+  radii,
+  space,
+  fonts,
+  type DesignTokens,
+  type SemanticColors,
+} from '../../../shared/design-system';
 import { useAuth } from '../../../shared/providers/auth-provider';
 import { useShopStore } from '../../../store/shop-store';
 import {
@@ -26,7 +35,88 @@ const SWIPE_DECK_MIN = 5;
 const FEED_LIMIT = 150;
 const AD_EVERY = 5;
 
+function createStyles(c: SemanticColors, tokens: DesignTokens) {
+  return {
+    container: { flex: 1, backgroundColor: c.canvas },
+    locationRow: {
+      flexDirection: 'row' as const,
+      alignItems: 'center' as const,
+      justifyContent: 'space-between' as const,
+      gap: space.xs,
+      paddingHorizontal: space.md,
+      paddingBottom: space.xs,
+    },
+    locationButton: {
+      minHeight: 38,
+      flexShrink: 1,
+      flexDirection: 'row' as const,
+      alignItems: 'center' as const,
+      gap: 5,
+      backgroundColor: c.surface,
+      borderRadius: radii.md,
+      paddingHorizontal: space.sm,
+      ...tokens.elevation.hairline,
+    },
+    undoButton: {
+      minHeight: 38,
+      flexDirection: 'row' as const,
+      alignItems: 'center' as const,
+      gap: 5,
+      backgroundColor: c.accentMuted,
+      borderRadius: radii.md,
+      paddingHorizontal: space.sm,
+      borderWidth: 1,
+      borderColor: c.accent,
+    },
+    deckCount: {
+      minHeight: 38,
+      alignItems: 'center' as const,
+      justifyContent: 'center' as const,
+      backgroundColor: c.surface,
+      borderRadius: radii.md,
+      paddingHorizontal: space.sm,
+      ...tokens.elevation.hairline,
+    },
+    deck: { flex: 1, justifyContent: 'center' as const, paddingHorizontal: space.md, paddingBottom: 6 },
+    listContent: { paddingBottom: 100 },
+    nextCard: {
+      position: 'absolute' as const,
+      borderRadius: radii.lg,
+      borderWidth: 1,
+      borderColor: c.border,
+    },
+    nextCardNear: {
+      left: 20,
+      right: 12,
+      top: 8,
+      bottom: 4,
+      backgroundColor: c.surface,
+      opacity: 0.7,
+    },
+    nextCardDeep: {
+      left: 28,
+      right: 6,
+      top: 16,
+      bottom: -2,
+      backgroundColor: c.gray100,
+      opacity: 0.55,
+    },
+    emptyCard: {
+      alignItems: 'center' as const,
+      justifyContent: 'center' as const,
+      gap: space.md,
+      borderRadius: radii.lg,
+      backgroundColor: c.surface,
+      padding: space.lg,
+      ...tokens.elevation.hairline,
+    },
+    hint: { paddingBottom: 84, color: c.inkMuted, fontFamily: fonts.regular },
+  };
+}
+
 export default function DiscoverScreen() {
+  const styles = useThemedStyles(createStyles);
+  const { colors } = useDesignTokens();
   const router = useRouter();
   const queryClient = useQueryClient();
   const { session } = useAuth();
@@ -167,32 +257,32 @@ export default function DiscoverScreen() {
       <ConsumerUtilityHeader />
       <View style={styles.locationRow}>
         <Pressable accessibilityRole="button" onPress={() => router.push('/mall-selector')} style={styles.locationButton}>
-          <Ionicons name="location" size={16} color={NEO_THEME.colors.black} />
-          <NuviaText variant="caption">{malls.find(mall => mall.id === selectedMall)?.name ?? 'ALL LOCATIONS'}</NuviaText>
-          <Ionicons name="chevron-down" size={14} color={NEO_THEME.colors.black} />
+          <Ionicons name="location" size={16} color={colors.ink} />
+          <Text variant="caption">{malls.find(mall => mall.id === selectedMall)?.name ?? 'All locations'}</Text>
+          <Ionicons name="chevron-down" size={14} color={colors.ink} />
         </Pressable>
         {!useList && history.length > 0 && (
           <Pressable accessibilityRole="button" accessibilityLabel="Undo last swipe" onPress={undo} style={styles.undoButton}>
-            <Ionicons name="arrow-undo" size={17} color={NEO_THEME.colors.black} />
-            <NuviaText variant="caption">UNDO</NuviaText>
+            <Ionicons name="arrow-undo" size={17} color={colors.ink} />
+            <Text variant="caption">Undo</Text>
           </Pressable>
         )}
         {!useList && deck.length > 0 && (
           <View style={styles.deckCount}>
-            <NuviaText variant="caption">{opportunityCount} POTS · {deck.length} LEFT</NuviaText>
+            <Text variant="caption">{opportunityCount} pots · {deck.length} left</Text>
           </View>
         )}
       </View>
 
       <View style={styles.deck}>
         {feed.isLoading ? (
-          <ActivityIndicator size="large" color={NEO_THEME.colors.primary} />
+          <ActivityIndicator size="large" color={colors.ink} />
         ) : feed.error ? (
           <View style={styles.emptyCard}>
-            <Ionicons name="cloud-offline" size={52} color={NEO_THEME.colors.black} />
-            <NuviaText variant="h2" align="center">DISCOVERY TOOK A BREAK</NuviaText>
-            <NuviaText variant="body" align="center">Check your connection and try again.</NuviaText>
-            <Pressable onPress={() => feed.refetch()} style={styles.primaryButton}><NuviaText variant="bodyBold">TRY AGAIN</NuviaText></Pressable>
+            <Ionicons name="cloud-offline" size={48} color={colors.inkMuted} />
+            <Text variant="h2" align="center">Discovery took a break</Text>
+            <Text variant="body" align="center" color={colors.inkMuted}>Check your connection and try again.</Text>
+            <Button onPress={() => feed.refetch()}>Try again</Button>
           </View>
         ) : useList ? (
           <FlatList
@@ -210,12 +300,12 @@ export default function DiscoverScreen() {
             )}
             ListEmptyComponent={
               <View style={styles.emptyCard}>
-                <Ionicons name="sparkles" size={52} color={NEO_THEME.colors.primary} />
-                <NuviaText variant="h1" align="center">NO LIVE CHALLENGES</NuviaText>
-                <NuviaText variant="body" align="center">Browse the marketplace or check saved picks.</NuviaText>
-                <Pressable onPress={() => router.push('/(shop)/marketplace')} style={styles.primaryButton}>
-                  <NuviaText variant="bodyBold">SEARCH MARKETPLACE</NuviaText>
-                </Pressable>
+                <Ionicons name="sparkles" size={48} color={colors.accent} />
+                <Text variant="h1" align="center">No live challenges</Text>
+                <Text variant="body" align="center" color={colors.inkMuted}>Browse the marketplace or check saved picks.</Text>
+                <Button onPress={() => router.push('/(shop)/marketplace')}>
+                  Search marketplace
+                </Button>
               </View>
             }
           />
@@ -243,36 +333,23 @@ export default function DiscoverScreen() {
           </>
         ) : (
           <View style={styles.emptyCard}>
-            <Ionicons name="sparkles" size={52} color={NEO_THEME.colors.primary} />
-            <NuviaText variant="h1" align="center">YOU'RE CAUGHT UP</NuviaText>
-            <NuviaText variant="body" align="center">Passed challenges return after 30 days. Your saved picks are waiting whenever you are ready.</NuviaText>
-            <Pressable onPress={() => router.push('/bag?tab=saved')} style={styles.primaryButton}><NuviaText variant="bodyBold">VIEW SAVED</NuviaText></Pressable>
-            <Pressable onPress={() => router.push('/(shop)/marketplace')} style={styles.secondaryButton}><NuviaText variant="bodyBold">SEARCH MARKETPLACE</NuviaText></Pressable>
+            <Ionicons name="sparkles" size={48} color={colors.accent} />
+            <Text variant="h1" align="center">You&apos;re caught up</Text>
+            <Text variant="body" align="center" color={colors.inkMuted}>
+              Passed challenges return after 30 days. Your saved picks are waiting whenever you are ready.
+            </Text>
+            <Button onPress={() => router.push('/bag?tab=saved')}>View saved</Button>
+            <Button variant="secondary" onPress={() => router.push('/(shop)/marketplace')}>
+              Search marketplace
+            </Button>
           </View>
         )}
       </View>
       {!useList && (
-        <NuviaText variant="caption" align="center" style={styles.hint}>
-          SWIPE LEFT TO PASS · RIGHT TO SAVE · ADS EVERY {AD_EVERY}
-        </NuviaText>
+        <Text variant="caption" align="center" style={styles.hint}>
+          Swipe left to pass · right to save
+        </Text>
       )}
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: NEO_THEME.colors.background },
-  locationRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 8, paddingHorizontal: 16, paddingBottom: 8 },
-  locationButton: { minHeight: 38, flexShrink: 1, flexDirection: 'row', alignItems: 'center', gap: 5, backgroundColor: NEO_THEME.colors.white, borderWidth: 2, borderColor: NEO_THEME.colors.black, borderRadius: 999, paddingHorizontal: 12 },
-  undoButton: { minHeight: 38, flexDirection: 'row', alignItems: 'center', gap: 5, backgroundColor: NEO_THEME.colors.secondary, borderWidth: 2, borderColor: NEO_THEME.colors.black, borderRadius: 999, paddingHorizontal: 12 },
-  deckCount: { minHeight: 38, alignItems: 'center', justifyContent: 'center', backgroundColor: NEO_THEME.colors.white, borderWidth: 2, borderColor: NEO_THEME.colors.black, borderRadius: 999, paddingHorizontal: 12 },
-  deck: { flex: 1, justifyContent: 'center', paddingHorizontal: 16, paddingBottom: 6 },
-  listContent: { paddingBottom: 100 },
-  nextCard: { position: 'absolute', borderRadius: 24, borderWidth: 3, borderColor: NEO_THEME.colors.black },
-  nextCardNear: { left: 22, right: 10, top: 10, bottom: 2, backgroundColor: NEO_THEME.colors.secondary, transform: [{ rotate: '1.8deg' }] },
-  nextCardDeep: { left: 30, right: 4, top: 18, bottom: -4, backgroundColor: NEO_THEME.colors.accent, transform: [{ rotate: '-2.2deg' }] },
-  emptyCard: { alignItems: 'center', justifyContent: 'center', gap: 16, borderWidth: 3, borderColor: NEO_THEME.colors.black, borderRadius: 24, backgroundColor: NEO_THEME.colors.white, padding: 28, boxShadow: '6px 6px 0px #000000' },
-  primaryButton: { minHeight: 48, alignSelf: 'stretch', alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: NEO_THEME.colors.black, borderRadius: 999, backgroundColor: NEO_THEME.colors.primary },
-  secondaryButton: { minHeight: 48, alignSelf: 'stretch', alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: NEO_THEME.colors.black, borderRadius: 999, backgroundColor: NEO_THEME.colors.secondary },
-  hint: { paddingBottom: 84, color: NEO_THEME.colors.grey, fontFamily: NEO_THEME.fonts.bold },
-});

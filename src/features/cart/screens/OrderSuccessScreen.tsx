@@ -1,3 +1,5 @@
+import { useNeoStyles } from '../../../shared/hooks/useNeoStyles';
+import { useTheme } from '../../../shared/providers/theme-provider';
 import React, { useEffect, useState } from "react";
 import { View, StyleSheet, ActivityIndicator } from "react-native";
 import QRCode from "react-native-qrcode-svg";
@@ -11,6 +13,8 @@ import { getMyOrder } from "../../../shared/api/api";
 import { supabase } from "../../../shared/lib/supabase";
 
 export default function OrderSuccessScreen() {
+  const styles = useNeoStyles(createStyles);
+  const { theme } = useTheme();
   const router = useRouter();
   const { orderId } = useLocalSearchParams<{ orderId?: string }>();
   const [showQR, setShowQR] = useState(false);
@@ -63,7 +67,7 @@ export default function OrderSuccessScreen() {
   const renderLargeTitle = () => (
     <View>
       <NuviaText variant="display">ORDER PLACED</NuviaText>
-      <NuviaText variant="label" color={NEO_THEME.colors.grey}>THANK YOU!</NuviaText>
+      <NuviaText variant="label" color={theme.colors.grey}>THANK YOU!</NuviaText>
     </View>
   );
 
@@ -101,22 +105,22 @@ export default function OrderSuccessScreen() {
             ) : (
               <View style={{ height: 200, width: 200, alignItems: 'center', justifyContent: 'center' }}>
                 {isError ? (
-                  <NuviaText variant="body" color={NEO_THEME.colors.grey} style={{ textAlign: 'center' }}>
+                  <NuviaText variant="body" color={theme.colors.grey} style={{ textAlign: 'center' }}>
                     Order placed, but the pickup QR could not be loaded. Open Orders to collect.
                   </NuviaText>
                 ) : (
-                  <ActivityIndicator size="large" color={NEO_THEME.colors.primary} />
+                  <ActivityIndicator size="large" color={theme.colors.primary} />
                 )}
               </View>
             )}
           </View>
 
-          <NuviaText variant="label" color={NEO_THEME.colors.grey}>ORDER ID</NuviaText>
+          <NuviaText variant="label" color={theme.colors.grey}>ORDER ID</NuviaText>
           <NuviaText variant="h3" style={{ marginBottom: 16 }}>
             {isLoading ? '...' : order ? order.id : resolvedOrderId || '...'}
           </NuviaText>
           
-          <NuviaText variant="body" color={NEO_THEME.colors.grey} style={{ textAlign: "center" }}>
+          <NuviaText variant="body" color={theme.colors.grey} style={{ textAlign: "center" }}>
             Show this QR code at the counter for pickup.
           </NuviaText>
 
@@ -125,7 +129,7 @@ export default function OrderSuccessScreen() {
               <NuviaText variant="label" style={{ marginBottom: 8 }}>
                 CREATOR OPPORTUNITY UNLOCKED
               </NuviaText>
-              <NuviaText variant="body" color={NEO_THEME.colors.grey} style={{ textAlign: 'center', marginBottom: 12 }}>
+              <NuviaText variant="body" color={theme.colors.grey} style={{ textAlign: 'center', marginBottom: 12 }}>
                 Post about this purchase on TikTok to earn a {rewardLabel}.
               </NuviaText>
               <NuviaButton onPress={handleCreatorOpportunity} variant="secondary" style={styles.button}>
@@ -136,14 +140,15 @@ export default function OrderSuccessScreen() {
         </View>
 
         <NuviaButton onPress={handleContinueShopping} variant="primary" style={styles.button}>
-          <NuviaText variant="label" color={NEO_THEME.colors.white}>CONTINUE SHOPPING</NuviaText>
+          <NuviaText variant="label" color={theme.colors.white}>CONTINUE SHOPPING</NuviaText>
         </NuviaButton>
       </View>
     </AnimatedHeaderLayout>
   );
 }
 
-const styles = StyleSheet.create({
+function createStyles(c) {
+  return {
   content: {
     flex: 1,
     padding: 20,
@@ -151,25 +156,25 @@ const styles = StyleSheet.create({
   },
   card: {
     width: "100%",
-    backgroundColor: NEO_THEME.colors.white,
-    borderWidth: 2,
-    borderColor: NEO_THEME.colors.black,
+    backgroundColor: c.white,
+    borderWidth: 1,
+    borderColor: c.border,
     borderRadius: 24,
     padding: 24,
     alignItems: "center",
     marginBottom: 24,
-    shadowColor: NEO_THEME.colors.black,
-    shadowOffset: { width: 6, height: 6 },
-    shadowOpacity: 1,
-    shadowRadius: 0,
-    elevation: 4,
+    shadowColor: c.black,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 2,
   },
   qrContainer: {
     padding: 16,
     backgroundColor: "white",
     marginBottom: 24,
-    borderWidth: 1.5,
-    borderColor: NEO_THEME.colors.black,
+    borderWidth: 1,
+    borderColor: c.border,
     borderRadius: 12,
   },
   message: {
@@ -183,8 +188,9 @@ const styles = StyleSheet.create({
     width: "100%",
     marginTop: 20,
     paddingTop: 16,
-    borderTopWidth: 2,
-    borderTopColor: NEO_THEME.colors.black,
+    borderTopWidth: 1,
+    borderTopColor: c.border,
     alignItems: "center",
   },
-});
+  };
+}

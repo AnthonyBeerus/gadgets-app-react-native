@@ -1,9 +1,10 @@
 import React from "react";
-import { View, StyleSheet, TouchableOpacity } from "react-native";
+import { View, TouchableOpacity } from "react-native";
 import { Image } from "expo-image";
 import { Ionicons } from "@expo/vector-icons";
-import { NEO_THEME } from "../../../shared/constants/neobrutalism";
 import { NuviaText } from "../../../components/atoms/nuvia-text";
+import { useNeoStyles } from "../../../shared/hooks/useNeoStyles";
+import { useTheme } from "../../../shared/providers/theme-provider";
 
 
 type CartItemType = {
@@ -22,12 +23,102 @@ type CartItemProps = {
   onDecrement: (id: number) => void;
 };
 
+function createStyles(c: { black: string; white: string; border: string; background: string; primary: string }) {
+  return {
+    container: {
+      marginBottom: 16,
+      backgroundColor: c.white,
+      borderWidth: 1,
+      borderColor: c.border,
+      borderRadius: 16,
+      shadowColor: c.black,
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.08,
+      shadowRadius: 8,
+      elevation: 2,
+      overflow: 'hidden' as const,
+    },
+    content: {
+      flexDirection: "row" as const,
+      padding: 12,
+      gap: 16,
+    },
+    imageContainer: {
+      width: 80,
+      height: 80,
+      borderRadius: 12,
+      borderWidth: 1,
+      borderColor: c.border,
+      backgroundColor: c.background,
+      overflow: 'hidden' as const,
+    },
+    image: {
+      width: "100%" as const,
+      height: "100%" as const,
+    },
+    details: {
+      flex: 1,
+      justifyContent: "space-between" as const,
+      paddingVertical: 2,
+    },
+    actions: {
+      flexDirection: "row" as const,
+      justifyContent: "space-between" as const,
+      alignItems: "center" as const,
+      marginTop: 8,
+    },
+    quantityControl: {
+      flexDirection: "row" as const,
+      alignItems: "center" as const,
+      borderWidth: 1,
+      borderColor: c.border,
+      backgroundColor: c.background,
+      borderRadius: 20,
+      padding: 2,
+    },
+    quantityButton: {
+      width: 32,
+      height: 32,
+      borderRadius: 16,
+      backgroundColor: c.white,
+      alignItems: "center" as const,
+      justifyContent: "center" as const,
+      borderWidth: 1,
+      borderColor: c.border,
+    },
+    quantityValue: {
+      paddingHorizontal: 12,
+      justifyContent: "center" as const,
+      alignItems: 'center' as const,
+      minWidth: 32,
+    },
+    removeButton: {
+      width: 36,
+      height: 36,
+      borderRadius: 18,
+      backgroundColor: c.black,
+      alignItems: "center" as const,
+      justifyContent: "center" as const,
+      borderWidth: 1,
+      borderColor: c.border,
+      shadowColor: c.black,
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.08,
+      shadowRadius: 8,
+    },
+  };
+}
+
 export const CartItem = ({
   item,
   onDecrement,
   onIncrement,
   onRemove,
 }: CartItemProps) => {
+  const styles = useNeoStyles(createStyles);
+  const { theme } = useTheme();
+  const c = theme.colors;
+
   return (
     <View style={styles.container}>
       <View style={styles.content}>
@@ -39,7 +130,7 @@ export const CartItem = ({
           <NuviaText variant="bodyBold" numberOfLines={2}>
             {item.title}
           </NuviaText>
-          <NuviaText variant="h3" color={NEO_THEME.colors.primary}>
+          <NuviaText variant="h3" color={c.primary}>
             ${item.price.toFixed(2)}
           </NuviaText>
 
@@ -49,7 +140,7 @@ export const CartItem = ({
                 onPress={() => onDecrement(item.id)}
                 style={styles.quantityButton}
               >
-                <Ionicons name="remove" size={16} color={NEO_THEME.colors.black} />
+                <Ionicons name="remove" size={16} color={c.black} />
               </TouchableOpacity>
               
               <View style={styles.quantityValue}>
@@ -60,7 +151,7 @@ export const CartItem = ({
                 onPress={() => onIncrement(item.id)}
                 style={styles.quantityButton}
               >
-                <Ionicons name="add" size={16} color={NEO_THEME.colors.black} />
+                <Ionicons name="add" size={16} color={c.black} />
               </TouchableOpacity>
             </View>
 
@@ -68,7 +159,7 @@ export const CartItem = ({
               onPress={() => onRemove(item.id)}
               style={styles.removeButton}
             >
-              <Ionicons name="trash-outline" size={20} color={NEO_THEME.colors.white} />
+              <Ionicons name="trash-outline" size={20} color={c.white} />
             </TouchableOpacity>
           </View>
         </View>
@@ -76,88 +167,3 @@ export const CartItem = ({
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    marginBottom: 16,
-    backgroundColor: NEO_THEME.colors.white,
-    borderWidth: 2,
-    borderColor: NEO_THEME.colors.black,
-    borderRadius: 16,
-    // Softer Nuvia Shadow
-    shadowColor: NEO_THEME.colors.black,
-    shadowOffset: { width: 4, height: 4 },
-    shadowOpacity: 1,
-    shadowRadius: 0,
-    elevation: 4,
-    overflow: 'hidden',
-  },
-  content: {
-    flexDirection: "row",
-    padding: 12,
-    gap: 16,
-  },
-  imageContainer: {
-    width: 80,
-    height: 80,
-    borderRadius: 12,
-    borderWidth: 1.5,
-    borderColor: NEO_THEME.colors.black,
-    backgroundColor: NEO_THEME.colors.background,
-    overflow: 'hidden',
-  },
-  image: {
-    width: "100%",
-    height: "100%",
-  },
-  details: {
-    flex: 1,
-    justifyContent: "space-between",
-    paddingVertical: 2,
-  },
-  actions: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginTop: 8,
-  },
-  quantityControl: {
-    flexDirection: "row",
-    alignItems: "center",
-    borderWidth: 1.5,
-    borderColor: NEO_THEME.colors.black,
-    backgroundColor: NEO_THEME.colors.background,
-    borderRadius: 20, // Pill shape
-    padding: 2,
-  },
-  quantityButton: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: NEO_THEME.colors.white,
-    alignItems: "center",
-    justifyContent: "center",
-    borderWidth: 1,
-    borderColor: NEO_THEME.colors.black,
-  },
-  quantityValue: {
-    paddingHorizontal: 12,
-    justifyContent: "center",
-    alignItems: 'center',
-    minWidth: 32,
-  },
-  removeButton: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: NEO_THEME.colors.black,
-    alignItems: "center",
-    justifyContent: "center",
-    borderWidth: 1.5,
-    borderColor: NEO_THEME.colors.black,
-    shadowColor: NEO_THEME.colors.black,
-    shadowOffset: { width: 2, height: 2 },
-    shadowOpacity: 1,
-    shadowRadius: 0,
-  },
-});

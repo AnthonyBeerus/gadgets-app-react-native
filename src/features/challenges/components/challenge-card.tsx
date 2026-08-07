@@ -1,3 +1,5 @@
+import { useNeoStyles } from '../../../shared/hooks/useNeoStyles';
+import { useTheme } from '../../../shared/providers/theme-provider';
 import React from 'react';
 import { Image } from 'expo-image';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
@@ -11,6 +13,8 @@ interface ChallengeCardProps {
 }
 
 export const ChallengeCard = ({ challenge, onPress }: ChallengeCardProps) => {
+  const styles = useNeoStyles(createStyles);
+  const { theme } = useTheme();
   return (
     <TouchableOpacity 
       style={styles.card} 
@@ -55,19 +59,20 @@ export const ChallengeCard = ({ challenge, onPress }: ChallengeCardProps) => {
   );
 };
 
-const styles = StyleSheet.create({
+function createStyles(c) {
+  return {
   card: {
     height: 280,
     borderRadius: NEO_THEME.borders.radius,
     overflow: 'hidden',
-    backgroundColor: NEO_THEME.colors.backgroundLight,
+    backgroundColor: c.backgroundLight,
     marginBottom: 16,
-    borderWidth: NEO_THEME.borders.width,
-    borderColor: NEO_THEME.colors.black,
-    shadowColor: NEO_THEME.colors.black,
-    shadowOffset: { width: 5, height: 5 },
-    shadowOpacity: 1,
-    shadowRadius: 0,
+    borderWidth: 1,
+    borderColor: c.border,
+    shadowColor: c.black,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
     elevation: 0,
   },
   image: {
@@ -88,18 +93,18 @@ const styles = StyleSheet.create({
   brandContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: NEO_THEME.colors.black,
+    backgroundColor: c.black,
     paddingHorizontal: 10,
     paddingVertical: 6,
     borderRadius: NEO_THEME.borders.radius,
     gap: 4,
-    borderWidth: 2,
-    borderColor: NEO_THEME.colors.white,
+    borderWidth: 1,
+    borderColor: c.white,
   },
   brandName: {
-    color: NEO_THEME.colors.white,
+    color: c.white,
     fontSize: 12,
-    fontWeight: '900',
+    fontWeight: '600',
     fontFamily: NEO_THEME.fonts.black,
     textTransform: 'uppercase',
   },
@@ -110,49 +115,49 @@ const styles = StyleSheet.create({
   premiumBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: NEO_THEME.colors.yellow,
+    backgroundColor: c.yellow,
     paddingHorizontal: 8,
     paddingVertical: 6,
     borderRadius: NEO_THEME.borders.radius,
     gap: 4,
-    borderWidth: 2,
-    borderColor: NEO_THEME.colors.black,
+    borderWidth: 1,
+    borderColor: c.border,
   },
   premiumText: {
-    color: NEO_THEME.colors.black,
+    color: c.black,
     fontSize: 10,
-    fontWeight: '900',
+    fontWeight: '600',
     fontFamily: NEO_THEME.fonts.black,
   },
   feeBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: NEO_THEME.colors.primary,
+    backgroundColor: c.primary,
     paddingHorizontal: 8,
     paddingVertical: 6,
     borderRadius: NEO_THEME.borders.radius,
     gap: 4,
-    borderWidth: 2,
-    borderColor: NEO_THEME.colors.white,
+    borderWidth: 1,
+    borderColor: c.white,
   },
   feeText: {
-    color: NEO_THEME.colors.white,
+    color: c.white,
     fontSize: 10,
-    fontWeight: '900',
+    fontWeight: '600',
     fontFamily: NEO_THEME.fonts.black,
   },
   freeBadge: {
-    backgroundColor: NEO_THEME.colors.success,
+    backgroundColor: c.success,
     paddingHorizontal: 8,
     paddingVertical: 6,
     borderRadius: NEO_THEME.borders.radius,
-    borderWidth: 2,
-    borderColor: NEO_THEME.colors.white,
+    borderWidth: 1,
+    borderColor: c.white,
   },
   freeText: {
-    color: NEO_THEME.colors.white,
+    color: c.white,
     fontSize: 10,
-    fontWeight: '900',
+    fontWeight: '600',
     fontFamily: NEO_THEME.fonts.black,
   },
   metaRow: {
@@ -170,9 +175,9 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   title: {
-    color: NEO_THEME.colors.white,
+    color: c.white,
     fontSize: 24,
-    fontWeight: '900',
+    fontWeight: '600',
     fontFamily: NEO_THEME.fonts.black,
     textShadowColor: 'rgba(0,0,0,0.8)',
     textShadowOffset: { width: 2, height: 2 },
@@ -183,23 +188,23 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
-    backgroundColor: NEO_THEME.colors.yellow,
+    backgroundColor: c.yellow,
     alignSelf: 'flex-start',
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: NEO_THEME.borders.radius,
-    borderWidth: 2,
-    borderColor: NEO_THEME.colors.black,
-    shadowColor: NEO_THEME.colors.black,
-    shadowOffset: { width: 2, height: 2 },
-    shadowOpacity: 1,
-    shadowRadius: 0,
+    borderWidth: 1,
+    borderColor: c.border,
+    shadowColor: c.black,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
     elevation: 0,
   },
   rewardText: {
-    color: NEO_THEME.colors.black,
+    color: c.black,
     fontSize: 14,
-    fontWeight: '900',
+    fontWeight: '600',
     fontFamily: NEO_THEME.fonts.black,
     textTransform: 'uppercase',
   },
@@ -210,7 +215,7 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   deadlineText: {
-    color: NEO_THEME.colors.white,
+    color: c.white,
     fontSize: 12,
     fontWeight: '700',
     fontFamily: NEO_THEME.fonts.bold,
@@ -218,4 +223,5 @@ const styles = StyleSheet.create({
     textShadowOffset: { width: 1, height: 1 },
     textShadowRadius: 0,
   },
-});
+  };
+}

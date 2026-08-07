@@ -1,7 +1,9 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { NEO_THEME } from '../../../shared/constants/neobrutalism';
+import { useNeoStyles } from '../../../shared/hooks/useNeoStyles';
+import { useTheme } from '../../../shared/providers/theme-provider';
 
 type BadgeType = 'premium' | 'fee' | 'status';
 
@@ -12,25 +14,28 @@ interface ChallengeBadgeProps {
 }
 
 export function ChallengeBadge({ type, text, icon }: ChallengeBadgeProps) {
+  const styles = useNeoStyles(createStyles);
+  const { theme } = useTheme();
+
   const getStyles = () => {
     switch (type) {
       case 'premium':
         return {
           container: styles.premiumBadge,
           text: styles.premiumText,
-          iconColor: NEO_THEME.colors.black,
+          iconColor: theme.colors.black,
         };
       case 'fee':
         return {
           container: styles.feeBadge,
           text: styles.feeText,
-          iconColor: NEO_THEME.colors.white,
+          iconColor: theme.colors.white,
         };
-      default: // status
+      default:
         return {
           container: styles.statusBadge,
           text: styles.statusText,
-          iconColor: NEO_THEME.colors.black,
+          iconColor: theme.colors.black,
         };
     }
   };
@@ -45,53 +50,62 @@ export function ChallengeBadge({ type, text, icon }: ChallengeBadgeProps) {
   );
 }
 
-const styles = StyleSheet.create({
-  premiumBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: NEO_THEME.colors.yellow,
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    borderRadius: NEO_THEME.borders.radius,
-    gap: 4,
-    borderWidth: 2,
-    borderColor: NEO_THEME.colors.black,
-  },
-  premiumText: {
-    fontFamily: NEO_THEME.fonts.black,
-    fontSize: 10,
-    color: NEO_THEME.colors.black,
-  },
-  feeBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: NEO_THEME.colors.primary,
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    borderRadius: NEO_THEME.borders.radius,
-    gap: 4,
-    borderWidth: 2,
-    borderColor: NEO_THEME.colors.black,
-  },
-  feeText: {
-    fontFamily: NEO_THEME.fonts.black,
-    fontSize: 10,
-    color: NEO_THEME.colors.white,
-  },
-  statusBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: NEO_THEME.colors.greyLight,
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    borderRadius: NEO_THEME.borders.radius,
-    gap: 4,
-    borderWidth: 2,
-    borderColor: NEO_THEME.colors.black,
-  },
-  statusText: {
-    fontFamily: NEO_THEME.fonts.bold,
-    fontSize: 10,
-    color: NEO_THEME.colors.black,
-  },
-});
+function createStyles(c: {
+  yellow: string;
+  border: string;
+  black: string;
+  primary: string;
+  white: string;
+  greyLight: string;
+}) {
+  return {
+    premiumBadge: {
+      flexDirection: 'row' as const,
+      alignItems: 'center' as const,
+      backgroundColor: c.yellow,
+      paddingHorizontal: 10,
+      paddingVertical: 6,
+      borderRadius: NEO_THEME.borders.radius,
+      gap: 4,
+      borderWidth: 1,
+      borderColor: c.border,
+    },
+    premiumText: {
+      fontFamily: NEO_THEME.fonts.black,
+      fontSize: 10,
+      color: c.black,
+    },
+    feeBadge: {
+      flexDirection: 'row' as const,
+      alignItems: 'center' as const,
+      backgroundColor: c.primary,
+      paddingHorizontal: 10,
+      paddingVertical: 6,
+      borderRadius: NEO_THEME.borders.radius,
+      gap: 4,
+      borderWidth: 1,
+      borderColor: c.border,
+    },
+    feeText: {
+      fontFamily: NEO_THEME.fonts.black,
+      fontSize: 10,
+      color: c.white,
+    },
+    statusBadge: {
+      flexDirection: 'row' as const,
+      alignItems: 'center' as const,
+      backgroundColor: c.greyLight,
+      paddingHorizontal: 10,
+      paddingVertical: 6,
+      borderRadius: NEO_THEME.borders.radius,
+      gap: 4,
+      borderWidth: 1,
+      borderColor: c.border,
+    },
+    statusText: {
+      fontFamily: NEO_THEME.fonts.bold,
+      fontSize: 10,
+      color: c.black,
+    },
+  };
+}

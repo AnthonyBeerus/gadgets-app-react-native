@@ -7,7 +7,15 @@
 - Route structure: `app/[feature]/[route]/index.tsx`
 - Screens: Extracted to `features/[feature]/screens/[Name]Screen.tsx`
 - Deep linking: Configure in `linking.ts`
-- Compose screens from organisms + global components
+- Compose screens from feature components + **shared design system**
+
+### Design system (FDD shared layer)
+- **Home**: `src/shared/design-system/` — tokens, primitives, patterns, `useDesignTokens` / `useThemedStyles`
+- Features import UI only from `shared/design-system` (not per-feature token copies)
+- Domain cards stay in `features/[feature]/components/` and compose shared primitives
+- **Theme**: `ThemeProvider` preference `system | light | dark` → `DesignTokensProvider` remaps semantic colors via `resolveSemanticColors`. Screens must build color StyleSheets with `useThemedStyles` / `useNeoStyles` (module-scope `StyleSheet.create` with static colors will not retheme).
+- **Deprecated**: `shared/constants/neobrutalism` (`NEO_THEME`), `NeoButton` / `NuviaButton` wrappers — do not add new imports; if needed use `useNeoStyles` for remapped `theme.colors`
+- Quiet commerce tokens: light canvas `#FAFAF8` / ink `#111111`; dark canvas `#111111` / surface `#1C1C1A` / ink `#F4F4F2`; accent `#E85D04`; no hard neo shadows
 
 ### Next.js (Future Web)
 - **App Router**: `app/[feature]/[route]/page.tsx`

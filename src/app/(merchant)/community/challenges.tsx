@@ -1,8 +1,10 @@
 import React from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, Image, ActivityIndicator } from 'react-native';
+import { View, Text, FlatList, TouchableOpacity, Image, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
 import { MaterialIcons } from '@expo/vector-icons';
 import { NEO_THEME } from '../../../shared/constants/neobrutalism';
+import { useNeoStyles } from '../../../shared/hooks/useNeoStyles';
+import { useTheme } from '../../../shared/providers/theme-provider';
 import { useAuth } from '../../../shared/providers/auth-provider';
 import { getShopChallenges, deleteChallenge } from '../../../shared/api/api';
 import { Alert } from 'react-native';
@@ -13,6 +15,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useCampaignResults, useSettleCompetitiveChallenge } from '../../../features/challenges/api/submissions';
 
 function OpportunityResults({ challengeId }: { challengeId: number }) {
+  const styles = useNeoStyles(createStyles);
   const { data } = useCampaignResults(challengeId);
   if (!data) return null;
   return (
@@ -28,6 +31,7 @@ function OpportunityResults({ challengeId }: { challengeId: number }) {
 }
 
 function SettleButton({ item }: { item: any }) {
+  const styles = useNeoStyles(createStyles);
   const settle = useSettleCompetitiveChallenge();
   if (item.contest_mode !== 'competitive_pot' || item.settled_at) {
     return item.settled_at ? <Text style={styles.deadline}>Settled {new Date(item.settled_at).toLocaleDateString()}</Text> : null;
@@ -59,6 +63,8 @@ function SettleButton({ item }: { item: any }) {
 
 export default function MerchantChallengesScreen() {
   const router = useRouter();
+  const styles = useNeoStyles(createStyles);
+  const { theme } = useTheme();
   const { merchantShopId } = useAuth();
   const { data: challenges, isLoading, error } = getShopChallenges(merchantShopId || 0);
 
@@ -140,7 +146,7 @@ export default function MerchantChallengesScreen() {
   if (isLoading) {
     return (
         <View style={[styles.center, { paddingTop: headerHeight + tabBarHeight }]}>
-            <ActivityIndicator size="large" color={NEO_THEME.colors.primary} />
+            <ActivityIndicator size="large" color={theme.colors.primary} />
         </View>
     );
   }
@@ -181,68 +187,77 @@ export default function MerchantChallengesScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+function createStyles(c: {
+  backgroundLight: string;
+  primary: string;
+  border: string;
+  black: string;
+  white: string;
+  grey: string;
+  secondary: string;
+}) {
+  return {
   container: {
     flex: 1,
-    backgroundColor: '#F0F0F0',
+    backgroundColor: c.backgroundLight,
   },
   center: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: 'center' as const,
+    alignItems: 'center' as const,
   },
   fabContainer: {
-      position: 'absolute',
+      position: 'absolute' as const,
       right: 20,
       bottom: 20,
       zIndex: 10,
   },
   floatingButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: NEO_THEME.colors.primary,
+    flexDirection: 'row' as const,
+    alignItems: 'center' as const,
+    backgroundColor: c.primary,
     paddingVertical: 12,
     paddingHorizontal: 20,
-    borderRadius: 30, // Pill shape
-    borderWidth: NEO_THEME.borders.width,
-    borderColor: NEO_THEME.colors.black,
-    shadowColor: NEO_THEME.colors.black,
-    shadowOffset: { width: 4, height: 4 },
-    shadowOpacity: 1,
-    shadowRadius: 0,
-    elevation: 5,
+    borderRadius: 30,
+    borderWidth: 1,
+    borderColor: c.border,
+    shadowColor: c.black,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 2,
   },
   floatingButtonText: {
-    color: 'white',
+    color: c.white,
     fontFamily: NEO_THEME.fonts.bold,
     fontSize: 16,
     marginLeft: 8,
   },
   card: {
-    backgroundColor: 'white',
+    backgroundColor: c.white,
     marginBottom: 16,
     borderRadius: NEO_THEME.borders.radius,
-    borderWidth: NEO_THEME.borders.width,
-    borderColor: NEO_THEME.colors.black,
-    overflow: 'hidden',
-    shadowColor: NEO_THEME.colors.black,
-    shadowOffset: { width: 4, height: 4 },
-    shadowOpacity: 1,
-    shadowRadius: 0,
+    borderWidth: 1,
+    borderColor: c.border,
+    overflow: 'hidden' as const,
+    shadowColor: c.black,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
   },
   image: {
-    width: '100%',
+    width: '100%' as const,
     height: 150,
-    borderBottomWidth: NEO_THEME.borders.width,
-    borderColor: NEO_THEME.colors.black,
+    borderBottomWidth: 1,
+    borderColor: c.border,
   },
   cardContent: {
     padding: 16,
   },
   headerRow: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'flex-start',
+      flexDirection: 'row' as const,
+      justifyContent: 'space-between' as const,
+      alignItems: 'flex-start' as const,
       marginBottom: 4,
   },
   title: {
@@ -253,23 +268,23 @@ const styles = StyleSheet.create({
   },
   brand: {
     fontSize: 14,
-    color: NEO_THEME.colors.grey,
+    color: c.grey,
     fontFamily: NEO_THEME.fonts.bold,
     marginBottom: 8,
   },
   reward: {
     fontSize: 16,
     fontFamily: NEO_THEME.fonts.bold,
-    color: NEO_THEME.colors.primary,
+    color: c.primary,
     marginBottom: 4,
   },
   deadline: {
     fontSize: 14,
     fontFamily: NEO_THEME.fonts.regular,
-    color: NEO_THEME.colors.black,
+    color: c.black,
   },
   statsRow: {
-    flexDirection: 'row',
+    flexDirection: 'row' as const,
     marginTop: 12,
     borderTopWidth: 1,
     borderTopColor: '#eee',
@@ -278,16 +293,16 @@ const styles = StyleSheet.create({
   participants: {
     fontSize: 14,
     fontFamily: NEO_THEME.fonts.regular,
-    color: NEO_THEME.colors.grey,
+    color: c.grey,
   },
-  resultsRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 10 },
-  resultText: { fontFamily: NEO_THEME.fonts.bold, fontSize: 10, color: NEO_THEME.colors.black, backgroundColor: NEO_THEME.colors.secondary, paddingHorizontal: 8, paddingVertical: 4, borderWidth: 1, borderColor: NEO_THEME.colors.black },
+  resultsRow: { flexDirection: 'row' as const, flexWrap: 'wrap' as const, gap: 8, marginTop: 10 },
+  resultText: { fontFamily: NEO_THEME.fonts.bold, fontSize: 10, color: c.black, backgroundColor: c.secondary, paddingHorizontal: 8, paddingVertical: 4, borderWidth: 1, borderColor: c.border },
   statusBadge: {
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: NEO_THEME.colors.black,
+    borderColor: c.border,
   },
   statusActive: {
     backgroundColor: '#C6F6D5',
@@ -305,15 +320,15 @@ const styles = StyleSheet.create({
   settleBtn: {
     marginTop: 12,
     minHeight: 42,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: NEO_THEME.colors.primary,
-    borderWidth: 2,
-    borderColor: NEO_THEME.colors.black,
+    alignItems: 'center' as const,
+    justifyContent: 'center' as const,
+    backgroundColor: c.primary,
+    borderWidth: 1,
+    borderColor: c.border,
     borderRadius: 12,
   },
   settleText: {
-    color: NEO_THEME.colors.white,
+    color: c.white,
     fontFamily: NEO_THEME.fonts.bold,
   },
   errorText: {
@@ -322,9 +337,9 @@ const styles = StyleSheet.create({
   },
   emptyState: {
     padding: 40,
-    alignItems: 'center',
-    justifyContent: 'center',
-    height: 300, 
+    alignItems: 'center' as const,
+    justifyContent: 'center' as const,
+    height: 300,
   },
   emptyText: {
     fontFamily: NEO_THEME.fonts.bold,
@@ -333,7 +348,8 @@ const styles = StyleSheet.create({
   },
   emptySubtext: {
     fontFamily: NEO_THEME.fonts.regular,
-    color: NEO_THEME.colors.grey,
-    textAlign: 'center',
+    color: c.grey,
+    textAlign: 'center' as const,
   },
-});
+  };
+}

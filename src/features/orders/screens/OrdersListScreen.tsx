@@ -1,3 +1,5 @@
+import { useNeoStyles } from '../../../shared/hooks/useNeoStyles';
+import { useTheme } from '../../../shared/providers/theme-provider';
 import React from 'react';
 import {
   ActivityIndicator,
@@ -18,36 +20,37 @@ import { NEO_THEME } from '../../../shared/constants/neobrutalism';
 import { NeoView } from '../../../shared/components/ui/neo-view';
 import { HeaderRightGroup } from '../../../shared/components/ui/header-right-group';
 
-const renderItem = (item: any) => (
-  <Link href={`/orders/${item.slug}`} asChild key={item.id}>
-    <Pressable>
-      <NeoView style={styles.orderContainer} containerStyle={styles.neoContainer}>
-        <View style={styles.orderContent}>
-          <View style={styles.orderDetailsContainer}>
-            <Text style={styles.orderItem}>Order {formatOrderId(item.slug)}</Text>
-            <Text style={styles.orderDetails}>{item.description}</Text>
-            <Text style={styles.orderDate}>
-              {format(new Date(item.created_at), 'MMM dd, yyyy')}
-            </Text>
-          </View>
-          <View
-            style={[styles.statusBadge, styles[`statusBadge_${item.status}`]]}
-          >
-            <Text style={styles.statusText}>{item.status.toUpperCase()}</Text>
-          </View>
-        </View>
-      </NeoView>
-    </Pressable>
-  </Link>
-);
-
-
 // Fix for missing types in DB schema and FlashList
 type OrderWithExtras = Tables<'order'> & { slug: string; description: string };
 const FlashListFixed = FlashList as unknown as <T>(props: React.ComponentProps<typeof FlashList<T>> & { estimatedItemSize: number }) => React.ReactElement;
 
 const OrdersListScreen = () => {
+  const styles = useNeoStyles(createStyles);
+  const { theme } = useTheme();
   const { data: orders, error, isLoading } = getMyOrders();
+
+  const renderItem = (item: OrderWithExtras) => (
+    <Link href={`/orders/${item.slug}`} asChild key={item.id}>
+      <Pressable>
+        <NeoView style={styles.orderContainer} containerStyle={styles.neoContainer}>
+          <View style={styles.orderContent}>
+            <View style={styles.orderDetailsContainer}>
+              <Text style={styles.orderItem}>Order {formatOrderId(item.slug)}</Text>
+              <Text style={styles.orderDetails}>{item.description}</Text>
+              <Text style={styles.orderDate}>
+                {format(new Date(item.created_at), 'MMM dd, yyyy')}
+              </Text>
+            </View>
+            <View
+              style={[styles.statusBadge, styles[`statusBadge_${item.status}`]]}
+            >
+              <Text style={styles.statusText}>{item.status.toUpperCase()}</Text>
+            </View>
+          </View>
+        </NeoView>
+      </Pressable>
+    </Link>
+  );
 
   const renderSmallTitle = () => (
     <Text style={styles.smallHeaderTitle}>My Orders</Text>
@@ -60,7 +63,7 @@ const OrdersListScreen = () => {
     </View>
   );
 
-  if (isLoading) return <ActivityIndicator size="large" color={NEO_THEME.colors.primary} style={{ marginTop: 40 }} />;
+  if (isLoading) return <ActivityIndicator size="large" color={theme.colors.primary} style={{ marginTop: 40 }} />;
 
   if (error) return <Text style={styles.errorText}>Error: {error?.message}</Text>;
 
@@ -97,27 +100,28 @@ const OrdersListScreen = () => {
 
 export default OrdersListScreen;
 
-const styles: { [key: string]: any } = StyleSheet.create({
+function createStyles(c) {
+  return {
   content: {
     flex: 1,
     paddingBottom: 40,
   },
   smallHeaderTitle: {
     fontSize: 16,
-    fontWeight: "900",
-    color: NEO_THEME.colors.black,
+    fontWeight: '600',
+    color: c.black,
     fontFamily: NEO_THEME.fonts.bold,
   },
   largeHeaderTitle: {
     fontSize: 32,
-    fontWeight: '900',
-    color: NEO_THEME.colors.black,
+    fontWeight: '600',
+    color: c.black,
     fontFamily: NEO_THEME.fonts.bold,
     letterSpacing: -1,
   },
   largeHeaderSubtitle: {
     fontSize: 14,
-    color: NEO_THEME.colors.grey,
+    color: c.grey,
     marginTop: 4,
     fontWeight: '700',
     fontFamily: NEO_THEME.fonts.bold,
@@ -126,7 +130,7 @@ const styles: { [key: string]: any } = StyleSheet.create({
     padding: 16,
   },
   orderContainer: {
-    backgroundColor: NEO_THEME.colors.white,
+    backgroundColor: c.white,
     padding: 16,
     borderRadius: 16, // Rounded
   },
@@ -145,19 +149,19 @@ const styles: { [key: string]: any } = StyleSheet.create({
   },
   orderItem: {
     fontSize: 18,
-    fontWeight: '900',
-    color: NEO_THEME.colors.black,
+    fontWeight: '600',
+    color: c.black,
     fontFamily: NEO_THEME.fonts.bold,
     marginBottom: 4,
   },
   orderDetails: {
     fontSize: 14,
-    color: NEO_THEME.colors.grey,
+    color: c.grey,
     marginBottom: 4,
   },
   orderDate: {
     fontSize: 12,
-    color: NEO_THEME.colors.black,
+    color: c.black,
     fontWeight: '700',
   },
   statusBadge: {
@@ -165,23 +169,23 @@ const styles: { [key: string]: any } = StyleSheet.create({
     paddingHorizontal: 12,
     borderRadius: 20, // Pill
     alignSelf: 'flex-start',
-    borderWidth: NEO_THEME.borders.width,
-    borderColor: NEO_THEME.colors.black,
+    borderWidth: 1,
+    borderColor: c.border,
   },
   statusText: {
     fontSize: 12,
-    fontWeight: '900',
-    color: NEO_THEME.colors.black,
+    fontWeight: '600',
+    color: c.black,
     fontFamily: NEO_THEME.fonts.bold,
   },
   statusBadge_Pending: {
-    backgroundColor: NEO_THEME.colors.yellow,
+    backgroundColor: c.yellow,
   },
   statusBadge_Completed: {
     backgroundColor: '#4caf50', 
   },
   statusBadge_Shipped: {
-    backgroundColor: NEO_THEME.colors.blue,
+    backgroundColor: c.blue,
   },
   statusBadge_InTransit: {
     backgroundColor: '#ff9800', 
@@ -192,15 +196,15 @@ const styles: { [key: string]: any } = StyleSheet.create({
   },
   emptyTitle: {
     fontSize: 20,
-    fontWeight: "900",
-    color: NEO_THEME.colors.black,
+    fontWeight: '600',
+    color: c.black,
     marginTop: 16,
     marginBottom: 8,
     fontFamily: NEO_THEME.fonts.bold,
   },
   emptyMessage: {
     fontSize: 16,
-    color: NEO_THEME.colors.grey,
+    color: c.grey,
     textAlign: "center",
   },
   errorText: {
@@ -208,4 +212,5 @@ const styles: { [key: string]: any } = StyleSheet.create({
     textAlign: 'center',
     marginTop: 20,
   }
-});
+  };
+}

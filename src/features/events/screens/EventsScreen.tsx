@@ -1,3 +1,5 @@
+import { useNeoStyles } from '../../../shared/hooks/useNeoStyles';
+import { useTheme } from '../../../shared/providers/theme-provider';
 import React, { useState, useEffect } from "react";
 import {
   View,
@@ -21,6 +23,8 @@ import { useGemStore } from "../../gems/store/gem-store";
 import { HeaderRightGroup } from "../../../shared/components/ui/header-right-group";
 
 export default function EventsScreen() {
+  const styles = useNeoStyles(createStyles);
+  const { theme } = useTheme();
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
@@ -103,7 +107,7 @@ export default function EventsScreen() {
           <MaterialIcons
             name="event"
             size={24}
-            color={NEO_THEME.colors.primary}
+            color={theme.colors.primary}
             style={styles.statsIcon}
           />
           <View>
@@ -116,7 +120,7 @@ export default function EventsScreen() {
           <MaterialIcons
             name="confirmation-number"
             size={24}
-            color={NEO_THEME.colors.yellow}
+            color={theme.colors.yellow}
             style={styles.statsIcon}
           />
           <View>
@@ -187,7 +191,7 @@ export default function EventsScreen() {
               ListHeaderComponent={renderHeader}
               ListEmptyComponent={
                 <View style={styles.emptyContainer}>
-                  <MaterialIcons name="event-busy" size={64} color={NEO_THEME.colors.grey} />
+                  <MaterialIcons name="event-busy" size={64} color={theme.colors.grey} />
                   <Text style={styles.emptyTitle}>NO EVENTS FOUND</Text>
                   <Text style={styles.emptyMessage}>
                     {error ? error : `No events available in the ${selectedCategory.toLowerCase()} category at the moment.`}
@@ -201,35 +205,36 @@ export default function EventsScreen() {
       
       {checkingIn && (
         <View style={[StyleSheet.absoluteFill, { backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', alignItems: 'center', zIndex: 1000 }]}>
-          <ActivityIndicator size="large" color={NEO_THEME.colors.white} />
+          <ActivityIndicator size="large" color={theme.colors.white} />
         </View>
       )}
     </AnimatedHeaderLayout>
   );
 }
 
-const styles = StyleSheet.create({
+function createStyles(c) {
+  return {
   content: {
     flex: 1,
   },
   smallHeaderTitle: {
     fontSize: 16,
-    fontWeight: "900",
-    color: NEO_THEME.colors.black,
+    fontWeight: '600',
+    color: c.black,
     fontFamily: NEO_THEME.fonts.black,
     textTransform: "uppercase",
   },
   largeHeaderTitle: {
     fontSize: 28,
-    fontWeight: "900",
-    color: NEO_THEME.colors.black,
+    fontWeight: '600',
+    color: c.black,
     marginBottom: 4,
     fontFamily: NEO_THEME.fonts.black,
     textTransform: "uppercase",
   },
   largeHeaderSubtitle: {
     fontSize: 16,
-    color: NEO_THEME.colors.grey,
+    color: c.grey,
   },
   statsContainer: {
     flexDirection: "row",
@@ -240,17 +245,17 @@ const styles = StyleSheet.create({
   },
   statsCard: {
     flex: 1,
-    backgroundColor: NEO_THEME.colors.white,
+    backgroundColor: c.white,
     padding: 16,
     borderRadius: NEO_THEME.borders.radius,
     flexDirection: "row",
     alignItems: "center",
-    borderWidth: NEO_THEME.borders.width,
-    borderColor: NEO_THEME.colors.black,
-    shadowColor: NEO_THEME.colors.black,
-    shadowOffset: { width: 4, height: 4 },
-    shadowOpacity: 1,
-    shadowRadius: 0,
+    borderWidth: 1,
+    borderColor: c.border,
+    shadowColor: c.black,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
     elevation: 0,
   },
   statsIcon: {
@@ -258,13 +263,13 @@ const styles = StyleSheet.create({
   },
   statsNumber: {
     fontSize: 24,
-    fontWeight: "900",
-    color: NEO_THEME.colors.black,
+    fontWeight: '600',
+    color: c.black,
     fontFamily: NEO_THEME.fonts.black,
   },
   statsLabel: {
     fontSize: 11,
-    color: NEO_THEME.colors.black,
+    color: c.black,
     marginTop: 2,
     fontWeight: "700",
     fontFamily: NEO_THEME.fonts.bold,
@@ -281,28 +286,28 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: NEO_THEME.borders.radius,
-    backgroundColor: NEO_THEME.colors.white,
-    borderWidth: NEO_THEME.borders.width,
-    borderColor: NEO_THEME.colors.black,
-    shadowColor: NEO_THEME.colors.black,
-    shadowOffset: { width: 2, height: 2 },
-    shadowOpacity: 1,
-    shadowRadius: 0,
+    backgroundColor: c.white,
+    borderWidth: 1,
+    borderColor: c.border,
+    shadowColor: c.black,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
     elevation: 0,
   },
   activeCategoryButton: {
-    backgroundColor: NEO_THEME.colors.primary,
-    borderColor: NEO_THEME.colors.black,
+    backgroundColor: c.primary,
+    borderColor: c.border,
   },
   categoryButtonText: {
     fontSize: 14,
     fontWeight: "700",
-    color: NEO_THEME.colors.black,
+    color: c.black,
     fontFamily: NEO_THEME.fonts.bold,
   },
   activeCategoryText: {
-    color: NEO_THEME.colors.white,
-    fontWeight: "900",
+    color: c.white,
+    fontWeight: '600',
     fontFamily: NEO_THEME.fonts.black,
   },
   eventsSection: {
@@ -315,8 +320,8 @@ const styles = StyleSheet.create({
   },
   emptyTitle: {
     fontSize: 20,
-    fontWeight: "900",
-    color: NEO_THEME.colors.black,
+    fontWeight: '600',
+    color: c.black,
     marginTop: 16,
     marginBottom: 8,
     fontFamily: NEO_THEME.fonts.black,
@@ -324,8 +329,9 @@ const styles = StyleSheet.create({
   },
   emptyMessage: {
     fontSize: 16,
-    color: NEO_THEME.colors.grey,
+    color: c.grey,
     textAlign: "center",
     lineHeight: 22,
   },
-});
+  };
+}

@@ -1,3 +1,5 @@
+import { useNeoStyles } from '../../../shared/hooks/useNeoStyles';
+import { useTheme } from '../../../shared/providers/theme-provider';
 import React, { useEffect, useState, useCallback } from 'react';
 import { View, Text, ScrollView, StyleSheet, TouchableOpacity, Alert, RefreshControl, ActivityIndicator } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -12,12 +14,14 @@ import { initializeGemsForTesting } from '../../gems/api/test-gems';
 
 // Fallback packs if RevenueCat offerings are not configured
 const FALLBACK_PACKS = [
-  { id: 'gems_100', amount: 100, price: 'P10', name: 'Handful of Gems', color: NEO_THEME.colors.yellow },
-  { id: 'gems_500', amount: 500, price: 'P45', name: 'Sack of Gems', color: NEO_THEME.colors.blue },
-  { id: 'gems_1200', amount: 1200, price: 'P99', name: 'Chest of Gems', color: NEO_THEME.colors.primary },
+  { id: 'gems_100', amount: 100, price: 'P10', name: 'Handful of Gems', color: theme.colors.yellow },
+  { id: 'gems_500', amount: 500, price: 'P45', name: 'Sack of Gems', color: theme.colors.blue },
+  { id: 'gems_1200', amount: 1200, price: 'P99', name: 'Chest of Gems', color: theme.colors.primary },
 ];
 
 export default function GemShopScreen() {
+  const styles = useNeoStyles(createStyles);
+  const { theme } = useTheme();
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const headerHeight = insets.top + 60; // Approximate header height
@@ -114,7 +118,7 @@ export default function GemShopScreen() {
 
   // Helper to get color for pack
   const getPackColor = (index: number) => {
-    const colors = [NEO_THEME.colors.yellow, NEO_THEME.colors.blue, NEO_THEME.colors.primary];
+    const colors = [theme.colors.yellow, theme.colors.blue, theme.colors.primary];
     return colors[index % colors.length];
   };
 
@@ -128,7 +132,7 @@ export default function GemShopScreen() {
           { paddingTop: headerHeight + 20, paddingBottom: insets.bottom + 20 }
         ]}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={NEO_THEME.colors.black} />
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={theme.colors.black} />
         }
       >
         
@@ -136,7 +140,7 @@ export default function GemShopScreen() {
         <View style={styles.balanceCard}>
           <Text style={styles.balanceLabel}>YOUR BALANCE</Text>
           <View style={styles.balanceRow}>
-            <Ionicons name="diamond" size={32} color={NEO_THEME.colors.primary} />
+            <Ionicons name="diamond" size={32} color={theme.colors.primary} />
             <Text style={styles.balanceAmount}>{loading ? '...' : balance}</Text>
           </View>
           
@@ -198,7 +202,7 @@ export default function GemShopScreen() {
                   disabled={purchasing}
                 >
                   <View style={styles.packIconContainer}>
-                    <Ionicons name="diamond-outline" size={40} color={NEO_THEME.colors.black} />
+                    <Ionicons name="diamond-outline" size={40} color={theme.colors.black} />
                   </View>
                   <View style={styles.packInfo}>
                     <Text style={styles.packAmount}>{pack.product.title}</Text>
@@ -219,7 +223,7 @@ export default function GemShopScreen() {
                   activeOpacity={0.8}
                 >
                   <View style={styles.packIconContainer}>
-                    <Ionicons name="diamond-outline" size={40} color={NEO_THEME.colors.black} />
+                    <Ionicons name="diamond-outline" size={40} color={theme.colors.black} />
                   </View>
                   <View style={styles.packInfo}>
                     <Text style={styles.packAmount}>{pack.amount}</Text>
@@ -238,17 +242,18 @@ export default function GemShopScreen() {
       
       {purchasing && (
         <View style={[StyleSheet.absoluteFill, { backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', alignItems: 'center' }]}>
-          <ActivityIndicator size="large" color={NEO_THEME.colors.white} />
+          <ActivityIndicator size="large" color={theme.colors.white} />
         </View>
       )}
     </View>
   );
 }
 
-const styles = StyleSheet.create({
+function createStyles(c) {
+  return {
   container: {
     flex: 1,
-    backgroundColor: NEO_THEME.colors.backgroundLight,
+    backgroundColor: c.backgroundLight,
   },
   content: {
     padding: 20,
@@ -256,24 +261,24 @@ const styles = StyleSheet.create({
   },
   // Balance
   balanceCard: {
-    backgroundColor: NEO_THEME.colors.white,
+    backgroundColor: c.white,
     padding: 20,
-    borderWidth: NEO_THEME.borders.width,
-    borderColor: NEO_THEME.colors.black,
+    borderWidth: 1,
+    borderColor: c.border,
     borderRadius: NEO_THEME.borders.radius,
     alignItems: 'center',
     marginBottom: 30,
     // Hard shadow
-    shadowColor: NEO_THEME.colors.black,
-    shadowOffset: { width: 4, height: 4 },
-    shadowOpacity: 1,
-    shadowRadius: 0,
-    elevation: 4,
+    shadowColor: c.black,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 2,
   },
   balanceLabel: {
     fontFamily: NEO_THEME.fonts.bold,
     fontSize: 14,
-    color: NEO_THEME.colors.grey,
+    color: c.grey,
     marginBottom: 8,
   },
   balanceRow: {
@@ -284,24 +289,24 @@ const styles = StyleSheet.create({
   balanceAmount: {
     fontFamily: NEO_THEME.fonts.black,
     fontSize: 48,
-    color: NEO_THEME.colors.black,
+    color: c.black,
   },
   testButton: {
     marginTop: 16,
-    backgroundColor: NEO_THEME.colors.yellow,
+    backgroundColor: c.yellow,
     paddingHorizontal: 16,
     paddingVertical: 8,
-    borderWidth: 2,
-    borderColor: NEO_THEME.colors.black,
-    shadowColor: NEO_THEME.colors.black,
-    shadowOffset: { width: 2, height: 2 },
-    shadowOpacity: 1,
-    shadowRadius: 0,
+    borderWidth: 1,
+    borderColor: c.border,
+    shadowColor: c.black,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
   },
   testButtonText: {
     fontFamily: NEO_THEME.fonts.bold,
     fontSize: 12,
-    color: NEO_THEME.colors.black,
+    color: c.black,
   },
   // Sections
   section: {
@@ -311,22 +316,22 @@ const styles = StyleSheet.create({
     fontFamily: NEO_THEME.fonts.black,
     fontSize: 24,
     marginBottom: 16,
-    color: NEO_THEME.colors.black,
+    color: c.black,
     textTransform: 'uppercase',
   },
   // Subscription
   subscriptionCard: {
-    backgroundColor: NEO_THEME.colors.black,
+    backgroundColor: c.black,
     padding: 20,
-    borderWidth: NEO_THEME.borders.width,
-    borderColor: NEO_THEME.colors.black,
+    borderWidth: 1,
+    borderColor: c.border,
     borderRadius: NEO_THEME.borders.radius,
     // Hard shadow
-    shadowColor: NEO_THEME.colors.grey,
-    shadowOffset: { width: 4, height: 4 },
-    shadowOpacity: 1,
-    shadowRadius: 0,
-    elevation: 4,
+    shadowColor: c.grey,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 2,
   },
   subHeader: {
     flexDirection: 'row',
@@ -337,12 +342,12 @@ const styles = StyleSheet.create({
   subTitle: {
     fontFamily: NEO_THEME.fonts.black,
     fontSize: 24,
-    color: NEO_THEME.colors.white,
+    color: c.white,
   },
   subDescription: {
     fontFamily: NEO_THEME.fonts.regular,
     fontSize: 14,
-    color: NEO_THEME.colors.white,
+    color: c.white,
     marginBottom: 20,
     lineHeight: 20,
   },
@@ -354,19 +359,19 @@ const styles = StyleSheet.create({
   subPrice: {
     fontFamily: NEO_THEME.fonts.bold,
     fontSize: 20,
-    color: NEO_THEME.colors.yellow,
+    color: c.yellow,
   },
   buyButton: {
-    backgroundColor: NEO_THEME.colors.white,
+    backgroundColor: c.white,
     paddingHorizontal: 20,
     paddingVertical: 10,
-    borderWidth: 2,
-    borderColor: NEO_THEME.colors.white,
+    borderWidth: 1,
+    borderColor: c.white,
   },
   buyButtonText: {
     fontFamily: NEO_THEME.fonts.black,
     fontSize: 14,
-    color: NEO_THEME.colors.black,
+    color: c.black,
   },
   // Packs
   packsGrid: {
@@ -376,15 +381,15 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     padding: 16,
-    borderWidth: NEO_THEME.borders.width,
-    borderColor: NEO_THEME.colors.black,
+    borderWidth: 1,
+    borderColor: c.border,
     borderRadius: NEO_THEME.borders.radius,
     // Hard shadow
-    shadowColor: NEO_THEME.colors.black,
-    shadowOffset: { width: 4, height: 4 },
-    shadowOpacity: 1,
-    shadowRadius: 0,
-    elevation: 4,
+    shadowColor: c.black,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 2,
   },
   packInfo: {
     flex: 1,
@@ -398,29 +403,30 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: 16,
-    borderWidth: 2,
-    borderColor: NEO_THEME.colors.black,
+    borderWidth: 1,
+    borderColor: c.border,
   },
   packAmount: {
     fontFamily: NEO_THEME.fonts.black,
     fontSize: 24,
-    color: NEO_THEME.colors.black,
+    color: c.black,
   },
   packName: {
     fontFamily: NEO_THEME.fonts.bold,
     fontSize: 14,
-    color: NEO_THEME.colors.black,
+    color: c.black,
   },
   priceTag: {
-    backgroundColor: NEO_THEME.colors.white,
+    backgroundColor: c.white,
     paddingHorizontal: 12,
     paddingVertical: 6,
-    borderWidth: 2,
-    borderColor: NEO_THEME.colors.black,
+    borderWidth: 1,
+    borderColor: c.border,
   },
   priceText: {
     fontFamily: NEO_THEME.fonts.bold,
     fontSize: 14,
-    color: NEO_THEME.colors.black,
+    color: c.black,
   },
-});
+  };
+}

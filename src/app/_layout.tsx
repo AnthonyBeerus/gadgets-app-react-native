@@ -1,4 +1,5 @@
 import { Stack } from "expo-router";
+import { StatusBar } from "expo-status-bar";
 import { ToastProvider } from "react-native-toast-notifications";
 import AuthProvider, { useAuth } from "../shared/providers/auth-provider";
 import QueryProvider from "../shared/providers/query-provider";
@@ -6,7 +7,8 @@ import NotificationProvider from "../shared/providers/notification-provider";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { RevenueCatProvider } from "../shared/providers/RevenueCatProvider";
 import { FontProvider } from "../shared/providers/font-provider";
-import { ThemeProvider } from "../shared/providers/theme-provider";
+import { ThemeProvider, useTheme } from "../shared/providers/theme-provider";
+import { DesignTokensProvider } from "../shared/design-system";
 import { Platform } from "react-native";
 import React from "react";
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
@@ -190,12 +192,19 @@ const AppNavigator = () => {
   );
 }
 
+function ThemedStatusBar() {
+  const { isDark } = useTheme();
+  return <StatusBar style={isDark ? 'light' : 'dark'} />;
+}
+
 function RootLayout() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
     <ThemeProvider>
+    <DesignTokensProvider>
       <FontProvider>
         <SafeAreaProvider>
+          <ThemedStatusBar />
           <ToastProvider>
           <AuthProvider>
             <QueryProvider>
@@ -212,6 +221,7 @@ function RootLayout() {
         </ToastProvider>
       </SafeAreaProvider>
       </FontProvider>
+    </DesignTokensProvider>
     </ThemeProvider>
     </GestureHandlerRootView>
   );

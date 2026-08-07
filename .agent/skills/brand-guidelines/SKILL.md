@@ -7,11 +7,11 @@ description: Applies Muse's official brand colors and design principles to artif
 
 ## Overview
 
-Muse is a creative-commerce platform powered by Molapo Creative Hub. This skill provides brand colors, typography, and design principles for maintaining visual consistency across all features.
+Muse is a creative-commerce platform for local merchants (challenge pots + marketplace). Visual identity is **quiet commerce modernist** — merchant-trust first, content/media first on Discover.
 
-**Keywords**: branding, Muse brand, creative economy, visual identity, design system, brand colors, typography, UI design, creative platform
+**Keywords**: branding, Muse brand, quiet commerce, design system, brand colors, typography
 
-> **Alignment**: This skill implements the specific aesthetic choices for Muse, following the "Bold Aesthetic Direction" philosophy from **frontend-design**. Refer to `frontend-design` for broader implementation strategies regarding motion, spatial composition, and avoiding generic patterns.
+> **Source of truth**: `src/shared/design-system/` — import tokens and primitives from there. Do **not** introduce new `NEO_THEME` / neobrutalism imports.
 
 ---
 
@@ -19,265 +19,119 @@ Muse is a creative-commerce platform powered by Molapo Creative Hub. This skill 
 
 **Core Principle**: *Creativity is an economy. Muse is its infrastructure.*
 
-Muse connects challenges, AI tools, marketplace commerce, services, events, and culture into one unified ecosystem. The brand should feel:
+The brand should feel:
 
-- **Vibrant & Energetic** — Reflects youth culture and creative energy. *Avoid timid, generic "clean" tech looks.*
-- **Modern & Bold** — Tech-forward without being cold. Neubrutalist influence.
-- **Premium yet Accessible** — Quality feel at P49-P99/month price point.
-- **Cultural & Local** — Rooted in Botswana's creative community. *Use local patterns/motifs where possible.*
-- **Distinctive & Unexpected** — Avoids "AI slop" or cookie-cutter templates. Features should feel hand-crafted.
+- **Competent & calm** — Merchants fund voucher pots; UI must feel money-safe
+- **Content-led** — Photography and pot economics carry personality; chrome recedes
+- **Local & clear** — Rooted in Botswana SME commerce (food, beauty, services)
+- **Distinctive without costume** — Avoid pastel neo kits, hard offset shadows, lilac washes
 
 ---
 
-## Color Palette
+## Color Palette (quiet commerce v1)
 
-### Primary Colors
+### Surfaces & ink (light)
 
-- **Deep Purple**: `#6B46C1` - Primary brand color, creative energy
-- **Vibrant Orange**: `#FF6B35` - Accent, CTAs, energy
-- **Electric Blue**: `#4A90E2` - Secondary accent, tech feel
+- **Canvas**: `#FAFAF8` — app field
+- **Surface**: `#FFFFFF` — cards, inputs
+- **Ink**: `#111111` — primary text and **primary CTA fill**
+- **Ink muted**: `#6B7280` — secondary text
+- **Border**: `#B0B6C0` — denser 1px structural edges (cards, inputs, chrome)
 
-### Neutral Colors
+### Surfaces & ink (dark)
 
-- **Dark**: `#1A202C` - Primary text, dark backgrounds
-- **Light**: `#F7FAFC` - Light backgrounds, cards
-- **Mid Gray**: `#A0AEC0` - Secondary text, borders
-- **Light Gray**: `#EDF2F7` - Subtle backgrounds, disabled states
+- **Canvas**: `#111111`
+- **Surface**: `#1C1C1A` — warm elevated panels (not blue-gray)
+- **Ink**: `#F4F4F2` — primary text and CTA fill (light on dark)
+- **Ink muted**: `#A1A1AA`
+- **Border**: `#3F3F46`
+- **Gray washes**: `#18181B` / `#27272A` for `gray50` / `gray100`
 
-### Semantic Colors
+Dark mode is preference-driven (`system` | `light` | `dark`) via `ThemeProvider` → `DesignTokensProvider` (`resolveSemanticColors`). Accent / success / error stay the same hexes.
 
-- **Success Green**: `#48BB78` - Successful actions, gems earned
-- **Warning Oran**: `#ED8936` - Warnings, important notices
-- **Error Red**: `#F56565` - Errors, validation
-- **Info Blue**: `#4299E1` - Informational messages
+### Accent (punctuation, not wallpaper)
 
-### Gem Economy Colors
+- **Accent**: `#E85D04` — challenge energy (pot/deadline), sparse use
+- **Accent muted**: `#FFF4ED` — soft highlight behind accent moments
 
-- **Gem Gold**: `#F6AD55` - Gem currency, rewards, premium features
-- **Gem Shine**: `#FBD38D` - Gem highlights, accents
+### Semantic
+
+- **Success**: `#16A34A`
+- **Warning**: `#D97706`
+- **Error**: `#DC2626`
+- **Info**: `#2563EB`
+
+### Forbidden as identity
+
+- Pastel lilac primary / lilac canvas
+- Hard `4px 4px 0 #000` neo shadows
+- Thick comic black outlines as default chrome
+- Multi-pastel rainbow (mint/pink/sky) as system colors
 
 ---
 
 ## Typography
 
-### Headings
-- **Font**: **Inter** (with system fallback to -apple-system, BlinkMacSystemFont, "Segoe UI")
-- **Weight**: Bold (700) for H1-H2, SemiBold (600) for H3-H4
-- **Style**: Modern, clean, tech-forward
+- **UI family**: Inter (400 / 500 / 600 / 700)
+- Hierarchy via size and weight — not all-caps by default
+- Display roles use Inter bold at larger sizes (no dual neo Poppins voice required)
 
-### Body Text
-- **Font**: **Inter** (with system fallback)
-- **Weight**: Regular (400) for body, Medium (500) for emphasis
-- **Style**: Readable, accessible
-
-### Creative Content (Display)
-- **Font**: **Poppins** or **Montserrat** for creative sections (challenges, events)
-- **Weight**: SemiBold (600) to Black (900) for maximum impact
-- **Style**: Energetic, youthful, bold. *Use for Headlines to break the "generic Inter" monotony.*
-
-*Note: While Inter is used for UI utility, rely heavily on the Display font (Poppins/Montserrat) for "Personality" areas to meet the `frontend-design` requirement for distinctive typography.*
+Token source: `src/shared/design-system/tokens/typography.ts`
 
 ---
 
-## Design Principles
+## Design principles
 
-### 1. Neubrutalism Aesthetic (The "Bold Choice")
-- **Conceptual Direction**: Raw, unpolished but functional. Digital craft.
-- **Visuals**: Bold borders (2px-4px), hard shadows, high contrast.
-- **Avoid**: Soft blurs, gradient glows on white (the "AI cliche"), rounded soft shadows.
-- **differentiation**: Use grid patterns, halftone dots, or noise textures to add depth and "grit".
-- Bold borders and shadows
-- High contrast
-- Vibrant color blocks
-- Playful yet functional
-- Digital craft feel
+### 1. Quiet commerce (system identity)
 
-### 2. Mobile-First
-- React Native/Expo optimized
-- Thumb-friendly touch targets (min 44x44pt)
-- Bottom navigation for core features
-- Gesture-driven interactions
+- Flat depth: `none` | `hairline` | soft blur only
+- Modest radii (`6` / `10` / `16`) — not pill-default for every control
+- Primary actions = ink fill / white label
+- Accent reserved for challenge energy
 
-### 3. Gem Economy Visibility
-- Gem balance always visible
-- Gem costs clearly displayed
-- Subscription benefits prominent
-- Reward celebrations (confetti, animations)
+### 2. FDD ownership
 
-### 4. Creative Energy
-- Dynamic animations (Reanimated)
-- Micro-interactions
-- Celebration moments (challenge wins, gem earnings)
-- Social proof (leaderboards, participation)
+| Shared (`src/shared/design-system`) | Features (`src/features/[x]`) |
+|---|---|
+| Tokens, Button, Text, Input, Surface, Tag, IconButton | Domain cards (challenge, opportunity) |
+| ScreenHeader, TabBarShell contracts | Feature screens composing shared primitives |
 
-### 5. Cultural Authenticity
-- Local imagery and iconography
-- Botswana context
-- Creative community focus
-- Youth culture alignment
+### 3. Mobile-first
+
+- Thumb targets ≥ 44×44
+- Discover media-first; merchant denser and quieter
+
+### 4. Accessibility
+
+- Prefer `#111` on `#FAFAF8` over pure 21:1 black/white for long reading
+- Visible focus / press feedback without hard-shadow gimmicks
 
 ---
 
-## Component Styling
+## Implementation
 
-### Buttons
-
-**Primary (CTAs)**:
-- Background: `#6B46C1` (Deep Purple)
-- Text: `#FFFFFF`
-- Border: 3px solid `#1A202C`
-- Shadow: 4px 4px 0px `#1A202C`
-- Active: Shift shadow (-2px, -2px)
-
-**Secondary (Actions)**:
-- Background: `#FF6B35` (Vibrant Orange)
-- Text: `#FFFFFF`
-- Border: 3px solid `#1A202C`
-- Shadow: 4px 4px 0px `#1A202C`
-
-**Tertiary (Gem Actions)**:
-- Background: `#F6AD55` (Gem Gold)
-- Text: `#1A202C`
-- Border: 3px solid `#1A202C`
-- Shadow: 4px 4px 0px `#1A202C`
-- Icon: Gem icon before text
-
-### Cards
-
-- Background: `#FFFFFF` or `#F7FAFC`
-- Border: 3px solid `#1A202C`
-- Border Radius: 16px
-- Shadow: 6px 6px 0px `#1A202C`
-- Padding: 16-24px
-
-### Input Fields
-
-- Background: `#FFFFFF`
-- Border: 2px solid `#A0AEC0`
-- Border Radius: 8px
-- Focus: Border color `#6B46C1`, 3px width
-- Error: Border color `#F56565`
-
----
-
-## Icon System
-
-- **Style**: Rounded, friendly, energetic
-- **Library**: Expo vector-icons (Ionicons, MaterialCommunityIcons)
-- **Size**: 20pt (small), 24pt (default), 32pt (large)
-- **Color**: Match text color or brand purple
-
-### Key Icons
-
-- Gem: `💎` or custom gem icon
-- Challenge: `🎯`
-- AI Tools: `✨`
-- Shop: `🛍️`
-- Events: `🎪`
-- Profile: `👤`
-
----
-
-## Visual Texture & Atmosphere
-*Aligned with `frontend-design` guidelines for Backgrounds & Visual Details*
-
-- **Depth**: Don't just use flat colors. Use distinct separation.
-- **Texture**: Subtle noise overlays, dot grids, or diagonal lines to break up solid backgrounds.
-- **Forms**: Use geometric shapes (circles, triangles, jagged lines) as background artifacts in accent colors to create energy.
-- **Lighting**: Hard light/edges rather than soft diffusion.
-
----
-
-## Animation Guidelines
-
-### Micro-interactions
-- Duration: 200-300ms
-- Easing: `spring` for playful, `ease-out` for smooth
-- Scale on press: 0.95
-- Haptic feedback on important actions
-
-### Celebrations
-- Gem earned: Confetti + scale animation
-- Challenge complete: Trophy reveal
-- Level up: Badge animation
-- Purchase complete: Success checkmark
-
----
-
-## Accessibility
-
-- **Contrast Ratios**: Minimum 4.5:1 for text, 3:1 for UI components
-- **Touch Targets**: Minimum 44x44pt
-- **Screen Reader**: All interactive elements labeled
-- **Color Blindness**: Don't rely on color alone for information
-- **Font Sizes**: Respect device font scaling
-
----
-
-## Usage Examples
-
-### Challenge Card
-```tsx
-<Card 
-  bg="#FFFFFF"
-  border="3px solid #1A202C"
-  shadow="6px 6px 0px #1A202C"
->
-  <Badge bg="#6B46C1" color="#FFFFFF">Premium</Badge>
-  <Title font="Poppins" weight="600">Create TikTok Dance</Title>
-  <GemCost color="#F6AD55">💎 50 gems</GemCost>
-  <Button bg="#FF6B35" color="#FFFFFF">Enter Challenge</Button>
-</Card>
+```ts
+import { Button, Text, colors, useDesignTokens } from '@/shared/design-system';
 ```
 
-### Gem Balance Display
-```tsx
-<GemBalance>
-  <Icon name="💎" size={24} color="#F6AD55" />
-  <Text font="Inter" weight="700" size={20}>1,234</Text>
-  <Badge bg="#6B46C1">Premium</Badge>
-</GemBalance>
-```
+Deprecated (compat only):
+
+- `shared/constants/neobrutalism` → `NEO_THEME` shim
+- `NuviaButton` / `NeoButton` / `NeoView` / `NuviaText` wrappers
 
 ---
 
-## Technical Implementation
+## Do / Don't
 
-### React Native Styling
-- Use `StyleSheet.create()` for performance
-- Theme via Context API or Zustand store
-- Color constants in `constants/colors.ts`
-- Typography constants in `constants/typography.ts`
+**Do**
 
-### Dark Mode
-- Support system preference
-- Dark backgrounds: `#1A202C`
-- Cards on dark: `#2D3748`
-- Maintain brand purple/orange accents
-- Gem gold remains `#F6AD55`
+- Import from `shared/design-system`
+- Let product/challenge imagery carry energy
+- Keep merchant Open Shop / settle screens calm
 
----
+**Don't**
 
-## Brand Voice
-
-- **Tone**: Energetic, inclusive, empowering
-- **Voice**: "We're building this together" not "Use our platform"
-- **Language**: Clear, direct, youth-friendly
-- **Avoid**: Corporate jargon, overly formal language
-- **Embrace**: Creative slang, local references, celebration
-
----
-
-## Platform-Specific Notes
-
-### Mobile (React Native/Expo)
-- Bottom tab navigation
-- Gesture-driven UI
-- Native animations (Reanimated)
-- Platform-specific shadows (iOS vs Android)
-
-### Future Web
-- Same color palette
-- Responsive grid
-- Hover states for desktop
-- Same neubrutalist aesthetic
+- Add new neobrutalism imports
+- Use hard offset shadows
+- Make lilac/purple the primary action color
+- All-caps every label

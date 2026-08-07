@@ -1,8 +1,27 @@
 import React, { useState } from 'react';
-import { ActivityIndicator, Alert, FlatList, Linking, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import {
+  ActivityIndicator,
+  Alert,
+  FlatList,
+  Linking,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { NEO_THEME } from '../../../shared/constants/neobrutalism';
+import {
+  Text,
+  Button,
+  Surface,
+  Tag,
+  space,
+  radii,
+  fonts,
+  useDesignTokens,
+  useThemedStyles,
+  type SemanticColors,
+} from '../../../shared/design-system';
 import { StaticHeader } from '../../../shared/components/layout/StaticHeader';
 import {
   AdminSubmission,
@@ -14,53 +33,85 @@ import {
 import { ChallengeSubmission } from '../types/challenge';
 
 const FILTERS: Array<{ key: ChallengeSubmission['status'] | 'all'; label: string }> = [
-  { key: 'pending', label: 'TO REVIEW' }, { key: 'approved', label: 'APPROVED' },
-  { key: 'rejected', label: 'REJECTED' }, { key: 'all', label: 'ALL' },
+  { key: 'pending', label: 'To review' },
+  { key: 'approved', label: 'Approved' },
+  { key: 'rejected', label: 'Rejected' },
+  { key: 'all', label: 'All' },
 ];
-const REJECTION_REASONS = ['Post does not match the brief', 'Post is not public', 'Account ownership could not be verified', 'Post was published outside the opportunity window'];
+const REJECTION_REASONS = [
+  'Post does not match the brief',
+  'Post is not public',
+  'Account ownership could not be verified',
+  'Post was published outside the opportunity window',
+];
 
 export default function CampaignReviewScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const styles = useThemedStyles(createStyles);
+  const { colors } = useDesignTokens();
   const [filter, setFilter] = useState<ChallengeSubmission['status'] | 'all'>('pending');
   const submissions = useAdminSubmissions(filter);
   const review = useReviewSubmission();
   const markVerified = useMarkManuallyVerified();
   const refreshMetrics = useRefreshSubmissionMetrics();
-  const [metricsDraft, setMetricsDraft] = useState<Record<number, { likes: string; comments: string; saves: string; views: string }>>({});
+  const [metricsDraft, setMetricsDraft] = useState<
+    Record<number, { likes: string; comments: string; saves: string; views: string }>
+  >({});
 
-  const reject = (item: AdminSubmission) => Alert.alert('Reject submission', 'Select the reason shown to the creator.', [
-    ...REJECTION_REASONS.map(reason => ({ text: reason, onPress: () => review.mutate({ submissionId: item.id, decision: 'rejected', rejectionReason: reason }) })),
-    { text: 'Cancel', style: 'cancel' },
-  ]);
+  const reject = (item: AdminSubmission) =>
+    Alert.alert('Reject submission', 'Select the reason shown to the creator.', [
+      ...REJECTION_REASONS.map(reason => ({
+        text: reason,
+        onPress: () =>
+          review.mutate({
+            submissionId: item.id,
+            decision: 'rejected',
+            rejectionReason: reason,
+          }),
+      })),
+      { text: 'Cancel', style: 'cancel' },
+    ]);
 
-  const draftFor = (item: AdminSubmission) => metricsDraft[item.id] ?? {
-    likes: String(item.like_count ?? 0),
-    comments: String(item.comment_count ?? 0),
-    saves: String(item.save_count ?? 0),
-    views: String(item.view_count ?? 0),
-  };
+  const draftFor = (item: AdminSubmission) =>
+    metricsDraft[item.id] ?? {
+      likes: String(item.like_count ?? 0),
+      comments: String(item.comment_count ?? 0),
+      saves: String(item.save_count ?? 0),
+      views: String(item.view_count ?? 0),
+    };
 
   const renderItem = ({ item }: { item: AdminSubmission }) => {
     const verified = ['api_verified', 'manually_verified'].includes(item.verification_status);
     const competitive = item.challenge?.contest_mode === 'competitive_pot';
     const draft = draftFor(item);
     return (
-      <View style={styles.card}>
-        <Text style={styles.eyebrow}>{item.challenge?.title ?? 'CREATOR OPPORTUNITY'}</Text>
-        <Text style={styles.title}>{item.post_description || 'External TikTok post'}</Text>
-        <Text style={styles.meta}>TikTok · {item.platform_author_open_id || 'handle unavailable'}</Text>
-        {competitive ? <Text style={styles.meta}>Competitive pot · score {Number(item.score ?? 0).toFixed(0)}</Text> : null}
-        <View style={[styles.badge, verified ? styles.verified : styles.manual]}>
-          <Text style={styles.badgeText}>{item.verification_status.replaceAll('_', ' ').toUpperCase()}</Text>
-        </View>
-        <TouchableOpacity style={styles.linkButton} onPress={() => Linking.openURL(item.public_share_url)}>
-          <Text style={styles.linkText}>OPEN PUBLIC TIKTOK POST</Text>
-        </TouchableOpacity>
+      <Surface style={styles.card} elevation="hairline">
+        <Text variant="caption">{item.challenge?.title ?? 'Creator opportunity'}</Text>
+        <Text variant="h3">{item.post_description || 'External TikTok post'}</Text>
+        <Text variant="caption">
+          TikTok · {item.platform_author_open_id || 'handle unavailable'}
+        </Text>
+        {competitive ? (
+          <Text variant="caption">
+            Competitive pot · score {Number(item.score ?? 0).toFixed(0)}
+          </Text>
+        ) : null}
+        <Tag
+          label={item.verification_status.replaceAll('_', ' ')}
+          tone={verified ? 'success' : 'warning'}
+        />
+        <Button
+          variant="outline"
+          onPress={() => Linking.openURL(item.public_share_url)}
+          style={styles.linkButton}
+        >
+          Open public TikTok post
+        </Button>
 
         {item.status === 'approved' && competitive ? (
           <View style={styles.metricsBox}>
-            <Text style={styles.metricsTitle}>ENGAGEMENT METRICS</Text>
+            <Text variant="label">Engagement metrics</Text>
             {(['likes', 'comments', 'saves', 'views'] as const).map(key => (
               <TextInput
                 key={key}
@@ -68,93 +119,169 @@ export default function CampaignReviewScreen() {
                 keyboardType="numeric"
                 value={draft[key]}
                 placeholder={key}
-                onChangeText={text => setMetricsDraft(prev => ({
-                  ...prev,
-                  [item.id]: { ...draft, [key]: text },
-                }))}
+                placeholderTextColor={colors.inkMuted}
+                onChangeText={text =>
+                  setMetricsDraft(prev => ({
+                    ...prev,
+                    [item.id]: { ...draft, [key]: text },
+                  }))
+                }
               />
             ))}
-            <TouchableOpacity
-              style={styles.secondaryButton}
+            <Button
+              variant="secondary"
               disabled={refreshMetrics.isPending}
-              onPress={() => refreshMetrics.mutate({
-                submissionId: item.id,
-                likeCount: Number(draft.likes) || 0,
-                commentCount: Number(draft.comments) || 0,
-                saveCount: Number(draft.saves) || 0,
-                viewCount: Number(draft.views) || 0,
-              })}
+              onPress={() =>
+                refreshMetrics.mutate({
+                  submissionId: item.id,
+                  likeCount: Number(draft.likes) || 0,
+                  commentCount: Number(draft.comments) || 0,
+                  saveCount: Number(draft.saves) || 0,
+                  viewCount: Number(draft.views) || 0,
+                })
+              }
             >
-              <Text style={styles.secondaryText}>SAVE SCORE</Text>
-            </TouchableOpacity>
+              Save score
+            </Button>
           </View>
         ) : null}
 
         {item.status === 'pending' ? (
           <>
             {item.verification_status === 'manual_verification_required' ? (
-              <TouchableOpacity style={styles.secondaryButton} disabled={markVerified.isPending} onPress={() => markVerified.mutate(item.id)}>
-                <Text style={styles.secondaryText}>MARK OWNERSHIP + POST VERIFIED</Text>
-              </TouchableOpacity>
+              <Button
+                variant="secondary"
+                disabled={markVerified.isPending}
+                onPress={() => markVerified.mutate(item.id)}
+              >
+                Mark ownership + post verified
+              </Button>
             ) : null}
             <View style={styles.actions}>
-              <TouchableOpacity style={[styles.action, styles.reject]} onPress={() => reject(item)}><Text style={styles.actionText}>REJECT</Text></TouchableOpacity>
-              <TouchableOpacity style={[styles.action, styles.approve, !verified && styles.disabled]} disabled={!verified || review.isPending}
-                onPress={() => review.mutate({ submissionId: item.id, decision: 'approved' })}>
-                <Text style={styles.actionText}>{competitive ? 'APPROVE FOR BOARD' : 'APPROVE + ISSUE VOUCHER'}</Text>
+              <TouchableOpacity style={[styles.action, styles.reject]} onPress={() => reject(item)}>
+                <Text variant="label" color={colors.surface}>
+                  Reject
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.action, styles.approve, !verified && styles.disabled]}
+                disabled={!verified || review.isPending}
+                onPress={() =>
+                  review.mutate({ submissionId: item.id, decision: 'approved' })
+                }
+              >
+                <Text variant="label" color={colors.surface} align="center">
+                  {competitive ? 'Approve for board' : 'Approve + issue voucher'}
+                </Text>
               </TouchableOpacity>
             </View>
           </>
-        ) : <Text style={styles.outcome}>{item.status.toUpperCase()}{item.rejection_reason ? ` — ${item.rejection_reason}` : ''}</Text>}
-      </View>
+        ) : (
+          <Text variant="bodyBold">
+            {item.status}
+            {item.rejection_reason ? ` — ${item.rejection_reason}` : ''}
+          </Text>
+        )}
+      </Surface>
     );
   };
 
   return (
     <View style={styles.container}>
-      <StaticHeader title="MUSE MODERATION" onBackPress={() => router.back()} />
-      <View style={styles.filters}>{FILTERS.map(item => (
-        <TouchableOpacity key={item.key} style={[styles.filter, filter === item.key && styles.filterActive]} onPress={() => setFilter(item.key)}>
-          <Text style={[styles.filterText, filter === item.key && styles.filterTextActive]}>{item.label}</Text>
-        </TouchableOpacity>
-      ))}</View>
-      {submissions.isLoading ? <ActivityIndicator style={{ marginTop: 60 }} color={NEO_THEME.colors.primary} /> : (
-        <FlatList contentInsetAdjustmentBehavior="automatic" data={submissions.data ?? []} renderItem={renderItem}
-          keyExtractor={item => String(item.id)} contentContainerStyle={{ padding: 16, paddingBottom: insets.bottom + 24, gap: 14 }}
-          ListEmptyComponent={<Text style={styles.empty}>No submissions in this queue.</Text>} />
+      <StaticHeader title="Moderation" onBackPress={() => router.back()} />
+      <View style={styles.filters}>
+        {FILTERS.map(item => (
+          <TouchableOpacity
+            key={item.key}
+            style={[styles.filter, filter === item.key && styles.filterActive]}
+            onPress={() => setFilter(item.key)}
+          >
+            <Text
+              variant="caption"
+              color={filter === item.key ? colors.ink : colors.inkMuted}
+            >
+              {item.label}
+            </Text>
+          </TouchableOpacity>
+        ))}
+      </View>
+      {submissions.isLoading ? (
+        <ActivityIndicator style={{ marginTop: 60 }} color={colors.ink} />
+      ) : (
+        <FlatList
+          contentInsetAdjustmentBehavior="automatic"
+          data={submissions.data ?? []}
+          renderItem={renderItem}
+          keyExtractor={item => String(item.id)}
+          contentContainerStyle={{
+            padding: space.md,
+            paddingBottom: insets.bottom + 24,
+            gap: space.md,
+          }}
+          ListEmptyComponent={
+            <Text variant="body" align="center" color={colors.inkMuted} style={styles.empty}>
+              No submissions in this queue.
+            </Text>
+          }
+        />
       )}
     </View>
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: NEO_THEME.colors.greyLight },
-  filters: { flexDirection: 'row', gap: 8, paddingHorizontal: 16, paddingVertical: 12 },
-  filter: { paddingHorizontal: 12, paddingVertical: 8, borderRadius: 999, backgroundColor: NEO_THEME.colors.white, borderWidth: 2, borderColor: NEO_THEME.colors.black },
-  filterActive: { backgroundColor: NEO_THEME.colors.secondary },
-  filterText: { fontFamily: NEO_THEME.fonts.bold, fontSize: 11 },
-  filterTextActive: { color: NEO_THEME.colors.black },
-  card: { backgroundColor: NEO_THEME.colors.white, borderWidth: 2, borderColor: NEO_THEME.colors.black, borderRadius: 16, padding: 16, gap: 8 },
-  eyebrow: { fontFamily: NEO_THEME.fonts.bold, fontSize: 11, color: NEO_THEME.colors.grey },
-  title: { fontFamily: NEO_THEME.fonts.black, fontSize: 18 },
-  meta: { fontFamily: NEO_THEME.fonts.regular, color: NEO_THEME.colors.grey },
-  badge: { alignSelf: 'flex-start', borderRadius: 999, borderWidth: 2, borderColor: NEO_THEME.colors.black, paddingHorizontal: 10, paddingVertical: 4 },
-  verified: { backgroundColor: NEO_THEME.colors.success },
-  manual: { backgroundColor: NEO_THEME.colors.secondary },
-  badgeText: { fontFamily: NEO_THEME.fonts.bold, fontSize: 10 },
-  linkButton: { minHeight: 42, justifyWidth: 2, borderColor: NEO_THEME.colors.black, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
-  linkText: { fontFamily: NEO_THEME.fonts.bold },
-  metricsBox: { gap: 8, marginTop: 4, paddingTop: 8, borderTopWidth: 1, borderColor: NEO_THEME.colors.greyLight },
-  metricsTitle: { fontFamily: NEO_THEME.fonts.bold },
-  metricInput: { borderWidth: 2, borderColor: NEO_THEME.colors.black, borderRadius: 10, paddingHorizontal: 10, paddingVertical: 8, fontFamily: NEO_THEME.fonts.regular },
-  secondaryButton: { minHeight: 42, backgroundColor: NEO_THEME.colors.secondary, borderWidth: 2, borderColor: NEO_THEME.colors.black, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
-  secondaryText: { fontFamily: NEO_THEME.fonts.bold },
-  actions: { flexDirection: 'row', gap: 8 },
-  action: { flex: 1, minHeight: 44, borderRadius: 12, borderWidth: 2, borderColor: NEO_THEME.colors.black, alignItems: 'center', justifyContent: 'center' },
-  reject: { backgroundColor: NEO_THEME.colors.error },
-  approve: { backgroundColor: NEO_THEME.colors.success },
-  disabled: { opacity: 0.45 },
-  actionText: { fontFamily: NEO_THEME.fonts.bold },
-  outcome: { fontFamily: NEO_THEME.fonts.bold },
-  empty: { textAlign: 'center', marginTop: 40, fontFamily: NEO_THEME.fonts.bold, color: NEO_THEME.colors.grey },
-});
+function createStyles(c: SemanticColors) {
+  return {
+    container: { flex: 1, backgroundColor: c.canvas },
+    filters: {
+      flexDirection: 'row' as const,
+      gap: space.xs,
+      paddingHorizontal: space.md,
+      paddingVertical: space.sm,
+      marginTop: 88,
+    },
+    filter: {
+      paddingHorizontal: space.sm,
+      paddingVertical: space.xs,
+      borderRadius: radii.sm,
+      backgroundColor: c.surface,
+      borderWidth: 1,
+      borderColor: c.border,
+    },
+    filterActive: {
+      backgroundColor: c.gray100,
+      borderColor: c.border,
+    },
+    card: { padding: space.md, gap: space.xs },
+    linkButton: { marginTop: space.xxs },
+    metricsBox: {
+      gap: space.xs,
+      marginTop: space.xxs,
+      paddingTop: space.sm,
+      borderTopWidth: 1,
+      borderColor: c.border,
+    },
+    metricInput: {
+      borderWidth: 1,
+      borderColor: c.border,
+      borderRadius: radii.md,
+      paddingHorizontal: space.sm,
+      paddingVertical: space.xs,
+      fontFamily: fonts.regular,
+      color: c.ink,
+      backgroundColor: c.surface,
+    },
+    actions: { flexDirection: 'row' as const, gap: space.xs, marginTop: space.xs },
+    action: {
+      flex: 1,
+      minHeight: 44,
+      borderRadius: radii.md,
+      alignItems: 'center' as const,
+      justifyContent: 'center' as const,
+      paddingHorizontal: space.xs,
+    },
+    reject: { backgroundColor: c.error },
+    approve: { backgroundColor: c.success },
+    disabled: { opacity: 0.45 },
+    empty: { marginTop: space.xxl },
+  };
+}

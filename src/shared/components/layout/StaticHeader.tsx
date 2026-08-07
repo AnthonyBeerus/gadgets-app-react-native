@@ -1,8 +1,8 @@
-import React from "react";
-import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Ionicons } from "@expo/vector-icons";
-import { NEO_THEME } from "../../constants/neobrutalism";
+import React from 'react';
+import { View, StyleSheet, TouchableOpacity } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Ionicons } from '@expo/vector-icons';
+import { Text, space, fonts, useDesignTokens } from '../../design-system';
 
 interface StaticHeaderProps {
   title: string;
@@ -16,58 +16,65 @@ export const StaticHeader: React.FC<StaticHeaderProps> = ({
   rightElement,
 }) => {
   const { top } = useSafeAreaInsets();
+  const { colors } = useDesignTokens();
 
   return (
-    <View style={[styles.header, { paddingTop: top + 12 }]}>
-      {onBackPress && (
+    <View
+      style={[
+        styles.header,
+        {
+          paddingTop: top + space.sm,
+          backgroundColor: colors.canvas,
+          borderBottomColor: colors.border,
+        },
+      ]}
+    >
+      {onBackPress ? (
         <TouchableOpacity
           onPress={onBackPress}
           style={styles.backButton}
           activeOpacity={0.7}
+          accessibilityRole="button"
+          accessibilityLabel="Go back"
         >
-          <Ionicons name="arrow-back" size={24} color={NEO_THEME.colors.black} />
+          <Ionicons name="arrow-back" size={24} color={colors.ink} />
         </TouchableOpacity>
-      )}
+      ) : null}
       <View style={styles.headerContent}>
-        <Text style={styles.title} numberOfLines={1}>
+        <Text variant="h3" numberOfLines={1} style={styles.title}>
           {title}
         </Text>
       </View>
-      {rightElement && <View style={styles.headerRight}>{rightElement}</View>}
+      {rightElement ? <View style={styles.headerRight}>{rightElement}</View> : null}
     </View>
   );
 };
 
 const styles = StyleSheet.create({
   header: {
-    position: "absolute",
+    position: 'absolute',
     top: 0,
     left: 0,
     right: 0,
     zIndex: 10,
-    paddingHorizontal: 16,
-    paddingBottom: 12,
-    backgroundColor: NEO_THEME.colors.white,
-    borderBottomWidth: NEO_THEME.borders.width,
-    borderBottomColor: NEO_THEME.colors.black,
-    flexDirection: "row",
-    alignItems: "center",
+    paddingHorizontal: space.md,
+    paddingBottom: space.sm,
+    borderBottomWidth: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   backButton: {
     padding: 4,
-    marginRight: 12,
+    marginRight: space.sm,
   },
   headerContent: {
     flex: 1,
-    justifyContent: "center",
+    justifyContent: 'center',
   },
   title: {
-    fontSize: 18,
-    fontWeight: "900",
-    color: NEO_THEME.colors.black,
-    fontFamily: NEO_THEME.fonts.bold,
+    fontFamily: fonts.semibold,
   },
   headerRight: {
-    marginLeft: 12,
+    marginLeft: space.sm,
   },
 });

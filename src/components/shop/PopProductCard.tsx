@@ -1,6 +1,8 @@
 import React from 'react';
 import { View, Text, StyleSheet, Image, ViewStyle, StyleProp, TouchableOpacity } from 'react-native';
 import { NEO_THEME } from '../../shared/constants/neobrutalism';
+import { useNeoStyles } from '../../shared/hooks/useNeoStyles';
+import { useTheme } from '../../shared/providers/theme-provider';
 
 interface PopProductCardProps {
   item: {
@@ -33,6 +35,9 @@ export const PopProductCard: React.FC<PopProductCardProps> = ({
   type = 'product',
   variant = 'default'
 }) => {
+  const styles = useNeoStyles(createStyles);
+  const { theme } = useTheme();
+
   // Robust image source logic
   const imageSource = item.heroImage 
     ? { uri: item.heroImage } 
@@ -73,7 +78,7 @@ export const PopProductCard: React.FC<PopProductCardProps> = ({
         />
         {/* Absolute Star Icon for Compact */}
         {isCompact && (
-             <View style={{ position: 'absolute', top: 10, right: 10, backgroundColor: 'white', borderRadius: 15, padding: 4, borderWidth: 2 }}>
+             <View style={[styles.compactStarBadge, { backgroundColor: theme.colors.white, borderColor: theme.colors.border }]}>
                  <Text style={{ fontSize: 12 }}>⭐</Text>
              </View>
         )}
@@ -105,7 +110,7 @@ export const PopProductCard: React.FC<PopProductCardProps> = ({
                 </View>
              )}
              {actionButton || (isCompact ? (
-                  <View style={{ width: 24, height: 24, borderRadius: 12, borderWidth: 1, alignItems:'center', justifyContent:'center'}}>
+                  <View style={[styles.compactCartButton, { borderColor: theme.colors.border }]}>
                       <Text style={{fontSize: 10}}>🛒</Text>
                   </View>
              ) : null)}
@@ -126,155 +131,172 @@ export const PopProductCard: React.FC<PopProductCardProps> = ({
   return CardContent;
 };
 
-const styles = StyleSheet.create({
+function createStyles(c) {
+  return {
   card: {
-    flexDirection: 'row',
+    flexDirection: 'row' as const,
     borderRadius: 24,
     marginBottom: 16,
-    borderWidth: 3,
-    borderColor: 'black',
-    overflow: 'hidden',
-    shadowColor: 'black',
-    shadowOffset: { width: 4, height: 4 },
-    shadowOpacity: 1,
-    shadowRadius: 0,
-    elevation: 4,
+    borderWidth: 1,
+    borderColor: c.border,
+    overflow: 'hidden' as const,
+    shadowColor: c.black,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 2,
     minHeight: 140,
   },
   compactCard: {
-      flexDirection: 'column',
-      // width: 160, // REMOVED: Let parent control width via style prop
+      flexDirection: 'column' as const,
       minHeight: 220,
       padding: 0,
   },
   imageContainer: {
-    width: 120, // Keep this for default
+    width: 120,
     backgroundColor: 'transparent',
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: 'center' as const,
+    alignItems: 'center' as const,
     padding: 10,
   },
   compactImageContainer: {
-      width: '100%',
+      width: '100%' as const,
       height: 140,
-      marginBottom: -25, // layout tweak overlap
+      marginBottom: -25,
       zIndex: 1,
-      alignItems: 'center', // Center image
-      justifyContent: 'center',
+      alignItems: 'center' as const,
+      justifyContent: 'center' as const,
   },
   image: {
     width: 100,
     height: 100,
     borderRadius: 12,
-    borderWidth: 3,
-    borderColor: 'white',
-    backgroundColor: 'white',
+    borderWidth: 1,
+    borderColor: c.white,
+    backgroundColor: c.white,
     transform: [{ rotate: '-3deg' }],
   },
   compactImage: {
-      width: 110, // Slightly smaller to fit
+      width: 110,
       height: 110,
       marginTop: 10,
       transform: [{ rotate: '3deg' }],
+  },
+  compactStarBadge: {
+    position: 'absolute' as const,
+    top: 10,
+    right: 10,
+    borderRadius: 15,
+    padding: 4,
+    borderWidth: 1,
   },
   cardContent: {
     flex: 1,
     padding: 16,
     paddingLeft: 0,
-    justifyContent: 'space-between',
+    justifyContent: 'space-between' as const,
   },
   compactCardContent: {
-      padding: 8, // Reduced padding
+      padding: 8,
       paddingBottom: 12,
-      justifyContent: 'flex-end',
-      paddingTop: 30, // Make room for image overlap
+      justifyContent: 'flex-end' as const,
+      paddingTop: 30,
       zIndex: 2,
   },
   headerRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
+    flexDirection: 'row' as const,
+    justifyContent: 'space-between' as const,
+    alignItems: 'flex-start' as const,
     marginBottom: 4,
   },
   categoryBadge: {
-    backgroundColor: 'white',
-    alignSelf: 'flex-start',
+    backgroundColor: c.white,
+    alignSelf: 'flex-start' as const,
     paddingHorizontal: 8,
     paddingVertical: 2,
     borderRadius: 8,
-    borderWidth: 2,
-    borderColor: 'black',
+    borderWidth: 1,
+    borderColor: c.border,
   },
   categoryText: {
     fontSize: 10,
     fontFamily: NEO_THEME.fonts.bold,
-    color: 'black',
-    textTransform: 'uppercase',
+    color: c.black,
+    textTransform: 'uppercase' as const,
   },
   title: {
     fontSize: 20,
     fontFamily: NEO_THEME.fonts.black,
-    color: 'black',
-    textTransform: 'uppercase',
+    color: c.black,
+    textTransform: 'uppercase' as const,
     marginBottom: 8,
     lineHeight: 22,
-    textShadowColor: 'white',
+    textShadowColor: c.white,
     textShadowOffset: { width: 1, height: 1 },
     textShadowRadius: 0,
   },
   compactTitle: {
-    fontSize: 13, // Smaller font
+    fontSize: 13,
     lineHeight: 15,
     marginBottom: 4,
-    textAlign: 'center', // Center title
+    textAlign: 'center' as const,
   },
   footerRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-end',
+    flexDirection: 'row' as const,
+    justifyContent: 'space-between' as const,
+    alignItems: 'flex-end' as const,
   },
   compactFooterRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    backgroundColor: 'white',
+    flexDirection: 'row' as const,
+    justifyContent: 'space-between' as const,
+    alignItems: 'center' as const,
+    backgroundColor: c.white,
     borderRadius: 12,
-    borderWidth: 2,
-    borderColor: 'black',
-    paddingHorizontal: 6, // Tighter padding
+    borderWidth: 1,
+    borderColor: c.border,
+    paddingHorizontal: 6,
     paddingVertical: 4,
-    marginTop: 'auto',
-    width: '100%', // Full width pill
+    marginTop: 'auto' as const,
+    width: '100%' as const,
+  },
+  compactCartButton: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    borderWidth: 1,
+    alignItems: 'center' as const,
+    justifyContent: 'center' as const,
   },
   priceLabel: {
     fontSize: 10,
     fontFamily: NEO_THEME.fonts.bold,
-    color: '#333',
+    color: c.grey,
     marginBottom: -2,
   },
   price: {
     fontSize: 24,
     fontFamily: NEO_THEME.fonts.black,
-    color: 'black',
+    color: c.black,
   },
   compactPrice: {
-    fontSize: 14, // Smaller price font
-    fontWeight: '900',
+    fontSize: 14,
+    fontWeight: '600' as const,
   },
   actionsContainer: {
-      flexDirection: 'row',
-      alignItems: 'center',
+      flexDirection: 'row' as const,
+      alignItems: 'center' as const,
       gap: 8,
   },
   durationBadge: {
-    backgroundColor: 'black',
+    backgroundColor: c.black,
     paddingHorizontal: 8, 
     paddingVertical: 4,
     borderRadius: 12,
   },
   durationText: {
-    color: 'white',
+    color: c.white,
     fontFamily: NEO_THEME.fonts.bold,
     fontSize: 12,
   },
-});
+  };
+}

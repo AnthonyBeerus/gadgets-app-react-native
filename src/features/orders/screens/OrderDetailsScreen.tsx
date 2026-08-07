@@ -1,3 +1,5 @@
+import { useNeoStyles } from '../../../shared/hooks/useNeoStyles';
+import { useTheme } from '../../../shared/providers/theme-provider';
 import React from 'react'; // Verified structural types
 import { Redirect, Stack, useLocalSearchParams, router } from 'expo-router';
 import { View, Text, StyleSheet, ScrollView, ActivityIndicator, Alert, TouchableHighlight, TouchableOpacity, FlatList, Image } from "react-native";
@@ -28,12 +30,14 @@ const getFriendlyStatusMessage = (status: string) => {
 };
 
 const OrderDetailsScreen = () => {
+  const styles = useNeoStyles(createStyles);
+  const { theme } = useTheme();
   const { slug } = useLocalSearchParams<{ slug: string }>();
 
   const { data: order, error, isLoading } = getMyOrder(slug);
   const { mutate: deleteOrderAction } = deleteOrder();
 
-  if (isLoading) return <ActivityIndicator size="large" color={NEO_THEME.colors.primary} style={{ marginTop: 40 }} />;
+  if (isLoading) return <ActivityIndicator size="large" color={theme.colors.primary} style={{ marginTop: 40 }} />;
 
   if (error || !order) return <Text style={styles.errorText}>Error: {error?.message}</Text>;
 
@@ -114,7 +118,7 @@ const OrderDetailsScreen = () => {
 
           {/* QR Code Section - Only show for completed/verified orders or Dev Mode */}
           <View style={styles.qrContainer}>
-            <Text style={{ marginBottom: 10, color: NEO_THEME.colors.grey, fontSize: 12 }}>Tap QR to Copy (Dev Mode)</Text>
+            <Text style={{ marginBottom: 10, color: theme.colors.grey, fontSize: 12 }}>Tap QR to Copy (Dev Mode)</Text>
             <TouchableOpacity 
                 activeOpacity={0.7}
                 onPress={async () => {
@@ -153,7 +157,7 @@ const OrderDetailsScreen = () => {
                   </View>
                   <View style={styles.summaryRow}>
                       <Text style={styles.summaryLabel}>Payment Status</Text>
-                      <Text style={[styles.summaryValue, { color: order.stripe_payment_status === 'succeeded' || order.stripe_payment_status === 'paid' ? NEO_THEME.colors.primary : 'red' }]}>
+                      <Text style={[styles.summaryValue, { color: order.stripe_payment_status === 'succeeded' || order.stripe_payment_status === 'paid' ? theme.colors.primary : 'red' }]}>
                           {order.stripe_payment_status?.toUpperCase() ?? 'PAID'}
                       </Text>
                   </View>
@@ -184,81 +188,82 @@ const OrderDetailsScreen = () => {
 
 export default OrderDetailsScreen;
 
-const styles: { [key: string]: any } = StyleSheet.create({
+function createStyles(c) {
+  return {
   container: {
     flex: 1,
-    backgroundColor: NEO_THEME.colors.backgroundLight,
+    backgroundColor: c.backgroundLight,
   },
   content: {
     flex: 1,
   },
   headerSection: {
-    backgroundColor: NEO_THEME.colors.white,
+    backgroundColor: c.white,
     padding: 16,
-    borderWidth: NEO_THEME.borders.width,
-    borderColor: NEO_THEME.colors.black,
+    borderWidth: 1,
+    borderColor: c.border,
     marginBottom: 24,
     borderRadius: 16, // Rounded
-    shadowColor: NEO_THEME.colors.black,
-    shadowOffset: { width: 4, height: 4 },
-    shadowOpacity: 1,
-    shadowRadius: 0,
+    shadowColor: c.black,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
     elevation: 0,
   },
   item: {
     fontSize: 20, // Smaller than before
-    fontWeight: '900',
-    color: NEO_THEME.colors.black,
+    fontWeight: '600',
+    color: c.black,
     fontFamily: NEO_THEME.fonts.bold,
   },
   friendlyMessage: {
     fontSize: 16,
-    color: NEO_THEME.colors.black,
+    color: c.black,
     marginBottom: 8,
     fontWeight: '500',
     fontFamily: NEO_THEME.fonts.regular,
   },
   details: {
     fontSize: 14,
-    color: NEO_THEME.colors.grey,
+    color: c.grey,
     marginBottom: 16,
     fontWeight: '500',
   },
   statusBadge: {
     paddingVertical: 4,
     paddingHorizontal: 12,
-    borderWidth: NEO_THEME.borders.width,
-    borderColor: NEO_THEME.colors.black,
+    borderWidth: 1,
+    borderColor: c.border,
     borderRadius: 20, // Pill
   },
   statusBadge_Pending: {
-    backgroundColor: NEO_THEME.colors.yellow,
+    backgroundColor: c.yellow,
   },
   statusBadge_Completed: {
     backgroundColor: '#4caf50',
   },
   statusBadge_Shipped: {
-    backgroundColor: NEO_THEME.colors.blue,
+    backgroundColor: c.blue,
   },
   statusBadge_InTransit: {
     backgroundColor: '#ff9800',
   },
   statusText: {
-    color: NEO_THEME.colors.black,
-    fontWeight: '900',
+    color: c.black,
+    fontWeight: '600',
     fontFamily: NEO_THEME.fonts.bold,
     fontSize: 10,
   },
   date: {
     fontSize: 12,
-    color: NEO_THEME.colors.grey,
+    color: c.grey,
     marginBottom: 16,
     fontWeight: '500',
   },
   itemsTitle: {
     fontSize: 20,
-    fontWeight: '900',
-    color: NEO_THEME.colors.black,
+    fontWeight: '600',
+    color: c.black,
     fontFamily: NEO_THEME.fonts.bold, 
     marginBottom: 16,
   },
@@ -270,22 +275,22 @@ const styles: { [key: string]: any } = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 12,
     padding: 12,
-    backgroundColor: NEO_THEME.colors.white,
-    borderWidth: NEO_THEME.borders.width,
-    borderColor: NEO_THEME.colors.black,
+    backgroundColor: c.white,
+    borderWidth: 1,
+    borderColor: c.border,
     borderRadius: 12, // Rounded
     // Subtle shadow
-    shadowColor: NEO_THEME.colors.black,
-    shadowOffset: { width: 2, height: 2 },
-    shadowOpacity: 1,
-    shadowRadius: 0,
+    shadowColor: c.black,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
   },
   heroImage: {
     width: 50, 
     height: 50,
     borderRadius: 8, 
     borderWidth: 1,
-    borderColor: NEO_THEME.colors.black,
+    borderColor: c.border,
   },
   itemInfo: {
     flex: 1,
@@ -296,20 +301,20 @@ const styles: { [key: string]: any } = StyleSheet.create({
   },
   itemName: {
     fontSize: 14,
-    fontWeight: '900',
-    color: NEO_THEME.colors.black,
+    fontWeight: '600',
+    color: c.black,
     fontFamily: NEO_THEME.fonts.bold,
     flex: 1,
   },
   itemPrice: {
     fontSize: 14,
     fontWeight: '700',
-    color: NEO_THEME.colors.black,
+    color: c.black,
     marginHorizontal: 8,
   },
   itemQuantity: {
     fontSize: 12,
-    color: NEO_THEME.colors.grey,
+    color: c.grey,
     fontWeight: '700',
   },
   errorText: {
@@ -325,7 +330,7 @@ const styles: { [key: string]: any } = StyleSheet.create({
     padding: 12,
     backgroundColor: '#FAFAFA', // Slight contrast
     borderWidth: 1,
-    borderColor: NEO_THEME.colors.grey,
+    borderColor: c.grey,
     borderRadius: 12, 
     borderStyle: 'dashed', 
   },
@@ -337,27 +342,27 @@ const styles: { [key: string]: any } = StyleSheet.create({
   qrLabel: {
     marginTop: 8,
     fontSize: 14,
-    fontWeight: '900',
-    color: NEO_THEME.colors.black,
+    fontWeight: '600',
+    color: c.black,
     fontFamily: NEO_THEME.fonts.bold,
   },
   qrSublabel: {
      fontSize: 12,
-     color: NEO_THEME.colors.grey,
+     color: c.grey,
      marginTop: 2,
      textAlign: 'center',
   },
   summarySection: {
       marginTop: 24,
-      backgroundColor: NEO_THEME.colors.white,
+      backgroundColor: c.white,
       padding: 16,
-      borderWidth: NEO_THEME.borders.width,
-      borderColor: NEO_THEME.colors.black,
+      borderWidth: 1,
+      borderColor: c.border,
       borderRadius: 16,
-      shadowColor: NEO_THEME.colors.black,
-      shadowOffset: { width: 4, height: 4 },
-      shadowOpacity: 1,
-      shadowRadius: 0,
+      shadowColor: c.black,
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.08,
+      shadowRadius: 8,
   },
   summaryRow: {
       flexDirection: 'row',
@@ -366,43 +371,44 @@ const styles: { [key: string]: any } = StyleSheet.create({
   },
   summaryLabel: {
       fontSize: 14,
-      color: NEO_THEME.colors.grey,
+      color: c.grey,
       fontFamily: NEO_THEME.fonts.bold,
   },
   summaryValue: {
       fontSize: 14,
-      color: NEO_THEME.colors.black,
+      color: c.black,
       fontFamily: NEO_THEME.fonts.bold,
   },
   totalLabel: {
       fontSize: 18,
-      color: NEO_THEME.colors.black,
+      color: c.black,
       fontFamily: NEO_THEME.fonts.black,
   },
   totalValue: {
       fontSize: 18,
-      color: NEO_THEME.colors.primary,
+      color: c.primary,
       fontFamily: NEO_THEME.fonts.black,
   },
   scanButton: {
-    backgroundColor: NEO_THEME.colors.primary,
+    backgroundColor: c.primary,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     padding: 16,
     borderRadius: 12,
-    borderWidth: 2,
+    borderWidth: 1,
     borderColor: 'black',
     marginBottom: 24,
     gap: 8,
     shadowColor: 'black',
-    shadowOffset: { width: 4, height: 4 },
-    shadowOpacity: 1,
-    shadowRadius: 0,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
   },
   scanButtonText: {
     color: 'white',
     fontFamily: NEO_THEME.fonts.bold,
     fontSize: 16,
   }
-});
+  };
+}

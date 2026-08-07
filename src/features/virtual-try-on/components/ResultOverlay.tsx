@@ -4,9 +4,7 @@ import {
   View,
   Text,
   Image,
-  TouchableOpacity,
-  StyleSheet,
-  ActivityIndicator,
+  TouchableOpacity, ActivityIndicator,
   Alert,
   Platform,
 } from "react-native";
@@ -14,6 +12,7 @@ import { useTryOnStore } from "../store/tryOnStore";
 import * as MediaLibrary from "expo-media-library";
 import { File, Paths } from "expo-file-system";
 import { NEO_THEME } from '../../../shared/constants/neobrutalism';
+import { useNeoStyles } from '../../../shared/hooks/useNeoStyles';
 
 interface ResultOverlayProps {
   onClose: () => void;
@@ -24,6 +23,7 @@ export default function ResultOverlay({
   onClose,
   onRetry,
 }: ResultOverlayProps) {
+  const styles = useNeoStyles(createStyles);
   const { resultImage, isProcessing, error } = useTryOnStore();
   const [isSaving, setIsSaving] = useState(false);
 
@@ -195,12 +195,13 @@ export default function ResultOverlay({
 }
 
 
-const styles = StyleSheet.create({
+function createStyles(c) {
+  return {
   processingContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: NEO_THEME.colors.backgroundLight,
+    backgroundColor: c.backgroundLight,
     gap: 20,
   },
   container: {
@@ -211,39 +212,39 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   content: {
-    backgroundColor: NEO_THEME.colors.white,
+    backgroundColor: c.white,
     borderRadius: NEO_THEME.borders.radius,
     padding: 24,
     alignItems: "center",
     maxWidth: 420,
     width: "100%",
-    borderWidth: NEO_THEME.borders.width,
-    borderColor: NEO_THEME.colors.black,
-    shadowColor: NEO_THEME.colors.black,
-    shadowOffset: { width: 8, height: 8 },
-    shadowOpacity: 1,
-    shadowRadius: 0,
+    borderWidth: 1,
+    borderColor: c.border,
+    shadowColor: c.black,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
     elevation: 0,
   },
   processingText: {
     fontSize: 18,
-    fontWeight: "900",
+    fontWeight: '600',
     textAlign: "center",
-    color: NEO_THEME.colors.black,
+    color: c.black,
     fontFamily: NEO_THEME.fonts.black,
     textTransform: "uppercase",
   },
   subText: {
     fontSize: 16,
-    color: NEO_THEME.colors.grey,
+    color: c.grey,
     marginTop: 8,
     textAlign: "center",
     lineHeight: 22,
   },
   errorTitle: {
     fontSize: 24,
-    fontWeight: "900",
-    color: NEO_THEME.colors.black,
+    fontWeight: '600',
+    color: c.black,
     marginBottom: 12,
     textAlign: "center",
     fontFamily: NEO_THEME.fonts.black,
@@ -251,7 +252,7 @@ const styles = StyleSheet.create({
   },
   errorText: {
     fontSize: 16,
-    color: NEO_THEME.colors.grey,
+    color: c.grey,
     textAlign: "center",
     marginBottom: 24,
     lineHeight: 24,
@@ -259,8 +260,8 @@ const styles = StyleSheet.create({
   },
   successTitle: {
     fontSize: 24,
-    fontWeight: "900",
-    color: NEO_THEME.colors.black,
+    fontWeight: '600',
+    color: c.black,
     marginBottom: 20,
     textAlign: "center",
     fontFamily: NEO_THEME.fonts.black,
@@ -271,16 +272,16 @@ const styles = StyleSheet.create({
     aspectRatio: 3 / 4,
     borderRadius: NEO_THEME.borders.radius,
     marginBottom: 20,
-    backgroundColor: NEO_THEME.colors.backgroundLight,
-    borderWidth: NEO_THEME.borders.width,
-    borderColor: NEO_THEME.colors.black,
+    backgroundColor: c.backgroundLight,
+    borderWidth: 1,
+    borderColor: c.border,
   },
   resultText: {
     fontSize: 18,
     marginBottom: 24,
     textAlign: "center",
-    color: NEO_THEME.colors.black,
-    fontWeight: "900",
+    color: c.black,
+    fontWeight: '600',
     fontFamily: NEO_THEME.fonts.black,
     textTransform: "uppercase",
   },
@@ -297,48 +298,48 @@ const styles = StyleSheet.create({
   },
   buttonIcon: {
     fontSize: 20,
-    color: NEO_THEME.colors.white,
+    color: c.white,
   },
   retryButton: {
     flex: 1,
-    backgroundColor: NEO_THEME.colors.primary,
+    backgroundColor: c.primary,
     paddingVertical: 16,
     paddingHorizontal: 20,
     borderRadius: NEO_THEME.borders.radius,
     alignItems: "center",
-    borderWidth: NEO_THEME.borders.width,
-    borderColor: NEO_THEME.colors.black,
-    shadowColor: NEO_THEME.colors.black,
-    shadowOffset: { width: 4, height: 4 },
-    shadowOpacity: 1,
-    shadowRadius: 0,
+    borderWidth: 1,
+    borderColor: c.border,
+    shadowColor: c.black,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
     elevation: 0,
   },
   retryButtonText: {
-    color: NEO_THEME.colors.white,
+    color: c.white,
     fontSize: 16,
-    fontWeight: "900",
+    fontWeight: '600',
     fontFamily: NEO_THEME.fonts.black,
   },
   saveButton: {
     flex: 1,
-    backgroundColor: NEO_THEME.colors.yellow,
+    backgroundColor: c.yellow,
     paddingVertical: 16,
     paddingHorizontal: 20,
     borderRadius: NEO_THEME.borders.radius,
     alignItems: "center",
-    borderWidth: NEO_THEME.borders.width,
-    borderColor: NEO_THEME.colors.black,
-    shadowColor: NEO_THEME.colors.black,
-    shadowOffset: { width: 4, height: 4 },
-    shadowOpacity: 1,
-    shadowRadius: 0,
+    borderWidth: 1,
+    borderColor: c.border,
+    shadowColor: c.black,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
     elevation: 0,
   },
   saveButtonText: {
-    color: NEO_THEME.colors.black,
+    color: c.black,
     fontSize: 16,
-    fontWeight: "900",
+    fontWeight: '600',
     fontFamily: NEO_THEME.fonts.black,
   },
   disabledButton: {
@@ -346,23 +347,24 @@ const styles = StyleSheet.create({
   },
   closeButton: {
     flex: 1,
-    backgroundColor: NEO_THEME.colors.grey,
+    backgroundColor: c.grey,
     paddingVertical: 16,
     paddingHorizontal: 20,
     borderRadius: NEO_THEME.borders.radius,
     alignItems: "center",
-    borderWidth: NEO_THEME.borders.width,
-    borderColor: NEO_THEME.colors.black,
-    shadowColor: NEO_THEME.colors.black,
-    shadowOffset: { width: 3, height: 3 },
-    shadowOpacity: 1,
-    shadowRadius: 0,
+    borderWidth: 1,
+    borderColor: c.border,
+    shadowColor: c.black,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
     elevation: 0,
   },
   closeButtonText: {
-    color: NEO_THEME.colors.white,
+    color: c.white,
     fontSize: 16,
-    fontWeight: "900",
+    fontWeight: '600',
     fontFamily: NEO_THEME.fonts.black,
   },
-});
+  };
+}

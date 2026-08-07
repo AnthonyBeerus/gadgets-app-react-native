@@ -1,30 +1,58 @@
 import React from "react";
 import {
   View,
-  Text,
-  StyleSheet,
-  Alert,
-  TouchableOpacity,
-  FlatList,
   ActivityIndicator,
 } from "react-native";
 import { FlashList } from "@shopify/flash-list";
 import { useCartStore } from "../../../store/cart-store";
 import { AnimatedHeaderLayout } from "../../../shared/components/layout/AnimatedHeaderLayout";
 import { CartItem } from "../components/CartItem";
-import { NEO_THEME } from "../../../shared/constants/neobrutalism";
+import { useDesignTokens, useThemedStyles, type DesignTokens, type SemanticColors } from "../../../shared/design-system";
 import { NuviaButton } from "../../../shared/components/ui/nuvia-button";
 import { NuviaText } from "../../../components/atoms/nuvia-text";
 import { useAuth } from "../../../shared/providers/auth-provider";
 
-import { useRouter } from "expo-router"; // Added import
+import { useRouter } from "expo-router";
 import { useCheckout } from "../hooks/use-checkout";
 
-// Fix for missing estimatedItemSize inside FlashListProps
 const FlashListFixed = FlashList as unknown as <T>(props: React.ComponentProps<typeof FlashList<T>> & { estimatedItemSize: number }) => React.ReactElement;
 
+function createStyles(c: SemanticColors, _tokens: DesignTokens) {
+  return {
+    content: {
+      paddingBottom: 200,
+    },
+    listContainer: {
+      padding: 16,
+    },
+    emptyContainer: {
+      padding: 40,
+      alignItems: "center" as const,
+      justifyContent: "center" as const,
+    },
+    footer: {
+      padding: 16,
+      backgroundColor: c.surface,
+      borderTopWidth: 1,
+      borderColor: c.border,
+      paddingBottom: 32,
+    },
+    totalContainer: {
+      flexDirection: "row" as const,
+      justifyContent: "space-between" as const,
+      alignItems: "center" as const,
+      marginBottom: 16,
+    },
+    checkoutButton: {
+      width: "100%" as const,
+    },
+  };
+}
+
 export default function CartScreen() {
-  const router = useRouter(); 
+  const styles = useThemedStyles(createStyles);
+  const { colors } = useDesignTokens();
+  const router = useRouter();
   const { session } = useAuth();
   const {
     items,
@@ -49,7 +77,7 @@ export default function CartScreen() {
   const renderLargeTitle = () => (
     <View>
       <NuviaText variant="display">MY CART</NuviaText>
-      <NuviaText variant="label" color={NEO_THEME.colors.grey}>
+      <NuviaText variant="label" color={colors.inkMuted}>
         {items.length} {items.length === 1 ? "ITEM" : "ITEMS"}
       </NuviaText>
     </View>
@@ -64,7 +92,7 @@ export default function CartScreen() {
           <View style={styles.footer}>
             <View style={styles.totalContainer}>
               <NuviaText variant="h3">TOTAL</NuviaText>
-              <NuviaText variant="display" color={NEO_THEME.colors.primary}>
+              <NuviaText variant="display" color={colors.ink}>
                 ${getTotalPrice()}
               </NuviaText>
             </View>
@@ -76,9 +104,9 @@ export default function CartScreen() {
               style={styles.checkoutButton}
             >
               {isProcessing ? (
-                <ActivityIndicator color={NEO_THEME.colors.white} />
+                <ActivityIndicator color={colors.surface} />
               ) : (
-                <NuviaText variant="label" color={NEO_THEME.colors.white}>
+                <NuviaText variant="label" color={colors.surface}>
                     CHECKOUT
                 </NuviaText>
               )}
@@ -91,7 +119,7 @@ export default function CartScreen() {
         {items.length === 0 ? (
           <View style={styles.emptyContainer}>
             <NuviaText variant="h2">YOUR CART IS EMPTY</NuviaText>
-            <NuviaText variant="body" color={NEO_THEME.colors.grey} style={{ textAlign: "center", marginTop: 8 }}>
+            <NuviaText variant="body" color={colors.inkMuted} style={{ textAlign: "center", marginTop: 8 }}>
               Start adding some awesome gadgets!
             </NuviaText>
           </View>
@@ -116,33 +144,3 @@ export default function CartScreen() {
     </AnimatedHeaderLayout>
   );
 }
-
-const styles = StyleSheet.create({
-  content: {
-    paddingBottom: 200,
-  },
-  listContainer: {
-    padding: 16,
-  },
-  emptyContainer: {
-    padding: 40,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  footer: {
-    padding: 16,
-    backgroundColor: NEO_THEME.colors.white,
-    borderTopWidth: 2,
-    borderColor: NEO_THEME.colors.black,
-    paddingBottom: 32,
-  },
-  totalContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 16,
-  },
-  checkoutButton: {
-    width: "100%",
-  },
-});

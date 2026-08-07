@@ -6,21 +6,33 @@ import {
   Alert,
   Pressable,
   ScrollView,
-  StyleSheet,
   Switch,
   TextInput,
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { NuviaText } from '../../../components/atoms/nuvia-text';
-import { NEO_THEME } from '../../../shared/constants/neobrutalism';
+import {
+  Text,
+  Button,
+  Surface,
+  space,
+  radii,
+  fonts,
+  elevation,
+  useDesignTokens,
+  useThemedStyles,
+  type SemanticColors,
+  type DesignTokens,
+} from '../../../shared/design-system';
 import { useAuth } from '../../../shared/providers/auth-provider';
 import { useShopStore } from '../../../store/shop-store';
 import { clearOpenShopIntent } from '../open-shop-intent';
 
 export default function OpenShopScreen() {
   const router = useRouter();
+  const styles = useThemedStyles(createStyles);
+  const { colors } = useDesignTokens();
   const { session, mounting, isMerchant, createMerchantShop, switchRole } = useAuth();
   const { malls, loadInitialData } = useShopStore();
   const [loading, setLoading] = useState(false);
@@ -48,7 +60,7 @@ export default function OpenShopScreen() {
   if (mounting) {
     return (
       <SafeAreaView style={styles.container}>
-        <ActivityIndicator size="large" color={NEO_THEME.colors.primary} />
+        <ActivityIndicator size="large" color={colors.ink} />
       </SafeAreaView>
     );
   }
@@ -89,41 +101,49 @@ export default function OpenShopScreen() {
   return (
     <SafeAreaView edges={['top']} style={styles.container}>
       <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
-        <Pressable accessibilityRole="button" accessibilityLabel="Go back" onPress={() => router.back()} style={styles.backButton}>
-          <Ionicons name="arrow-back" size={22} color={NEO_THEME.colors.black} />
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Go back"
+          onPress={() => router.back()}
+          style={styles.backButton}
+        >
+          <Ionicons name="arrow-back" size={22} color={colors.ink} />
         </Pressable>
 
-        <View style={styles.card}>
-          <Ionicons name="storefront" size={56} color={NEO_THEME.colors.black} style={styles.heroIcon} />
-          <NuviaText variant="h1" align="center">Open your shop</NuviaText>
-          <NuviaText variant="body" align="center" style={styles.description}>
-            Set up a storefront for products and competitive content pots. Discover only shows live pots after you add a product and fund a challenge.
-          </NuviaText>
+        <Surface style={styles.card} elevation="hairline">
+          <Ionicons name="storefront-outline" size={48} color={colors.ink} style={styles.heroIcon} />
+          <Text variant="h1" align="center">
+            Open your shop
+          </Text>
+          <Text variant="body" align="center" color={colors.inkMuted} style={styles.description}>
+            Set up a storefront for products and competitive content pots. Discover only shows live
+            pots after you add a product and fund a challenge.
+          </Text>
 
           <View style={styles.formGroup}>
-            <NuviaText variant="caption" style={styles.label}>SHOP NAME</NuviaText>
+            <Text variant="label">Shop name</Text>
             <TextInput
               style={styles.input}
               value={shopName}
               onChangeText={setShopName}
               placeholder="e.g. Mama T's Soul Food"
-              placeholderTextColor={NEO_THEME.colors.grey}
+              placeholderTextColor={colors.inkMuted}
             />
           </View>
 
           <View style={styles.formGroup}>
-            <NuviaText variant="caption" style={styles.label}>DISPLAY LOCATION</NuviaText>
+            <Text variant="label">Display location</Text>
             <TextInput
               style={styles.input}
               value={shopLocation}
               onChangeText={setShopLocation}
               placeholder="Molapo Crossing, Unit B12"
-              placeholderTextColor={NEO_THEME.colors.grey}
+              placeholderTextColor={colors.inkMuted}
             />
           </View>
 
           <View style={styles.formGroup}>
-            <NuviaText variant="caption" style={styles.label}>MALL (REQUIRED FOR DISCOVER)</NuviaText>
+            <Text variant="label">Mall (required for Discover)</Text>
             <View style={styles.mallList}>
               {malls.map(mall => {
                 const selected = shopMallId === mall.id;
@@ -135,122 +155,111 @@ export default function OpenShopScreen() {
                     onPress={() => setShopMallId(mall.id)}
                     style={[styles.mallOption, selected && styles.mallOptionSelected]}
                   >
-                    <NuviaText variant="bodyBold">{mall.name}</NuviaText>
-                    {selected ? <Ionicons name="checkmark-circle" size={20} color={NEO_THEME.colors.black} /> : null}
+                    <Text variant="bodyBold">{mall.name}</Text>
+                    {selected ? (
+                      <Ionicons name="checkmark-circle" size={20} color={colors.ink} />
+                    ) : null}
                   </Pressable>
                 );
               })}
               {malls.length === 0 ? (
-                <NuviaText variant="caption">Loading malls…</NuviaText>
+                <Text variant="caption">Loading malls…</Text>
               ) : null}
             </View>
           </View>
 
           <View style={styles.formGroup}>
-            <NuviaText variant="caption" style={styles.label}>SHORT DESCRIPTION</NuviaText>
+            <Text variant="label">Short description</Text>
             <TextInput
               style={[styles.input, styles.textArea]}
               value={shopDescription}
               onChangeText={setShopDescription}
               placeholder="What do you sell, and what kind of challenges will you fund?"
-              placeholderTextColor={NEO_THEME.colors.grey}
+              placeholderTextColor={colors.inkMuted}
               multiline
             />
           </View>
 
           <View style={styles.switchRow}>
-            <NuviaText variant="bodyBold">Delivery</NuviaText>
+            <Text variant="bodyBold">Delivery</Text>
             <Switch
               value={enableDelivery}
               onValueChange={setEnableDelivery}
-              trackColor={{ false: NEO_THEME.colors.greyLight, true: NEO_THEME.colors.primary }}
+              trackColor={{ false: colors.gray200, true: colors.ink }}
             />
           </View>
           <View style={styles.switchRow}>
-            <NuviaText variant="bodyBold">Collection</NuviaText>
+            <Text variant="bodyBold">Collection</Text>
             <Switch
               value={enableCollection}
               onValueChange={setEnableCollection}
-              trackColor={{ false: NEO_THEME.colors.greyLight, true: NEO_THEME.colors.primary }}
+              trackColor={{ false: colors.gray200, true: colors.ink }}
             />
           </View>
 
-          <Pressable
-            accessibilityRole="button"
-            onPress={handleCreate}
-            disabled={loading}
-            style={[styles.button, loading && styles.buttonDisabled]}
-          >
-            <NuviaText variant="bodyBold">{loading ? 'CREATING…' : 'CREATE SHOP'}</NuviaText>
-          </Pressable>
-        </View>
+          <Button onPress={handleCreate} disabled={loading} style={styles.button}>
+            {loading ? 'Creating…' : 'Create shop'}
+          </Button>
+        </Surface>
       </ScrollView>
     </SafeAreaView>
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: NEO_THEME.colors.background },
-  content: { padding: 16, paddingBottom: 40, gap: 12 },
-  backButton: {
-    width: 46,
-    height: 46,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 2,
-    borderColor: NEO_THEME.colors.black,
-    borderRadius: 14,
-    backgroundColor: NEO_THEME.colors.white,
-  },
-  card: {
-    backgroundColor: NEO_THEME.colors.white,
-    borderWidth: 3,
-    borderColor: NEO_THEME.colors.black,
-    borderRadius: 24,
-    padding: 20,
-    gap: 14,
-    boxShadow: '6px 6px 0px #000000',
-  },
-  heroIcon: { alignSelf: 'center', marginBottom: 4 },
-  description: { color: NEO_THEME.colors.grey, marginBottom: 4 },
-  formGroup: { gap: 6 },
-  label: { fontFamily: NEO_THEME.fonts.bold, color: NEO_THEME.colors.black },
-  input: {
-    minHeight: 48,
-    borderWidth: 2,
-    borderColor: NEO_THEME.colors.black,
-    borderRadius: 14,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    fontFamily: NEO_THEME.fonts.regular,
-    fontSize: 16,
-    color: NEO_THEME.colors.black,
-    backgroundColor: NEO_THEME.colors.white,
-  },
-  textArea: { minHeight: 96, textAlignVertical: 'top' },
-  mallList: { gap: 8 },
-  mallOption: {
-    minHeight: 48,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    borderWidth: 2,
-    borderColor: NEO_THEME.colors.black,
-    borderRadius: 14,
-    paddingHorizontal: 12,
-    backgroundColor: NEO_THEME.colors.white,
-  },
-  mallOptionSelected: { backgroundColor: NEO_THEME.colors.secondary },
-  switchRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  button: {
-    minHeight: 52,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 2,
-    borderColor: NEO_THEME.colors.black,
-    borderRadius: 999,
-    backgroundColor: NEO_THEME.colors.primary,
-    marginTop: 8,
-  },
-  buttonDisabled: { opacity: 0.5 },
-});
+function createStyles(c: SemanticColors, tokens: DesignTokens) {
+  return {
+    container: { flex: 1, backgroundColor: c.canvas },
+    content: { padding: space.md, paddingBottom: space.xxl, gap: space.sm },
+    backButton: {
+      width: 44,
+      height: 44,
+      alignItems: 'center' as const,
+      justifyContent: 'center' as const,
+      borderRadius: radii.md,
+      backgroundColor: c.surface,
+      ...tokens.elevation.hairline,
+    },
+    card: {
+      padding: space.lg,
+      gap: space.md,
+    },
+    heroIcon: { alignSelf: 'center' as const, marginBottom: space.xxs },
+    description: { marginBottom: space.xxs },
+    formGroup: { gap: space.xs },
+    input: {
+      minHeight: 48,
+      borderWidth: 1,
+      borderColor: c.border,
+      borderRadius: radii.md,
+      paddingHorizontal: space.sm,
+      paddingVertical: space.sm,
+      fontFamily: fonts.regular,
+      fontSize: 16,
+      color: c.ink,
+      backgroundColor: c.surface,
+    },
+    textArea: { minHeight: 96, textAlignVertical: 'top' as const },
+    mallList: { gap: space.xs },
+    mallOption: {
+      minHeight: 48,
+      flexDirection: 'row' as const,
+      alignItems: 'center' as const,
+      justifyContent: 'space-between' as const,
+      borderWidth: 1,
+      borderColor: c.border,
+      borderRadius: radii.md,
+      paddingHorizontal: space.sm,
+      backgroundColor: c.surface,
+    },
+    mallOptionSelected: {
+      backgroundColor: c.accentMuted,
+      borderColor: c.accent,
+    },
+    switchRow: {
+      flexDirection: 'row' as const,
+      alignItems: 'center' as const,
+      justifyContent: 'space-between' as const,
+    },
+    button: { marginTop: space.xs },
+  };
+}

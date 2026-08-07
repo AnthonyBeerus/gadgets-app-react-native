@@ -1,24 +1,26 @@
-import { View, Text, StyleSheet, FlatList, Image, TouchableOpacity, ActivityIndicator } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { NEO_THEME } from "../../../shared/constants/neobrutalism";
+import { View, Text, FlatList, TouchableOpacity, ActivityIndicator } from "react-native";
 import { useAuth } from "../../../shared/providers/auth-provider";
 import { getShopProducts, deleteProduct } from "../../../shared/api/api";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { Alert } from "react-native";
 import { PopProductCard } from "../../../components/shop/PopProductCard";
-
+import { NEO_THEME } from "../../../shared/constants/neobrutalism";
 import Animated, { useAnimatedScrollHandler } from "react-native-reanimated";
 import { useCollapsibleTab } from "../../../shared/context/CollapsibleTabContext";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useNeoStyles } from "../../../shared/hooks/useNeoStyles";
+import { useTheme } from "../../../shared/providers/theme-provider";
 
 export default function MerchantInventory() {
   const router = useRouter();
+  const styles = useNeoStyles(createStyles);
+  const { theme } = useTheme();
+  const c = theme.colors;
   const { merchantShopId } = useAuth();
   const { data: products, isLoading, error } = getShopProducts(merchantShopId || 0);
   const deleteProductMutation = deleteProduct();
   
-  // Collapsible Tab Logic
   const { scrollY, headerHeight, tabBarHeight } = useCollapsibleTab();
   const insets = useSafeAreaInsets();
   
@@ -27,24 +29,20 @@ export default function MerchantInventory() {
   });
 
   const handleDelete = (id: number) => {
-    console.log('[Catalog] handleDelete called for id:', id);
     Alert.alert(
       "Delete Product",
       "Are you sure you want to delete this product?",
       [
-        { text: "Cancel", style: "cancel", onPress: () => console.log('Delete cancelled') },
+        { text: "Cancel", style: "cancel" },
         { 
           text: "Delete", 
           style: "destructive", 
           onPress: () => {
-            console.log('[Catalog] Confirm delete id:', id);
             deleteProductMutation.mutate(id, {
                 onSuccess: () => {
-                    console.log('[Catalog] Delete success');
                     Alert.alert('Success', 'Product deleted');
                 },
                 onError: (err) => {
-                    console.error('[Catalog] Delete error:', err);
                     Alert.alert('Error', 'Failed to delete: ' + err.message);
                 }
             });
@@ -54,12 +52,10 @@ export default function MerchantInventory() {
     );
   };
 
-  // ... loading/error checks remain same (simple return Views are fine as they overlay everything)
-
   if (isLoading) {
     return (
       <View style={[styles.center, { paddingTop: headerHeight + tabBarHeight }]}>
-        <ActivityIndicator size="large" color={NEO_THEME.colors.primary} />
+        <ActivityIndicator size="large" color={c.primary} />
       </View>
     );
   }
@@ -80,7 +76,7 @@ export default function MerchantInventory() {
         onPress={() => item.slug && router.push(`/product/${item.slug}`)}
         actionButton={
            <TouchableOpacity onPress={() => handleDelete(item.id)} style={styles.deleteBtn}>
-              <MaterialIcons name="delete-outline" size={24} color="black" />
+              <MaterialIcons name="delete-outline" size={24} color={c.black} />
            </TouchableOpacity>
         }
       />
@@ -109,7 +105,7 @@ export default function MerchantInventory() {
               style={styles.addProductButton}
               onPress={() => router.push('/create-product')}
             >
-              <MaterialIcons name="add-box" size={20} color={NEO_THEME.colors.white} />
+              <MaterialIcons name="add-box" size={20} color={c.white} />
               <Text style={styles.addProductButtonText}>Add product</Text>
             </TouchableOpacity>
           </View>
@@ -119,61 +115,72 @@ export default function MerchantInventory() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#FAFAFA', // Clean white-ish bg to let cards pop
-  },
-  center: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  deleteBtn: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: 'white',
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderWidth: 2,
-    borderColor: 'black',
-  },
-  errorText: {
-    color: NEO_THEME.colors.red,
-    fontWeight: 'bold',
-  },
-  emptyState: {
-    padding: 40,
-    alignItems: 'center',
-  },
-  emptyText: {
-    fontFamily: NEO_THEME.fonts.black,
-    fontSize: 24,
-    marginBottom: 8,
-    textTransform: 'uppercase',
-  },
-  emptySubtext: {
-    fontFamily: NEO_THEME.fonts.bold,
-    color: NEO_THEME.colors.grey,
-    padding: 8,
-    textAlign: 'center',
-    marginBottom: 12,
-  },
-  addProductButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    backgroundColor: NEO_THEME.colors.primary,
-    borderWidth: 2,
-    borderColor: NEO_THEME.colors.black,
-    borderRadius: NEO_THEME.borders.radius,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-  },
-  addProductButtonText: {
-    color: NEO_THEME.colors.white,
-    fontFamily: NEO_THEME.fonts.bold,
-    fontSize: 14,
-  },
-});
+function createStyles(c: {
+  black: string;
+  white: string;
+  grey: string;
+  border: string;
+  background: string;
+  primary: string;
+  red: string;
+}) {
+  return {
+    container: {
+      flex: 1,
+      backgroundColor: c.background,
+    },
+    center: {
+      flex: 1,
+      justifyContent: "center" as const,
+      alignItems: "center" as const,
+    },
+    deleteBtn: {
+      width: 40,
+      height: 40,
+      borderRadius: 20,
+      backgroundColor: c.white,
+      justifyContent: "center" as const,
+      alignItems: "center" as const,
+      borderWidth: 1,
+      borderColor: c.border,
+    },
+    errorText: {
+      color: c.red,
+      fontWeight: 'bold' as const,
+    },
+    emptyState: {
+      padding: 40,
+      alignItems: 'center' as const,
+    },
+    emptyText: {
+      fontFamily: NEO_THEME.fonts.black,
+      fontSize: 24,
+      marginBottom: 8,
+      textTransform: 'uppercase' as const,
+      color: c.black,
+    },
+    emptySubtext: {
+      fontFamily: NEO_THEME.fonts.bold,
+      color: c.grey,
+      padding: 8,
+      textAlign: 'center' as const,
+      marginBottom: 12,
+    },
+    addProductButton: {
+      flexDirection: 'row' as const,
+      alignItems: 'center' as const,
+      gap: 8,
+      backgroundColor: c.primary,
+      borderWidth: 1,
+      borderColor: c.border,
+      borderRadius: NEO_THEME.borders.radius,
+      paddingHorizontal: 16,
+      paddingVertical: 12,
+    },
+    addProductButtonText: {
+      color: c.white,
+      fontFamily: NEO_THEME.fonts.bold,
+      fontSize: 14,
+    },
+  };
+}
