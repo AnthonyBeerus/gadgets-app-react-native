@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "skills": {
+    "product-designer": {
+      "source": "borghei/claude-skills",
+      "sourceType": "github",
+      "skillPath": "product-team/product-designer/SKILL.md",
+      "computedHash": "664a242b4d72e30a39c0fb0eef8a3c8c1f40d66c7cbb30635a83bce05302b08c"
+    }
+  }
+}
