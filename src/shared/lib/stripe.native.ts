@@ -1,10 +1,15 @@
 import { supabase } from './supabase';
 import { initPaymentSheet, presentPaymentSheet } from '@stripe/stripe-react-native';
+import type { CartAttribution } from '../../store/cart-store';
 
-const fetchStripekeys = async (totalAmount: number) => {
+type CheckoutItem = { productId: number; quantity: number };
+
+const fetchStripeKeys = async (items: CheckoutItem[], attribution: CartAttribution | null) => {
   const { data, error } = await supabase.functions.invoke('stripe-checkout', {
     body: {
-      totalAmount,
+      action: 'create',
+      items,
+      attribution,
     },
   });
 
@@ -16,10 +21,10 @@ const fetchStripekeys = async (totalAmount: number) => {
   return data;
 };
 
-export const setupStripePaymentSheet = async (totalAmount: number) => {
+export const setupStripePaymentSheet = async (items: CheckoutItem[], attribution: CartAttribution | null = null) => {
   // Fetch paymentIntent and publishable key from server
-  const { paymentIntent, publicKey, ephemeralKey, customer } =
-    await fetchStripekeys(totalAmount);
+  const { paymentIntent, publicKey, ephemeralKey, customer, orderId, totalAmount } =
+    await fetchStripeKeys(items, attribution);
 
   if (!paymentIntent || !publicKey) {
     throw new Error('Failed to fetch Stripe keys');
@@ -36,7 +41,15 @@ export const setupStripePaymentSheet = async (totalAmount: number) => {
      throw new Error(error.message);
    }
 
-  return paymentIntent;
+  return { paymentIntent, orderId: Number(orderId), totalAmount: Number(totalAmount) };
+};
+
+export const confirmStripeOrder = async (orderId: number) => {
+  const { data, error } = await supabase.functions.invoke('stripe-checkout', {
+    body: { action: 'confirm', orderId },
+  });
+  if (error || data?.error) throw new Error(data?.error || error?.message || 'Payment confirmation failed');
+  return data.order;
 };
 
 export const openStripeCheckout = async () => {

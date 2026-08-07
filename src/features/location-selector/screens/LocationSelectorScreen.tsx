@@ -252,6 +252,16 @@ export default function LocationSelectorScreen() {
             </TouchableOpacity>
           ))}
 
+          {!searchQuery && malls.length === 0 && (
+            <View style={styles.emptyState}>
+              <Ionicons name="location-outline" size={48} color={NEO_THEME.colors.grey} />
+              <Text style={styles.emptyStateText}>Locations coming soon</Text>
+              <Text style={styles.emptyStateCopy}>
+                Shops can still launch without a mall. Browse all shops while locations are added.
+              </Text>
+            </View>
+          )}
+
           {/* Empty State */}
           {filteredMalls.length === 0 && searchQuery && (
             <View style={styles.emptyState}>
@@ -473,5 +483,13 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: NEO_THEME.colors.grey,
     fontFamily: NEO_THEME.fonts.bold,
+  },
+  emptyStateCopy: {
+    marginTop: 8,
+    fontSize: 14,
+    color: NEO_THEME.colors.grey,
+    fontFamily: NEO_THEME.fonts.regular,
+    textAlign: "center",
+    lineHeight: 20,
   },
 });

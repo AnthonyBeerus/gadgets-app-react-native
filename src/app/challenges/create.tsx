@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TextInput, ScrollView, TouchableOpacity, Alert, Switch } from 'react-native';
+import { View, Text, StyleSheet, TextInput, ScrollView, TouchableOpacity, Alert } from 'react-native';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { useRouter } from 'expo-router';
 import DateTimePicker from '@react-native-community/datetimepicker'; 
 import { NEO_THEME } from '../../shared/constants/neobrutalism';
-import { createChallenge } from '../../shared/api/api';
+import { createChallenge, getShopProducts } from '../../shared/api/api';
 import { useAuth } from '../../shared/providers/auth-provider';
 
 const challengeSchema = z.object({
@@ -16,10 +16,14 @@ const challengeSchema = z.object({
   reward: z.string().min(3, "Reward description required"),
   deadline: z.date(),
   imageUrl: z.string().url(),
-  requirements: z.string(), // We'll split this later
+  requirements: z.string(),
   category: z.string().min(3),
-  type: z.enum(['free', 'paid', 'subscriber']),
-  entryFee: z.number().optional(),
+  productId: z.number().int().positive('Select a sponsored product'),
+  productIds: z.array(z.number().int().positive()).default([]),
+  rewardValue: z.number().positive('Voucher value must be greater than zero'),
+  contestMode: z.enum(['standard', 'competitive_pot']),
+  potValue: z.number().nonnegative(),
+  consolationVoucherValue: z.number().nonnegative(),
 });
 
 type ChallengeFormData = z.infer<typeof challengeSchema>;
@@ -28,6 +32,7 @@ export default function CreateChallengeScreen() {
   const router = useRouter();
   const { merchantShopId } = useAuth();
   const { mutate: createChallengeMutation, isPending } = createChallenge();
+  const { data: products } = getShopProducts(merchantShopId ?? 0);
   const [showDatePicker, setShowDatePicker] = useState(false);
 
   const { control, handleSubmit, setValue, watch, formState: { errors } } = useForm<ChallengeFormData>({
@@ -35,37 +40,68 @@ export default function CreateChallengeScreen() {
     defaultValues: {
       title: '',
       description: '',
-      brandName: '', // Could pre-fill with shop name if available
-      reward: '',
-      deadline: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // Default 1 week
+      brandName: '',
+      reward: 'P1000 pot · top 5 share',
+      deadline: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
       imageUrl: 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=800',
       requirements: '',
       category: 'General',
-      type: 'free',
-      entryFee: 0,
+      productId: 0,
+      productIds: [],
+      rewardValue: 50,
+      contestMode: 'competitive_pot',
+      potValue: 1000,
+      consolationVoucherValue: 25,
     }
   });
 
   const deadline = watch('deadline');
-  const type = watch('type');
+  const contestMode = watch('contestMode');
+  const productIds = watch('productIds');
+
+  const toggleProduct = (productId: number) => {
+    const next = productIds.includes(productId)
+      ? productIds.filter(id => id !== productId)
+      : [...productIds, productId];
+    setValue('productIds', next);
+    if (!watch('productId') && next[0]) setValue('productId', next[0]);
+    if (watch('productId') && !next.includes(watch('productId')) && next[0]) {
+      setValue('productId', next[0]);
+    }
+  };
 
   const onSubmit = (data: ChallengeFormData) => {
     if (!merchantShopId) {
       Alert.alert("Error", "Merchant Shop ID not found");
       return;
     }
+    if (data.contestMode === 'competitive_pot' && data.potValue <= 0) {
+      Alert.alert('Error', 'Competitive challenges need a pot value greater than zero.');
+      return;
+    }
 
-    // Convert requirements text to array (newline separated)
     const requirementsArray = data.requirements.split('\n').filter(r => r.trim().length > 0);
+    const selectedProducts = data.productIds.length > 0 ? data.productIds : [data.productId];
 
     createChallengeMutation({
       ...data,
       deadline: data.deadline.toISOString(),
       requirements: requirementsArray,
       shopId: merchantShopId,
+      type: 'free',
+      productId: data.productId || selectedProducts[0],
+      productIds: selectedProducts,
+      contestMode: data.contestMode,
+      potValue: data.potValue,
+      consolationVoucherValue: data.consolationVoucherValue,
+      reward: data.contestMode === 'competitive_pot'
+        ? `P${data.potValue} pot · top 5 share · P${data.consolationVoucherValue} consolation`
+        : data.reward,
     }, {
       onSuccess: () => {
-        Alert.alert("Success", "Challenge created successfully!");
+        Alert.alert("Success", data.contestMode === 'competitive_pot'
+          ? "Competitive challenge is live."
+          : "Creator opportunity activated for this product.");
         router.back();
       },
       onError: (error: Error) => {
@@ -87,7 +123,7 @@ export default function CreateChallengeScreen() {
         
         {/* Title */}
         <View style={styles.inputGroup}>
-          <Text style={styles.label}>Challenge Title</Text>
+          <Text style={styles.label}>Opportunity Title</Text>
           <Controller
             control={control}
             name="title"
@@ -121,16 +157,79 @@ export default function CreateChallengeScreen() {
           {errors.brandName && <Text style={styles.errorText}>{errors.brandName.message}</Text>}
         </View>
 
-        {/* Reward */}
         <View style={styles.inputGroup}>
-          <Text style={styles.label}>Prize / Reward</Text>
+          <Text style={styles.label}>Challenge Type</Text>
+          <Controller control={control} name="contestMode" render={({ field: { onChange, value } }) => (
+            <View style={styles.typeContainer}>
+              <TouchableOpacity style={[styles.typeChip, value === 'competitive_pot' && styles.typeChipSelected]} onPress={() => onChange('competitive_pot')}>
+                <Text style={[styles.typeText, value === 'competitive_pot' && styles.typeTextSelected]}>Competitive pot</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={[styles.typeChip, value === 'standard' && styles.typeChipSelected]} onPress={() => onChange('standard')}>
+                <Text style={[styles.typeText, value === 'standard' && styles.typeTextSelected]}>Standard voucher</Text>
+              </TouchableOpacity>
+            </View>
+          )} />
+        </View>
+
+        <View style={styles.inputGroup}>
+          <Text style={styles.label}>Qualifying Products</Text>
+          <Controller control={control} name="productId" render={({ field: { onChange, value } }) => (
+            <View style={styles.productList}>{products?.map((product: any) => {
+              const selected = productIds.includes(product.id) || value === product.id;
+              return (
+                <TouchableOpacity
+                  key={product.id}
+                  style={[styles.typeChip, selected && styles.typeChipSelected]}
+                  onPress={() => {
+                    onChange(product.id);
+                    toggleProduct(product.id);
+                  }}
+                >
+                  <Text style={[styles.typeText, selected && styles.typeTextSelected]}>{product.title}</Text>
+                </TouchableOpacity>
+              );
+            })}</View>
+          )} />
+          {errors.productId && <Text style={styles.errorText}>{errors.productId.message}</Text>}
+          <Text style={styles.helperText}>Select one or more menu items / SKUs that count for entry.</Text>
+        </View>
+
+        {contestMode === 'competitive_pot' ? (
+          <>
+            <View style={styles.inputGroup}>
+              <Text style={styles.label}>Prize Pot (BWP)</Text>
+              <Controller control={control} name="potValue" render={({ field: { onChange, value } }) => (
+                <TextInput style={styles.input} keyboardType="numeric" value={String(value)} onChangeText={text => onChange(Number(text) || 0)} />
+              )} />
+              <Text style={styles.helperText}>Top 5 share 40/25/15/10/10 of this pot as store vouchers.</Text>
+            </View>
+            <View style={styles.inputGroup}>
+              <Text style={styles.label}>Consolation Voucher (BWP)</Text>
+              <Controller control={control} name="consolationVoucherValue" render={({ field: { onChange, value } }) => (
+                <TextInput style={styles.input} keyboardType="numeric" value={String(value)} onChangeText={text => onChange(Number(text) || 0)} />
+              )} />
+              <Text style={styles.helperText}>Every approved entry that does not place still gets this.</Text>
+            </View>
+          </>
+        ) : (
+          <View style={styles.inputGroup}>
+            <Text style={styles.label}>Voucher Value (BWP)</Text>
+            <Controller control={control} name="rewardValue" render={({ field: { onChange, value } }) => (
+              <TextInput style={styles.input} keyboardType="numeric" value={String(value)} onChangeText={text => onChange(Number(text) || 0)} />
+            )} />
+            {errors.rewardValue && <Text style={styles.errorText}>{errors.rewardValue.message}</Text>}
+          </View>
+        )}
+
+        <View style={styles.inputGroup}>
+          <Text style={styles.label}>Reward Label</Text>
           <Controller
             control={control}
             name="reward"
             render={({ field: { onChange, value } }) => (
               <TextInput
                 style={styles.input}
-                placeholder="e.g. $100 Gift Card"
+                placeholder={contestMode === 'competitive_pot' ? 'Auto-filled from pot if blank' : 'e.g. P50 off your next visit'}
                 value={value}
                 onChangeText={onChange}
               />
@@ -203,52 +302,6 @@ export default function CreateChallengeScreen() {
         </View>
 
         
-         {/* Type & Fee */}
-         <View style={styles.row}>
-            <View style={[styles.inputGroup, { flex: 1, marginRight: 8 }]}>
-                <Text style={styles.label}>Type</Text>
-                <View style={styles.typeContainer}>
-                    {['free', 'paid'].map((t) => (
-                        <TouchableOpacity
-                            key={t}
-                            style={[
-                                styles.typeChip,
-                                type === t && styles.typeChipSelected
-                            ]}
-                            onPress={() => setValue('type', t as any)}
-                        >
-                            <Text style={[
-                                styles.typeText,
-                                type === t && styles.typeTextSelected
-                            ]}>
-                                {t.toUpperCase()}
-                            </Text>
-                        </TouchableOpacity>
-                    ))}
-                </View>
-            </View>
-
-            {type === 'paid' && (
-                <View style={[styles.inputGroup, { flex: 1, marginLeft: 8 }]}>
-                    <Text style={styles.label}>Entry Fee ($)</Text>
-                    <Controller
-                        control={control}
-                        name="entryFee"
-                        render={({ field: { onChange, value } }) => (
-                        <TextInput
-                            style={styles.input}
-                            placeholder="0"
-                            keyboardType="numeric"
-                            value={value?.toString()}
-                            onChangeText={(val) => onChange(Number(val) || 0)}
-                        />
-                        )}
-                    />
-                </View>
-            )}
-        </View>
-
-
         {/* Image URL */}
         <View style={styles.inputGroup}>
           <Text style={styles.label}>Cover Image URL</Text>
@@ -274,7 +327,7 @@ export default function CreateChallengeScreen() {
             disabled={isPending}
         >
           <Text style={styles.createButtonText}>
-            {isPending ? "Creating..." : "Launch Challenge"}
+            {isPending ? "Creating..." : contestMode === 'competitive_pot' ? "Launch Competitive Challenge" : "Activate Creator Opportunity"}
           </Text>
         </TouchableOpacity>
 
@@ -360,6 +413,7 @@ const styles = StyleSheet.create({
       flexDirection: 'row',
       gap: 8,
   },
+  productList: { gap: 8 },
   typeChip: {
       flex: 1,
       paddingVertical: 12,

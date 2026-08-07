@@ -1,69 +1,121 @@
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, Modal, Pressable } from "react-native";
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, TextInput, Switch } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { NEO_THEME } from "../../shared/constants/neobrutalism";
 import { useAuth } from "../../shared/providers/auth-provider";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useState } from "react";
-import QRCode from 'react-native-qrcode-svg';
+import { getMerchantDashboardStats } from "../../shared/api/api";
 
 export default function MerchantDashboard() {
   const router = useRouter();
-  const { isMerchant, createDevMerchant, user, switchRole } = useAuth();
+  const { isMerchant, createMerchantShop, merchantShopId, user, switchRole } = useAuth();
   const [loading, setLoading] = useState(false);
-  const [showQR, setShowQR] = useState(false);
-  const [qrData, setQrData] = useState<string | null>(null);
+  const [shopName, setShopName] = useState("");
+  const [shopLocation, setShopLocation] = useState("");
+  const [shopDescription, setShopDescription] = useState("");
+  const [enableDelivery, setEnableDelivery] = useState(false);
+  const [enableCollection, setEnableCollection] = useState(true);
+  const { data: stats } = getMerchantDashboardStats(merchantShopId);
 
-  const handleCreateDevMerchant = async () => {
-    try {
-        setLoading(true);
-        await createDevMerchant();
-        Alert.alert("Success", "Dev Merchant Account Created! You are now a merchant.");
-    } catch (error: any) {
-        Alert.alert("Error", error.message || "Failed to create merchant account.");
-    } finally {
-        setLoading(false);
+  const handleCreateMerchant = async () => {
+    if (!shopName.trim() || !shopLocation.trim()) {
+      Alert.alert("Shop details needed", "Enter a shop name and display location to continue.");
+      return;
     }
-  };
 
-  const generateHandoverCode = () => {
-      // In a real app, this would fetch the specific order to generate a code for.
-      // For this demo, we generate a mock valid payload for testing.
-      const payload = JSON.stringify({
-          orderId: 1001,
-          token: "fulfillment_secret_123",
-          timestamp: Date.now()
+    try {
+      setLoading(true);
+      await createMerchantShop({
+        shopName: shopName.trim(),
+        shopLocation: shopLocation.trim(),
+        shopDescription: shopDescription.trim() || undefined,
+        enableDelivery,
+        enableCollection,
       });
-      setQrData(payload);
-      setShowQR(true);
+    } catch (error: any) {
+      Alert.alert("Error", error.message || "Failed to create merchant account.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   if (!isMerchant) {
     return (
       <SafeAreaView style={styles.container}>
-        <View style={styles.content}>
+        <ScrollView contentContainerStyle={styles.content}>
           <View style={styles.card}>
             <MaterialIcons name="storefront" size={64} color={NEO_THEME.colors.black} style={{ marginBottom: 16 }} />
-            <Text style={styles.title}>Merchant Mode</Text>
+            <Text style={styles.title}>Open Your Shop</Text>
             <Text style={styles.description}>
-              Manage your shop, inventory, and verify orders.
+              Create a storefront linked to your account, then add products and start accepting orders.
             </Text>
-            <Text style={styles.warning}>
-              *This is a Dev Environment. Creating an account will generate a test shop linked to your user.*
-            </Text>
+
+            <View style={styles.formGroup}>
+              <Text style={styles.label}>Shop name</Text>
+              <TextInput
+                style={styles.input}
+                value={shopName}
+                onChangeText={setShopName}
+                placeholder="e.g. Neighbourhood Goods"
+              />
+            </View>
+
+            <View style={styles.formGroup}>
+              <Text style={styles.label}>Display location</Text>
+              <TextInput
+                style={styles.input}
+                value={shopLocation}
+                onChangeText={setShopLocation}
+                placeholder="Online, Johannesburg, or your pickup area"
+              />
+            </View>
+
+            <View style={styles.formGroup}>
+              <Text style={styles.label}>Short description</Text>
+              <TextInput
+                style={[styles.input, styles.textArea]}
+                value={shopDescription}
+                onChangeText={setShopDescription}
+                placeholder="What do you sell?"
+                multiline
+              />
+            </View>
+
+            <View style={styles.switchRow}>
+              <Text style={styles.label}>Delivery</Text>
+              <Switch
+                value={enableDelivery}
+                onValueChange={setEnableDelivery}
+                trackColor={{ false: "#767577", true: NEO_THEME.colors.primary }}
+              />
+            </View>
+
+            <View style={styles.switchRow}>
+              <Text style={styles.label}>Collection</Text>
+              <Switch
+                value={enableCollection}
+                onValueChange={setEnableCollection}
+                trackColor={{ false: "#767577", true: NEO_THEME.colors.primary }}
+              />
+            </View>
             
             <TouchableOpacity 
                 style={[styles.button, loading && { opacity: 0.5 }]} 
-                onPress={handleCreateDevMerchant}
+                onPress={handleCreateMerchant}
                 disabled={loading}
             >
-              <Text style={styles.buttonText}>{loading ? "Creating..." : "Activate Dev Merchant Account"}</Text>
+              <Text style={styles.buttonText}>{loading ? "Creating..." : "Create Shop"}</Text>
             </TouchableOpacity>
           </View>
-        </View>
+        </ScrollView>
       </SafeAreaView>
     );
   }
+
+  const productCount = Number(stats?.product_count ?? 0);
+  const pendingOrderCount = Number(stats?.pending_order_count ?? 0);
+  const todaysSales = Number(stats?.todays_sales ?? 0);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -89,12 +141,16 @@ export default function MerchantDashboard() {
 
         <View style={styles.statsContainer}>
             <View style={styles.statCard}>
-                <Text style={styles.statValue}>12</Text>
+                <Text style={styles.statValue}>{pendingOrderCount}</Text>
                 <Text style={styles.statLabel}>Pending Orders</Text>
             </View>
             <View style={[styles.statCard, { backgroundColor: NEO_THEME.colors.yellow }]}>
-                <Text style={styles.statValue}>$1,240</Text>
+                <Text style={styles.statValue}>${todaysSales.toFixed(0)}</Text>
                 <Text style={styles.statLabel}>Today's Sales</Text>
+            </View>
+            <View style={[styles.statCard, { backgroundColor: NEO_THEME.colors.sky }]}>
+                <Text style={styles.statValue}>{productCount}</Text>
+                <Text style={styles.statLabel}>Products</Text>
             </View>
         </View>
 
@@ -110,10 +166,10 @@ export default function MerchantDashboard() {
                 </TouchableOpacity>
                 <TouchableOpacity 
                   style={styles.actionCard}
-                  onPress={generateHandoverCode}
+                  onPress={() => router.push('/create-product')}
                 >
-                    <MaterialIcons name="qr-code" size={32} color={NEO_THEME.colors.black} />
-                    <Text style={styles.actionText}>Generate Handover Code</Text>
+                    <MaterialIcons name="add-box" size={32} color={NEO_THEME.colors.black} />
+                    <Text style={styles.actionText}>Add Product</Text>
                 </TouchableOpacity>
             </View>
 
@@ -123,43 +179,15 @@ export default function MerchantDashboard() {
                   onPress={() => router.push('/scan-order')}
                 >
                     <MaterialIcons name="qr-code-scanner" size={32} color={NEO_THEME.colors.black} />
-                    <Text style={styles.actionText}>Scan (Debug)</Text>
+                    <Text style={styles.actionText}>Scan Order</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.actionCard} onPress={() => router.push('/(merchant)/vouchers')}>
+                    <MaterialIcons name="redeem" size={32} color={NEO_THEME.colors.black} />
+                    <Text style={styles.actionText}>Redeem Voucher</Text>
                 </TouchableOpacity>
              </View>
         </View>
       </ScrollView>
-
-      {/* QR Code Modal */}
-      <Modal visible={showQR} animationType="slide" transparent>
-          <View style={styles.modalOverlay}>
-              <View style={styles.modalContent}>
-                  <View style={styles.modalHeader}>
-                      <Text style={styles.modalTitle}>Handover QR</Text>
-                      <TouchableOpacity onPress={() => setShowQR(false)}>
-                          <MaterialIcons name="close" size={24} color={NEO_THEME.colors.black} />
-                      </TouchableOpacity>
-                  </View>
-                  
-                  <View style={styles.qrContainer}>
-                      {qrData && (
-                          <QRCode 
-                              value={qrData}
-                              size={200}
-                              testID="handover-qr-code"
-                          />
-                      )}
-                  </View>
-                  
-                  <Text style={styles.qrInstructions}>
-                      Ask customer to scan to confirm receipt.
-                  </Text>
-
-                  <TouchableOpacity style={styles.closeButton} onPress={() => setShowQR(false)}>
-                      <Text style={styles.closeButtonText}>Done</Text>
-                  </TouchableOpacity>
-              </View>
-          </View>
-      </Modal>
 
     </SafeAreaView>
   );
@@ -171,9 +199,9 @@ const styles = StyleSheet.create({
     backgroundColor: "#F0F0F0",
   },
   content: {
-    flex: 1,
     justifyContent: "center",
     padding: 20,
+    minHeight: "100%",
   },
   scrollContent: {
     padding: 20,
@@ -217,13 +245,37 @@ const styles = StyleSheet.create({
     marginBottom: 24,
     color: NEO_THEME.colors.grey,
   },
-  warning: {
-    fontSize: 12,
+  formGroup: {
+    width: "100%",
+    marginBottom: 14,
+  },
+  label: {
+    fontSize: 14,
+    fontFamily: NEO_THEME.fonts.bold,
+    color: NEO_THEME.colors.black,
+    marginBottom: 6,
+  },
+  input: {
+    width: "100%",
+    backgroundColor: NEO_THEME.colors.white,
+    borderWidth: NEO_THEME.borders.width,
+    borderColor: NEO_THEME.colors.black,
+    borderRadius: NEO_THEME.borders.radius,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
     fontFamily: NEO_THEME.fonts.regular,
-    textAlign: "center",
-    marginBottom: 24,
-    color: NEO_THEME.colors.primary,
-    fontStyle: 'italic',
+    fontSize: 14,
+  },
+  textArea: {
+    minHeight: 88,
+    textAlignVertical: "top",
+  },
+  switchRow: {
+    width: "100%",
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 14,
   },
   button: {
     backgroundColor: NEO_THEME.colors.primary,
@@ -247,9 +299,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: 16,
     marginBottom: 24,
+    flexWrap: 'wrap',
   },
   statCard: {
-    flex: 1,
+    flexGrow: 1,
+    flexBasis: 140,
     backgroundColor: NEO_THEME.colors.white,
     padding: 16,
     borderRadius: NEO_THEME.borders.radius,
@@ -317,58 +371,4 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: NEO_THEME.colors.black,
   },
-  modalOverlay: {
-      flex: 1,
-      backgroundColor: 'rgba(0,0,0,0.5)',
-      justifyContent: 'center',
-      alignItems: 'center',
-      padding: 20
-  },
-  modalContent: {
-      backgroundColor: NEO_THEME.colors.white,
-      width: '100%',
-      maxWidth: 350,
-      borderRadius: NEO_THEME.borders.radius,
-      borderWidth: NEO_THEME.borders.width,
-      borderColor: NEO_THEME.colors.black,
-      padding: 24,
-      alignItems: 'center',
-      shadowColor: NEO_THEME.colors.black,
-      shadowOffset: { width: 8, height: 8 },
-      shadowOpacity: 1,
-      shadowRadius: 0,
-  },
-  modalHeader: {
-      width: '100%',
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      marginBottom: 24,
-  },
-  modalTitle: {
-      fontSize: 20,
-      fontFamily: NEO_THEME.fonts.bold,
-  },
-  qrContainer: {
-      padding: 16,
-      backgroundColor: 'white',
-      borderRadius: 12,
-      marginBottom: 24,
-  },
-  qrInstructions: {
-      fontFamily: NEO_THEME.fonts.regular,
-      textAlign: 'center',
-      marginBottom: 24,
-      color: NEO_THEME.colors.grey,
-  },
-  closeButton: {
-      backgroundColor: NEO_THEME.colors.black,
-      paddingVertical: 12,
-      paddingHorizontal: 32,
-      borderRadius: NEO_THEME.borders.radius,
-  },
-  closeButtonText: {
-      color: 'white',
-      fontFamily: NEO_THEME.fonts.bold,
-  }
 });

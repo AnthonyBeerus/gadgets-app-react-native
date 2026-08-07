@@ -17,7 +17,9 @@ import { useToast } from "react-native-toast-notifications";
 import { useCartStore } from "../../../store/cart-store";
 import { getProduct } from "../../../shared/api/api";
 import { NEO_THEME } from "../../../shared/constants/neobrutalism";
-import TryOnModal from "../../virtual-try-on/components/TryOnModal";
+import { useQuery } from '@tanstack/react-query';
+import { getOpportunityForProduct, recordCreatorOpportunityEvent } from '../../discovery/api';
+import type { DiscoverySource } from '../../../store/cart-store';
 import { NuviaButton } from "../../../shared/components/ui/nuvia-button";
 import { StaticHeader } from "../../../shared/components/layout/StaticHeader";
 import { NuviaText } from "../../../components/atoms/nuvia-text";
@@ -26,18 +28,21 @@ import { NuviaTag } from "../../../shared/components/ui/nuvia-tag";
 const { width } = Dimensions.get("window");
 
 export default function ProductDetailsScreen() {
-  const { slug } = useLocalSearchParams<{ slug: string }>();
+  const { slug, source, opportunityId } = useLocalSearchParams<{
+    slug: string;
+    source?: DiscoverySource;
+    opportunityId?: string;
+  }>();
   const router = useRouter();
   const toast = useToast();
 
   const { data: product, error, isLoading } = getProduct(slug);
-  const { items, addItem, incrementItem, decrementItem } = useCartStore();
+  const { items, addItem, incrementItem, decrementItem, setAttribution } = useCartStore();
 
   const cartItem = items.find((item) => item.id === product?.id);
   const initialQuantity = cartItem ? cartItem.quantity : 0;
 
   const [quantity, setQuantity] = useState(initialQuantity);
-  const [tryOnModalVisible, setTryOnModalVisible] = useState(false);
   const [selectedColor, setSelectedColor] = useState<any>(null);
   const [selectedSize, setSelectedSize] = useState("M");
 
@@ -51,6 +56,19 @@ export default function ProductDetailsScreen() {
       setSelectedColor(colorVariants[0]);
     }
   }, [product?.id]);
+
+  const parsedOpportunityId = opportunityId ? Number(opportunityId) : undefined;
+  const opportunity = useQuery({
+    queryKey: ['product-opportunity', product?.id, parsedOpportunityId],
+    queryFn: () => getOpportunityForProduct(Number(product!.id), parsedOpportunityId),
+    enabled: Boolean(product?.id),
+    staleTime: 60_000,
+  });
+
+  useEffect(() => {
+    if (!parsedOpportunityId || !source) return;
+    recordCreatorOpportunityEvent(parsedOpportunityId, 'detail_open', source).catch(() => undefined);
+  }, [parsedOpportunityId, source]);
 
   // Get the current hero image based on selected color variant
   const currentHeroImage = selectedColor?.image_url || product?.heroImage;
@@ -96,6 +114,7 @@ export default function ProductDetailsScreen() {
       quantity: quantity === 0 ? 1 : quantity,
       maxQuantity: product.maxQuantity || 0,
     });
+    if (source) setAttribution({ source, opportunityId: parsedOpportunityId });
     toast.show("Added to cart", {
       type: "success",
       placement: "top",
@@ -149,28 +168,6 @@ export default function ProductDetailsScreen() {
           />
         </View>
 
-          {/* Virtual Try-On Button */}
-          {supportsVirtualTryOn && (
-            <View style={styles.tryOnButtonContainer}>
-              <TouchableOpacity
-                style={styles.tryOnButtonProminent}
-                onPress={() => setTryOnModalVisible(true)}
-                activeOpacity={0.8}
-              >
-                <View style={styles.tryOnIconContainer}>
-                  <Ionicons name="camera" size={28} color="#fff" />
-                </View>
-                <View style={styles.tryOnTextContainer}>
-                  <NuviaText variant="h3">VIRTUAL TRY-ON</NuviaText>
-                  <NuviaText variant="caption">
-                    See how it looks on you!
-                  </NuviaText>
-                </View>
-                <Ionicons name="chevron-forward" size={24} color={NEO_THEME.colors.black} />
-              </TouchableOpacity>
-            </View>
-          )}
-
           {/* Product Details */}
           <View style={styles.detailsContainer}>
             {/* Price and Rating */}
@@ -188,6 +185,34 @@ export default function ProductDetailsScreen() {
                 </View>
               </View>
             </View>
+
+            {opportunity.data && (
+              <View style={styles.opportunityCard}>
+                <View style={styles.opportunityHeading}>
+                  <View style={styles.tiktokIcon}>
+                    <Ionicons name="logo-tiktok" size={22} color={NEO_THEME.colors.white} />
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <NuviaText variant="caption">CREATOR OPPORTUNITY</NuviaText>
+                    <NuviaText variant="h2">P{Number(opportunity.data.reward_value).toFixed(2)} VOUCHER</NuviaText>
+                  </View>
+                </View>
+                <NuviaText variant="bodyBold">{opportunity.data.title}</NuviaText>
+                <NuviaText variant="body">{opportunity.data.description}</NuviaText>
+                {(opportunity.data.requirements ?? []).slice(0, 3).map((requirement: string) => (
+                  <View key={requirement} style={styles.requirementRow}>
+                    <Ionicons name="checkmark-circle" size={17} color={NEO_THEME.colors.black} />
+                    <NuviaText variant="caption" style={{ flex: 1 }}>{requirement}</NuviaText>
+                  </View>
+                ))}
+                <View style={styles.unlockNote}>
+                  <Ionicons name="lock-closed" size={16} color={NEO_THEME.colors.black} />
+                  <NuviaText variant="caption" style={{ flex: 1 }}>
+                    Complete this purchase to unlock eligibility. Muse verifies your external TikTok before the merchant voucher is issued.
+                  </NuviaText>
+                </View>
+              </View>
+            )}
 
             {/* Color Variants */}
             {supportsVirtualTryOn && colorVariants.length > 0 && (
@@ -267,9 +292,7 @@ export default function ProductDetailsScreen() {
             <View style={styles.section}>
               <NuviaText variant="h3" style={styles.sectionTitle}>DETAILS</NuviaText>
               <NuviaText variant="body" style={styles.description}>
-                A stylish and comfortable {product.title.toLowerCase()}. Made with
-                high-quality materials for maximum durability and comfort. Perfect
-                for casual wear or special occasions.
+                {product.description || `Learn more about ${product.title}.`}
               </NuviaText>
             </View>
 
@@ -327,17 +350,6 @@ export default function ProductDetailsScreen() {
         </NuviaButton>
       </View>
 
-      {/* Virtual Try-On Modal */}
-      <TryOnModal
-        visible={tryOnModalVisible}
-        onClose={() => setTryOnModalVisible(false)}
-        shopProducts={[
-          {
-            ...product,
-            heroImage: currentHeroImage,
-          },
-        ]}
-      />
     </SafeAreaView>
   );
 }
@@ -526,6 +538,44 @@ const styles = StyleSheet.create({
     color: NEO_THEME.colors.dark,
     lineHeight: 24,
     fontFamily: NEO_THEME.fonts.regular,
+  },
+  opportunityCard: {
+    gap: 10,
+    backgroundColor: NEO_THEME.colors.secondary,
+    borderWidth: 3,
+    borderColor: NEO_THEME.colors.black,
+    borderRadius: 18,
+    padding: 16,
+    marginBottom: 20,
+    boxShadow: '5px 5px 0px #000000',
+  },
+  opportunityHeading: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  tiktokIcon: {
+    width: 44,
+    height: 44,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: NEO_THEME.colors.black,
+    borderRadius: 12,
+  },
+  requirementRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 7,
+  },
+  unlockNote: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 8,
+    backgroundColor: NEO_THEME.colors.white,
+    borderWidth: 2,
+    borderColor: NEO_THEME.colors.black,
+    borderRadius: 12,
+    padding: 10,
   },
   tryOnButtonContainer: {
     paddingHorizontal: 20,

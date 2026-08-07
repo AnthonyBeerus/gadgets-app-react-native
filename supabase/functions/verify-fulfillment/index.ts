@@ -49,19 +49,6 @@ Deno.serve(async (req) => {
       return new Response('Unauthorized', { status: 401, headers: corsHeaders });
     }
 
-    // Verify user has 'merchant' role. 
-    // Assuming role is stored in app_metadata or user_metadata.
-    // Adjust this based on your actual Source of Truth for roles.
-    // For now, checking app_metadata.role or user_metadata.role
-    const userRole = user.app_metadata?.role || user.user_metadata?.role;
-    
-    // START_TEMPORARY_BYPASS: If you haven't set up merchant roles yet, you might want to comment this out
-    // or set a specific ALLOWED_MERCHANT_EMAIL env var.
-    // if (userRole !== 'merchant') {
-    //    return new Response('Forbidden: Merchant access required', { status: 403, headers: corsHeaders });
-    // }
-    // END_TEMPORARY_BYPASS
-
     // 1. Fetch Order
     const { data: order, error: orderError } = await supabaseAdmin
         .from('order')
@@ -71,6 +58,14 @@ Deno.serve(async (req) => {
 
     if (orderError || !order) {
         return new Response('Order not found', { status: 404, headers: corsHeaders });
+    }
+
+    const { data: ownedItems, error: ownershipError } = await supabaseAdmin
+      .from('order_item')
+      .select('product!inner(shop_id, shops!inner(owner_id))')
+      .eq('order', orderId);
+    if (ownershipError || !ownedItems?.length || ownedItems.some((item: any) => item.product?.shops?.owner_id !== user.id)) {
+      return new Response('Forbidden: order belongs to another merchant', { status: 403, headers: corsHeaders });
     }
 
     // 2. TOKEN & IDEMPOTENCY CHECK
@@ -94,7 +89,7 @@ Deno.serve(async (req) => {
     }
 
     // 3. Validate Payment
-    const paymentIntentId = order.payment_intent_id;
+    const paymentIntentId = order.stripe_payment_intent_id;
     if (!paymentIntentId) {
          return new Response(JSON.stringify({ 
              verified: false, 
@@ -105,17 +100,7 @@ Deno.serve(async (req) => {
     }
 
     // 4. Retrieve PaymentIntent from Stripe
-    let paymentIntent;
-    if (paymentIntentId === 'pi_test_manual_unblock') {
-        // Bypass for manual testing/unblocking
-        paymentIntent = {
-            status: 'succeeded',
-            amount: (order.totalPrice || 0) * 100,
-            currency: 'usd'
-        };
-    } else {
-        paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
-    }
+    const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
 
     if (paymentIntent.status === 'succeeded') {
         // 5. Update Order Status

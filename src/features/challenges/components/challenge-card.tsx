@@ -30,24 +30,7 @@ export const ChallengeCard = ({ challenge, onPress }: ChallengeCardProps) => {
             <Text style={styles.brandName}>{challenge.brand_name}</Text>
           </View>
           
-          <View style={styles.badgesRow}>
-            {challenge.is_premium && (
-              <View style={styles.premiumBadge}>
-                <Ionicons name="star" size={12} color={NEO_THEME.colors.black} />
-                <Text style={styles.premiumText}>PLUS</Text>
-              </View>
-            )}
-            {challenge.entry_fee ? (
-              <View style={styles.feeBadge}>
-                <Ionicons name="diamond" size={12} color={NEO_THEME.colors.white} />
-                <Text style={styles.feeText}>{challenge.entry_fee}</Text>
-              </View>
-            ) : (
-              <View style={styles.freeBadge}>
-                <Text style={styles.freeText}>FREE</Text>
-              </View>
-            )}
-          </View>
+          <View style={styles.freeBadge}><Text style={styles.freeText}>PURCHASE-LINKED</Text></View>
         </View>
         
         <View style={styles.footer}>
@@ -63,7 +46,7 @@ export const ChallengeCard = ({ challenge, onPress }: ChallengeCardProps) => {
             </View>
             <View style={styles.participantsContainer}>
               <Ionicons name="people" size={12} color="#E0E0E0" />
-              <Text style={styles.deadlineText}>{challenge.participants_count} joined</Text>
+              <Text style={styles.deadlineText}>{challenge.participants_count} creators</Text>
             </View>
           </View>
         </View>

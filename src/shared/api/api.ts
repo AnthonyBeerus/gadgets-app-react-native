@@ -137,6 +137,40 @@ export const getShopProducts = (shopId: number) => {
   });
 };
 
+export const getMerchantDashboardStats = (shopId: number | null) => {
+  return useQuery({
+    queryKey: ["merchantDashboardStats", shopId],
+    enabled: !!shopId,
+    queryFn: async () => {
+      if (!shopId) {
+        return {
+          product_count: 0,
+          pending_order_count: 0,
+          todays_sales: 0,
+        };
+      }
+
+      const { data, error } = await (supabase as any).rpc("get_merchant_dashboard_stats", {
+        target_shop_id: shopId,
+      });
+
+      if (error) {
+        throw new Error(
+          "An error occurred while fetching merchant stats: " + error.message
+        );
+      }
+
+      return (
+        data?.[0] ?? {
+          product_count: 0,
+          pending_order_count: 0,
+          todays_sales: 0,
+        }
+      );
+    },
+  });
+};
+
 export const getProductsWithShops = () => {
   return useQuery({
     queryKey: ["productsWithShops"],
@@ -229,17 +263,11 @@ export const getMyOrders = () => {
   });
 };
 
-// Helper to generate a secure random token for QR fulfillment verification
-const generateFulfillmentToken = () => {
-  return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
-};
-
 export const createOrder = () => {
   const { user } = useAuth();
   const userId = user?.id;
 
   const slug = generateOrderSlug();
-  const fulfillmentToken = generateFulfillmentToken();
 
   const queryClient = useQueryClient();
 
@@ -256,7 +284,6 @@ export const createOrder = () => {
           status: "Pending",
           payment_intent_id: paymentIntentId,
           stripe_payment_status: paymentStatus || 'pending',
-          fulfillment_token: fulfillmentToken
         })
         .select("*")
         .single();
@@ -349,6 +376,11 @@ export const createOrderItem = () => {
         )
         .select("*");
 
+      if (error)
+        throw new Error(
+          "An error occurred while creating order item: " + error.message
+        );
+
       const productQuantities = insertData.reduce(
         (acc, { productId, quantity }) => {
           if (!acc[productId]) {
@@ -362,18 +394,18 @@ export const createOrderItem = () => {
 
       await Promise.all(
         Object.entries(productQuantities).map(
-          async ([productId, totalQuantity]) =>
-            supabase.rpc("decrement_product_quantity", {
+          async ([productId, totalQuantity]) => {
+            const { error: stockError } = await supabase.rpc("decrement_product_quantity", {
               product_id: Number(productId),
               quantity: totalQuantity,
-            })
+            });
+
+            if (stockError) {
+              throw new Error("Failed to decrement stock: " + stockError.message);
+            }
+          }
         )
       );
-
-      if (error)
-        throw new Error(
-          "An error occurred while creating order item: " + error.message
-        );
 
       return data;
     },
@@ -391,7 +423,9 @@ export interface OrderWithItems {
   order_items: {
     id: number;
     quantity: number;
+    product: number;
     products: {
+      id: number;
       title: string;
       heroImage: string;
       price: number;
@@ -399,21 +433,29 @@ export interface OrderWithItems {
   }[];
 }
 
-export const getMyOrder = (slug: string) => {
+/** Lookup by numeric order id (post-checkout) or by slug (order details deep link). */
+export const getMyOrder = (idOrSlug: string) => {
   const { user } = useAuth();
   const userId = user?.id;
+  const numericId = /^\d+$/.test(idOrSlug) ? Number(idOrSlug) : null;
 
   return useQuery({
-    queryKey: ["orders", slug],
+    queryKey: ["orders", idOrSlug],
     queryFn: async () => {
       if (!userId) throw new Error("User not authenticated");
+      if (!idOrSlug) throw new Error("Order identifier is required");
 
-      const { data, error } = await supabase
+      let query = supabase
         .from("order")
         .select("*, order_items:order_item(*, products:product(*))")
-        .eq("slug", slug)
-        .eq("user", userId)
-        .single();
+        .eq("user", userId);
+
+      query =
+        numericId !== null
+          ? query.eq("id", numericId)
+          : query.eq("slug", idOrSlug);
+
+      const { data, error } = await query.single();
 
       if (error || !data)
         throw new Error(
@@ -422,6 +464,7 @@ export const getMyOrder = (slug: string) => {
 
       return data as unknown as OrderWithItems;
     },
+    enabled: !!userId && !!idOrSlug,
   });
 };
 
@@ -1193,8 +1236,18 @@ export const createChallenge = () => {
       type: 'free' | 'paid' | 'subscriber';
       entryFee?: number;
       shopId: number;
+      productId: number;
+      productIds?: number[];
+      rewardValue: number;
+      contestMode?: 'standard' | 'competitive_pot';
+      potValue?: number;
+      consolationVoucherValue?: number;
     }) {
-      const { data, error } = await supabase
+      const contestMode = challengeData.contestMode ?? 'standard';
+      const productIds = Array.from(
+        new Set([challengeData.productId, ...(challengeData.productIds ?? [])].filter(Boolean))
+      );
+      const { data, error } = await (supabase as any)
         .from("challenges")
         .insert({
           title: challengeData.title,
@@ -1208,8 +1261,22 @@ export const createChallenge = () => {
           type: challengeData.type,
           entry_fee: challengeData.entryFee,
           shop_id: challengeData.shopId,
+          product_id: challengeData.productId,
+          reward_value: contestMode === 'competitive_pot'
+            ? (challengeData.consolationVoucherValue ?? challengeData.rewardValue)
+            : challengeData.rewardValue,
+          reward_currency: 'BWP',
+          voucher_valid_days: 30,
+          manual_verification_enabled: true,
           status: 'active',
-          participants_count: 0
+          participants_count: 0,
+          contest_mode: contestMode,
+          pot_value: contestMode === 'competitive_pot' ? challengeData.potValue : null,
+          pot_currency: 'BWP',
+          pot_splits: { '1': 0.4, '2': 0.25, '3': 0.15, '4': 0.1, '5': 0.1 },
+          consolation_voucher_value:
+            contestMode === 'competitive_pot' ? (challengeData.consolationVoucherValue ?? 25) : null,
+          score_rule: 'engagement_quality',
         })
         .select("*")
         .single();
@@ -1220,12 +1287,23 @@ export const createChallenge = () => {
         );
       }
 
+      if (productIds.length > 0) {
+        const { error: qualifyError } = await (supabase as any)
+          .from('challenge_qualifying_products')
+          .upsert(
+            productIds.map(productId => ({ challenge_id: data.id, product_id: productId })),
+            { onConflict: 'challenge_id,product_id' }
+          );
+        if (qualifyError) {
+          throw new Error('Challenge created but qualifying products failed: ' + qualifyError.message);
+        }
+      }
+
       return data;
     },
 
     async onSuccess() {
       await queryClient.invalidateQueries({ queryKey: ["shopChallenges"] });
-      // ongoing_challenges might be another key
     },
   });
 };
@@ -1610,6 +1688,7 @@ export const createProduct = () => {
         .from("product")
         .insert({
           ...productData,
+          category: Number(productData.category) || 1,
           slug: uniqueSlug,
         })
         .select("*")
@@ -1685,7 +1764,17 @@ export const deleteProduct = () => {
 
 export const uploadProductImage = async (uri: string) => {
   try {
+    const {
+      data: { user },
+      error: userError,
+    } = await supabase.auth.getUser();
+
+    if (userError || !user) {
+      throw new Error("You must be signed in to upload product images.");
+    }
+
     const filename = `product-${Date.now()}-${Math.random().toString(36).substring(7)}.jpg`;
+    const storagePath = `${user.id}/${filename}`;
     const formData = new FormData();
     
     // @ts-ignore - React Native FormData expects specific object structure
@@ -1697,7 +1786,7 @@ export const uploadProductImage = async (uri: string) => {
 
     const { data, error } = await supabase.storage
       .from('product-images')
-      .upload(filename, formData, {
+      .upload(storagePath, formData, {
         cacheControl: '3600',
         upsert: false,
       });
@@ -1708,7 +1797,7 @@ export const uploadProductImage = async (uri: string) => {
 
     const { data: { publicUrl } } = supabase.storage
       .from('product-images')
-      .getPublicUrl(filename);
+      .getPublicUrl(data.path);
 
     return publicUrl;
   } catch (error: any) {

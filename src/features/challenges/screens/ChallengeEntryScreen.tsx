@@ -1,137 +1,210 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TextInput, TouchableOpacity, Image, ActivityIndicator } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { ActivityIndicator, Linking, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import * as Crypto from 'expo-crypto';
+import * as SecureStore from 'expo-secure-store';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Ionicons } from '@expo/vector-icons';
-import * as ImagePicker from 'expo-image-picker';
 import { useToast } from 'react-native-toast-notifications';
 import { NEO_THEME } from '../../../shared/constants/neobrutalism';
 import { StaticHeader } from '../../../shared/components/layout/StaticHeader';
 import { useChallengeStore } from '../store/challenge-store';
-import { UploadBox } from '../../../shared/components/ui/UploadBox';
-import { InfoBox } from '../../../shared/components/ui/InfoBox';
-import { useCreateSubmission } from '../api/submissions';
+import { CONSENT_TERMS, tiktokApi, useClaimPurchaseCode, useCreateSubmission, useCreatorAccount, useOpportunityEligibility, useTikTokVideos } from '../api/submissions';
+import { TikTokVideo } from '../types/challenge';
+import { PILOT_FEATURES } from '../../../shared/constants/pilot-features';
+
+const VERIFIER_KEY = 'muse-tiktok-pkce-verifier';
+const REDIRECT_URI = 'muse://tiktok/callback';
+const toBase64Url = (value: string) => value.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/g, '');
 
 export default function ChallengeEntryScreen() {
   const { id } = useLocalSearchParams();
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const toast = useToast();
-  const { challenges } = useChallengeStore();
-  const createSubmission = useCreateSubmission();
+  const challengeId = Number(Array.isArray(id) ? id[0] : id);
+  const challenges = useChallengeStore(s => s.challenges);
+  const loadingChallenge = useChallengeStore(s => s.loading);
+  const fetchChallengeById = useChallengeStore(s => s.fetchChallengeById);
+  const [challenge, setChallenge] = useState(() =>
+    challenges.find(item => item.id === challengeId) ?? null
+  );
+  const accountQuery = useCreatorAccount();
+  const videosQuery = useTikTokVideos(accountQuery.data?.connection_status === 'connected');
+  const eligibility = useOpportunityEligibility(challengeId, challenge?.product_id, challenge?.shop_id);
+  const submit = useCreateSubmission();
+  const [selectedVideo, setSelectedVideo] = useState<TikTokVideo | null>(null);
+  const [manualUrl, setManualUrl] = useState('');
+  const [manualHandle, setManualHandle] = useState('');
+  const [consentAccepted, setConsentAccepted] = useState(false);
+  const [connecting, setConnecting] = useState(false);
+  const [purchaseCode, setPurchaseCode] = useState('');
+  const claimCode = useClaimPurchaseCode();
 
-  const [mediaUri, setMediaUri] = useState<string | null>(null);
-  const [mediaType, setMediaType] = useState<'image' | 'video'>('image');
-  const [caption, setCaption] = useState('');
+  const proof = eligibility.data?.[0] ?? null;
+  const manualFallback = !!challenge?.manual_verification_enabled || PILOT_FEATURES.manualTikTokVerification;
 
-  const challenge = challenges.find(c => c.id === Number(id));
-
-  if (!challenge) return null;
-
-  const pickMedia = async () => {
-    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (status !== 'granted') {
-      toast.show('Media library permission is required to upload.', { type: 'warning' });
+  useEffect(() => {
+    if (!Number.isFinite(challengeId) || challengeId <= 0) return;
+    const cached = challenges.find(item => item.id === challengeId);
+    if (cached) {
+      setChallenge(cached);
       return;
     }
-
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.All,
-      allowsEditing: true,
-      quality: 0.8,
+    let cancelled = false;
+    void fetchChallengeById(challengeId).then(found => {
+      if (!cancelled) setChallenge(found);
     });
+    return () => {
+      cancelled = true;
+    };
+  }, [challengeId, challenges, fetchChallengeById]);
 
-    if (!result.canceled && result.assets && result.assets.length > 0) {
-      const asset = result.assets[0];
-      setMediaUri(asset.uri);
-      setMediaType(asset.type === 'video' ? 'video' : 'image');
-    }
-  };
+  useEffect(() => {
+    const handleUrl = async ({ url }: { url: string }) => {
+      if (!url.startsWith(REDIRECT_URI)) return;
+      const query = new URL(url).searchParams;
+      const code = query.get('code');
+      const state = query.get('state');
+      const verifier = await SecureStore.getItemAsync(VERIFIER_KEY);
+      if (!code || !state || !verifier) {
+        toast.show('TikTok connection could not be completed.', { type: 'danger' });
+        return;
+      }
+      try {
+        setConnecting(true);
+        await tiktokApi.callback(code, state, verifier);
+        await SecureStore.deleteItemAsync(VERIFIER_KEY);
+        await accountQuery.refetch();
+        toast.show('TikTok connected.', { type: 'success' });
+      } catch (error) {
+        toast.show(error instanceof Error ? error.message : 'TikTok connection failed.', { type: 'danger' });
+      } finally {
+        setConnecting(false);
+      }
+    };
+    const subscription = Linking.addEventListener('url', handleUrl);
+    Linking.getInitialURL().then(url => { if (url) void handleUrl({ url }); });
+    return () => subscription.remove();
+  }, []);
 
-  const handleSubmit = async () => {
-    if (!mediaUri) {
-      toast.show('Please upload your content first.', { type: 'warning' });
-      return;
-    }
-
+  const connectTikTok = async () => {
     try {
-      await createSubmission.mutateAsync({
-        challengeId: challenge.id,
-        uri: mediaUri,
-        mediaType,
-        caption,
+      setConnecting(true);
+      const random = Crypto.getRandomBytes(32);
+      const verifier = toBase64Url(globalThis.btoa(Array.from(random, byte => String.fromCharCode(byte)).join('')));
+      const challengeHash = await Crypto.digestStringAsync(Crypto.CryptoDigestAlgorithm.SHA256, verifier, {
+        encoding: Crypto.CryptoEncoding.BASE64,
       });
-      toast.show('Entry submitted! Track it in My Entries.', { type: 'success' });
-      router.push('/(shop)/challenges/my-entries');
-    } catch (error: any) {
-      toast.show(error?.message ?? 'Failed to submit entry. Please try again.', { type: 'danger' });
+      await SecureStore.setItemAsync(VERIFIER_KEY, verifier);
+      const { authorizationUrl } = await tiktokApi.authorize(REDIRECT_URI, toBase64Url(challengeHash));
+      await Linking.openURL(authorizationUrl);
+    } catch (error) {
+      toast.show(error instanceof Error ? error.message : 'Could not open TikTok.', { type: 'danger' });
+      setConnecting(false);
     }
   };
 
-  const submitting = createSubmission.isPending;
+  const canSubmit = !!proof && consentAccepted && (!!selectedVideo || (manualFallback && !!manualUrl.trim() && !!manualHandle.trim()));
+  const submitPost = async () => {
+    if (!challenge || !proof) return;
+    try {
+      await submit.mutateAsync({ challengeId: challenge.id, purchaseProofId: proof.id,
+        account: selectedVideo ? accountQuery.data ?? null : null, video: selectedVideo,
+        manualUrl, manualHandle, consentAccepted });
+      toast.show(selectedVideo ? 'Verified TikTok post submitted.' : 'Post sent to Muse for manual verification.', { type: 'success' });
+      router.push('/(shop)/challenges/my-entries');
+    } catch (error) {
+      toast.show(error instanceof Error ? error.message : 'Submission failed.', { type: 'danger' });
+    }
+  };
 
+  if (!challenge) {
+    return (
+      <View style={styles.container}>
+        <StaticHeader title="SUBMIT TIKTOK POST" onBackPress={() => router.back()} />
+        <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+          {loadingChallenge ? (
+            <ActivityIndicator size="large" color={NEO_THEME.colors.primary} />
+          ) : (
+            <Text style={styles.body}>Opportunity not found.</Text>
+          )}
+        </View>
+      </View>
+    );
+  }
   return (
     <View style={styles.container}>
-      <StaticHeader title="SUBMIT ENTRY" onBackPress={() => router.back()} />
-
-      <ScrollView contentContainerStyle={[styles.content, { paddingBottom: insets.bottom + 20 }]}>
-        <View style={styles.challengeSummary}>
-          <Text style={styles.summaryLabel}>ENTERING CHALLENGE:</Text>
-          <Text style={styles.summaryTitle}>{challenge.title.toUpperCase()}</Text>
+      <StaticHeader title="SUBMIT TIKTOK POST" onBackPress={() => router.back()} />
+      <ScrollView contentInsetAdjustmentBehavior="automatic" contentContainerStyle={[styles.content, { paddingBottom: insets.bottom + 28 }]}>
+        <View style={styles.card}>
+          <Text style={styles.eyebrow}>CREATOR OPPORTUNITY</Text>
+          <Text style={styles.title}>{challenge.title}</Text>
+          <Text style={styles.body}>Publish the content on TikTok first, then select the verified public post here.</Text>
         </View>
 
-        <View style={styles.uploadSection}>
-          {mediaUri ? (
-            <TouchableOpacity style={styles.previewContainer} activeOpacity={0.9} onPress={pickMedia}>
-              <Image source={{ uri: mediaUri }} style={styles.previewImage} />
-              <View style={styles.previewBadge}>
-                <Ionicons
-                  name={mediaType === 'video' ? 'videocam' : 'image'}
-                  size={14}
-                  color={NEO_THEME.colors.white}
-                />
-                <Text style={styles.previewBadgeText}>TAP TO CHANGE</Text>
-              </View>
+        {!proof && !eligibility.isLoading ? (
+          <View style={[styles.card, styles.warning]}>
+            <Text style={styles.cardTitle}>PURCHASE REQUIRED</Text>
+            <Text style={styles.body}>A successful purchase of the sponsored product is required before submitting.</Text>
+            <TextInput style={styles.input} autoCapitalize="characters" placeholder="Walk-in purchase code" value={purchaseCode} onChangeText={setPurchaseCode} />
+            <TouchableOpacity style={styles.secondaryButton} disabled={!purchaseCode.trim() || claimCode.isPending}
+              onPress={() => claimCode.mutate(purchaseCode, { onSuccess: () => { setPurchaseCode(''); void eligibility.refetch(); }, onError: error => toast.show(error.message, { type: 'danger' }) })}>
+              <Text style={styles.secondaryText}>CLAIM PURCHASE</Text>
             </TouchableOpacity>
+          </View>
+        ) : null}
+
+        <View style={styles.card}>
+          <Text style={styles.cardTitle}>1. CONNECT TIKTOK</Text>
+          {accountQuery.data?.connection_status === 'connected' ? (
+            <Text style={styles.success}>CONNECTED AS {accountQuery.data.display_name ?? 'TIKTOK CREATOR'}</Text>
           ) : (
-            <UploadBox onPress={pickMedia} />
+            <TouchableOpacity style={styles.primaryButton} disabled={connecting} onPress={connectTikTok}>
+              {connecting ? <ActivityIndicator color={NEO_THEME.colors.white} /> : <Text style={styles.primaryText}>CONNECT TIKTOK</Text>}
+            </TouchableOpacity>
           )}
         </View>
 
-        <View style={styles.formSection}>
-          <Text style={styles.label}>CAPTION</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Tell us about your submission..."
-            placeholderTextColor={NEO_THEME.colors.grey}
-            multiline
-            numberOfLines={4}
-            value={caption}
-            onChangeText={setCaption}
-          />
+        {accountQuery.data?.connection_status === 'connected' ? (
+          <View style={styles.card}>
+            <Text style={styles.cardTitle}>2. SELECT YOUR PUBLIC POST</Text>
+            {videosQuery.isLoading ? <ActivityIndicator color={NEO_THEME.colors.primary} /> : null}
+            {videosQuery.error ? <Text style={styles.error}>{(videosQuery.error as Error).message}</Text> : null}
+            {videosQuery.data?.map(video => (
+              <TouchableOpacity key={video.id} style={[styles.videoRow, selectedVideo?.id === video.id && styles.selected]}
+                onPress={() => setSelectedVideo(video)}>
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.videoTitle} numberOfLines={2}>{video.video_description || video.title || 'TikTok video'}</Text>
+                  <Text style={styles.videoMeta}>{video.id}</Text>
+                </View>
+                <Text style={styles.check}>{selectedVideo?.id === video.id ? 'SELECTED' : 'SELECT'}</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        ) : null}
+
+        {manualFallback ? (
+          <View style={styles.card}>
+            <Text style={styles.cardTitle}>TIKTOK APPROVAL FALLBACK</Text>
+            <Text style={styles.body}>If account connection is unavailable, Muse can manually verify a public post.</Text>
+            <TextInput style={styles.input} autoCapitalize="none" keyboardType="url" placeholder="https://www.tiktok.com/@you/video/..."
+              value={manualUrl} onChangeText={setManualUrl} />
+            <TextInput style={styles.input} autoCapitalize="none" placeholder="@yourhandle" value={manualHandle} onChangeText={setManualHandle} />
+          </View>
+        ) : null}
+
+        <View style={styles.card}>
+          <Text style={styles.cardTitle}>3. VERIFICATION TERMS</Text>
+          {CONSENT_TERMS.map(term => <Text key={term} style={styles.term}>• {term}</Text>)}
+          <TouchableOpacity accessibilityRole="checkbox" accessibilityState={{ checked: consentAccepted }}
+            style={styles.consentRow} onPress={() => setConsentAccepted(value => !value)}>
+            <View style={[styles.checkbox, consentAccepted && styles.checkboxChecked]}><Text style={styles.checkboxMark}>{consentAccepted ? '✓' : ''}</Text></View>
+            <Text style={styles.consentText}>I agree to these terms</Text>
+          </TouchableOpacity>
         </View>
 
-        <View style={styles.infoBoxContainer}>
-          <InfoBox
-            type="warning"
-            message="By submitting, you agree to the challenge rules and grant us permission to feature your content."
-          />
-        </View>
-
-        <TouchableOpacity
-          style={[styles.submitButton, submitting && { opacity: 0.7 }]}
-          activeOpacity={0.9}
-          onPress={handleSubmit}
-          disabled={submitting}
-        >
-          {submitting ? (
-            <ActivityIndicator color={NEO_THEME.colors.white} />
-          ) : (
-            <>
-              <Text style={styles.submitText}>SUBMIT ENTRY</Text>
-              <Ionicons name="send" size={20} color={NEO_THEME.colors.white} />
-            </>
-          )}
+        <TouchableOpacity style={[styles.primaryButton, !canSubmit && styles.disabled]} disabled={!canSubmit || submit.isPending} onPress={submitPost}>
+          {submit.isPending ? <ActivityIndicator color={NEO_THEME.colors.white} /> : <Text style={styles.primaryText}>SUBMIT TO MUSE FOR REVIEW</Text>}
         </TouchableOpacity>
       </ScrollView>
     </View>
@@ -139,102 +212,31 @@ export default function ChallengeEntryScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: NEO_THEME.colors.backgroundLight,
-  },
-  content: {
-    padding: 20,
-  },
-  challengeSummary: {
-    marginBottom: 24,
-  },
-  summaryLabel: {
-    fontFamily: NEO_THEME.fonts.bold,
-    fontSize: 12,
-    color: NEO_THEME.colors.grey,
-    marginBottom: 4,
-  },
-  summaryTitle: {
-    fontFamily: NEO_THEME.fonts.black,
-    fontSize: 20,
-    color: NEO_THEME.colors.black,
-  },
-  uploadSection: {
-    marginBottom: 24,
-  },
-  previewContainer: {
-    height: 240,
-    borderRadius: NEO_THEME.borders.radius,
-    borderWidth: NEO_THEME.borders.width,
-    borderColor: NEO_THEME.colors.black,
-    overflow: 'hidden',
-    backgroundColor: NEO_THEME.colors.greyLight,
-  },
-  previewImage: {
-    width: '100%',
-    height: '100%',
-    resizeMode: 'cover',
-  },
-  previewBadge: {
-    position: 'absolute',
-    bottom: 12,
-    right: 12,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    backgroundColor: NEO_THEME.colors.black,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: NEO_THEME.borders.radius,
-  },
-  previewBadgeText: {
-    fontFamily: NEO_THEME.fonts.bold,
-    fontSize: 10,
-    color: NEO_THEME.colors.white,
-  },
-  formSection: {
-    marginBottom: 24,
-  },
-  label: {
-    fontFamily: NEO_THEME.fonts.bold,
-    fontSize: 14,
-    color: NEO_THEME.colors.black,
-    marginBottom: 8,
-  },
-  input: {
-    backgroundColor: NEO_THEME.colors.white,
-    borderWidth: NEO_THEME.borders.width,
-    borderColor: NEO_THEME.colors.black,
-    borderRadius: NEO_THEME.borders.radius,
-    padding: 16,
-    fontFamily: NEO_THEME.fonts.regular,
-    fontSize: 16,
-    color: NEO_THEME.colors.black,
-    textAlignVertical: 'top',
-    minHeight: 120,
-  },
-  infoBoxContainer: {
-    marginBottom: 32,
-  },
-  submitButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: NEO_THEME.colors.black,
-    padding: 16,
-    borderRadius: NEO_THEME.borders.radius,
-    gap: 8,
-    shadowColor: NEO_THEME.colors.grey,
-    shadowOffset: { width: 4, height: 4 },
-    shadowOpacity: 1,
-    shadowRadius: 0,
-    elevation: 4,
-  },
-  submitText: {
-    fontFamily: NEO_THEME.fonts.black,
-    fontSize: 16,
-    color: NEO_THEME.colors.white,
-    textTransform: 'uppercase',
-  },
+  container: { flex: 1, backgroundColor: NEO_THEME.colors.backgroundLight },
+  content: { padding: 20, gap: 16 },
+  card: { backgroundColor: NEO_THEME.colors.white, borderWidth: NEO_THEME.borders.width, borderColor: NEO_THEME.colors.black, borderRadius: NEO_THEME.borders.radius, padding: 16, gap: 10 },
+  warning: { backgroundColor: NEO_THEME.colors.yellow },
+  eyebrow: { fontFamily: NEO_THEME.fonts.bold, fontSize: 11, color: NEO_THEME.colors.primary },
+  title: { fontFamily: NEO_THEME.fonts.black, fontSize: 22, color: NEO_THEME.colors.black },
+  cardTitle: { fontFamily: NEO_THEME.fonts.black, fontSize: 15, color: NEO_THEME.colors.black },
+  body: { fontFamily: NEO_THEME.fonts.regular, fontSize: 14, lineHeight: 20, color: NEO_THEME.colors.black },
+  success: { fontFamily: NEO_THEME.fonts.bold, color: NEO_THEME.colors.success },
+  error: { fontFamily: NEO_THEME.fonts.bold, color: NEO_THEME.colors.error },
+  primaryButton: { minHeight: 52, alignItems: 'center', justifyContent: 'center', padding: 14, borderRadius: NEO_THEME.borders.radius, borderWidth: NEO_THEME.borders.width, borderColor: NEO_THEME.colors.black, backgroundColor: NEO_THEME.colors.black },
+  primaryText: { fontFamily: NEO_THEME.fonts.black, fontSize: 14, color: NEO_THEME.colors.white },
+  disabled: { opacity: 0.4 },
+  videoRow: { flexDirection: 'row', alignItems: 'center', gap: 12, borderWidth: 2, borderColor: NEO_THEME.colors.black, padding: 12, borderRadius: NEO_THEME.borders.radius },
+  selected: { backgroundColor: NEO_THEME.colors.secondary },
+  videoTitle: { fontFamily: NEO_THEME.fonts.bold, fontSize: 13, color: NEO_THEME.colors.black },
+  videoMeta: { fontFamily: NEO_THEME.fonts.regular, fontSize: 10, color: NEO_THEME.colors.grey },
+  check: { fontFamily: NEO_THEME.fonts.black, fontSize: 10, color: NEO_THEME.colors.black },
+  input: { minHeight: 48, borderWidth: 2, borderColor: NEO_THEME.colors.black, borderRadius: NEO_THEME.borders.radius, paddingHorizontal: 12, fontFamily: NEO_THEME.fonts.regular, color: NEO_THEME.colors.black },
+  secondaryButton: { minHeight: 46, alignItems: 'center', justifyContent: 'center', backgroundColor: NEO_THEME.colors.white, borderWidth: 2, borderColor: NEO_THEME.colors.black, borderRadius: NEO_THEME.borders.radius },
+  secondaryText: { fontFamily: NEO_THEME.fonts.black, fontSize: 12, color: NEO_THEME.colors.black },
+  term: { fontFamily: NEO_THEME.fonts.regular, fontSize: 13, lineHeight: 19, color: NEO_THEME.colors.black },
+  consentRow: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingTop: 8 },
+  checkbox: { width: 26, height: 26, alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: NEO_THEME.colors.black, borderRadius: 4 },
+  checkboxChecked: { backgroundColor: NEO_THEME.colors.black },
+  checkboxMark: { color: NEO_THEME.colors.white, fontFamily: NEO_THEME.fonts.black },
+  consentText: { fontFamily: NEO_THEME.fonts.bold, color: NEO_THEME.colors.black },
 });

@@ -1,5 +1,5 @@
-import ChallengesExploreScreen from '../../../features/challenges/screens/ChallengesExploreScreen';
+import { Redirect } from 'expo-router';
 
-export default function Page() {
-  return <ChallengesExploreScreen />;
+export default function CreatorOpportunitiesRedirect() {
+  return <Redirect href="/(shop)" />;
 }

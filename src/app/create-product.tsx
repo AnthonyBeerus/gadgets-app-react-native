@@ -20,6 +20,11 @@ export default function CreateProductScreen() {
         return;
     }
 
+    if (images.length === 0) {
+      Alert.alert("Image required", "Add at least one product image before saving.");
+      return;
+    }
+
     setIsSubmitting(true);
     try {
       // 1. Upload images
@@ -39,7 +44,7 @@ export default function CreateProductScreen() {
         ...data,
         shop_id: merchantShopId,
         imagesUrl: imageUrls,
-        heroImage: imageUrls[0] || null, // First image is hero
+        heroImage: imageUrls[0], // First image is hero
       });
 
       Alert.alert("Success", "Product created successfully", [

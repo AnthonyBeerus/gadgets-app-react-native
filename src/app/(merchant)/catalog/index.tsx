@@ -104,7 +104,14 @@ export default function MerchantInventory() {
         ListEmptyComponent={
           <View style={styles.emptyState}>
             <Text style={styles.emptyText}>No products found.</Text>
-            <Text style={styles.emptySubtext}>Add some swag to your shop!</Text>
+            <Text style={styles.emptySubtext}>Add your first product to make the shop visible to shoppers.</Text>
+            <TouchableOpacity
+              style={styles.addProductButton}
+              onPress={() => router.push('/create-product')}
+            >
+              <MaterialIcons name="add-box" size={20} color={NEO_THEME.colors.white} />
+              <Text style={styles.addProductButtonText}>Add product</Text>
+            </TouchableOpacity>
           </View>
         }
       />
@@ -150,5 +157,23 @@ const styles = StyleSheet.create({
     fontFamily: NEO_THEME.fonts.bold,
     color: NEO_THEME.colors.grey,
     padding: 8,
+    textAlign: 'center',
+    marginBottom: 12,
+  },
+  addProductButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    backgroundColor: NEO_THEME.colors.primary,
+    borderWidth: 2,
+    borderColor: NEO_THEME.colors.black,
+    borderRadius: NEO_THEME.borders.radius,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+  },
+  addProductButtonText: {
+    color: NEO_THEME.colors.white,
+    fontFamily: NEO_THEME.fonts.bold,
+    fontSize: 14,
   },
 });

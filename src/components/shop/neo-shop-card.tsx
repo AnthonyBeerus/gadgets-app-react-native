@@ -42,22 +42,22 @@ export const NeoShopCard = ({ shop, onPress }: NeoShopCardProps) => {
             contentFit="cover"
             transition={200}
           />
-          {shop.is_open === false && (
+          {shop.is_open === false ? (
             <View style={styles.closedBadge}>
               <Text style={styles.closedText}>CLOSED</Text>
             </View>
-          )}
+          ) : null}
         </View>
         
         <View style={styles.content}>
           <View style={styles.header}>
             <Text style={styles.title} numberOfLines={1}>{shop.name}</Text>
-            {shop.rating && (
+            {Number(shop.rating) > 0 ? (
               <View style={styles.ratingBadge}>
                 <Ionicons name="star" size={14} color={NEO_THEME.colors.yellow} />
-                <Text style={styles.ratingText}>{shop.rating}</Text>
+                <Text style={styles.ratingText}>{String(shop.rating)}</Text>
               </View>
-            )}
+            ) : null}
           </View>
           
           <View style={styles.footer}>

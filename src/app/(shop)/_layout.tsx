@@ -14,7 +14,6 @@ const TabsLayout = () => {
   const insets = useSafeAreaInsets();
 
   if (mounting) return <ActivityIndicator />;
-  if (!session) return <Redirect href="/auth" />;
   if (isMerchant && activeRole === 'merchant') return <Redirect href="/(merchant)" />;
 
   return (
@@ -26,19 +25,27 @@ const TabsLayout = () => {
       <Tabs.Screen
         name="index"
         options={{
-          title: "Shop",
+          title: "Discover",
+        }}
+      />
+      <Tabs.Screen
+        name="marketplace"
+        options={{
+          title: "Marketplace",
         }}
       />
       <Tabs.Screen
         name="services"
         options={{
           title: "Services",
+          href: null,
         }}
       />
       <Tabs.Screen
         name="challenges"
         options={{
-          title: "Challenges",
+          title: "Creator Opportunities",
+          href: null,
         }}
       />
 
@@ -46,6 +53,7 @@ const TabsLayout = () => {
         name="events"
         options={{
           title: "Events",
+          href: null,
         }}
       />
 
@@ -53,6 +61,7 @@ const TabsLayout = () => {
         name="profile"
         options={{
           title: "Profile",
+          href: null,
         }}
       />
     </Tabs>

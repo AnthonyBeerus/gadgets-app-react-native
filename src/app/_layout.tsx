@@ -9,6 +9,7 @@ import { FontProvider } from "../shared/providers/font-provider";
 import { ThemeProvider } from "../shared/providers/theme-provider";
 import { Platform } from "react-native";
 import React from "react";
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 import * as Sentry from '@sentry/react-native';
 
@@ -167,6 +168,7 @@ const AppNavigator = () => {
 
 function RootLayout() {
   return (
+    <GestureHandlerRootView style={{ flex: 1 }}>
     <ThemeProvider>
       <FontProvider>
         <SafeAreaProvider>
@@ -187,6 +189,7 @@ function RootLayout() {
       </SafeAreaProvider>
       </FontProvider>
     </ThemeProvider>
+    </GestureHandlerRootView>
   );
 }
 

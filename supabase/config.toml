@@ -219,6 +219,15 @@ enabled = true
 policy = "oneshot"
 inspector_port = 8083
 
+[functions.tiktok-creator]
+verify_jwt = true
+
+[functions.stripe-checkout]
+verify_jwt = true
+
+[functions.verify-fulfillment]
+verify_jwt = true
+
 [analytics]
 enabled = true
 port = 54327

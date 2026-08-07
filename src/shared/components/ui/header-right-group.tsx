@@ -2,17 +2,15 @@
  * HeaderRightGroup
  * 
  * Compact horizontal group for header right side.
- * Contains GemBalanceChip and CartHeaderButton.
+ * Pilot utility group. Gems remain hidden from the consumer experience.
  */
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
-import { GemBalanceChip } from './gem-balance-chip';
 import { CartHeaderButton } from './CartHeaderButton';
 
 export const HeaderRightGroup = () => {
   return (
     <View style={styles.container}>
-      <GemBalanceChip />
       <CartHeaderButton />
     </View>
   );

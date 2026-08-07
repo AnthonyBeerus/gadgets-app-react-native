@@ -31,7 +31,7 @@ describe('createOrder API', () => {
     jest.clearAllMocks();
   });
 
-  it('should generate fulfillment_token and include it in the order insertion', async () => {
+  it('creates a pending order without overriding the database fulfillment token', async () => {
     // Setup stable mocks for the chain
     const mockSingle = jest.fn().mockResolvedValue({ data: { id: 1, slug: 'ORDER-123' }, error: null });
     const mockSelect = jest.fn().mockReturnValue({ single: mockSingle });
@@ -57,10 +57,6 @@ describe('createOrder API', () => {
       status: 'Pending',
       stripe_payment_status: 'pending',
     }));
-    
-    // Verify fulfillment_token is present and is a non-empty string
-    expect(insertedData).toHaveProperty('fulfillment_token');
-    expect(typeof insertedData.fulfillment_token).toBe('string');
-    expect(insertedData.fulfillment_token.length).toBeGreaterThan(0);
+    expect(insertedData).not.toHaveProperty('fulfillment_token');
   });
 });

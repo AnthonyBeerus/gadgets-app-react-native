@@ -18,7 +18,7 @@ interface FlashListPropsWithEstimatedItemSize<T> extends FlashListProps<T> {
 
 const AnimatedFlashList = Animated.createAnimatedComponent(FlashList) as unknown as <T>(props: FlashListPropsWithEstimatedItemSize<T> & { ref?: any }) => React.ReactElement;
 
-type FilterType = 'ALL' | 'FREE' | 'PREMIUM' | 'ENDING SOON';
+type FilterType = 'ALL' | 'ENDING SOON';
 
 export default function ChallengesExploreScreen() {
   const { challenges, loading, fetchChallenges } = useChallengeStore();
@@ -43,8 +43,6 @@ export default function ChallengesExploreScreen() {
 
   const filteredChallenges = challenges.filter(c => {
     switch (activeFilter) {
-      case 'FREE': return c.type === 'free';
-      case 'PREMIUM': return c.is_premium || c.type === 'subscriber';
       case 'ENDING SOON':
         const deadline = new Date(c.deadline);
         const now = new Date();
@@ -70,8 +68,6 @@ export default function ChallengesExploreScreen() {
         contentContainerStyle={styles.filterContainer}
       >
         <FilterChip label="ALL" isActive={activeFilter === 'ALL'} onPress={() => setActiveFilter('ALL')} />
-        <FilterChip label="FREE" isActive={activeFilter === 'FREE'} onPress={() => setActiveFilter('FREE')} />
-        <FilterChip label="PREMIUM" type="premium" isActive={activeFilter === 'PREMIUM'} onPress={() => setActiveFilter('PREMIUM')} />
         <FilterChip label="ENDING SOON" type="urgent" isActive={activeFilter === 'ENDING SOON'} onPress={() => setActiveFilter('ENDING SOON')} />
       </ScrollView>
     </View>
@@ -101,7 +97,7 @@ export default function ChallengesExploreScreen() {
       showsVerticalScrollIndicator={false}
       ListEmptyComponent={
         <View style={styles.emptyState}>
-          <Text style={styles.emptyText}>No challenges found matching this filter.</Text>
+          <Text style={styles.emptyText}>No creator opportunities match this filter.</Text>
         </View>
       }
     />

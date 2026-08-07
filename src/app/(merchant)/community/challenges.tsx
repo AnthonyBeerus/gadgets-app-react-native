@@ -10,6 +10,52 @@ import { Alert } from 'react-native';
 import Animated, { useAnimatedScrollHandler } from "react-native-reanimated";
 import { useCollapsibleTab } from "../../../shared/context/CollapsibleTabContext";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useCampaignResults, useSettleCompetitiveChallenge } from '../../../features/challenges/api/submissions';
+
+function OpportunityResults({ challengeId }: { challengeId: number }) {
+  const { data } = useCampaignResults(challengeId);
+  if (!data) return null;
+  return (
+    <View style={styles.resultsRow}>
+      <Text style={styles.resultText}>{data.impressions} VIEWS</Text>
+      <Text style={styles.resultText}>{data.saves} SAVES</Text>
+      <Text style={styles.resultText}>{data.attributed_purchases} PURCHASES</Text>
+      <Text style={styles.resultText}>{data.eligible_purchasers} ELIGIBLE</Text>
+      <Text style={styles.resultText}>{data.verified_posts} VERIFIED</Text>
+      <Text style={styles.resultText}>{data.vouchers_redeemed}/{data.vouchers_issued} REDEEMED</Text>
+    </View>
+  );
+}
+
+function SettleButton({ item }: { item: any }) {
+  const settle = useSettleCompetitiveChallenge();
+  if (item.contest_mode !== 'competitive_pot' || item.settled_at) {
+    return item.settled_at ? <Text style={styles.deadline}>Settled {new Date(item.settled_at).toLocaleDateString()}</Text> : null;
+  }
+  return (
+    <TouchableOpacity
+      style={styles.settleBtn}
+      disabled={settle.isPending}
+      onPress={() => Alert.alert(
+        'Settle pot?',
+        'Ranks approved entries by engagement score and issues placement + consolation vouchers.',
+        [
+          { text: 'Cancel', style: 'cancel' },
+          {
+            text: 'Settle',
+            style: 'destructive',
+            onPress: () => settle.mutate(item.id, {
+              onSuccess: (result: any) => Alert.alert('Settled', `Placement vouchers: ${result?.placement_vouchers ?? 0}. Consolations: ${result?.consolation_vouchers ?? 0}.`),
+              onError: (err: Error) => Alert.alert('Error', err.message),
+            }),
+          },
+        ]
+      )}
+    >
+      <Text style={styles.settleText}>{settle.isPending ? 'SETTLING…' : 'SETTLE POT'}</Text>
+    </TouchableOpacity>
+  );
+}
 
 export default function MerchantChallengesScreen() {
   const router = useRouter();
@@ -60,11 +106,23 @@ export default function MerchantChallengesScreen() {
             <Text style={styles.statusText}>{item.status}</Text>
         </View>
         <Text style={styles.brand}>{item.brand_name || 'My Shop'}</Text>
-        <Text style={styles.reward}>🏆 {item.reward}</Text>
+        <Text style={styles.reward}>
+          {item.contest_mode === 'competitive_pot'
+            ? `Pot P${Number(item.pot_value ?? 0).toFixed(0)} · top 5`
+            : `🏆 ${item.reward}`}
+        </Text>
         <Text style={styles.deadline}>Ends: {new Date(item.deadline).toLocaleDateString()}</Text>
         <View style={styles.statsRow}>
              <Text style={styles.participants}>👥 {item.participants_count || 0} participants</Text>
         </View>
+        <OpportunityResults challengeId={item.id} />
+        <SettleButton item={item} />
+        <TouchableOpacity onPress={() => router.push(`/challenges/leaderboard?id=${item.id}`)}>
+          <Text style={styles.participants}>View leaderboard</Text>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={() => router.push('/challenges/review')}>
+          <Text style={styles.participants}>Review entries</Text>
+        </TouchableOpacity>
       </View>
     </View>
   );
@@ -222,6 +280,8 @@ const styles = StyleSheet.create({
     fontFamily: NEO_THEME.fonts.regular,
     color: NEO_THEME.colors.grey,
   },
+  resultsRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 10 },
+  resultText: { fontFamily: NEO_THEME.fonts.bold, fontSize: 10, color: NEO_THEME.colors.black, backgroundColor: NEO_THEME.colors.secondary, paddingHorizontal: 8, paddingVertical: 4, borderWidth: 1, borderColor: NEO_THEME.colors.black },
   statusBadge: {
     paddingHorizontal: 8,
     paddingVertical: 4,
@@ -241,6 +301,20 @@ const styles = StyleSheet.create({
   },
   deleteBtn: {
     padding: 4,
+  },
+  settleBtn: {
+    marginTop: 12,
+    minHeight: 42,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: NEO_THEME.colors.primary,
+    borderWidth: 2,
+    borderColor: NEO_THEME.colors.black,
+    borderRadius: 12,
+  },
+  settleText: {
+    color: NEO_THEME.colors.white,
+    fontFamily: NEO_THEME.fonts.bold,
   },
   errorText: {
     color: 'red',

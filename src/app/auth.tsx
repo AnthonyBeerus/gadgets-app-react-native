@@ -23,10 +23,8 @@ const authSchema = zod.object({
 });
 
 export default function Auth() {
-  const { session, createDevMerchant } = useAuth();
+  const { session } = useAuth();
   const [registerAsMerchant, setRegisterAsMerchant] = React.useState(false);
-
-  if (session) return <Redirect href='/' />;
 
   const { control, handleSubmit, formState } = useForm({
     resolver: zodResolver(authSchema),
@@ -35,6 +33,8 @@ export default function Auth() {
       password: '',
     },
   });
+
+  if (session) return <Redirect href='/' />;
 
   const signIn = async (data: zod.infer<typeof authSchema>) => {
     const { error } = await supabase.auth.signInWithPassword(data);
@@ -56,17 +56,7 @@ export default function Auth() {
     if (error) {
       alert(error.message);
     } else {
-      if (registerAsMerchant) {
-        try {
-            await createDevMerchant();
-            Toast.show('Merchant Account Created!', { type: 'success' });
-        } catch (e) {
-            console.error(e);
-            // Don't alert here, user is signed up anyway. Could maybe show toast warning.
-        }
-      }
-
-      Toast.show('Signed up successfully', {
+      Toast.show(registerAsMerchant ? 'Signed up. Open Merchant Mode to set up your shop.' : 'Signed up successfully', {
         type: 'success',
         placement: 'top',
         duration: 1500,
@@ -143,7 +133,7 @@ export default function Auth() {
             <View style={[styles.checkbox, registerAsMerchant && styles.checkboxChecked]}>
                 {registerAsMerchant && <View style={styles.checkboxInner} />}
             </View>
-            <Text style={styles.checkboxLabel}>Register as Merchant (Dev)</Text>
+            <Text style={styles.checkboxLabel}>I want to open a shop</Text>
         </TouchableOpacity>
 
         <TouchableOpacity

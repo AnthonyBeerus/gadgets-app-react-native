@@ -9,7 +9,6 @@ import {
   ImageBackground,
   Dimensions,
   ActivityIndicator,
-  Alert,
   ScrollView,
 } from "react-native";
 import Animated from "react-native-reanimated";
@@ -57,13 +56,6 @@ export default function ShopsScreen() {
     loadInitialData();
   }, []);
 
-  // Show error alerts
-  useEffect(() => {
-    if (error) {
-      Alert.alert("Error", error);
-    }
-  }, [error]);
-
   // Featured shops for hero carousel - use allShops to ignore filters
   const featuredShops = React.useMemo(() => {
     return allShops.filter(shop => 
@@ -99,7 +91,7 @@ export default function ShopsScreen() {
   };
 
   const selectedMallData = malls.find((m) => m.id === selectedMall);
-  const mallName = selectedMallData?.name?.toUpperCase() || "Molapo Crossing";
+  const mallName = selectedMallData?.name?.toUpperCase() || (malls.length > 0 ? "ALL LOCATIONS" : "LOCATIONS COMING SOON");
 
   const renderShopCard = ({ item }: { item: any }) => (
     <NuviaShopCard shop={item} onPress={() => navigateToShop(item.id)} />
@@ -233,6 +225,12 @@ export default function ShopsScreen() {
         </Animated.View>
 
         <View style={styles.listContainer}>
+          {error && (
+            <View style={styles.inlineError}>
+              <Ionicons name="warning-outline" size={22} color={NEO_THEME.colors.black} />
+              <NuviaText variant="body" style={styles.inlineErrorText}>{error}</NuviaText>
+            </View>
+          )}
           {loading ? (
             <ActivityIndicator size="large" color={NEO_THEME.colors.primary} style={{ marginTop: 40 }} />
           ) : (
@@ -242,6 +240,15 @@ export default function ShopsScreen() {
               // @ts-ignore: estimatedItemSize definition missing
               estimatedItemSize={280}
               scrollEnabled={false}
+              ListEmptyComponent={
+                <View style={styles.emptyState}>
+                  <Ionicons name="storefront-outline" size={48} color={NEO_THEME.colors.grey} />
+                  <NuviaText variant="h2" style={styles.emptyTitle}>No shops yet</NuviaText>
+                  <NuviaText variant="body" style={styles.emptyCopy}>
+                    Merchants are setting up their storefronts. Check back soon or open your own shop from Merchant Mode.
+                  </NuviaText>
+                </View>
+              }
             />
           )}
         </View>
@@ -424,6 +431,35 @@ const styles = StyleSheet.create({
   },
   listContainer: {
     paddingHorizontal: 16,
+  },
+  inlineError: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    backgroundColor: NEO_THEME.colors.yellow,
+    borderWidth: NEO_THEME.borders.width,
+    borderColor: NEO_THEME.colors.black,
+    borderRadius: NEO_THEME.borders.radius,
+    padding: 12,
+    marginBottom: 16,
+  },
+  inlineErrorText: {
+    flex: 1,
+  },
+  emptyState: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 56,
+    paddingHorizontal: 20,
+  },
+  emptyTitle: {
+    marginTop: 12,
+    textAlign: 'center',
+  },
+  emptyCopy: {
+    marginTop: 8,
+    textAlign: 'center',
+    color: NEO_THEME.colors.grey,
   },
   columnWrapper: {
     justifyContent: 'space-between',

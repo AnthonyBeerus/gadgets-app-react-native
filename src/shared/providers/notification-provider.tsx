@@ -1,26 +1,8 @@
-import { useState, useEffect, useRef, PropsWithChildren } from "react";
-import * as Notifications from "expo-notifications";
-import registerForPushNotificationsAsync from "../lib/notifications";
+import { useEffect, PropsWithChildren } from "react";
+import Constants, { ExecutionEnvironment } from 'expo-constants';
 import { supabase } from "../lib/supabase";
 
-Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-    shouldShowAlert: true,
-    shouldPlaySound: false,
-    shouldSetBadge: false,
-    shouldShowBanner: true,
-    shouldShowList: true,
-  }),
-});
-
 const NotificationProvider = ({ children }: PropsWithChildren) => {
-  const [expoPushToken, setExpoPushToken] = useState("");
-  const [notification, setNotification] = useState<
-    Notifications.Notification | undefined
-  >(undefined);
-  const notificationListener = useRef<Notifications.Subscription | null>(null);
-  const responseListener = useRef<Notifications.Subscription | null>(null);
-
   const saveUserPushNotificationToken = async (token: string) => {
     if (!token.length) return;
 
@@ -40,35 +22,39 @@ const NotificationProvider = ({ children }: PropsWithChildren) => {
   };
 
   useEffect(() => {
-    // Gracefully handle notification setup failures (e.g., missing Firebase config)
-    registerForPushNotificationsAsync()
-      .then((token) => {
-        setExpoPushToken(token ?? "");
-        saveUserPushNotificationToken(token ?? "");
-      })
-      .catch((error: any) => {
-        console.warn('[Notifications] Failed to register:', error.message);
-        // Don't crash the app if notifications fail
-        setExpoPushToken("");
-      });
-
-    try {
-      notificationListener.current =
-        Notifications.addNotificationReceivedListener((notification) => {
-          setNotification(notification);
-        });
-
-      responseListener.current =
-        Notifications.addNotificationResponseReceivedListener((response) => {
-          console.log(response);
-        });
-    } catch (error) {
-      console.warn('[Notifications] Failed to add listeners:', error);
+    if (Constants.executionEnvironment === ExecutionEnvironment.StoreClient) {
+      return;
     }
 
+    let disposed = false;
+    let notificationSubscription: { remove: () => void } | undefined;
+    let responseSubscription: { remove: () => void } | undefined;
+
+    void Promise.all([
+      import('expo-notifications'),
+      import('../lib/notifications'),
+    ]).then(([Notifications, registration]) => {
+      if (disposed) return;
+      Notifications.setNotificationHandler({
+        handleNotification: async () => ({
+          shouldShowAlert: true,
+          shouldPlaySound: false,
+          shouldSetBadge: false,
+          shouldShowBanner: true,
+          shouldShowList: true,
+        }),
+      });
+      notificationSubscription = Notifications.addNotificationReceivedListener(() => {});
+      responseSubscription = Notifications.addNotificationResponseReceivedListener(() => {});
+      return registration.default().then(token => saveUserPushNotificationToken(token ?? ''));
+    }).catch((error: Error) => {
+      console.warn('[Notifications] Setup skipped:', error.message);
+    });
+
     return () => {
-      notificationListener.current?.remove();
-      responseListener.current?.remove();
+      disposed = true;
+      notificationSubscription?.remove();
+      responseSubscription?.remove();
     };
   }, []);
 

@@ -14,7 +14,7 @@ import { router } from "expo-router";
 import { HeaderRightGroup } from "../../../shared/components/ui/header-right-group";
 
 const ProfileScreen = () => {
-  const { user, createDevMerchant, isMerchant, switchRole } = useAuth();
+  const { user, isMerchant, isAdmin, switchRole } = useAuth();
 
   const renderSmallTitle = () => (
     <Text style={styles.headerTitle}>
@@ -92,53 +92,22 @@ const ProfileScreen = () => {
           />
           <ProfileOption
             icon="favorite"
-            title="WISHLIST"
-            subtitle="Items you want to buy later"
-            onPress={() => {}}
+            title="SAVED OPPORTUNITIES"
+            subtitle="Products you may want to buy and create for"
+            onPress={() => router.push('/saved-opportunities')}
           />
           <ProfileOption
-            icon="location-on"
-            title="ADDRESSES"
-            subtitle="Manage your delivery addresses"
-            onPress={() => {}}
-          />
-          <ProfileOption
-            icon="payment"
-            title="PAYMENT METHODS"
-            subtitle="Credit cards, PayPal, and more"
-            onPress={() => {}}
+            icon="movie"
+            title="CREATOR ACTIVITY"
+            subtitle="Submissions, decisions, and vouchers"
+            onPress={() => router.push('/(shop)/challenges/my-entries')}
           />
         </View>
       </View>
 
-      {/* Support Section */}
+      {/* Merchant Section */}
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>SUPPORT</Text>
-        <View style={styles.optionsContainer}>
-          <ProfileOption
-            icon="help"
-            title="HELP CENTER"
-            subtitle="Get help and support"
-            onPress={() => {}}
-          />
-          <ProfileOption
-            icon="feedback"
-            title="SEND FEEDBACK"
-            subtitle="Tell us how we can improve"
-            onPress={() => {}}
-          />
-          <ProfileOption
-            icon="info"
-            title="ABOUT"
-            subtitle="App version and legal information"
-            onPress={() => {}}
-          />
-        </View>
-      </View>
-
-      {/* Developer Section */}
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>DEVELOPER</Text>
+        <Text style={styles.sectionTitle}>MERCHANT</Text>
         <View style={styles.optionsContainer}>
           {isMerchant ? (
              <ProfileOption
@@ -155,20 +124,27 @@ const ProfileScreen = () => {
             <ProfileOption
                 // @ts-ignore
                 icon="add-business"
-                title="ACTIVATE MERCHANT MODE"
-                subtitle="Create a Dev Merchant account"
-                onPress={async () => {
-                    try {
-                        await createDevMerchant();
-                        router.replace("/(merchant)");
-                    } catch (e: any) {
-                        alert("Error: " + e.message);
-                    }
-                }}
+                title="OPEN A SHOP"
+                subtitle="Set up your merchant storefront"
+                onPress={() => router.replace("/(merchant)")}
             />
           )}
         </View>
       </View>
+
+      {isAdmin ? (
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>MUSE OPERATIONS</Text>
+          <View style={styles.optionsContainer}>
+            <ProfileOption
+              icon="fact-check"
+              title="CREATOR MODERATION"
+              subtitle="Verify external posts and issue vouchers"
+              onPress={() => router.push('/challenges/review')}
+            />
+          </View>
+        </View>
+      ) : null}
 
       {/* Sign Out */}
       <View style={styles.section}>

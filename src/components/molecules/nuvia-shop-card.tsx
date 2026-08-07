@@ -51,22 +51,22 @@ export const NuviaShopCard: React.FC<NuviaShopCardProps> = ({ shop, onPress }) =
           contentFit="cover"
           transition={200}
         />
-        {shop.is_open === false && (
+        {shop.is_open === false ? (
           <NuviaTag 
             label="CLOSED" 
             color={NEO_THEME.colors.black} 
             style={styles.closedBadge} 
             textStyle={{ color: NEO_THEME.colors.white }}
           />
-        )}
-        {shop.rating && (
+        ) : null}
+        {Number(shop.rating) > 0 ? (
           <View style={styles.ratingBadge}>
             <Ionicons name="star" size={14} color={NEO_THEME.colors.secondary} />
             <NuviaText variant="label" color={NEO_THEME.colors.white} style={{ fontSize: 12 }}>
-              {shop.rating}
+              {String(shop.rating)}
             </NuviaText>
           </View>
-        )}
+        ) : null}
       </View>
       
       <View style={styles.content}>

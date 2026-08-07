@@ -29,6 +29,7 @@ type ProductFormProps = {
 
 export default function ProductForm({ initialValues, onSubmit, isSubmitting }: ProductFormProps) {
   const [images, setImages] = useState<string[]>(initialValues?.imagesUrl || (initialValues?.heroImage ? [initialValues.heroImage] : []));
+  const [imageError, setImageError] = useState<string | null>(null);
   
   const { control, handleSubmit, formState: { errors } } = useForm<ProductFormData>({
     resolver: zodResolver(productSchema),
@@ -54,6 +55,7 @@ export default function ProductForm({ initialValues, onSubmit, isSubmitting }: P
 
     if (!result.canceled && result.assets && result.assets.length > 0) {
       setImages([...images, result.assets[0].uri]);
+      setImageError(null);
     }
   };
 
@@ -64,6 +66,11 @@ export default function ProductForm({ initialValues, onSubmit, isSubmitting }: P
   };
 
   const onFormSubmit = (data: ProductFormData) => {
+    if (images.length === 0) {
+      setImageError('Add at least one product image before saving.');
+      return;
+    }
+
     onSubmit(data, images);
   };
 
@@ -177,6 +184,7 @@ export default function ProductForm({ initialValues, onSubmit, isSubmitting }: P
       />
 
       <Text style={styles.sectionTitle}>Images</Text>
+      {imageError && <Text style={styles.error}>{imageError}</Text>}
       <View style={styles.imagesContainer}>
         {images.map((uri, index) => (
           <View key={index} style={styles.imageWrapper}>

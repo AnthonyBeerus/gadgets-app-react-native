@@ -17,7 +17,7 @@ interface ShopFilterState {
 
 export const useShopFilterStore = create<ShopFilterState>((set) => ({
   // Initial state
-  selectedMall: 1, // Default to Molapo Crossing
+  selectedMall: null,
   selectedCategory: null,
   selectedFeature: null,
   searchQuery: "",
@@ -52,7 +52,7 @@ export const useShopFilterStore = create<ShopFilterState>((set) => ({
 
   resetFilters: () =>
     set({
-      selectedMall: 1,
+      selectedMall: null,
       selectedCategory: null,
       selectedFeature: null,
       searchQuery: "",

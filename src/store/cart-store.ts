@@ -9,9 +9,18 @@ type CartItemType = {
   maxQuantity: number;
 };
 
+export type DiscoverySource = 'discover' | 'saved' | 'marketplace' | 'merchant';
+
+export type CartAttribution = {
+  source: DiscoverySource;
+  opportunityId?: number;
+};
+
 type CartState = {
   items: CartItemType[];
+  attribution: CartAttribution | null;
   addItem: (item: CartItemType) => void;
+  setAttribution: (attribution: CartAttribution | null) => void;
   removeItem: (id: number) => void;
   incrementItem: (id: number) => void;
   decrementItem: (id: number) => void;
@@ -24,6 +33,7 @@ const initialCartItems: CartItemType[] = [];
 
 export const useCartStore = create<CartState>((set, get) => ({
   items: initialCartItems,
+  attribution: null,
   addItem: (item: CartItemType) => {
     const existingItem = get().items.find(i => i.id === item.id);
     if (existingItem) {
@@ -53,6 +63,7 @@ export const useCartStore = create<CartState>((set, get) => ({
         ),
       };
     }),
+  setAttribution: (attribution) => set({ attribution }),
   decrementItem: (id: number) =>
     set(state => ({
       items: state.items.map(item =>
@@ -72,5 +83,5 @@ export const useCartStore = create<CartState>((set, get) => ({
     const { items } = get();
     return items.reduce((count, item) => count + item.quantity, 0);
   },
-  resetCart: () => set({ items: initialCartItems }),
+  resetCart: () => set({ items: initialCartItems, attribution: null }),
 }));

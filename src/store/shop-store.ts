@@ -62,7 +62,7 @@ export const useShopStore = create<ShopStoreState>((set, get) => ({
   allShops: [],
   categories: [],
   malls: [],
-  selectedMall: 1, // Default to Molapo Crossing
+  selectedMall: null,
   selectedCategory: null,
   selectedFeature: null,
   searchQuery: "",
@@ -79,12 +79,15 @@ export const useShopStore = create<ShopStoreState>((set, get) => ({
         getMalls(),
       ]);
 
-      // Load shops for default mall (Molapo Crossing)
-      const shopsData = await getShopsByMall(1);
+      const initialMallId = mallsData?.[0]?.id ?? null;
+      const shopsData = initialMallId
+        ? await getShopsByMall(initialMallId)
+        : await getShops();
 
       set({
         categories: categoriesData,
         malls: mallsData || [],
+        selectedMall: initialMallId,
         shops: shopsData as ShopWithCategory[],
         allShops: shopsData as ShopWithCategory[],
         loading: false,
@@ -277,10 +280,10 @@ export const useShopStore = create<ShopStoreState>((set, get) => ({
     }
   },
 
-  // Reset all filters to default (Molapo Crossing)
+  // Reset all filters and browse all shops.
   resetFilters: async () => {
     set({
-      selectedMall: 1,
+      selectedMall: null,
       selectedCategory: null,
       selectedFeature: null,
       searchQuery: "",
@@ -290,7 +293,7 @@ export const useShopStore = create<ShopStoreState>((set, get) => ({
     });
 
     try {
-      const shopsData = await getShopsByMall(1);
+      const shopsData = await getShops();
       set({ shops: shopsData as ShopWithCategory[], loading: false });
     } catch (error) {
       console.error("Error resetting filters:", error);
