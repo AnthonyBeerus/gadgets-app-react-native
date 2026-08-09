@@ -140,6 +140,11 @@ export function OpportunityCard({ item, reduceMotion, onAction, onDetails, compa
       </View>
 
       <View style={styles.content}>
+        {item.is_prototype && (
+          <View style={styles.prototypeBadge}>
+            <Text variant="caption" style={styles.prototypeText}>CONCEPT · NOT LIVE</Text>
+          </View>
+        )}
         <Text variant="caption" color={colors.inkMuted} numberOfLines={1}>
           {item.merchant_name}
           {item.merchant_location ? ` · ${item.merchant_location}` : ''}
@@ -239,6 +244,8 @@ function createStyles(c: SemanticColors, _tokens: DesignTokens) {
       paddingTop: space.md,
       paddingBottom: space.md,
     },
+    prototypeBadge: { alignSelf: 'flex-start' as const, borderRadius: radii.sm, backgroundColor: c.accentMuted, paddingHorizontal: space.sm, paddingVertical: 4 },
+    prototypeText: { fontFamily: fonts.semibold, color: c.ink },
     title: {
       fontSize: 22,
       lineHeight: 28,

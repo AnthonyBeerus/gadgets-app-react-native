@@ -27,16 +27,12 @@ import {
 } from '../api';
 import { ConsumerUtilityHeader } from '../components/consumer-utility-header';
 import { OpportunityCard } from '../components/opportunity-card';
-import type { CreatorOpportunityFeedItem, OpportunityPreferenceState } from '../types';
+import { DiscoverAdCard } from '../components/discover-ad-card';
+import { buildDiscoveryDeck } from '../deck';
+import type { CreatorOpportunityFeedItem, DiscoveryDeckEntry, OpportunityPreferenceState } from '../types';
 
 const SWIPE_DECK_MIN = 5;
 const FEED_LIMIT = 150;
-type OpportunityDeckEntry = {
-  kind: 'opportunity';
-  key: string;
-  item: CreatorOpportunityFeedItem;
-};
-
 function createStyles(c: SemanticColors, tokens: DesignTokens) {
   return {
     container: { flex: 1, backgroundColor: c.canvas },
@@ -113,6 +109,7 @@ function createStyles(c: SemanticColors, tokens: DesignTokens) {
       ...tokens.elevation.hairline,
     },
     hint: { paddingBottom: 84, color: c.inkMuted, fontFamily: fonts.regular },
+    prototypeBanner: { marginHorizontal: space.md, marginBottom: space.xs, paddingHorizontal: space.sm, paddingVertical: 7, borderRadius: radii.sm, backgroundColor: c.accentMuted },
   };
 }
 
@@ -123,7 +120,7 @@ export default function DiscoverScreen() {
   const queryClient = useQueryClient();
   const { session } = useAuth();
   const { selectedMall, malls, loadInitialData } = useShopStore();
-  const [history, setHistory] = useState<OpportunityDeckEntry[]>([]);
+  const [history, setHistory] = useState<DiscoveryDeckEntry[]>([]);
   const [reduceMotion, setReduceMotion] = useState(false);
   const [actedKeys, setActedKeys] = useState<string[]>([]);
   const impressions = useRef(new Set<string>());
@@ -167,8 +164,8 @@ export default function DiscoverScreen() {
   });
 
   const actedSet = useMemo(() => new Set(actedKeys), [actedKeys]);
-  const fullDeck = useMemo<OpportunityDeckEntry[]>(
-    () => (feed.data ?? []).map(item => ({ kind: 'opportunity', key: `opp-${item.opportunity_id}`, item })),
+  const fullDeck = useMemo<DiscoveryDeckEntry[]>(
+    () => buildDiscoveryDeck(feed.data ?? []),
     [feed.data],
   );
   const deck = useMemo(
@@ -189,14 +186,14 @@ export default function DiscoverScreen() {
     }
   }, [current?.key]);
 
-  const markActed = (entry: OpportunityDeckEntry) => {
+  const markActed = (entry: DiscoveryDeckEntry) => {
     setActedKeys(previous => (previous.includes(entry.key) ? previous : [...previous, entry.key]));
   };
 
   const handleOpportunityAction = async (
     state: OpportunityPreferenceState,
     item: CreatorOpportunityFeedItem,
-    entry: OpportunityDeckEntry,
+    entry: Extract<DiscoveryDeckEntry, { kind: 'opportunity' }>,
   ) => {
     if (actionLock.current === entry.key || actedSet.has(entry.key)) return;
     actionLock.current = entry.key;
@@ -227,6 +224,10 @@ export default function DiscoverScreen() {
 
   const openDetails = (item: CreatorOpportunityFeedItem) => {
     recordCreatorOpportunityEvent(item.opportunity_id, 'detail_open', 'discover').catch(() => undefined);
+    if (item.is_prototype) {
+      router.push(`/opportunity/${item.opportunity_id}`);
+      return;
+    }
     if (item.contest_mode === 'competitive_pot' || item.opportunity_id > 0) {
       router.push(`/challenges/${item.opportunity_id}`);
       return;
@@ -240,6 +241,11 @@ export default function DiscoverScreen() {
   return (
     <SafeAreaView edges={['top']} style={styles.container}>
       <ConsumerUtilityHeader />
+      {feed.data?.some(item => item.is_prototype) && (
+        <View style={styles.prototypeBanner}>
+          <Text variant="caption" align="center">Partner prototype · campaign concepts are illustrative, not live offers</Text>
+        </View>
+      )}
       <View style={styles.locationRow}>
         <Pressable accessibilityRole="button" onPress={() => router.push('/mall-selector')} style={styles.locationButton}>
           <Ionicons name="location" size={16} color={colors.ink} />
@@ -271,7 +277,7 @@ export default function DiscoverScreen() {
           </View>
         ) : useList ? (
           <FlatList
-            data={deck.filter(entry => entry.kind === 'opportunity')}
+            data={deck.filter((entry): entry is Extract<DiscoveryDeckEntry, { kind: 'opportunity' }> => entry.kind === 'opportunity')}
             keyExtractor={item => item.key}
             contentContainerStyle={styles.listContent}
             renderItem={({ item }) => (
@@ -298,13 +304,22 @@ export default function DiscoverScreen() {
           <>
             {deck[2] && <View pointerEvents="none" style={[styles.nextCard, styles.nextCardDeep]} />}
             {deck[1] && <View pointerEvents="none" style={[styles.nextCard, styles.nextCardNear]} />}
-            <OpportunityCard
-              key={current.key}
-              item={current.item}
-              reduceMotion={reduceMotion}
-              onAction={state => handleOpportunityAction(state, current.item, current)}
-              onDetails={() => openDetails(current.item)}
-            />
+            {current.kind === 'opportunity' ? (
+              <OpportunityCard
+                key={current.key}
+                item={current.item}
+                reduceMotion={reduceMotion}
+                onAction={state => handleOpportunityAction(state, current.item, current)}
+                onDetails={() => openDetails(current.item)}
+              />
+            ) : (
+              <DiscoverAdCard
+                key={current.key}
+                item={current.item}
+                onContinue={() => { setHistory([current]); markActed(current); }}
+                onLearnMore={() => router.push('/advertise')}
+              />
+            )}
           </>
         ) : (
           <View style={styles.emptyCard}>

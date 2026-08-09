@@ -10,7 +10,7 @@ This is the memory doc for the finer details. Older research in `ugc-marketplace
 
 ## One-line thesis
 
-Muse helps **local merchants grow** by funding competitive, purchase-gated content challenges — not by becoming “another Botswana marketplace.”
+Muse helps **local businesses and institutions turn creator participation into measurable commerce and funding** through cash-paid content competitions, sponsored discovery and shoppable local experiences.
 
 ---
 
@@ -70,7 +70,8 @@ Restaurant-shaped loop (applies to salons, braai, lunch boxes, etc.):
 - **Discover** = swipe deck of live challenge cards (pot, deadline, buy-to-enter, Save/Pass)  
 - **Marketplace** = search/browse products + merchants when you already know what you want  
 - **Saved** = shortlist from right-swipes; saving does **not** enter you  
-- Showcase builds may inject **ad slots** every N cards to stress merchant placement value — not required for pilot economics
+- Showcase builds inject clearly labelled **generated sponsored-demo slots** every four opportunity cards to demonstrate merchant placement value and open the revenue model.
+- When the live feed is unavailable or empty, the partner prototype uses clearly labelled, locally researched fixture campaigns. These never enter live payment or settlement paths.
 
 ---
 

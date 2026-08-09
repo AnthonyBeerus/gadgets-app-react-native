@@ -11,6 +11,7 @@ import type {
   OpportunityPreferenceState,
   OpportunitySource,
 } from './types';
+import { PROTOTYPE_OPPORTUNITIES } from './prototype-opportunities';
 
 const db = supabase as any;
 
@@ -63,11 +64,12 @@ export async function getCreatorOpportunityFeed({
     if (result.error) throw result.error;
     rows = result.data;
   } catch (error) {
-    console.warn('[Discover] Real opportunity feed unavailable.', error);
-    throw error;
+    console.warn('[Discover] Live feed unavailable; using clearly labelled prototype opportunities.', error);
+    rows = null;
   }
 
-  const normalized = diversifyOpportunityFeed(normalizeFeed(rows));
+  const liveFeed = normalizeFeed(rows);
+  const normalized = diversifyOpportunityFeed(liveFeed.length > 0 ? liveFeed : PROTOTYPE_OPPORTUNITIES);
   if (includeHiddenPreferences) return normalized;
 
   const { data: authData } = await supabase.auth.getUser();
@@ -88,6 +90,17 @@ export async function getCreatorOpportunityFeed({
 }
 
 export async function getSavedCreatorOpportunities() {
+  const guestSaved = (await getGuestOpportunityPreferences())
+    .filter(item => item.state === 'saved')
+    .sort((a, b) => Date.parse(b.updated_at) - Date.parse(a.updated_at));
+  const prototypeSaved = guestSaved.filter(item => item.opportunity_id < 0);
+  if (prototypeSaved.length > 0) {
+    const byId = new Map(PROTOTYPE_OPPORTUNITIES.map(item => [item.opportunity_id, item]));
+    return prototypeSaved
+      .map(pref => byId.get(pref.opportunity_id))
+      .filter((item): item is CreatorOpportunityFeedItem => Boolean(item))
+      .map(item => ({ ...item, preference_state: 'saved' as const }));
+  }
   const { data: authData } = await supabase.auth.getUser();
   if (authData.user) {
     const { data, error } = await db.rpc('get_saved_creator_opportunities');
@@ -95,9 +108,7 @@ export async function getSavedCreatorOpportunities() {
     return normalizeFeed(data);
   }
 
-  const savedPrefs = (await getGuestOpportunityPreferences())
-    .filter(item => item.state === 'saved')
-    .sort((a, b) => Date.parse(b.updated_at) - Date.parse(a.updated_at));
+  const savedPrefs = guestSaved;
   if (savedPrefs.length === 0) return [];
 
   const savedIds = savedPrefs.map(item => item.opportunity_id);
@@ -117,6 +128,7 @@ export async function setCreatorOpportunityPreference(
   opportunityId: number,
   state: OpportunityPreferenceState,
 ) {
+  if (opportunityId < 0) return setGuestOpportunityPreference(opportunityId, state);
   const { data: authData } = await supabase.auth.getUser();
   if (!authData.user) return setGuestOpportunityPreference(opportunityId, state);
   const { data, error } = await db.rpc('set_creator_opportunity_preference', {
@@ -129,6 +141,7 @@ export async function setCreatorOpportunityPreference(
 }
 
 export async function restoreCreatorOpportunityPreference(opportunityId: number) {
+  if (opportunityId < 0) return restoreGuestOpportunityPreference(opportunityId);
   const { data: authData } = await supabase.auth.getUser();
   if (!authData.user) return restoreGuestOpportunityPreference(opportunityId);
   const { error } = await db.rpc('restore_creator_opportunity_preference', {
@@ -139,7 +152,8 @@ export async function restoreCreatorOpportunityPreference(opportunityId: number)
 }
 
 export async function mergeGuestCreatorOpportunityPreferences() {
-  const preferences = await getGuestOpportunityPreferences();
+  const preferences = (await getGuestOpportunityPreferences())
+    .filter(preference => preference.opportunity_id > 0);
   if (preferences.length === 0) return 0;
   const { data: authData } = await supabase.auth.getUser();
   if (!authData.user) return 0;
@@ -156,6 +170,7 @@ export async function recordCreatorOpportunityEvent(
   eventType: 'impression' | 'detail_open',
   source: OpportunitySource,
 ) {
+  if (opportunityId < 0) return;
   const { data: authData } = await supabase.auth.getUser();
   if (!authData.user) return;
   const { error } = await db.rpc('record_creator_opportunity_event', {

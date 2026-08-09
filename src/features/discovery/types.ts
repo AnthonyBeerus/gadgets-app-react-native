@@ -35,7 +35,21 @@ export type CreatorOpportunityFeedItem = {
   accepted_entry_fee: number;
   settled_at: string | null;
   score_rule: 'hybrid_quality_engagement';
+  is_prototype?: boolean;
+  prototype_disclaimer?: string;
 };
+
+export type SponsoredDemo = {
+  id: string;
+  advertiser: string;
+  headline: string;
+  body: string;
+  badge: string;
+};
+
+export type DiscoveryDeckEntry =
+  | { kind: 'opportunity'; key: string; item: CreatorOpportunityFeedItem }
+  | { kind: 'sponsored-demo'; key: string; item: SponsoredDemo };
 
 export type GuestOpportunityPreference = {
   opportunity_id: number;
