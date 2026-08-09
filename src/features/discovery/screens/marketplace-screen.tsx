@@ -47,8 +47,8 @@ export default function MarketplaceScreen() {
       <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
         <View style={styles.heading}>
           <Text variant="caption" color={colors.accent}>SHOPS · {location.toUpperCase()}</Text>
-          <Text variant="h1">Shop businesses that invest in Botswana&apos;s creators.</Text>
-          <Text variant="body" color={colors.inkMuted}>Find the business, see the funded brief, then shop the products that make participation possible.</Text>
+          <Text variant="h1">Shop businesses building Botswana&apos;s digital economy.</Text>
+          <Text variant="body" color={colors.inkMuted}>Discover local businesses funding creator campaigns, generating social content and turning attention into real commerce.</Text>
         </View>
 
         <View style={styles.searchBox}>
@@ -81,7 +81,7 @@ export default function MarketplaceScreen() {
         ) : (
           <View style={styles.sections}>
             {sponsored && <><SectionTitle title="Sponsored spotlight" /><MerchantGrowthCard profile={sponsored} onPress={() => openMerchant(sponsored.id)} /></>}
-            <SectionTitle title="Businesses funding creators" count={active.length} />
+            <SectionTitle title="Businesses powering creator campaigns" count={active.length} />
             <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.horizontalCards}>{active.map(profile => <MerchantGrowthCard key={profile.id} profile={profile} compact onPress={() => openMerchant(profile.id)} />)}</ScrollView>
             <SectionTitle title="Campaign collections" />
             <View style={styles.collectionRow}>

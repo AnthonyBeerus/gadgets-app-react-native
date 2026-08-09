@@ -68,7 +68,7 @@ Restaurant-shaped loop (applies to salons, braai, lunch boxes, etc.):
 ## Discover + Shops
 
 - **Discover** = swipe deck of live challenge cards (pot, deadline, buy-to-enter, Save/Pass)  
-- **Shops** = merchant-first browsing for businesses funding creators; products appear as qualifying conversion rails within each business
+- **Shops** = merchant-first browsing for businesses building Botswana's digital economy through funded creator campaigns; products appear as qualifying conversion rails within each business
 - **Saved** = shortlist from right-swipes; saving does **not** enter you  
 - Showcase builds inject clearly labelled **generated sponsored-demo slots** every four opportunity cards to demonstrate merchant placement value and open the revenue model.
 - When the live feed is unavailable or empty, the partner prototype uses clearly labelled, locally researched fixture campaigns. These never enter live payment or settlement paths.
