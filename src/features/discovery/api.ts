@@ -1,4 +1,5 @@
 import { supabase } from '../../shared/lib/supabase';
+import Constants from 'expo-constants';
 import { diversifyOpportunityFeed } from './ranking';
 import {
   clearGuestOpportunityPreferences,
@@ -12,6 +13,7 @@ import type {
   OpportunitySource,
 } from './types';
 import { PROTOTYPE_OPPORTUNITIES } from './prototype-opportunities';
+import { shouldUsePrototypeFeedImmediately } from './feed-mode';
 
 const db = supabase as any;
 
@@ -49,6 +51,11 @@ export async function getCreatorOpportunityFeed({
   mallId?: number | null;
   includeHiddenPreferences?: boolean;
 } = {}) {
+  const appVariant = Constants.expoConfig?.extra?.appVariant;
+  if (shouldUsePrototypeFeedImmediately(appVariant) || (__DEV__ && !appVariant)) {
+    return PROTOTYPE_OPPORTUNITIES.slice(cursor, cursor + limit);
+  }
+
   const seed = new Date().toISOString().slice(0, 10);
   let rows: any[] | null = null;
   try {
