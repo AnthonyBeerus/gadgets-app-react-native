@@ -207,7 +207,7 @@ export default function BagScreen() {
             <View style={styles.empty}>
               <NuviaText variant="h2">CART IS EMPTY</NuviaText>
               <NuviaText variant="body" align="center">
-                Add a qualifying product to enter a challenge, or browse the marketplace.
+                Add a qualifying product to enter a challenge, or browse Shops.
               </NuviaText>
               <Pressable onPress={() => router.replace('/(shop)/marketplace')} style={styles.action}>
                 <NuviaText variant="bodyBold">BROWSE MARKETPLACE</NuviaText>

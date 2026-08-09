@@ -16,6 +16,6 @@ describe('partner prototype opportunity feed', () => {
   });
 
   it('labels inferred campaigns without claiming they are live partnerships', () => {
-    expect(PROTOTYPE_OPPORTUNITIES.every(item => item.prototype_disclaimer.length > 20)).toBe(true);
+    expect(PROTOTYPE_OPPORTUNITIES.every(item => (item.prototype_disclaimer?.length ?? 0) > 20)).toBe(true);
   });
 });

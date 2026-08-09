@@ -27,6 +27,13 @@ const item = (id: number, merchantId: number): CreatorOpportunityFeedItem => ({
   eligibility_proof_id: null,
   eligibility_consumed: false,
   rank_score: 10,
+  contest_mode: 'competitive_pot',
+  pot_value: 500,
+  pot_currency: 'BWP',
+  pot_splits: { winner: 1 },
+  accepted_entry_fee: 50,
+  settled_at: null,
+  score_rule: 'hybrid_quality_engagement',
 });
 
 describe('diversifyOpportunityFeed', () => {

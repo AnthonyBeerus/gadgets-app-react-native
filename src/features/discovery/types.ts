@@ -45,6 +45,7 @@ export type SponsoredDemo = {
   headline: string;
   body: string;
   badge: string;
+  merchantId: number;
 };
 
 export type DiscoveryDeckEntry =

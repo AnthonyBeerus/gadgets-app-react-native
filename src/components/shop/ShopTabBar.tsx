@@ -17,7 +17,7 @@ function routeIcon(name: PillRoute): keyof typeof Ionicons.glyphMap {
 
 function routeLabel(name: PillRoute) {
   if (name === 'index') return 'Discover';
-  if (name === 'marketplace') return 'Marketplace';
+  if (name === 'marketplace') return 'Shops';
   if (name === 'activity') return 'Activity';
   return 'Profile';
 }

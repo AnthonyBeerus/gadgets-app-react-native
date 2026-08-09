@@ -44,7 +44,7 @@ const TabsLayout = () => {
       <Tabs.Screen
         name="marketplace"
         options={{
-          title: "Marketplace",
+          title: "Shops",
         }}
       />
       <Tabs.Screen

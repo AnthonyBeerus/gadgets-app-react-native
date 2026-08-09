@@ -65,13 +65,15 @@ Restaurant-shaped loop (applies to salons, braai, lunch boxes, etc.):
 
 ---
 
-## Discover + marketplace
+## Discover + Shops
 
 - **Discover** = swipe deck of live challenge cards (pot, deadline, buy-to-enter, Save/Pass)  
-- **Marketplace** = search/browse products + merchants when you already know what you want  
+- **Shops** = merchant-first browsing for businesses funding creators; products appear as qualifying conversion rails within each business
 - **Saved** = shortlist from right-swipes; saving does **not** enter you  
 - Showcase builds inject clearly labelled **generated sponsored-demo slots** every four opportunity cards to demonstrate merchant placement value and open the revenue model.
 - When the live feed is unavailable or empty, the partner prototype uses clearly labelled, locally researched fixture campaigns. These never enter live payment or settlement paths.
+- The partner prototype centers Molapo merchants, creator briefs, illustrative external-social outcomes and qualifying commerce. It does not claim to be an all-in-one directory, booking platform or national local-business catalogue.
+- Browse Botswana is treated as a broad directory/storefront competitor. Muse differentiates on the measurable loop: **merchant funding → creator brief → external social content → qualifying commerce → merchant growth**.
 
 ---
 
@@ -122,4 +124,4 @@ Remote project used in this phase: **project-muse-rebuild**. Showcase seed data 
 
 1. **Merchant growth first**; youth creators are supply.  
 2. **Accepted-entry fee + ranked cash pot + purchase proof** is the product.
-3. **Marketplace stays as rails**; Discover is challenges, not “shop the mall.”
+3. **Shops keeps commerce as rails**; merchant-funded creator growth is the identity, not catalogue breadth.

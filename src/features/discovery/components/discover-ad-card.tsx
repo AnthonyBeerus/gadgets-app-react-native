@@ -29,7 +29,7 @@ export function DiscoverAdCard({ item, onContinue, onLearnMore }: Props) {
           ))}
         </View>
         <Pressable accessibilityRole="button" onPress={onLearnMore} style={styles.primary}>
-          <Text variant="bodyBold" color={colors.surface}>See how Muse makes money</Text>
+          <Text variant="bodyBold" color={colors.surface}>Explore sponsored business</Text>
           <Ionicons name="arrow-forward" size={18} color={colors.surface} />
         </Pressable>
         <Pressable accessibilityRole="button" onPress={onContinue} style={styles.secondary}>

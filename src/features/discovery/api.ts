@@ -12,7 +12,7 @@ import type {
   OpportunityPreferenceState,
   OpportunitySource,
 } from './types';
-import { PROTOTYPE_OPPORTUNITIES } from './prototype-opportunities';
+import { getPrototypeOpportunity, PROTOTYPE_OPPORTUNITIES } from './prototype-opportunities';
 import { shouldUsePrototypeFeedImmediately } from './feed-mode';
 
 const db = supabase as any;
@@ -189,6 +189,24 @@ export async function recordCreatorOpportunityEvent(
 }
 
 export async function getOpportunityForProduct(productId: number, opportunityId?: number) {
+  if (productId < 0) {
+    const prototype = opportunityId
+      ? getPrototypeOpportunity(opportunityId)
+      : PROTOTYPE_OPPORTUNITIES.find(item => item.product_id === productId) ?? null;
+    if (!prototype) return null;
+    return {
+      id: prototype.opportunity_id,
+      title: prototype.opportunity_title,
+      description: prototype.opportunity_description,
+      requirements: prototype.requirements,
+      deadline: prototype.deadline,
+      reward_value: prototype.reward_value,
+      accepted_entry_fee: prototype.accepted_entry_fee,
+      reward_currency: prototype.reward_currency,
+      product_id: prototype.product_id,
+      status: 'prototype',
+    };
+  }
   let query = db.from('challenges')
     .select('id,title,description,requirements,deadline,reward_value,reward_currency,product_id,status')
     .eq('product_id', productId)
@@ -203,6 +221,7 @@ export async function getOpportunityForProduct(productId: number, opportunityId?
     requirements: string[];
     deadline: string;
     reward_value: number;
+    accepted_entry_fee?: number;
     reward_currency: string;
     product_id: number;
     status: string;

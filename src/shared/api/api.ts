@@ -3,6 +3,7 @@ import { supabase } from "../lib/supabase";
 import { useAuth } from "../providers/auth-provider";
 import { generateOrderSlug } from "../utils/utils";
 import { Database, Tables, TablesInsert } from '../types/database.types';
+import { getPrototypeProduct } from '../../features/discovery/shops-model';
 
 export const getProductsAndCategories = () => {
   return useQuery({
@@ -26,6 +27,15 @@ export const getProduct = (slug: string) => {
   return useQuery({
     queryKey: ["product", slug],
     queryFn: async () => {
+      const prototypeProduct = getPrototypeProduct(slug);
+      if (prototypeProduct) {
+        return {
+          ...prototypeProduct,
+          imagesUrl: [prototypeProduct.heroImage],
+          is_available: true,
+          created_at: new Date(0).toISOString(),
+        } as any;
+      }
       try {
         const { data, error } = await supabase
           .from("product")

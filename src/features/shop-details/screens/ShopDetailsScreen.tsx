@@ -1,455 +1,87 @@
-import { useNeoStyles } from '../../../shared/hooks/useNeoStyles';
-import { useTheme } from '../../../shared/providers/theme-provider';
-import React, { useState, useEffect } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  Image,
-  TouchableOpacity,
-  ScrollView,
-  ActivityIndicator,
-  Alert,
-  Linking,
-} from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { useLocalSearchParams, useRouter } from "expo-router";
-import { Ionicons } from "@expo/vector-icons";
-import { getShopById, getShopProducts } from "../../../shared/api/shops";
-import { StaticHeader } from "../../../shared/components/layout/StaticHeader";
-import { NEO_THEME } from "../../../shared/constants/neobrutalism";
-import { NuviaButton } from "../../../shared/components/ui/nuvia-button";
-import { NuviaText } from "../../../components/atoms/nuvia-text";
-import { NuviaTag } from "../../../shared/components/ui/nuvia-tag";
-import { useCartStore } from "../../../store/cart-store";
-import { NuviaProductCard } from "../../../components/molecules/nuvia-product-card";
+import { Ionicons } from '@expo/vector-icons';
+import { useQuery } from '@tanstack/react-query';
+import { Image } from 'expo-image';
+import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useState } from 'react';
+import { ActivityIndicator, Linking, Modal, Pressable, ScrollView, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+
+import { getCampaignAwareShopById } from '../../discovery/marketplace-api';
+import { Button, Text, radii, space, useDesignTokens, useThemedStyles, type DesignTokens, type SemanticColors } from '../../../shared/design-system';
 
 export default function ShopDetailsScreen() {
-  const styles = useNeoStyles(createStyles);
-  const { theme } = useTheme();
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
-  const { items } = useCartStore(); // Added hook usage
+  const styles = useThemedStyles(createStyles);
+  const { colors } = useDesignTokens();
+  const [concept, setConcept] = useState<string | null>(null);
+  const shop = useQuery({ queryKey: ['campaign-aware-shop', id], queryFn: () => getCampaignAwareShopById(Number(id)), staleTime: 60_000 });
 
-  const [shop, setShop] = useState<any>(null);
-  const [products, setProducts] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [productsLoading, setProductsLoading] = useState(true);
-
-  useEffect(() => {
-    if (id) {
-      loadShopDetails();
-      loadShopProducts();
-    }
-  }, [id]);
-
-  const loadShopDetails = async () => {
-    try {
-      setLoading(true);
-      const shopId = parseInt(id!);
-      if (isNaN(shopId)) throw new Error(`Invalid shop ID: ${id}`);
-
-      const shopData = await getShopById(shopId);
-      setShop(shopData);
-    } catch (error) {
-      console.error("Error loading shop details:", error);
-      Alert.alert("Error", "Failed to load shop details.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const loadShopProducts = async () => {
-    try {
-      setProductsLoading(true);
-      const productsData = await getShopProducts(parseInt(id!));
-      setProducts(productsData || []);
-    } catch (error) {
-      console.error("Error loading shop products:", error);
-      setProducts([]);
-    } finally {
-      setProductsLoading(false);
-    }
-  };
-
-  const handleBrowseProducts = () => {
-    if (products.length > 0) {
-      router.push(
-        `/product?shop=${shop.id}&shopName=${encodeURIComponent(shop.name)}`
-      );
-    } else {
-      Alert.alert(
-        "Products",
-        "Contact the shop directly for available products and services."
-      );
-    }
-  };
-
-  const handleCallShop = () => {
-    if (shop?.phone) {
-      const phoneUrl = `tel:${shop.phone}`;
-      Linking.canOpenURL(phoneUrl).then((supported) => {
-        if (supported) {
-          Linking.openURL(phoneUrl);
-        } else {
-          Alert.alert("Error", "Phone dialer not available");
-        }
-      });
-    }
-  };
-
-  if (loading) {
-    return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color={theme.colors.primary} />
-      </View>
-    );
-  }
-
-  if (!shop) {
-    return (
-    <View style={styles.emptyContainer}>
-        <NuviaText variant="h2">SHOP NOT FOUND</NuviaText>
-      </View>
-    );
-  }
+  if (shop.isLoading) return <View style={styles.center}><ActivityIndicator size="large" color={colors.ink} /></View>;
+  if (!shop.data) return <View style={styles.center}><Text variant="h1">Shop not found</Text><Button onPress={() => router.back()}>Go back</Button></View>;
+  const profile = shop.data;
+  const openProduct = (slug: string) => router.push({ pathname: '/product/[slug]', params: { slug, source: 'merchant', ...(profile.opportunity ? { opportunityId: profile.opportunity.opportunity_id } : {}) } });
+  const visit = () => Linking.openURL(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(profile.location)}`);
 
   return (
     <SafeAreaView style={styles.container}>
-      <StaticHeader 
-        title={shop.name} 
-        onBackPress={() => router.back()} 
-        rightElement={
-          <TouchableOpacity onPress={() => router.push("/bag")} style={{ position: 'relative' }}>
-            <Ionicons name="cart" size={24} color={theme.colors.black} />
-            {items.length > 0 && (
-              <NuviaTag 
-                label={items.length.toString()} 
-                color={theme.colors.primary} 
-                style={{
-                  position: 'absolute',
-                  top: -6,
-                  right: -6,
-                  paddingHorizontal: 4,
-                  minWidth: 18,
-                  height: 18,
-                  borderRadius: 9,
-                }}
-                textStyle={{ fontSize: 10, color: theme.colors.white }}
-              />
-            )}
-          </TouchableOpacity>
-        }
-      />
-      
-      <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
-        {/* Shop Image */}
-        {shop.image_url && (
-          <Image source={{ uri: shop.image_url }} style={styles.shopImage} />
-        )}
+      <ScrollView contentContainerStyle={styles.content}>
+        <View style={styles.hero}>
+          <Image source={{ uri: profile.imageUrl }} style={styles.image} contentFit="cover" />
+          <Pressable accessibilityRole="button" accessibilityLabel="Back" onPress={() => router.back()} style={styles.back}><Ionicons name="arrow-back" size={22} color={colors.ink} /></Pressable>
+          {profile.isSponsored && <View style={styles.sponsored}><Text variant="caption">SPONSORED CONCEPT</Text></View>}
+        </View>
+        <View style={styles.body}>
+          {profile.isPrototype && <View style={styles.prototype}><Text variant="caption">PARTNER PROTOTYPE · NOT A LIVE OFFER</Text></View>}
+          <Text variant="caption" color={colors.accent}>{profile.intent.toUpperCase()} · MOLAPO</Text>
+          <Text variant="h1">{profile.name}</Text>
+          <Text variant="body" color={colors.inkMuted}>{profile.story}</Text>
+          <View style={styles.actions}>
+            <Button onPress={visit}>Visit at Molapo</Button>
+            {profile.phone && <Button variant="secondary" onPress={() => Linking.openURL(`tel:${profile.phone}`)}>Call</Button>}
+            {profile.whatsapp && <Button variant="secondary" onPress={() => Linking.openURL(`https://wa.me/${profile.whatsapp}`)}>WhatsApp</Button>}
+          </View>
 
-        {/* Shop Info */}
-        <View style={styles.shopInfo}>
-          {shop.description && (
-            <NuviaText variant="body" style={styles.description}>
-              {shop.description}
-            </NuviaText>
+          {profile.opportunity && (
+            <View style={styles.opportunity}>
+              <Text variant="caption" color={colors.accent}>ACTIVE CREATOR OPPORTUNITY</Text>
+              <Text variant="h2">{profile.opportunity.opportunity_title}</Text>
+              <Text variant="body" color={colors.inkMuted}>{profile.opportunity.opportunity_description}</Text>
+              <View style={styles.moneyRow}><Money label="PRIZE POT" value={`P${profile.opportunity.pot_value}`} /><Money label="ACCEPTED ENTRY" value={`P${profile.opportunity.accepted_entry_fee}`} /></View>
+              <Button onPress={() => router.push(`/opportunity/${profile.opportunity!.opportunity_id}`)}>View opportunity</Button>
+              {profile.products[0] && <Button variant="secondary" onPress={() => openProduct(profile.products[0].slug)}>Shop qualifying item</Button>}
+            </View>
           )}
 
-          {/* Quick Actions */}
-          <View style={styles.quickActionsSection}>
-            <NuviaButton
-              onPress={handleBrowseProducts}
-              variant="primary"
-              style={styles.primaryActionButton}
-            >
-                <Ionicons name="storefront" size={20} color={theme.colors.white} style={{ marginRight: 8 }} />
-                <NuviaText variant="label" color={theme.colors.white}>
-                    BROWSE PRODUCTS
-                </NuviaText>
-            </NuviaButton>
+          <Text variant="h2">What creator participation can produce</Text>
+          <Text variant="body" color={colors.inkMuted}>Illustrative outcomes only. Live Muse campaigns reference public posts hosted on TikTok or other social platforms.</Text>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.concepts}>
+            {profile.creatorConcepts.map(item => <Pressable key={item} onPress={() => setConcept(item)} style={styles.concept}><View style={styles.play}><Ionicons name="play" size={18} color={colors.surface} /></View><Text variant="caption" color={colors.accent}>ILLUSTRATIVE CONTENT</Text><Text variant="bodyBold">{item}</Text><Text variant="caption" color={colors.inkMuted}>Tap to see how verification works</Text></Pressable>)}
+          </ScrollView>
 
-            <View style={styles.secondaryActions}>
-              {shop.phone && (
-                <TouchableOpacity
-                  style={styles.secondaryActionButton}
-                  onPress={handleCallShop}
-                >
-                  <Ionicons name="call" size={18} color={theme.colors.black} />
-                  <NuviaText variant="label">CALL</NuviaText>
-                </TouchableOpacity>
-              )}
-            </View>
-          </View>
+          <Text variant="h2">Qualifying and featured products</Text>
+          <View style={styles.products}>{profile.products.map(product => <Pressable key={product.id} onPress={() => openProduct(product.slug)} style={styles.product}><Image source={{ uri: product.heroImage }} style={styles.productImage} contentFit="cover" /><Text variant="bodyBold" numberOfLines={2}>{product.title}</Text><Text variant="h2">P{product.price}</Text></Pressable>)}</View>
 
-
-
-          {/* Services Grid */}
-          <View style={styles.section}>
-            <NuviaText variant="h3" style={styles.sectionTitle}>SERVICES</NuviaText>
-            <View style={styles.featuresGrid}>
-              {shop.has_delivery && (
-                <View style={styles.featureCard}>
-                   <View style={styles.featureIconContainer}>
-                    <Ionicons name="bicycle" size={24} color={theme.colors.black} />
-                   </View>
-                   <NuviaText variant="label">DELIVERY</NuviaText>
-                </View>
-              )}
-              {shop.has_collection && (
-                <View style={styles.featureCard}>
-                   <View style={styles.featureIconContainer}>
-                    <Ionicons name="bag-handle" size={24} color={theme.colors.black} />
-                   </View>
-                   <NuviaText variant="label">COLLECTION</NuviaText>
-                </View>
-              )}
-            </View>
-          </View>
-
-          {/* Details */}
-          <View style={styles.section}>
-            <NuviaText variant="h3" style={styles.sectionTitle}>DETAILS</NuviaText>
-            {shop.location && (
-              <View style={styles.detailRow}>
-                <Ionicons name="location" size={20} color={theme.colors.black} />
-                <NuviaText variant="body">{shop.location}</NuviaText>
-              </View>
-            )}
-            {shop.rating && (
-              <View style={styles.detailRow}>
-                <Ionicons name="star" size={20} color={theme.colors.secondary} />
-                <NuviaText variant="bodyBold">{shop.rating.toFixed(1)} RATING</NuviaText>
-              </View>
-            )}
-          </View>
+          <View style={styles.details}><Text variant="h2">Business details</Text><View style={styles.detailRow}><Ionicons name="location" size={20} color={colors.ink} /><Text variant="body" style={styles.flex}>{profile.location}</Text></View><View style={styles.detailRow}><Ionicons name="bag-handle" size={20} color={colors.ink} /><Text variant="body" style={styles.flex}>{[profile.hasCollection && 'Collection', profile.hasDelivery && 'Delivery'].filter(Boolean).join(' · ') || 'Visit in person'}</Text></View><Text variant="caption" color={colors.inkMuted}>Merchant identity and campaign details are verified before a live offer is published.</Text></View>
         </View>
       </ScrollView>
 
+      <Modal transparent visible={Boolean(concept)} animationType="fade" onRequestClose={() => setConcept(null)}>
+        <Pressable style={styles.modalBackdrop} onPress={() => setConcept(null)}><Pressable style={styles.modalCard} onPress={event => event.stopPropagation()}><Ionicons name="logo-tiktok" size={32} color={colors.ink} /><Text variant="h2">External content, verified by Muse</Text><Text variant="body" color={colors.inkMuted}>{concept}</Text><Text variant="body">The creator publishes publicly, submits the post URL and grants disclosed reuse rights. Muse checks purchase eligibility and brief compliance before the accepted-entry payout or leaderboard ranking applies.</Text><Button onPress={() => setConcept(null)}>Got it</Button></Pressable></Pressable>
+      </Modal>
     </SafeAreaView>
   );
 }
 
-function createStyles(c) {
-  return {
-  container: {
-    flex: 1,
-    backgroundColor: c.backgroundLight,
-  },
-  scrollView: {
-    flex: 1,
-  },
-  scrollContent: {
-    paddingTop: 60,
-    paddingBottom: 20,
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  emptyContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  emptyTitle: {
-    fontSize: 20,
-    fontWeight: '600',
-    color: c.black,
-    fontFamily: NEO_THEME.fonts.black,
-  },
-  shopImage: {
-    width: "100%",
-    height: 250,
-    resizeMode: "cover",
-    borderBottomLeftRadius: 32,
-    borderBottomRightRadius: 32,
-    borderBottomWidth: 1,
-    borderColor: c.border,
-  },
-  shopInfo: {
-    padding: 20,
-  },
-  description: {
-    fontSize: 16,
-    color: c.black,
-    marginBottom: 24,
-    lineHeight: 24,
-    fontFamily: NEO_THEME.fonts.regular,
-  },
-  quickActionsSection: {
-    marginBottom: 24,
-  },
-  primaryActionButton: {
-    marginBottom: 16,
-  },
-  primaryActionText: {
-    color: c.white,
-    fontWeight: '600',
-    fontFamily: NEO_THEME.fonts.bold,
-    fontSize: 16,
-  },
-  secondaryActions: {
-    flexDirection: "row",
-    gap: 12,
-  },
-  secondaryActionButton: {
-    flex: 1,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    padding: 12,
-    backgroundColor: c.white,
-    borderWidth: 1,
-    borderColor: c.border,
-    borderRadius: 24, // Pill
-    gap: 8,
-    shadowColor: c.black,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
-  },
-  secondaryActionText: {
-    fontWeight: '600',
-    fontFamily: NEO_THEME.fonts.bold,
-    color: c.black,
-  },
-  section: {
-    marginBottom: 24,
-  },
-  sectionHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 12,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: c.black,
-    fontFamily: NEO_THEME.fonts.bold,
-  },
-  viewAllText: {
-    color: c.primary,
-    fontWeight: "700",
-    fontFamily: NEO_THEME.fonts.bold,
-  },
-  productsScroll: {
-    marginHorizontal: -20,
-    paddingHorizontal: 20,
-  },
-  productCard: {
-    width: 140,
-    marginRight: 12,
-    backgroundColor: c.white,
-    borderWidth: 1,
-    borderColor: c.border,
-    borderRadius: NEO_THEME.borders.radius,
-    padding: 8,
-  },
-  productImage: {
-    width: "100%",
-    height: 100,
-    marginBottom: 8,
-    borderRadius: NEO_THEME.borders.radius,
-  },
-  productName: {
-    fontWeight: "700",
-    fontFamily: NEO_THEME.fonts.bold,
-    marginBottom: 4,
-  },
-  productPrice: {
-    fontWeight: '600',
-    fontFamily: NEO_THEME.fonts.black,
-    color: c.primary,
-  },
-  emptyText: {
-    color: c.grey,
-    fontStyle: "italic",
-  },
-  featuresGrid: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 12,
-  },
-  featureCard: {
-    width: "48%",
-    backgroundColor: c.white,
-    borderWidth: 1,
-    borderColor: c.border,
-    borderRadius: NEO_THEME.borders.radius,
-    padding: 16,
-    alignItems: "center",
-    gap: 8,
-    shadowColor: c.black,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
-  },
-  featureLabel: {
-    fontWeight: '600',
-    fontFamily: NEO_THEME.fonts.bold,
-    fontSize: 12,
-  },
-  detailRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 8,
-    gap: 12,
-  },
-  detailText: {
-    fontSize: 16,
-    color: c.black,
-  },
-  modalContainer: {
-    flex: 1,
-    backgroundColor: c.backgroundLight,
-  },
-  modalHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    padding: 20,
-    borderBottomWidth: 1,
-    borderColor: c.border,
-    backgroundColor: c.white,
-  },
-  modalTitle: {
-    fontSize: 20,
-    fontWeight: '600',
-    fontFamily: NEO_THEME.fonts.black,
-  },
-  servicesList: {
-    flex: 1,
-    padding: 20,
-  },
-  serviceCard: {
-    backgroundColor: c.white,
-    borderWidth: 1,
-    borderColor: c.border,
-    borderRadius: 16,
-    padding: 16,
-    marginBottom: 12,
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    shadowColor: c.black,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
-    elevation: 2,
-  },
-  featureIconContainer: {
-      width: 48,
-      height: 48,
-      borderRadius: 24,
-      backgroundColor: c.background,
-      borderWidth: 1,
-      borderColor: c.border,
-      alignItems: 'center',
-      justifyContent: 'center',
-      marginBottom: 8,
-  }
-  };
-}
+function Money({ label, value }: { label: string; value: string }) { return <View style={{ flex: 1, gap: 4 }}><Text variant="caption">{label}</Text><Text variant="h2">{value}</Text></View>; }
+
+function createStyles(c: SemanticColors, tokens: DesignTokens) { return {
+  container: { flex: 1, backgroundColor: c.canvas }, content: { paddingBottom: 48 }, center: { flex: 1, alignItems: 'center' as const, justifyContent: 'center' as const, gap: space.md, backgroundColor: c.canvas },
+  hero: { height: 300, backgroundColor: c.gray100 }, image: { width: '100%' as const, height: '100%' as const }, back: { position: 'absolute' as const, top: space.md, left: space.md, width: 44, height: 44, borderRadius: 22, alignItems: 'center' as const, justifyContent: 'center' as const, backgroundColor: c.surface }, sponsored: { position: 'absolute' as const, right: space.md, bottom: space.md, borderRadius: radii.sm, backgroundColor: c.surface, paddingHorizontal: space.sm, paddingVertical: 6 },
+  body: { padding: space.md, gap: space.md }, prototype: { alignSelf: 'flex-start' as const, borderRadius: radii.sm, backgroundColor: c.accentMuted, paddingHorizontal: space.sm, paddingVertical: 6 }, actions: { gap: space.sm },
+  opportunity: { gap: space.sm, borderRadius: radii.lg, backgroundColor: c.surface, padding: space.md, ...tokens.elevation.hairline }, moneyRow: { flexDirection: 'row' as const, gap: space.md, borderRadius: radii.md, backgroundColor: c.accentMuted, padding: space.md },
+  concepts: { gap: space.sm, paddingRight: space.md }, concept: { width: 220, minHeight: 180, justifyContent: 'flex-end' as const, gap: space.xs, borderRadius: radii.md, backgroundColor: c.surface, padding: space.md, ...tokens.elevation.hairline }, play: { width: 42, height: 42, borderRadius: 21, alignItems: 'center' as const, justifyContent: 'center' as const, backgroundColor: c.ink },
+  products: { flexDirection: 'row' as const, flexWrap: 'wrap' as const, gap: space.sm }, product: { width: '48%' as const, gap: space.xs, borderRadius: radii.md, backgroundColor: c.surface, padding: space.sm, ...tokens.elevation.hairline }, productImage: { width: '100%' as const, aspectRatio: 1, borderRadius: radii.sm },
+  details: { gap: space.sm, borderTopWidth: 1, borderColor: c.border, paddingTop: space.md }, detailRow: { flexDirection: 'row' as const, alignItems: 'center' as const, gap: space.sm }, flex: { flex: 1 },
+  modalBackdrop: { flex: 1, alignItems: 'center' as const, justifyContent: 'center' as const, backgroundColor: 'rgba(0,0,0,0.55)', padding: space.lg }, modalCard: { width: '100%' as const, gap: space.md, borderRadius: radii.lg, backgroundColor: c.surface, padding: space.lg },
+}; }

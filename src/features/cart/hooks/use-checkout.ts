@@ -4,6 +4,7 @@ import { useRouter } from 'expo-router';
 import { useCartStore } from '../../../store/cart-store';
 import { useAuth } from '../../../shared/providers/auth-provider';
 import { confirmStripeOrder, openStripeCheckout, setupStripePaymentSheet } from '../../../shared/lib/stripe.native';
+import { containsPrototypeCheckoutItem } from '../prototype-checkout-guard';
 
 export const useCheckout = () => {
   const router = useRouter();
@@ -14,6 +15,13 @@ export const useCheckout = () => {
   const checkout = async () => {
     if (!items.length) {
       Alert.alert('Cart is empty', 'Please add items before checking out.');
+      return;
+    }
+    if (containsPrototypeCheckoutItem(items)) {
+      Alert.alert(
+        'Prototype item',
+        'This partner-demo item can be added to the bag, but it cannot enter live checkout or payment systems.',
+      );
       return;
     }
     if (!session?.user) {

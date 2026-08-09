@@ -293,9 +293,9 @@ export default function DiscoverScreen() {
               <View style={styles.emptyCard}>
                 <Ionicons name="sparkles" size={48} color={colors.accent} />
                 <Text variant="h1" align="center">No live challenges</Text>
-                <Text variant="body" align="center" color={colors.inkMuted}>Browse the marketplace or check saved picks.</Text>
+                <Text variant="body" align="center" color={colors.inkMuted}>Browse Shops or check saved picks.</Text>
                 <Button onPress={() => router.push('/(shop)/marketplace')}>
-                  Search marketplace
+                  Explore Shops
                 </Button>
               </View>
             }
@@ -317,7 +317,7 @@ export default function DiscoverScreen() {
                 key={current.key}
                 item={current.item}
                 onContinue={() => { setHistory([current]); markActed(current); }}
-                onLearnMore={() => router.push('/advertise')}
+                onLearnMore={() => router.push(`/shop/${current.item.merchantId}`)}
               />
             )}
           </>
@@ -330,7 +330,7 @@ export default function DiscoverScreen() {
             </Text>
             <Button onPress={() => router.push('/bag?tab=saved')}>View saved</Button>
             <Button variant="secondary" onPress={() => router.push('/(shop)/marketplace')}>
-              Search marketplace
+              Explore Shops
             </Button>
           </View>
         )}

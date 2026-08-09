@@ -33,7 +33,7 @@ export default function PrototypeOpportunityScreen() {
           <Text variant="h2">The brief</Text>
           {item.requirements.map(requirement => <View key={requirement} style={{ flexDirection: 'row', gap: space.sm }}><Ionicons name="checkmark-circle" size={20} color={colors.accent} /><Text variant="body" style={{ flex: 1 }}>{requirement}</Text></View>)}
           <View style={{ padding: space.md, borderRadius: radii.md, backgroundColor: colors.surface, gap: space.xs }}><Text variant="bodyBold">Qualifying item</Text><Text variant="body">{item.product_title} · from P{item.price}</Text><Text variant="caption" color={colors.inkMuted}>In a live campaign, a Muse order or verified till code unlocks submission.</Text></View>
-          <Button onPress={() => router.push('/(shop)/marketplace')}>Explore the marketplace</Button>
+          <Button onPress={() => router.push('/(shop)/marketplace')}>Explore Shops</Button>
           <Button variant="secondary" onPress={() => router.push('/auth')}>Preview creator sign-in</Button>
           <Text variant="caption" color={colors.inkMuted}>{item.prototype_disclaimer}</Text>
         </View>

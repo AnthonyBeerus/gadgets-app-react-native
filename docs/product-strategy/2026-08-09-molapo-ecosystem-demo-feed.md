@@ -43,3 +43,9 @@ The app labels these as prototype concepts and uses negative internal IDs so the
 ## Sponsored discovery slot
 
 After every four opportunity cards, the partner build inserts a clearly labelled generated-ad concept. It explains the merchant funnel (`brief → creators → content → sales`) and opens a business-model screen covering campaign fees, sponsored placement, commerce fees and future measurement. No package prices are invented before partner validation.
+
+## Shops implementation
+
+The customer-facing marketplace tab is **Shops** while its internal route remains `marketplace`. The screen ranks merchant identity and active funded briefs before inventory, groups search into Businesses, Opportunities and Products, and keeps prototype products on negative IDs. The merchant fixtures also include House of Scents, Cutting Line Studio, B4U Discount Centre and Coupons, all listed by the official Molapo Crossing directory. Their proposed products, stories and creator-content concepts remain illustrative rather than claims of live stock or partnerships.
+
+Browse Botswana remains a boundary rather than a template: Muse does not add broad directory, stays, classifieds, bookings, ratings or general event aggregation. The differentiated loop is merchant funding, creator participation, external social distribution, qualifying commerce and measurable growth.

@@ -6,6 +6,7 @@ const sponsoredDemo: SponsoredDemo = {
   headline: 'Your next ad could start with local creators',
   body: 'Muse turns a product, an offer and a funded creator brief into a sponsored discovery card people can save, shop and respond to.',
   badge: 'Generated ad concept · not sponsored',
+  merchantId: -204,
 };
 
 export function buildDiscoveryDeck(items: CreatorOpportunityFeedItem[], interval = 4): DiscoveryDeckEntry[] {
