@@ -61,7 +61,6 @@ const MerchantTabsLayout = () => {
           title: "Profile",
         }}
       />
-      <Tabs.Screen name="vouchers" options={{ href: null }} />
     </Tabs>
   );
 };

@@ -1,15 +1,14 @@
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { ToastProvider } from "react-native-toast-notifications";
+import { ClerkProvider } from '@clerk/expo';
+import { tokenCache } from '@clerk/expo/token-cache';
 import AuthProvider, { useAuth } from "../shared/providers/auth-provider";
 import QueryProvider from "../shared/providers/query-provider";
-import NotificationProvider from "../shared/providers/notification-provider";
 import { SafeAreaProvider } from "react-native-safe-area-context";
-import { RevenueCatProvider } from "../shared/providers/RevenueCatProvider";
 import { FontProvider } from "../shared/providers/font-provider";
 import { ThemeProvider, useTheme } from "../shared/providers/theme-provider";
 import { DesignTokensProvider } from "../shared/design-system";
-import { Platform } from "react-native";
 import React from "react";
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
@@ -41,7 +40,7 @@ Sentry.init({
 import { StripeProviderWrapper } from "../shared/providers/stripe";
 
 const AppNavigator = () => {
-  const { activeRole, isMerchant } = useAuth();
+  const { isMerchant } = useAuth();
   
   return (
     <Stack>
@@ -93,30 +92,12 @@ const AppNavigator = () => {
         }}
       />
       <Stack.Screen
-        name="appointments"
-        options={{
-          headerShown: false,
-          title: "Appointments",
-          animation: 'ios_from_right',
-        }}
-      />
-      <Stack.Screen
-        name="services"
-        options={{
-          headerShown: false,
-          animation: 'ios_from_right',
-        }}
-      />
-      <Stack.Screen
-        name="gem-shop"
-        options={{
-          headerShown: false,
-          animation: 'ios_from_right',
-        }}
-      />
-      <Stack.Screen
         name="auth"
         options={{ headerShown: false, title: "Auth" }}
+      />
+      <Stack.Screen
+        name="account"
+        options={{ title: "Account and security" }}
       />
       <Stack.Screen
         name="open-shop"
@@ -156,20 +137,8 @@ const AppNavigator = () => {
         }} 
       />
       <Stack.Screen
-        name="events"
-        options={{ headerShown: false, title: "Events", animation: 'ios_from_right', }}
-      />
-      <Stack.Screen
         name="challenges"
         options={{ headerShown: false, title: "Challenges", animation: 'ios_from_right', }}
-      />
-      <Stack.Screen
-        name="paywall"
-        options={{ 
-          presentation: "formSheet",
-          headerShown: false, 
-          title: "Upgrade to Pro",
-        }}
       />
       <Stack.Screen
           name="create-product"
@@ -198,8 +167,14 @@ function ThemedStatusBar() {
 }
 
 function RootLayout() {
+  const publishableKey = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY;
+  if (!publishableKey) {
+    throw new Error('EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY is required');
+  }
+
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
+    <ClerkProvider publishableKey={publishableKey} tokenCache={tokenCache}>
     <ThemeProvider>
     <DesignTokensProvider>
       <FontProvider>
@@ -210,11 +185,7 @@ function RootLayout() {
             <QueryProvider>
               <StripeProviderWrapper
                 publishableKey={process.env.EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY!}>
-                <NotificationProvider>
-                  <RevenueCatProvider>
-                    <AppNavigator />
-                  </RevenueCatProvider>
-                </NotificationProvider>
+                <AppNavigator />
               </StripeProviderWrapper>
             </QueryProvider>
           </AuthProvider>
@@ -223,6 +194,7 @@ function RootLayout() {
       </FontProvider>
     </DesignTokensProvider>
     </ThemeProvider>
+    </ClerkProvider>
     </GestureHandlerRootView>
   );
 }

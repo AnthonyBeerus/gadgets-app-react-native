@@ -21,9 +21,9 @@ export interface Challenge {
   pot_value?: number | null;
   pot_currency?: string;
   pot_splits?: Record<string, number> | null;
-  consolation_voucher_value?: number | null;
+  accepted_entry_fee?: number;
   settled_at?: string | null;
-  score_rule?: string;
+  score_rule?: 'hybrid_quality_engagement';
 }
 
 export type VerificationStatus =
@@ -119,6 +119,6 @@ export interface CampaignResults {
   submitted_posts: number;
   verified_posts: number;
   approved_posts: number;
-  vouchers_issued: number;
-  vouchers_redeemed: number;
+  payouts_created: number;
+  payouts_paid: number;
 }

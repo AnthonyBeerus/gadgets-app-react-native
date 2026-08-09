@@ -522,7 +522,7 @@ export default function ProductDetailsScreen() {
                   </View>
                   <View style={{ flex: 1 }}>
                     <NuviaText variant="caption">CREATOR OPPORTUNITY</NuviaText>
-                    <NuviaText variant="h2">P{Number(opportunity.data.reward_value).toFixed(2)} VOUCHER</NuviaText>
+                    <NuviaText variant="h2">P{Number(opportunity.data.accepted_entry_fee ?? opportunity.data.reward_value).toFixed(2)} ACCEPTED-ENTRY FEE</NuviaText>
                   </View>
                 </View>
                 <NuviaText variant="bodyBold">{opportunity.data.title}</NuviaText>
@@ -536,7 +536,7 @@ export default function ProductDetailsScreen() {
                 <View style={styles.unlockNote}>
                   <Ionicons name="lock-closed" size={16} color={colors.ink} />
                   <NuviaText variant="caption" style={{ flex: 1 }}>
-                    Complete this purchase to unlock eligibility. Muse verifies your external TikTok before the merchant voucher is issued.
+                    Complete this purchase to unlock eligibility. Submit your public post for review; accepted work earns the stated cash fee and can rank for the prize pot.
                   </NuviaText>
                 </View>
               </View>

@@ -70,13 +70,3 @@ jest.mock('react-native-worklets', () => ({
 jest.mock('@react-native-async-storage/async-storage', () =>
   require('@react-native-async-storage/async-storage/jest/async-storage-mock')
 );
-
-jest.mock('react-native-purchases', () => ({
-  configure: jest.fn(),
-  setDebugLogsEnabled: jest.fn(),
-  addCustomerInfoUpdateListener: jest.fn(),
-  removeCustomerInfoUpdateListener: jest.fn(),
-  getCustomerInfo: jest.fn().mockResolvedValue({}),
-  getOfferings: jest.fn().mockResolvedValue({ current: null, all: {} }),
-  purchasePackage: jest.fn().mockResolvedValue({}),
-}));

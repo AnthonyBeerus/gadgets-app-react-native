@@ -46,17 +46,15 @@ export function OpportunityCard({ item, reduceMotion, onAction, onDetails, compa
   const leaving = useSharedValue(false);
   const settled = useRef(false);
   const threshold = Math.min(110, width * 0.25);
-  const competitive = item.contest_mode === 'competitive_pot';
   const eligible = Boolean(item.eligibility_proof_id && !item.eligibility_consumed);
   const remaining = daysLeft(item.deadline);
 
-  const potLine = competitive && item.pot_value != null
-    ? `P${Number(item.pot_value).toFixed(0)} pot`
-    : `P${Number(item.reward_value).toFixed(0)} voucher`;
+  const potLine = `P${Number(item.pot_value ?? 0).toFixed(0)} prize pot`;
 
   const metaParts = [
     potLine,
-    competitive ? 'Top 5' : null,
+    `P${Number(item.accepted_entry_fee).toFixed(0)} per accepted entry`,
+    'Top 5 paid',
     remaining != null ? `${remaining}d left` : null,
     `From P${item.price.toFixed(0)}`,
   ].filter(Boolean);
@@ -177,7 +175,7 @@ export function OpportunityCard({ item, reduceMotion, onAction, onDetails, compa
             hitSlop={8}
             style={styles.detailsLink}
           >
-            <Text variant="bodyBold">{competitive ? 'View challenge' : 'View product'}</Text>
+            <Text variant="bodyBold">View opportunity</Text>
             <Ionicons name="arrow-forward" size={16} color={colors.ink} />
           </Pressable>
 

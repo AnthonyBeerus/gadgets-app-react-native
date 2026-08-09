@@ -1,0 +1,11 @@
+interface:
+  display_name: "Muse OTA Preview Update"
+  short_description: "Safely publish Muse Android preview updates"
+  default_prompt: "Use $muse-ota-preview-update to validate and publish a Muse preview OTA update."
+dependencies:
+  tools:
+    - type: "mcp"
+      value: "expo"
+      description: "Verify current EAS Update behavior and Muse project state"
+      transport: "streamable_http"
+      url: "https://mcp.expo.dev/mcp"

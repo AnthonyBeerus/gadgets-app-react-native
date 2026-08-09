@@ -1,88 +1,75 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { ActivityIndicator, Linking, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, Linking, Pressable, ScrollView, Text, View } from 'react-native';
 
-import { NuviaText } from '../../../components/atoms/nuvia-text';
-import { NEO_THEME } from '../../../shared/constants/neobrutalism';
-import { useNeoStyles } from '../../../shared/hooks/useNeoStyles';
-import { useTheme } from '../../../shared/providers/theme-provider';
-import { useMySubmissions, useRewardVouchers } from '../api/submissions';
-import type { ChallengeSubmission } from '../types/challenge';
-
-const STATUS_COLOR: Record<ChallengeSubmission['status'], string> = {
-  pending: theme.colors.warning,
-  approved: theme.colors.success,
-  rejected: theme.colors.error,
-};
+import { useCreatorPayouts, useMySubmissions } from '../api/submissions';
 
 export default function ChallengesMyEntriesScreen() {
-  const styles = useNeoStyles(createStyles);
-  const { theme } = useTheme();
   const router = useRouter();
   const submissions = useMySubmissions();
-  const vouchers = useRewardVouchers();
+  const payouts = useCreatorPayouts();
 
   return (
-    <ScrollView contentInsetAdjustmentBehavior="automatic" style={styles.container} contentContainerStyle={styles.content}>
-      <View style={styles.header}>
-        <Pressable accessibilityRole="button" accessibilityLabel="Go back" onPress={() => router.back()} style={styles.backButton}>
-          <Ionicons name="arrow-back" size={22} color={theme.colors.black} />
+    <ScrollView contentInsetAdjustmentBehavior="automatic" contentContainerStyle={{ padding: 20, paddingTop: 56, paddingBottom: 100, gap: 22, backgroundColor: '#F8F6F8', flexGrow: 1 }}>
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+        <Pressable accessibilityLabel="Go back" onPress={() => router.back()} style={iconButton}>
+          <Ionicons name="arrow-back" size={21} color="#171217" />
         </Pressable>
-        <View style={{ flex: 1 }}>
-          <NuviaText variant="display">ACTIVITY</NuviaText>
-          <NuviaText variant="body">TikTok submissions, decisions, and merchant vouchers.</NuviaText>
+        <View style={{ flex: 1, gap: 4 }}>
+          <Text style={{ fontSize: 30, fontWeight: '800', color: '#171217' }}>My entries</Text>
+          <Text style={{ color: '#655C65' }}>Submission, judging, and payout status.</Text>
         </View>
       </View>
 
-      <NuviaText variant="h2">VOUCHERS</NuviaText>
-      {vouchers.isLoading ? <ActivityIndicator color={theme.colors.primary} /> : vouchers.data?.length ? vouchers.data.map((voucher: any) => (
-        <View key={voucher.id} style={styles.voucherCard}>
-          <View>
-            <NuviaText variant="caption">MERCHANT VOUCHER</NuviaText>
-            <NuviaText variant="h1">P{Number(voucher.value).toFixed(2)}</NuviaText>
+      <SectionTitle>Payouts</SectionTitle>
+      {payouts.isLoading ? <ActivityIndicator color="#171217" /> : payouts.data?.length ? payouts.data.map((payout: any) => (
+        <View key={payout.id} style={card}>
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', gap: 12 }}>
+            <View style={{ gap: 4 }}>
+              <Text style={eyebrow}>{String(payout.kind).replaceAll('_', ' ')}</Text>
+              <Text style={{ fontSize: 28, fontWeight: '800', color: '#171217' }}>P{(Number(payout.amount_minor) / 100).toFixed(2)}</Text>
+            </View>
+            <Status value={payout.status} />
           </View>
-          <View style={styles.codeBox}><NuviaText variant="h3" selectable>{voucher.code}</NuviaText></View>
-          <NuviaText variant="caption">{voucher.redeemed_at ? 'REDEEMED' : `VALID UNTIL ${new Date(voucher.expires_at).toLocaleDateString()}`}</NuviaText>
+          <Text selectable style={{ color: '#655C65', fontSize: 13 }}>
+            {payout.provider} {payout.provider_reference ? `· ${payout.provider_reference}` : ''}
+          </Text>
         </View>
-      )) : <View style={styles.empty}><NuviaText variant="body">Approved creator posts will issue vouchers here.</NuviaText></View>}
+      )) : <Empty text="Accepted-entry fees and ranked prizes will appear here." />}
 
-      <NuviaText variant="h2">CREATOR POSTS</NuviaText>
-      {submissions.isLoading ? <ActivityIndicator color={theme.colors.primary} /> : submissions.data?.length ? submissions.data.map(submission => (
-        <View key={submission.id} style={styles.entryCard}>
-          <View style={[styles.statusBadge, { backgroundColor: STATUS_COLOR[submission.status] }]}>
-            <NuviaText variant="caption">{submission.status.toUpperCase()}</NuviaText>
+      <SectionTitle>Creator posts</SectionTitle>
+      {submissions.isLoading ? <ActivityIndicator color="#171217" /> : submissions.data?.length ? submissions.data.map(submission => (
+        <View key={submission.id} style={card}>
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', gap: 12 }}>
+            <Text style={{ flex: 1, color: '#171217', fontSize: 16, fontWeight: '700' }} numberOfLines={2}>
+              {submission.post_description || 'Public TikTok post'}
+            </Text>
+            <Status value={submission.status} />
           </View>
-          <NuviaText variant="bodyBold" numberOfLines={2}>{submission.post_description || 'External TikTok post'}</NuviaText>
-          <NuviaText variant="caption">{submission.verification_status.replaceAll('_', ' ').toUpperCase()}</NuviaText>
-          {submission.rejection_reason && <NuviaText variant="body">{submission.rejection_reason}</NuviaText>}
-          <Pressable accessibilityRole="link" onPress={() => Linking.openURL(submission.public_share_url)} style={styles.openButton}>
-            <Ionicons name="logo-tiktok" size={17} color={theme.colors.white} />
-            <NuviaText variant="caption" color={theme.colors.white}>OPEN ON TIKTOK</NuviaText>
+          <Text style={{ color: '#655C65', fontSize: 13 }}>{submission.verification_status.replaceAll('_', ' ')}</Text>
+          {submission.rejection_reason ? <Text selectable style={{ color: '#B42318' }}>{submission.rejection_reason}</Text> : null}
+          <Pressable onPress={() => Linking.openURL(submission.public_share_url)} style={{ minHeight: 44, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, borderRadius: 13, backgroundColor: '#171217' }}>
+            <Ionicons name="open-outline" size={17} color="#FFFFFF" />
+            <Text style={{ color: '#FFFFFF', fontWeight: '700' }}>Open public post</Text>
           </Pressable>
         </View>
-      )) : (
-        <View style={styles.empty}>
-          <NuviaText variant="h3">NO POSTS YET</NuviaText>
-          <NuviaText variant="body" align="center">Purchase a sponsored product, then submit your external TikTok post.</NuviaText>
-          <Pressable onPress={() => router.replace('/(shop)')} style={styles.discoverButton}><NuviaText variant="bodyBold">DISCOVER OPPORTUNITIES</NuviaText></Pressable>
-        </View>
-      )}
+      )) : <Empty text="Choose an opportunity, publish your post, then submit its public URL." />}
     </ScrollView>
   );
 }
 
-function createStyles(c) {
-  return {
-  container: { flex: 1, backgroundColor: c.background },
-  content: { gap: 16, padding: 16, paddingBottom: 48 },
-  header: { flexDirection: 'row', alignItems: 'flex-start', gap: 12 },
-  backButton: { width: 46, height: 46, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: c.border, borderRadius: 14, backgroundColor: c.white },
-  voucherCard: { gap: 9, borderWidth: 1, borderColor: c.border, borderRadius: 18, backgroundColor: c.secondary, padding: 16, boxShadow: '0px 2px 8px rgba(0,0,0,0.08)' },
-  codeBox: { alignSelf: 'flex-start', borderWidth: 1, borderColor: c.border, borderRadius: 10, backgroundColor: c.white, paddingHorizontal: 14, paddingVertical: 8 },
-  entryCard: { gap: 9, borderWidth: 1, borderColor: c.border, borderRadius: 16, backgroundColor: c.white, padding: 15, boxShadow: '0px 2px 8px rgba(0,0,0,0.08)' },
-  statusBadge: { alignSelf: 'flex-start', borderWidth: 1, borderColor: c.border, borderRadius: 999, paddingHorizontal: 10, paddingVertical: 5 },
-  openButton: { alignSelf: 'flex-start', flexDirection: 'row', alignItems: 'center', gap: 7, borderRadius: 999, backgroundColor: c.black, paddingHorizontal: 13, paddingVertical: 9 },
-  empty: { alignItems: 'center', gap: 10, borderWidth: 1, borderColor: c.border, borderRadius: 16, backgroundColor: c.white, padding: 22 },
-  discoverButton: { minHeight: 46, alignSelf: 'stretch', alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: c.border, borderRadius: 999, backgroundColor: c.secondary },
-  };
+function SectionTitle({ children }: { children: string }) {
+  return <Text style={{ fontSize: 19, fontWeight: '800', color: '#171217' }}>{children}</Text>;
 }
+
+function Status({ value }: { value: string }) {
+  return <View style={{ alignSelf: 'flex-start', borderRadius: 999, backgroundColor: '#F2EAF7', paddingHorizontal: 10, paddingVertical: 6 }}><Text style={eyebrow}>{value}</Text></View>;
+}
+
+function Empty({ text }: { text: string }) {
+  return <View style={[card, { alignItems: 'center' }]}><Text style={{ color: '#655C65', textAlign: 'center', lineHeight: 21 }}>{text}</Text></View>;
+}
+
+const card = { gap: 12, borderWidth: 1, borderColor: '#E2DCE2', borderRadius: 18, backgroundColor: '#FFFFFF', padding: 16 };
+const iconButton = { width: 44, height: 44, borderWidth: 1, borderColor: '#E2DCE2', borderRadius: 14, backgroundColor: '#FFFFFF', alignItems: 'center' as const, justifyContent: 'center' as const };
+const eyebrow = { color: '#6A1B9A', fontSize: 11, fontWeight: '800' as const, textTransform: 'uppercase' as const };

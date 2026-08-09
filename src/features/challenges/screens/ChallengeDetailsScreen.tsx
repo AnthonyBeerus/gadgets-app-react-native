@@ -1,203 +1,129 @@
-import { useNeoStyles } from '../../../shared/hooks/useNeoStyles';
-import { useTheme } from '../../../shared/providers/theme-provider';
-import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, Image, ScrollView, TouchableOpacity, ActivityIndicator, Linking } from 'react-native';
-import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { NEO_THEME } from '../../../shared/constants/neobrutalism';
+import { Image } from 'expo-image';
+import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useEffect, useState } from 'react';
+import type { ReactNode } from 'react';
+import { ActivityIndicator, Pressable, ScrollView, Text, View } from 'react-native';
+
 import { useChallengeStore } from '../store/challenge-store';
-import { Challenge } from '../types/challenge';
-import { StaticHeader } from '../../../shared/components/layout/StaticHeader';
-import { ChallengeBadge } from '../components/ChallengeBadge';
-import { RewardCard } from '../components/RewardCard';
-import { RequirementsList } from '../components/RequirementsList';
-import { MetaInfoCard } from '../components/MetaInfoCard';
-import { useChallengeLeaderboard, useOpportunityEligibility } from '../api/submissions';
+import type { Challenge } from '../types/challenge';
+import { useOpportunityEligibility } from '../api/submissions';
+
+const prizeSplits = [40, 25, 15, 10, 10];
 
 export default function ChallengeDetailsScreen() {
-  const styles = useNeoStyles(createStyles);
-  const { theme } = useTheme();
-  const { id } = useLocalSearchParams();
   const router = useRouter();
-  const insets = useSafeAreaInsets();
-  const challengeId = Number(Array.isArray(id) ? id[0] : id);
-  const challenges = useChallengeStore(s => s.challenges);
-  const loading = useChallengeStore(s => s.loading);
-  const fetchChallengeById = useChallengeStore(s => s.fetchChallengeById);
-  const [challenge, setChallenge] = useState<Challenge | null>(null);
-  const [notFound, setNotFound] = useState(false);
+  const { id } = useLocalSearchParams<{ id: string }>();
+  const challengeId = Number(id);
+  const challenges = useChallengeStore(state => state.challenges);
+  const fetchChallengeById = useChallengeStore(state => state.fetchChallengeById);
+  const [challenge, setChallenge] = useState<Challenge | null>(
+    challenges.find(item => item.id === challengeId) ?? null,
+  );
+  const [loading, setLoading] = useState(!challenge);
   const eligibility = useOpportunityEligibility(challengeId, challenge?.product_id, challenge?.shop_id);
-  const leaderboard = useChallengeLeaderboard(challengeId);
-  const proof = eligibility.data?.[0];
-  const canEnter = Boolean(proof && !proof.consumed_by_submission_id);
-  const competitive = challenge?.contest_mode === 'competitive_pot';
+  const canEnter = Boolean(eligibility.data?.some(proof => !proof.consumed_by_submission_id));
 
   useEffect(() => {
-    if (!Number.isFinite(challengeId) || challengeId <= 0) {
-      setNotFound(true);
-      return;
-    }
+    if (!Number.isFinite(challengeId)) return;
+    void fetchChallengeById(challengeId)
+      .then(setChallenge)
+      .finally(() => setLoading(false));
+  }, [challengeId, fetchChallengeById]);
 
-    const cached = challenges.find(c => c.id === challengeId);
-    if (cached) {
-      setChallenge(cached);
-      setNotFound(false);
-      return;
-    }
-
-    let cancelled = false;
-    void fetchChallengeById(challengeId).then(found => {
-      if (cancelled) return;
-      setChallenge(found);
-      setNotFound(!found);
-    });
-    return () => {
-      cancelled = true;
-    };
-  }, [challengeId, challenges, fetchChallengeById]);
-
-  const handlePrimary = () => {
-    if (!challenge) return;
-    if (canEnter) {
-      router.push(`/challenges/entry/${challenge.id}`);
-      return;
-    }
-    router.push(`/challenges/entry/${challenge.id}`);
-  };
-
-  if (notFound) {
-    return (
-      <View style={styles.loadingContainer}>
-        <Text style={{ fontFamily: NEO_THEME.fonts.bold, color: theme.colors.grey }}>
-          Challenge not found.
-        </Text>
-      </View>
-    );
+  if (loading) {
+    return <View style={center}><ActivityIndicator color="#171217" /></View>;
+  }
+  if (!challenge) {
+    return <View style={center}><Text selectable>Opportunity not found.</Text></View>;
   }
 
-  if (!challenge || loading) {
-    return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color={theme.colors.primary} />
-      </View>
-    );
-  }
-
-  const rewardCopy = competitive && challenge.pot_value != null
-    ? `P${challenge.pot_value.toFixed(0)} pot · Top 5 share · Consolation P${Number(challenge.consolation_voucher_value ?? 0).toFixed(0)}`
-    : challenge.reward;
+  const entryFee = Number(challenge.accepted_entry_fee ?? challenge.reward_value ?? 0);
+  const pot = Number(challenge.pot_value ?? 0);
 
   return (
-    <View style={styles.container}>
-      <StaticHeader title={competitive ? 'COMPETITIVE CHALLENGE' : 'CREATOR OPPORTUNITY'} onBackPress={() => router.back()} />
-
-      <ScrollView contentContainerStyle={[styles.content, { paddingBottom: insets.bottom + 100 }]}>
-        <View style={styles.imageContainer}>
-          <Image source={{ uri: challenge.image_url }} style={styles.image} />
-          <View style={styles.overlay}>
-            <View style={styles.brandBadge}>
-              <Ionicons name="business" size={14} color={theme.colors.white} />
-              <Text style={styles.brandText}>{challenge.brand_name}</Text>
-            </View>
-          </View>
+    <View style={{ flex: 1, backgroundColor: '#F8F6F8' }}>
+      <ScrollView contentInsetAdjustmentBehavior="automatic" contentContainerStyle={{ paddingBottom: 128, gap: 20 }}>
+        <View style={{ height: 270, backgroundColor: '#E9E4E9' }}>
+          <Image source={{ uri: challenge.image_url }} style={{ width: '100%', height: '100%' }} contentFit="cover" />
+          <Pressable accessibilityLabel="Go back" onPress={() => router.back()} style={backButton}>
+            <Ionicons name="arrow-back" size={22} color="#171217" />
+          </Pressable>
         </View>
 
-        <View style={styles.headerSection}>
-          <View style={styles.badgesRow}>
-            <ChallengeBadge type="status" text={challenge.status.toUpperCase()} />
-            {competitive ? <ChallengeBadge type="status" text="POT CONTEST" /> : null}
-          </View>
-          <Text style={styles.title}>{challenge.title.toUpperCase()}</Text>
-          <Text style={styles.description}>{challenge.description}</Text>
+        <View style={{ paddingHorizontal: 20, gap: 8 }}>
+          <Text style={{ color: '#6A1B9A', fontSize: 12, fontWeight: '800', letterSpacing: 0.8 }}>PAID CREATOR OPPORTUNITY</Text>
+          <Text style={{ color: '#171217', fontSize: 30, lineHeight: 36, fontWeight: '800' }}>{challenge.title}</Text>
+          <Text style={{ color: '#655C65', fontSize: 15 }}>{challenge.brand_name}</Text>
+          <Text style={{ color: '#3E373E', fontSize: 16, lineHeight: 24 }}>{challenge.description}</Text>
         </View>
 
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>{competitive ? 'THE POT' : 'THE REWARD'}</Text>
-          <RewardCard reward={rewardCopy} />
-          {competitive ? (
-            <Text style={styles.helper}>
-              Ranked by likes + 3×comments + 2×saves after merchant approval. Views are shown but do not decide winners.
-            </Text>
-          ) : null}
+        <View style={{ paddingHorizontal: 20, flexDirection: 'row', gap: 10 }}>
+          <MoneyBlock label="PER ACCEPTED ENTRY" value={`P${entryFee.toFixed(0)}`} />
+          <MoneyBlock label="RANKED PRIZE POT" value={`P${pot.toFixed(0)}`} />
         </View>
 
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>REQUIREMENTS</Text>
-          <RequirementsList requirements={challenge.requirements} />
-        </View>
-
-        <MetaInfoCard deadline={challenge.deadline} participants={challenge.participants_count} />
-
-        {competitive ? (
-          <View style={styles.section}>
-            <View style={styles.boardHeader}>
-              <Text style={styles.sectionTitle}>LEADERBOARD</Text>
-              <TouchableOpacity onPress={() => router.push(`/challenges/leaderboard?id=${challenge.id}`)}>
-                <Text style={styles.link}>FULL BOARD</Text>
-              </TouchableOpacity>
-            </View>
-            {(leaderboard.data ?? []).slice(0, 5).map((row, index) => (
-              <TouchableOpacity
-                key={row.submission_id}
-                style={styles.boardRow}
-                onPress={() => row.public_share_url && Linking.openURL(row.public_share_url)}
-              >
-                <Text style={styles.rank}>#{row.final_rank ?? index + 1}</Text>
-                <View style={{ flex: 1 }}>
-                  <Text style={styles.score}>Score {row.score.toFixed(0)}</Text>
-                  <Text style={styles.meta}>{row.like_count} likes · {row.comment_count} comments · {row.save_count} saves</Text>
-                </View>
-              </TouchableOpacity>
+        <Section title="How the prize is split">
+          <View style={{ flexDirection: 'row', gap: 8 }}>
+            {prizeSplits.map((split, index) => (
+              <View key={split} style={{ flex: 1, alignItems: 'center', gap: 4, borderRadius: 12, backgroundColor: '#F2EAF7', paddingVertical: 12 }}>
+                <Text style={{ color: '#6A1B9A', fontSize: 16, fontWeight: '800' }}>{split}%</Text>
+                <Text style={{ color: '#655C65', fontSize: 11 }}>#{index + 1}</Text>
+              </View>
             ))}
-            {(leaderboard.data ?? []).length === 0 ? (
-              <Text style={styles.helper}>Approved entries appear here once the merchant verifies posts.</Text>
-            ) : null}
           </View>
-        ) : null}
+        </Section>
+
+        <Section title="How entries are judged">
+          <Text style={bodyText}>Quality decides 70%: brief compliance 30, product clarity 25, creativity 25, and technical or brand safety 20.</Text>
+          <Text style={bodyText}>Engagement percentile contributes the remaining 30%. Raw views never decide the winner alone.</Text>
+        </Section>
+
+        <Section title="What you need to do">
+          {challenge.requirements.map(requirement => (
+            <View key={requirement} style={{ flexDirection: 'row', gap: 10, alignItems: 'flex-start' }}>
+              <Ionicons name="checkmark-circle" size={20} color="#16803C" />
+              <Text style={[bodyText, { flex: 1 }]}>{requirement}</Text>
+            </View>
+          ))}
+          <Text style={{ color: '#655C65', fontSize: 13 }}>Deadline: {new Date(challenge.deadline).toLocaleString()}</Text>
+        </Section>
       </ScrollView>
 
-      <View style={[styles.footer, { paddingBottom: insets.bottom + 16 }]}>
-        <TouchableOpacity
-          style={[styles.ctaButton, { backgroundColor: theme.colors.black }]}
-          activeOpacity={0.9}
-          onPress={handlePrimary}
+      <View style={footer}>
+        <Pressable
+          accessibilityRole="button"
+          onPress={() => router.push(`/challenges/entry/${challenge.id}`)}
+          style={{ minHeight: 56, borderRadius: 16, alignItems: 'center', justifyContent: 'center', backgroundColor: '#171217' }}
         >
-          <Text style={[styles.ctaText, { color: theme.colors.white }]}>
-            {canEnter ? 'SUBMIT ENTRY' : 'BUY TO ENTER / CLAIM CODE'}
+          <Text style={{ color: '#FFFFFF', fontSize: 16, fontWeight: '800' }}>
+            {canEnter ? 'Submit your post' : 'Buy or claim purchase proof'}
           </Text>
-          <Ionicons name="arrow-forward" size={20} color={theme.colors.white} />
-        </TouchableOpacity>
+        </Pressable>
       </View>
     </View>
   );
 }
 
-function createStyles(c) {
-  return {
-  container: { flex: 1, backgroundColor: c.backgroundLight },
-  loadingContainer: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  content: { padding: 0 },
-  imageContainer: { height: 250, width: '100%', position: 'relative', borderBottomWidth: 1, borderColor: c.border },
-  image: { width: '100%', height: '100%', resizeMode: 'cover' },
-  overlay: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,0,0,0.2)', padding: 16, justifyContent: 'flex-end', alignItems: 'flex-start' },
-  brandBadge: { flexDirection: 'row', alignItems: 'center', backgroundColor: c.black, paddingHorizontal: 12, paddingVertical: 6, borderRadius: NEO_THEME.borders.radius, gap: 6 },
-  brandText: { fontFamily: NEO_THEME.fonts.bold, fontSize: 12, color: c.white, textTransform: 'uppercase' },
-  headerSection: { padding: 20, borderBottomWidth: 1, borderColor: c.border, backgroundColor: c.white },
-  badgesRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 12 },
-  title: { fontFamily: NEO_THEME.fonts.black, fontSize: 28, color: c.black, marginBottom: 8, lineHeight: 32 },
-  description: { fontFamily: NEO_THEME.fonts.regular, fontSize: 16, color: c.black, lineHeight: 22 },
-  section: { padding: 20, borderBottomWidth: 1, borderColor: c.border },
-  sectionTitle: { fontFamily: NEO_THEME.fonts.black, fontSize: 18, color: c.black, marginBottom: 16, textTransform: 'uppercase' },
-  helper: { marginTop: 10, fontFamily: NEO_THEME.fonts.regular, color: c.grey, lineHeight: 20 },
-  boardHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  link: { fontFamily: NEO_THEME.fonts.bold, color: c.primary, marginBottom: 16 },
-  boardRow: { flexDirection: 'row', gap: 12, alignItems: 'center', paddingVertical: 10, borderBottomWidth: 1, borderColor: c.border },
-  rank: { fontFamily: NEO_THEME.fonts.black, fontSize: 18, width: 40 },
-  score: { fontFamily: NEO_THEME.fonts.bold },
-  meta: { fontFamily: NEO_THEME.fonts.regular, color: c.grey, marginTop: 2 },
-  footer: { position: 'absolute', bottom: 0, left: 0, right: 0, backgroundColor: c.white, padding: 16, borderTopWidth: 1, borderColor: c.border },
-  ctaButton: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', padding: 16, borderRadius: NEO_THEME.borders.radius, gap: 8, borderWidth: 1, borderColor: c.border },
-  ctaText: { fontFamily: NEO_THEME.fonts.black, fontSize: 16, textTransform: 'uppercase' },
-  };
+function MoneyBlock({ label, value }: { label: string; value: string }) {
+  return (
+    <View style={{ flex: 1, gap: 6, borderRadius: 18, backgroundColor: '#171217', padding: 16 }}>
+      <Text style={{ color: '#CFC6CF', fontSize: 10, fontWeight: '700', letterSpacing: 0.5 }}>{label}</Text>
+      <Text style={{ color: '#FFFFFF', fontSize: 26, fontWeight: '800' }}>{value}</Text>
+    </View>
+  );
 }
+
+function Section({ children, title }: { children: ReactNode; title: string }) {
+  return (
+    <View style={{ marginHorizontal: 20, gap: 12, borderWidth: 1, borderColor: '#E2DCE2', borderRadius: 18, backgroundColor: '#FFFFFF', padding: 18 }}>
+      <Text style={{ color: '#171217', fontSize: 18, fontWeight: '800' }}>{title}</Text>
+      {children}
+    </View>
+  );
+}
+
+const center = { flex: 1, alignItems: 'center' as const, justifyContent: 'center' as const, backgroundColor: '#F8F6F8' };
+const backButton = { position: 'absolute' as const, top: 18, left: 18, width: 44, height: 44, borderRadius: 22, alignItems: 'center' as const, justifyContent: 'center' as const, backgroundColor: '#FFFFFFE8' };
+const bodyText = { color: '#3E373E', fontSize: 15, lineHeight: 22 };
+const footer = { position: 'absolute' as const, left: 0, right: 0, bottom: 0, borderTopWidth: 1, borderTopColor: '#E2DCE2', backgroundColor: '#FFFFFF', padding: 16, paddingBottom: 24 };

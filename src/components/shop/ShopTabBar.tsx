@@ -3,31 +3,28 @@ import { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 import { Platform, Pressable, StyleSheet, View } from 'react-native';
 import Animated, { useAnimatedStyle, withTiming } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useRouter } from 'expo-router';
 
-import { Text, radii, space, useDesignTokens } from '../../shared/design-system';
-import { useCartStore } from '../../store/cart-store';
-
-const pillRoutes = ['index', 'marketplace', 'profile'] as const;
+import { radii, space, useDesignTokens } from '../../shared/design-system';
+const pillRoutes = ['index', 'marketplace', 'activity', 'profile'] as const;
 type PillRoute = (typeof pillRoutes)[number];
 
 function routeIcon(name: PillRoute): keyof typeof Ionicons.glyphMap {
   if (name === 'index') return 'flame';
   if (name === 'marketplace') return 'storefront';
+  if (name === 'activity') return 'pulse';
   return 'person';
 }
 
 function routeLabel(name: PillRoute) {
   if (name === 'index') return 'Discover';
   if (name === 'marketplace') return 'Marketplace';
+  if (name === 'activity') return 'Activity';
   return 'Profile';
 }
 
 export default function ShopTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
   const insets = useSafeAreaInsets();
-  const router = useRouter();
   const { colors, elevation } = useDesignTokens();
-  const itemCount = useCartStore(s => s.getItemCount());
   const focusedRoute = state.routes[state.index]?.name;
 
   if (!focusedRoute || !pillRoutes.includes(focusedRoute as PillRoute)) {
@@ -97,21 +94,6 @@ export default function ShopTabBar({ state, descriptors, navigation }: BottomTab
         })}
       </View>
 
-      <Pressable
-        accessibilityRole="button"
-        accessibilityLabel={itemCount > 0 ? `Bag, ${itemCount} items` : 'Bag and saved'}
-        onPress={() => router.push('/bag')}
-        style={[styles.fab, { backgroundColor: colors.ink, ...elevation.soft }]}
-      >
-        <Ionicons name="bag-handle" size={24} color={colors.surface} />
-        {itemCount > 0 ? (
-          <View style={[styles.badge, { backgroundColor: colors.accent }]}>
-            <Text variant="caption" style={[styles.badgeText, { color: colors.surface }]}>
-              {itemCount > 9 ? '9+' : String(itemCount)}
-            </Text>
-          </View>
-        ) : null}
-      </Pressable>
     </Animated.View>
   );
 }
@@ -129,7 +111,6 @@ const styles = StyleSheet.create({
   },
   pill: {
     flex: 1,
-    marginRight: space.md,
     flexDirection: 'row',
     height: 56,
     borderRadius: radii.lg,
@@ -144,26 +125,5 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     height: '100%',
     borderRadius: radii.md,
-  },
-  fab: {
-    width: 56,
-    height: 56,
-    borderRadius: radii.lg,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  badge: {
-    position: 'absolute',
-    top: 6,
-    right: 6,
-    minWidth: 18,
-    height: 18,
-    borderRadius: 9,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: 3,
-  },
-  badgeText: {
-    fontSize: 10,
   },
 });

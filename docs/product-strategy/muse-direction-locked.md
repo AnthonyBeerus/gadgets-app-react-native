@@ -1,7 +1,7 @@
 # Muse product direction (locked)
 
-**Last updated:** 2026-08-07  
-**Status:** Direction locked for pilot — implement against this, not older “marketplace company” framing  
+**Last updated:** 2026-08-09
+**Status:** Direction locked for partner prototype — this cash-payout revision supersedes voucher framing
 **Branch snapshot:** `mvp-refinement-gut-ugc-ai`
 
 This is the memory doc for the finer details. Older research in `ugc-marketplace-audit-and-research.md` and `.codex-audit/` still has useful comps; **this file wins when they conflict**.
@@ -39,12 +39,12 @@ Muse helps **local merchants grow** by funding competitive, purchase-gated conte
 
 Restaurant-shaped loop (applies to salons, braai, lunch boxes, etc.):
 
-1. Merchant funds a **voucher pot** and picks qualifying products/services  
+1. Merchant funds the **accepted-entry fees and ranked cash prize pot** and picks qualifying products/services
 2. User **buys** a qualifying SKU in Muse **or** claims a **till purchase code**  
 3. User posts a **public TikTok** and submits (with rights)  
 4. Merchant/admin **approves** (quality + rights gate)  
 5. Live **leaderboard**; at deadline merchant hits **Settle**  
-6. Top placers get tier vouchers; other approved entries get a small **consolation** voucher  
+6. Every accepted entry earns the disclosed cash fee; top placers additionally share the ranked cash prize pot
 
 ### Locked rules (do not casually change)
 
@@ -52,8 +52,8 @@ Restaurant-shaped loop (applies to salons, braai, lunch boxes, etc.):
 | --- | --- |
 | Pot split | Top **5** share **40 / 25 / 15 / 10 / 10** |
 | Score | `likes + 3×comments + 2×saves` — **views are vanity only**, not ranking |
-| Prize | **Merchant vouchers only** (shop credit) — no Muse cash wallet |
-| Consolation | Fixed small voucher for approved non-placers (merchant-set, ~P20–P50 default) |
+| Prize | Merchant-funded cash pot paid through Stripe; Orange Money is the second payout adapter |
+| Accepted-entry fee | Fixed cash fee for every approved, compliant entry; the merchant pre-funds the maximum liability |
 | Entry | Purchase proof required (Muse order **or** till code) |
 | Qualifying SKUs | **Multi-product** allowed (“any meal”, “any nail set”) |
 | Discover swipe | **Save / Pass only** — Buy/Enter live on details, not on the card |
@@ -61,7 +61,7 @@ Restaurant-shaped loop (applies to salons, braai, lunch boxes, etc.):
 | Pilot metrics | **Manual** paste of likes/comments/saves (TikTok API later) |
 
 **Pitch template:**  
-“Post while dining here this weekend. Buy any meal through Muse (or claim till code) to enter. Top 5 engagement share a P1,000 voucher pot; every approved post still gets a small voucher.”
+“Post while dining here this weekend. Buy any meal through Muse (or claim till code) to enter. Every accepted post earns P50, and the top five share an additional P1,000 cash prize pot.”
 
 ---
 
@@ -85,7 +85,7 @@ Pieces already exist elsewhere (FanBitz, Idukki, Euka/Growi TikTok Shop contests
 ## Pilot success (what “working” means)
 
 - Merchants fund pots and settle without Muse ops heroics  
-- Entrants understand: buy → post → compete → voucher  
+- Entrants understand: buy → post → earn an acceptance fee → compete for cash prizes
 - Approved posts are reusable creative the merchant would otherwise pay for  
 - WhatsApp can still close; Muse owns brief → proof → board → settle  
 
@@ -110,7 +110,7 @@ Remote project used in this phase: **project-muse-rebuild**. Showcase seed data 
 ## Explicitly deferred
 
 - TikTok API auto-metrics  
-- Muse cash wallet / payouts  
+- An internal Muse stored-value wallet; payouts go directly through Stripe or Orange Money
 - Campus ambassador programme as the product  
 - Killing the product catalog  
 - Views-only leaderboards  
@@ -120,5 +120,5 @@ Remote project used in this phase: **project-muse-rebuild**. Showcase seed data 
 ## If you only remember three things
 
 1. **Merchant growth first**; youth creators are supply.  
-2. **Competitive pot + purchase proof + voucher settle** is the product.  
+2. **Accepted-entry fee + ranked cash pot + purchase proof** is the product.
 3. **Marketplace stays as rails**; Discover is challenges, not “shop the mall.”

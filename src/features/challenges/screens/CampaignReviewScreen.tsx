@@ -171,7 +171,7 @@ export default function CampaignReviewScreen() {
                 }
               >
                 <Text variant="label" color={colors.surface} align="center">
-                  {competitive ? 'Approve for board' : 'Approve + issue voucher'}
+                  {competitive ? 'Approve for ranking' : 'Approve for payout'}
                 </Text>
               </TouchableOpacity>
             </View>

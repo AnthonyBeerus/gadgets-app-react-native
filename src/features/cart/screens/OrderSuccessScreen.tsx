@@ -80,7 +80,7 @@ export default function OrderSuccessScreen() {
       : null;
 
   const rewardLabel = opportunityQuery.data
-    ? `P${Number(opportunityQuery.data.reward_value ?? 0).toFixed(0)} voucher`
+    ? `P${Number(opportunityQuery.data.accepted_entry_fee ?? opportunityQuery.data.reward_value ?? 0).toFixed(0)} accepted-entry fee`
     : null;
 
   return (

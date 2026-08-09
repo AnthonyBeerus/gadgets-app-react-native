@@ -1,475 +1,121 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, ScrollView, TouchableOpacity, Alert } from 'react-native';
-import { useForm, Controller } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
-import { useRouter } from 'expo-router';
-import DateTimePicker from '@react-native-community/datetimepicker'; 
-import { NEO_THEME } from '../../shared/constants/neobrutalism';
-import { useNeoStyles } from '../../shared/hooks/useNeoStyles';
-import { createChallenge, getShopProducts } from '../../shared/api/api';
-import { useAuth } from '../../shared/providers/auth-provider';
+import { initPaymentSheet, presentPaymentSheet } from '@stripe/stripe-react-native';
+import { Stack, useRouter } from 'expo-router';
+import { useMemo, useState } from 'react';
+import type { ReactNode } from 'react';
+import { ActivityIndicator, Alert, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
 
-const challengeSchema = z.object({
-  title: z.string().min(5, "Title must be at least 5 characters"),
-  description: z.string().min(10, "Description must be at least 10 characters"),
-  brandName: z.string().min(2, "Brand name required"),
-  reward: z.string().min(3, "Reward description required"),
-  deadline: z.date(),
-  imageUrl: z.string().url(),
-  requirements: z.string(),
-  category: z.string().min(3),
-  productId: z.number().int().positive('Select a sponsored product'),
-  productIds: z.array(z.number().int().positive()).default([]),
-  rewardValue: z.number().positive('Voucher value must be greater than zero'),
-  contestMode: z.enum(['standard', 'competitive_pot']),
-  potValue: z.number().nonnegative(),
-  consolationVoucherValue: z.number().nonnegative(),
-});
+import { calculatePrizeAllocations, DEFAULT_PRIZE_SPLITS, validateCompetitionBudget } from '../../features/opportunities/domain/competition';
+import { supabase } from '../../shared/lib/supabase';
 
-type ChallengeFormData = z.infer<typeof challengeSchema>;
-
-export default function CreateChallengeScreen() {
+export default function CreateCreatorOpportunityScreen() {
   const router = useRouter();
-  const styles = useNeoStyles(createStyles);
-  const { merchantShopId } = useAuth();
-  const { mutate: createChallengeMutation, isPending } = createChallenge();
-  const { data: products } = getShopProducts(merchantShopId ?? 0);
-  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [title, setTitle] = useState('');
+  const [brief, setBrief] = useState('');
+  const [entryFee, setEntryFee] = useState('50');
+  const [maximumEntries, setMaximumEntries] = useState('20');
+  const [prizePot, setPrizePot] = useState('1000');
+  const [daysLive, setDaysLive] = useState('14');
+  const [submitting, setSubmitting] = useState(false);
 
-  const { control, handleSubmit, setValue, watch, formState: { errors } } = useForm<ChallengeFormData>({
-    resolver: zodResolver(challengeSchema),
-    defaultValues: {
-      title: '',
-      description: '',
-      brandName: '',
-      reward: 'P1000 pot · top 5 share',
-      deadline: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-      imageUrl: 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=800',
-      requirements: '',
-      category: 'General',
-      productId: 0,
-      productIds: [],
-      rewardValue: 50,
-      contestMode: 'competitive_pot',
-      potValue: 1000,
-      consolationVoucherValue: 25,
+  const budget = useMemo(() => {
+    const acceptedEntryFeeMinor = Math.round(Number(entryFee || 0) * 100);
+    const maximumAcceptedEntries = Number(maximumEntries || 0);
+    const prizePotMinor = Math.round(Number(prizePot || 0) * 100);
+    if (![acceptedEntryFeeMinor, maximumAcceptedEntries, prizePotMinor].every(Number.isInteger)) return null;
+    try {
+      return validateCompetitionBudget({ acceptedEntryFeeMinor, maximumAcceptedEntries, prizePotMinor, fundedAmountMinor: 0 });
+    } catch {
+      return null;
     }
-  });
+  }, [entryFee, maximumEntries, prizePot]);
 
-  const deadline = watch('deadline');
-  const contestMode = watch('contestMode');
-  const productIds = watch('productIds');
+  const allocations = useMemo(() => {
+    const minor = Math.round(Number(prizePot || 0) * 100);
+    try { return calculatePrizeAllocations(minor, DEFAULT_PRIZE_SPLITS); } catch { return []; }
+  }, [prizePot]);
 
-  const toggleProduct = (productId: number) => {
-    const next = productIds.includes(productId)
-      ? productIds.filter(id => id !== productId)
-      : [...productIds, productId];
-    setValue('productIds', next);
-    if (!watch('productId') && next[0]) setValue('productId', next[0]);
-    if (watch('productId') && !next.includes(watch('productId')) && next[0]) {
-      setValue('productId', next[0]);
-    }
-  };
-
-  const onSubmit = (data: ChallengeFormData) => {
-    if (!merchantShopId) {
-      Alert.alert("Error", "Merchant Shop ID not found");
+  const fundOpportunity = async () => {
+    if (!budget || title.trim().length < 3 || brief.trim().length < 20 || Number(daysLive) < 1) {
+      Alert.alert('Complete the brief', 'Add a title, a useful brief, valid fees, a prize pot, and a deadline.');
       return;
     }
-    if (data.contestMode === 'competitive_pot' && data.potValue <= 0) {
-      Alert.alert('Error', 'Competitive challenges need a pot value greater than zero.');
-      return;
-    }
-
-    const requirementsArray = data.requirements.split('\n').filter(r => r.trim().length > 0);
-    const selectedProducts = data.productIds.length > 0 ? data.productIds : [data.productId];
-
-    createChallengeMutation({
-      ...data,
-      deadline: data.deadline.toISOString(),
-      requirements: requirementsArray,
-      shopId: merchantShopId,
-      type: 'free',
-      productId: data.productId || selectedProducts[0],
-      productIds: selectedProducts,
-      contestMode: data.contestMode,
-      potValue: data.potValue,
-      consolationVoucherValue: data.consolationVoucherValue,
-      reward: data.contestMode === 'competitive_pot'
-        ? `P${data.potValue} pot · top 5 share · P${data.consolationVoucherValue} consolation`
-        : data.reward,
-    }, {
-      onSuccess: () => {
-        Alert.alert("Success", data.contestMode === 'competitive_pot'
-          ? "Competitive challenge is live."
-          : "Creator opportunity activated for this product.");
-        router.back();
-      },
-      onError: (error: Error) => {
-        Alert.alert("Error", error.message);
+    setSubmitting(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('fund-creator-opportunity', {
+        body: {
+          title: title.trim(),
+          brief: brief.trim(),
+          acceptedEntryFeeMinor: Math.round(Number(entryFee) * 100),
+          maximumAcceptedEntries: Number(maximumEntries),
+          prizePotMinor: Math.round(Number(prizePot) * 100),
+          endsAt: new Date(Date.now() + Number(daysLive) * 86_400_000).toISOString(),
+        },
+      });
+      if (error || data?.error) throw new Error(data?.error || error?.message || 'Funding setup failed');
+      const initialized = await initPaymentSheet({
+        merchantDisplayName: 'Muse',
+        paymentIntentClientSecret: data.paymentIntentClientSecret,
+        returnURL: 'muse://stripe-redirect',
+      });
+      if (initialized.error) throw new Error(initialized.error.message);
+      const presented = await presentPaymentSheet();
+      if (presented.error) {
+        if (presented.error.code === 'Canceled') return;
+        throw new Error(presented.error.message);
       }
-    });
+      Alert.alert('Funding received', 'Muse will publish this opportunity after operator approval.');
+      router.replace('/(merchant)/community/challenges');
+    } catch (error) {
+      Alert.alert('Could not fund opportunity', error instanceof Error ? error.message : 'Try again.');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>Create Challenge</Text>
-        <TouchableOpacity onPress={() => router.back()}>
-             <Text style={styles.cancelText}>Cancel</Text>
-        </TouchableOpacity>
+    <ScrollView contentInsetAdjustmentBehavior="automatic" keyboardShouldPersistTaps="handled" contentContainerStyle={{ padding: 20, paddingBottom: 80, gap: 20, backgroundColor: '#F8F6F8' }}>
+      <Stack.Screen options={{ title: 'New creator opportunity' }} />
+      <View style={{ gap: 6 }}>
+        <Text style={{ fontSize: 30, lineHeight: 36, fontWeight: '800', color: '#171217' }}>Fund the work before it goes live.</Text>
+        <Text style={helper}>Creators see exactly what an accepted entry earns and what the top five can win.</Text>
       </View>
-      
-      <ScrollView contentContainerStyle={styles.content}>
-        
-        {/* Title */}
-        <View style={styles.inputGroup}>
-          <Text style={styles.label}>Opportunity Title</Text>
-          <Controller
-            control={control}
-            name="title"
-            render={({ field: { onChange, value } }) => (
-              <TextInput
-                style={styles.input}
-                placeholder="e.g. Summer Fitness Challenge"
-                value={value}
-                onChangeText={onChange}
-              />
-            )}
-          />
-          {errors.title && <Text style={styles.errorText}>{errors.title.message}</Text>}
+
+      <Field label="Opportunity title"><TextInput value={title} onChangeText={setTitle} placeholder="Show us your best Molapo lunch break" style={input} /></Field>
+      <Field label="Creator brief"><TextInput multiline value={brief} onChangeText={setBrief} placeholder="What should the post show, disclose, and avoid?" style={[input, { minHeight: 130, textAlignVertical: 'top', paddingTop: 15 }]} /></Field>
+      <View style={{ flexDirection: 'row', gap: 12 }}>
+        <Field label="Accepted entry (P)" flex><TextInput keyboardType="decimal-pad" value={entryFee} onChangeText={setEntryFee} style={input} /></Field>
+        <Field label="Maximum accepted" flex><TextInput keyboardType="number-pad" value={maximumEntries} onChangeText={setMaximumEntries} style={input} /></Field>
+      </View>
+      <View style={{ flexDirection: 'row', gap: 12 }}>
+        <Field label="Prize pot (P)" flex><TextInput keyboardType="decimal-pad" value={prizePot} onChangeText={setPrizePot} style={input} /></Field>
+        <Field label="Days live" flex><TextInput keyboardType="number-pad" value={daysLive} onChangeText={setDaysLive} style={input} /></Field>
+      </View>
+
+      <View style={summaryCard}>
+        <Text style={eyebrow}>UPFRONT FUNDING</Text>
+        <Text style={{ fontSize: 32, fontWeight: '800', color: '#FFFFFF' }}>P{((budget?.requiredAmountMinor ?? 0) / 100).toFixed(2)}</Text>
+        <Text style={{ color: '#CFC6CF', lineHeight: 20 }}>Accepted-entry liability plus the full prize pot. Stripe confirms funding by webhook before Muse can approve the opportunity.</Text>
+      </View>
+
+      <View style={{ gap: 10 }}>
+        <Text style={{ fontSize: 16, fontWeight: '800', color: '#171217' }}>Top-five prize split</Text>
+        <View style={{ flexDirection: 'row', gap: 7 }}>
+          {allocations.map((amount, index) => <View key={index} style={{ flex: 1, alignItems: 'center', gap: 3, borderRadius: 12, backgroundColor: '#F2EAF7', paddingVertical: 11 }}><Text style={eyebrow}>#{index + 1}</Text><Text style={{ color: '#171217', fontWeight: '800' }}>P{(amount / 100).toFixed(0)}</Text></View>)}
         </View>
+      </View>
 
-         {/* Brand Name */}
-         <View style={styles.inputGroup}>
-          <Text style={styles.label}>Brand / Host Name</Text>
-          <Controller
-            control={control}
-            name="brandName"
-            render={({ field: { onChange, value } }) => (
-              <TextInput
-                style={styles.input}
-                placeholder="My Brand"
-                value={value}
-                onChangeText={onChange}
-              />
-            )}
-          />
-          {errors.brandName && <Text style={styles.errorText}>{errors.brandName.message}</Text>}
-        </View>
-
-        <View style={styles.inputGroup}>
-          <Text style={styles.label}>Challenge Type</Text>
-          <Controller control={control} name="contestMode" render={({ field: { onChange, value } }) => (
-            <View style={styles.typeContainer}>
-              <TouchableOpacity style={[styles.typeChip, value === 'competitive_pot' && styles.typeChipSelected]} onPress={() => onChange('competitive_pot')}>
-                <Text style={[styles.typeText, value === 'competitive_pot' && styles.typeTextSelected]}>Competitive pot</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={[styles.typeChip, value === 'standard' && styles.typeChipSelected]} onPress={() => onChange('standard')}>
-                <Text style={[styles.typeText, value === 'standard' && styles.typeTextSelected]}>Standard voucher</Text>
-              </TouchableOpacity>
-            </View>
-          )} />
-        </View>
-
-        <View style={styles.inputGroup}>
-          <Text style={styles.label}>Qualifying Products</Text>
-          <Controller control={control} name="productId" render={({ field: { onChange, value } }) => (
-            <View style={styles.productList}>{products?.map((product: any) => {
-              const selected = productIds.includes(product.id) || value === product.id;
-              return (
-                <TouchableOpacity
-                  key={product.id}
-                  style={[styles.typeChip, selected && styles.typeChipSelected]}
-                  onPress={() => {
-                    onChange(product.id);
-                    toggleProduct(product.id);
-                  }}
-                >
-                  <Text style={[styles.typeText, selected && styles.typeTextSelected]}>{product.title}</Text>
-                </TouchableOpacity>
-              );
-            })}</View>
-          )} />
-          {errors.productId && <Text style={styles.errorText}>{errors.productId.message}</Text>}
-          <Text style={styles.helperText}>Select one or more menu items / SKUs that count for entry.</Text>
-        </View>
-
-        {contestMode === 'competitive_pot' ? (
-          <>
-            <View style={styles.inputGroup}>
-              <Text style={styles.label}>Prize Pot (BWP)</Text>
-              <Controller control={control} name="potValue" render={({ field: { onChange, value } }) => (
-                <TextInput style={styles.input} keyboardType="numeric" value={String(value)} onChangeText={text => onChange(Number(text) || 0)} />
-              )} />
-              <Text style={styles.helperText}>Top 5 share 40/25/15/10/10 of this pot as store vouchers.</Text>
-            </View>
-            <View style={styles.inputGroup}>
-              <Text style={styles.label}>Consolation Voucher (BWP)</Text>
-              <Controller control={control} name="consolationVoucherValue" render={({ field: { onChange, value } }) => (
-                <TextInput style={styles.input} keyboardType="numeric" value={String(value)} onChangeText={text => onChange(Number(text) || 0)} />
-              )} />
-              <Text style={styles.helperText}>Every approved entry that does not place still gets this.</Text>
-            </View>
-          </>
-        ) : (
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>Voucher Value (BWP)</Text>
-            <Controller control={control} name="rewardValue" render={({ field: { onChange, value } }) => (
-              <TextInput style={styles.input} keyboardType="numeric" value={String(value)} onChangeText={text => onChange(Number(text) || 0)} />
-            )} />
-            {errors.rewardValue && <Text style={styles.errorText}>{errors.rewardValue.message}</Text>}
-          </View>
-        )}
-
-        <View style={styles.inputGroup}>
-          <Text style={styles.label}>Reward Label</Text>
-          <Controller
-            control={control}
-            name="reward"
-            render={({ field: { onChange, value } }) => (
-              <TextInput
-                style={styles.input}
-                placeholder={contestMode === 'competitive_pot' ? 'Auto-filled from pot if blank' : 'e.g. P50 off your next visit'}
-                value={value}
-                onChangeText={onChange}
-              />
-            )}
-          />
-          {errors.reward && <Text style={styles.errorText}>{errors.reward.message}</Text>}
-        </View>
-
-        {/* Deadline */}
-        <View style={styles.inputGroup}>
-            <Text style={styles.label}>Deadline</Text>
-            <TouchableOpacity 
-                style={styles.dateButton}
-                onPress={() => setShowDatePicker(true)}
-            >
-                <Text style={styles.dateText}>{deadline.toDateString()}</Text>
-            </TouchableOpacity>
-            {showDatePicker && (
-                <DateTimePicker
-                value={deadline}
-                mode="date"
-                display="default"
-                onChange={(event, selectedDate) => {
-                    setShowDatePicker(false);
-                    if (selectedDate) setValue('deadline', selectedDate);
-                }}
-                />
-            )}
-        </View>
-        
-        {/* Description */}
-        <View style={styles.inputGroup}>
-          <Text style={styles.label}>Description</Text>
-          <Controller
-            control={control}
-            name="description"
-            render={({ field: { onChange, value } }) => (
-              <TextInput
-                style={[styles.input, styles.textArea]}
-                placeholder="Describe the challenge..."
-                multiline
-                numberOfLines={4}
-                value={value}
-                onChangeText={onChange}
-              />
-            )}
-          />
-          {errors.description && <Text style={styles.errorText}>{errors.description.message}</Text>}
-        </View>
-
-        {/* Requirements */}
-        <View style={styles.inputGroup}>
-          <Text style={styles.label}>Requirements (One per line)</Text>
-          <Controller
-            control={control}
-            name="requirements"
-            render={({ field: { onChange, value } }) => (
-              <TextInput
-                style={[styles.input, styles.textArea]}
-                placeholder="1. Post a photo...&#10;2. Tag us..."
-                multiline
-                numberOfLines={4}
-                value={value}
-                onChangeText={onChange}
-              />
-            )}
-          />
-           {/* Helper text explaining generic requirements are okay */}
-           <Text style={styles.helperText}>List what users need to do to complete the challenge.</Text>
-        </View>
-
-        
-        {/* Image URL */}
-        <View style={styles.inputGroup}>
-          <Text style={styles.label}>Cover Image URL</Text>
-          <Controller
-            control={control}
-            name="imageUrl"
-            render={({ field: { onChange, value } }) => (
-              <TextInput
-                style={styles.input}
-                placeholder="https://..."
-                value={value}
-                onChangeText={onChange}
-              />
-            )}
-          />
-           <Text style={styles.helperText}>Use a high-quality image to attract participants.</Text>
-        </View>
-
-
-        <TouchableOpacity 
-            style={[styles.createButton, isPending && styles.disabledButton]} 
-            onPress={handleSubmit(onSubmit)}
-            disabled={isPending}
-        >
-          <Text style={styles.createButtonText}>
-            {isPending ? "Creating..." : contestMode === 'competitive_pot' ? "Launch Competitive Challenge" : "Activate Creator Opportunity"}
-          </Text>
-        </TouchableOpacity>
-
-      </ScrollView>
-    </View>
+      <Pressable disabled={submitting} onPress={fundOpportunity} style={{ minHeight: 58, alignItems: 'center', justifyContent: 'center', borderRadius: 16, backgroundColor: '#171217', opacity: submitting ? 0.55 : 1 }}>
+        {submitting ? <ActivityIndicator color="#FFFFFF" /> : <Text style={{ color: '#FFFFFF', fontSize: 16, fontWeight: '800' }}>Continue to Stripe test payment</Text>}
+      </Pressable>
+    </ScrollView>
   );
 }
 
-function createStyles(c) {
-  return {
-  container: {
-    flex: 1,
-    backgroundColor: c.backgroundLight,
-  },
-  header: {
-    paddingTop: 60,
-    padding: 20,
-    backgroundColor: c.white,
-    borderBottomWidth: 1,
-    borderBottomColor: c.border,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  headerTitle: {
-    fontSize: 20,
-    fontFamily: NEO_THEME.fonts.bold,
-  },
-  cancelText: {
-    fontFamily: NEO_THEME.fonts.bold,
-    color: c.grey,
-  },
-  content: {
-    padding: 20,
-  },
-  inputGroup: {
-    marginBottom: 20,
-  },
-  row: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-  },
-  label: {
-    fontFamily: NEO_THEME.fonts.bold,
-    marginBottom: 8,
-    fontSize: 16,
-  },
-  helperText: {
-      fontFamily: NEO_THEME.fonts.regular,
-      color: c.grey,
-      fontSize: 12,
-      marginTop: 4,
-  },
-  input: {
-    backgroundColor: c.white,
-    borderWidth: 1,
-    borderColor: c.border,
-    borderRadius: NEO_THEME.borders.radius,
-    padding: 12,
-    fontSize: 16,
-    fontFamily: NEO_THEME.fonts.regular,
-    shadowColor: c.black,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
-  },
-  textArea: {
-    height: 100,
-    textAlignVertical: 'top',
-  },
-  dateButton: {
-    backgroundColor: c.white,
-    borderWidth: 1,
-    borderColor: c.border,
-    borderRadius: NEO_THEME.borders.radius,
-    padding: 12,
-    alignItems: 'center',
-    shadowColor: c.black,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-  },
-  dateText: {
-      fontFamily: NEO_THEME.fonts.bold,
-      fontSize: 16,
-  },
-  typeContainer: {
-      flexDirection: 'row',
-      gap: 8,
-  },
-  productList: { gap: 8 },
-  typeChip: {
-      flex: 1,
-      paddingVertical: 12,
-      alignItems: 'center',
-      borderRadius: NEO_THEME.borders.radius,
-      borderWidth: 1,
-      borderColor: c.grey,
-      backgroundColor: c.white,
-  },
-  typeChipSelected: {
-      backgroundColor: c.primary,
-      borderColor: c.border,
-      borderWidth: 1,
-  },
-  typeText: {
-      fontFamily: NEO_THEME.fonts.regular,
-      color: c.black,
-  },
-  typeTextSelected: {
-      fontFamily: NEO_THEME.fonts.bold,
-      color: c.white,
-  },
-  
-  errorText: {
-    color: 'red',
-    marginTop: 4,
-    fontFamily: NEO_THEME.fonts.bold,
-    fontSize: 12,
-  },
-  createButton: {
-    backgroundColor: c.primary,
-    padding: 16,
-    borderRadius: NEO_THEME.borders.radius,
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: c.border,
-    marginTop: 20,
-    marginBottom: 40,
-    shadowColor: c.black,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
-  },
-  disabledButton: {
-      opacity: 0.7,
-  },
-  createButtonText: {
-    color: c.white,
-    fontFamily: NEO_THEME.fonts.bold,
-    fontSize: 18,
-  },
-  };
+function Field({ children, flex, label }: { children: ReactNode; flex?: boolean; label: string }) {
+  return <View style={[{ gap: 7 }, flex && { flex: 1 }]}><Text style={{ color: '#3E373E', fontSize: 13, fontWeight: '700' }}>{label}</Text>{children}</View>;
 }
+
+const input = { minHeight: 52, borderWidth: 1, borderColor: '#D9D1D9', borderRadius: 14, paddingHorizontal: 15, backgroundColor: '#FFFFFF', color: '#171217' };
+const helper = { color: '#655C65', fontSize: 15, lineHeight: 22 };
+const eyebrow = { color: '#B47AD0', fontSize: 10, fontWeight: '800' as const, letterSpacing: 0.7 };
+const summaryCard = { gap: 8, borderRadius: 18, backgroundColor: '#171217', padding: 18 };

@@ -7,7 +7,6 @@ import {
   Pressable,
 } from "react-native";
 import { useAuth } from "../../../shared/providers/auth-provider";
-import { supabase } from "../../../shared/lib/supabase";
 import { useTheme, type ThemePreference } from "../../../shared/providers/theme-provider";
 import { useNeoStyles } from "../../../shared/hooks/useNeoStyles";
 import { ProfileOption } from "../components/ProfileOption";
@@ -23,7 +22,7 @@ const PREFERENCE_OPTIONS: { value: ThemePreference; label: string }[] = [
 ];
 
 const ProfileScreen = () => {
-  const { user, isMerchant, isAdmin, switchRole } = useAuth();
+  const { user, isMerchant, isAdmin, signOut } = useAuth();
   const { preference, setPreference } = useTheme();
   const styles = useNeoStyles(createStyles);
 
@@ -49,14 +48,14 @@ const ProfileScreen = () => {
         </Text>
         <Text style={styles.largeUserEmail}>{user?.email}</Text>
         <View style={styles.userTypeBadge}>
-          <Text style={styles.userTypeText}>{user?.type || "USER"}</Text>
+          <Text style={styles.userTypeText}>{user?.role || "CREATOR"}</Text>
         </View>
       </View>
     </View>
   );
 
   const handleSignOut = async () => {
-    await supabase.auth.signOut();
+    await signOut();
   };
 
   const preferenceLabel = useMemo(
@@ -77,20 +76,14 @@ const ProfileScreen = () => {
           <ProfileOption
             icon="person"
             title="EDIT PROFILE"
-            subtitle="Update your personal information"
-            onPress={() => {}}
-          />
-          <ProfileOption
-            icon="notifications"
-            title="NOTIFICATIONS"
-            subtitle="Manage your notification preferences"
-            onPress={() => {}}
+            subtitle="Name, email, profile image, and security"
+            onPress={() => router.push('/account')}
           />
           <ProfileOption
             icon="security"
             title="PRIVACY & SECURITY"
             subtitle="Password, two-factor authentication"
-            onPress={() => {}}
+            onPress={() => router.push('/account')}
           />
           <View style={styles.appearanceBlock}>
             <Text style={styles.appearanceTitle}>APPEARANCE</Text>
@@ -135,7 +128,7 @@ const ProfileScreen = () => {
           <ProfileOption
             icon="movie"
             title="CREATOR ACTIVITY"
-            subtitle="Submissions, decisions, and vouchers"
+            subtitle="Submissions, judging, and payouts"
             onPress={() => router.push('/(shop)/challenges/my-entries')}
           />
         </View>
@@ -144,18 +137,7 @@ const ProfileScreen = () => {
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>MERCHANT</Text>
         <View style={styles.optionsContainer}>
-          {isMerchant ? (
-             <ProfileOption
-                // @ts-ignore
-                icon="store"
-                title="SWITCH TO MERCHANT MODE"
-                subtitle="Access your dashboard"
-                onPress={() => {
-                    switchRole('merchant');
-                    router.replace("/(merchant)");
-                }}
-             />
-          ) : (
+          {!isMerchant ? (
             <ProfileOption
                 // @ts-ignore
                 icon="add-business"
@@ -163,7 +145,7 @@ const ProfileScreen = () => {
                 subtitle="Set up your storefront for products and challenge pots"
                 onPress={() => router.push("/open-shop")}
             />
-          )}
+          ) : null}
         </View>
       </View>
 
@@ -174,7 +156,7 @@ const ProfileScreen = () => {
             <ProfileOption
               icon="fact-check"
               title="CREATOR MODERATION"
-              subtitle="Verify external posts and issue vouchers"
+              subtitle="Verify posts, judge quality, and release payouts"
               onPress={() => router.push('/challenges/review')}
             />
           </View>

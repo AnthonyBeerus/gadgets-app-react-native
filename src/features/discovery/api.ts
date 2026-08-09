@@ -11,56 +11,8 @@ import type {
   OpportunityPreferenceState,
   OpportunitySource,
 } from './types';
-import { getMarketplaceCatalog } from './marketplace-api';
 
 const db = supabase as any;
-
-async function getPreviewOpportunityFeed(mallId: number | null) {
-  const catalog = await getMarketplaceCatalog();
-  const shops = new Map(catalog.shops.map(shop => [Number(shop.id), shop]));
-  return catalog.products
-    .map(product => {
-      const shop = shops.get(Number(product.shop_id));
-      if (!shop || (mallId != null && Number(shop.mall_id) !== mallId)) return null;
-      const price = Number(product.price);
-      return {
-        opportunity_id: -Number(product.id),
-        opportunity_title: `Create for ${product.title}`,
-        opportunity_description: `Show how you would use ${product.title} in an authentic public TikTok.`,
-        requirements: ['Public TikTok post', 'Show the product clearly', 'Keep the post live during review'],
-        deadline: new Date(Date.now() + 30 * 86400000).toISOString(),
-        product_id: Number(product.id),
-        product_slug: product.slug,
-        product_title: product.title,
-        product_description: product.description,
-        hero_image: product.heroImage,
-        price,
-        max_quantity: Number(product.maxQuantity),
-        category_id: Number(product.category),
-        merchant_id: Number(shop.id),
-        merchant_name: shop.name,
-        merchant_location: shop.location,
-        mall_id: shop.mall_id == null ? null : Number(shop.mall_id),
-        has_delivery: Boolean(shop.has_delivery),
-        has_collection: Boolean(shop.has_collection),
-        reward_value: Math.min(100, Math.max(25, Math.round(price * 0.2 / 5) * 5)),
-        reward_currency: 'BWP',
-        preference_state: null,
-        eligibility_proof_id: null,
-        eligibility_consumed: false,
-        rank_score: 0,
-        contest_mode: 'standard',
-        pot_value: null,
-        pot_currency: 'BWP',
-        pot_splits: null,
-        consolation_voucher_value: null,
-        settled_at: null,
-        score_rule: 'engagement_quality',
-      } satisfies CreatorOpportunityFeedItem;
-    })
-    .filter(item => item !== null)
-    .slice(0, 20) as CreatorOpportunityFeedItem[];
-}
 
 function normalizeFeed(rows: any[] | null): CreatorOpportunityFeedItem[] {
   return (rows ?? []).map(row => ({
@@ -79,9 +31,9 @@ function normalizeFeed(rows: any[] | null): CreatorOpportunityFeedItem[] {
     pot_value: row.pot_value == null ? null : Number(row.pot_value),
     pot_currency: row.pot_currency ?? 'BWP',
     pot_splits: row.pot_splits && typeof row.pot_splits === 'object' ? row.pot_splits : { '1': 0.4, '2': 0.25, '3': 0.15, '4': 0.1, '5': 0.1 },
-    consolation_voucher_value: row.consolation_voucher_value == null ? null : Number(row.consolation_voucher_value),
+    accepted_entry_fee: Number(row.accepted_entry_fee ?? row.consolation_voucher_value ?? row.reward_value ?? 0),
     settled_at: row.settled_at ?? null,
-    score_rule: row.score_rule ?? 'engagement_quality',
+    score_rule: 'hybrid_quality_engagement',
   }));
 }
 
@@ -110,9 +62,9 @@ export async function getCreatorOpportunityFeed({
     ]);
     if (result.error) throw result.error;
     rows = result.data;
-  } catch {
-    console.warn('[Discover] Using preview opportunities until the feed migration is applied.');
-    rows = await getPreviewOpportunityFeed(mallId);
+  } catch (error) {
+    console.warn('[Discover] Real opportunity feed unavailable.', error);
+    throw error;
   }
 
   const normalized = diversifyOpportunityFeed(normalizeFeed(rows));

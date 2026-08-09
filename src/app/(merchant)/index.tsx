@@ -162,11 +162,6 @@ export default function MerchantDashboard() {
               label="Scan order"
               onPress={() => router.push("/scan-order")}
             />
-            <ActionCard
-              icon="redeem"
-              label="Redeem voucher"
-              onPress={() => router.push("/(merchant)/vouchers")}
-            />
           </View>
         </View>
       </ScrollView>

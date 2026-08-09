@@ -1,0 +1,11 @@
+interface:
+  display_name: "Muse EAS Preview Build"
+  short_description: "Safely build and diagnose Muse preview binaries"
+  default_prompt: "Use $muse-eas-preview-build to validate and prepare a Muse preview build."
+dependencies:
+  tools:
+    - type: "mcp"
+      value: "expo"
+      description: "Inspect, run, and diagnose Muse EAS builds"
+      transport: "streamable_http"
+      url: "https://mcp.expo.dev/mcp"

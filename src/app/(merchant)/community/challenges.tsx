@@ -25,7 +25,7 @@ function OpportunityResults({ challengeId }: { challengeId: number }) {
       <Text style={styles.resultText}>{data.attributed_purchases} PURCHASES</Text>
       <Text style={styles.resultText}>{data.eligible_purchasers} ELIGIBLE</Text>
       <Text style={styles.resultText}>{data.verified_posts} VERIFIED</Text>
-      <Text style={styles.resultText}>{data.vouchers_redeemed}/{data.vouchers_issued} REDEEMED</Text>
+      <Text style={styles.resultText}>{data.payouts_paid}/{data.payouts_created} PAID</Text>
     </View>
   );
 }
@@ -42,14 +42,14 @@ function SettleButton({ item }: { item: any }) {
       disabled={settle.isPending}
       onPress={() => Alert.alert(
         'Settle pot?',
-        'Ranks approved entries by engagement score and issues placement + consolation vouchers.',
+        'Finalizes the quality and engagement ranking, then creates the disclosed cash payouts.',
         [
           { text: 'Cancel', style: 'cancel' },
           {
             text: 'Settle',
             style: 'destructive',
             onPress: () => settle.mutate(item.id, {
-              onSuccess: (result: any) => Alert.alert('Settled', `Placement vouchers: ${result?.placement_vouchers ?? 0}. Consolations: ${result?.consolation_vouchers ?? 0}.`),
+              onSuccess: (result: any) => Alert.alert('Settled', `Cash payouts created: ${result?.payouts_created ?? 0}.`),
               onError: (err: Error) => Alert.alert('Error', err.message),
             }),
           },

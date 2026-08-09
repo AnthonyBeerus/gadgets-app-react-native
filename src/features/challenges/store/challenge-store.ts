@@ -27,10 +27,11 @@ const mapChallenge = (item: any): Challenge => ({
   pot_value: item.pot_value == null ? null : Number(item.pot_value),
   pot_currency: item.pot_currency ?? 'BWP',
   pot_splits: item.pot_splits && typeof item.pot_splits === 'object' ? item.pot_splits : null,
-  consolation_voucher_value:
-    item.consolation_voucher_value == null ? null : Number(item.consolation_voucher_value),
+  accepted_entry_fee: Number(
+    item.accepted_entry_fee ?? item.consolation_voucher_value ?? item.reward_value ?? 0,
+  ),
   settled_at: item.settled_at ?? null,
-  score_rule: item.score_rule ?? 'engagement_quality',
+  score_rule: 'hybrid_quality_engagement',
 });
 
 interface ChallengeState {

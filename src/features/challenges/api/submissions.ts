@@ -149,6 +149,20 @@ export function useMySubmissions() {
   });
 }
 
+export function useCreatorPayouts() {
+  return useQuery({
+    queryKey: ['creatorPayouts'],
+    queryFn: async () => {
+      const { data, error } = await db
+        .from('creator_payouts')
+        .select('*')
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+}
+
 export interface AdminSubmission extends ChallengeSubmission {
   challenge: {
     id: number;

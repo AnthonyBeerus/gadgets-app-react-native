@@ -11,14 +11,11 @@ import {
   ActivityIndicator,
   Alert,
   Linking,
-  Modal,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { getShopById, getShopProducts } from "../../../shared/api/shops";
-import { supabase } from "../../../shared/lib/supabase";
-import TryOnModal from "../../virtual-try-on/components/TryOnModal";
 import { StaticHeader } from "../../../shared/components/layout/StaticHeader";
 import { NEO_THEME } from "../../../shared/constants/neobrutalism";
 import { NuviaButton } from "../../../shared/components/ui/nuvia-button";
@@ -36,12 +33,8 @@ export default function ShopDetailsScreen() {
 
   const [shop, setShop] = useState<any>(null);
   const [products, setProducts] = useState<any[]>([]);
-  const [services, setServices] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [productsLoading, setProductsLoading] = useState(true);
-  const [servicesLoading, setServicesLoading] = useState(false);
-  const [tryOnModalVisible, setTryOnModalVisible] = useState(false);
-  const [serviceSelectionVisible, setServiceSelectionVisible] = useState(false);
 
   useEffect(() => {
     if (id) {
@@ -79,38 +72,6 @@ export default function ShopDetailsScreen() {
     }
   };
 
-  const loadShopServices = async () => {
-    try {
-      setServicesLoading(true);
-      const { data, error } = await supabase
-        .from("service")
-        .select(
-          `
-          *,
-          service_provider!inner (
-            id,
-            name,
-            rating,
-            total_reviews,
-            is_verified,
-            shop_id
-          )
-        `
-        )
-        .eq("service_provider.shop_id", parseInt(id!))
-        .eq("is_active", true)
-        .order("name");
-
-      if (error) throw error;
-      setServices(data || []);
-    } catch (error) {
-      console.error("Error loading shop services:", error);
-      setServices([]);
-    } finally {
-      setServicesLoading(false);
-    }
-  };
-
   const handleBrowseProducts = () => {
     if (products.length > 0) {
       router.push(
@@ -124,27 +85,6 @@ export default function ShopDetailsScreen() {
     }
   };
 
-  const handleBookAppointment = () => {
-    loadShopServices();
-    setServiceSelectionVisible(true);
-  };
-
-  const handleServiceSelect = (service: any) => {
-    setServiceSelectionVisible(false);
-    // Use the canonical booking flow (the services/booking-modal route).
-    router.push({
-      pathname: "/services/booking-modal",
-      params: {
-        serviceId: String(service.id),
-        serviceName: service.name,
-        price: String(service.price),
-        duration: String(service.duration_minutes),
-        providerId: String(service.service_provider?.id ?? ""),
-        providerName: service.service_provider?.name ?? "",
-      },
-    });
-  };
-
   const handleCallShop = () => {
     if (shop?.phone) {
       const phoneUrl = `tel:${shop.phone}`;
@@ -156,10 +96,6 @@ export default function ShopDetailsScreen() {
         }
       });
     }
-  };
-
-  const handleVirtualTryOn = () => {
-    setTryOnModalVisible(true);
   };
 
   if (loading) {
@@ -234,16 +170,6 @@ export default function ShopDetailsScreen() {
             </NuviaButton>
 
             <View style={styles.secondaryActions}>
-              {shop.has_appointment_booking && (
-                <TouchableOpacity
-                  style={styles.secondaryActionButton}
-                  onPress={handleBookAppointment}
-                >
-                  <Ionicons name="calendar" size={18} color={theme.colors.black} />
-                  <NuviaText variant="label">BOOK</NuviaText>
-                </TouchableOpacity>
-              )}
-
               {shop.phone && (
                 <TouchableOpacity
                   style={styles.secondaryActionButton}
@@ -278,14 +204,6 @@ export default function ShopDetailsScreen() {
                    <NuviaText variant="label">COLLECTION</NuviaText>
                 </View>
               )}
-              {shop.has_virtual_try_on && (
-                <TouchableOpacity style={styles.featureCard} onPress={handleVirtualTryOn}>
-                   <View style={[styles.featureIconContainer, { backgroundColor: theme.colors.primary }]}>
-                    <Ionicons name="glasses" size={24} color={theme.colors.white} />
-                   </View>
-                   <NuviaText variant="label">TRY-ON</NuviaText>
-                </TouchableOpacity>
-              )}
             </View>
           </View>
 
@@ -308,41 +226,6 @@ export default function ShopDetailsScreen() {
         </View>
       </ScrollView>
 
-      <TryOnModal
-        visible={tryOnModalVisible}
-        onClose={() => setTryOnModalVisible(false)}
-        shopProducts={products}
-      />
-
-      <Modal
-        visible={serviceSelectionVisible}
-        animationType="slide"
-        presentationStyle="pageSheet"
-        onRequestClose={() => setServiceSelectionVisible(false)}
-      >
-        <SafeAreaView style={styles.modalContainer}>
-          <View style={styles.modalHeader}>
-            <Text style={styles.modalTitle}>SELECT SERVICE</Text>
-            <TouchableOpacity onPress={() => setServiceSelectionVisible(false)}>
-              <Ionicons name="close" size={28} color={theme.colors.black} />
-            </TouchableOpacity>
-          </View>
-          <ScrollView style={styles.servicesList}>
-            {services.map((service) => (
-              <TouchableOpacity
-                key={service.id}
-                style={styles.serviceCard}
-                onPress={() => handleServiceSelect(service)}
-              >
-                <NuviaText variant="bodyBold">{service.name}</NuviaText>
-                <NuviaText variant="h3" color={theme.colors.primary}>
-                  P{service.price.toFixed(2)}
-                </NuviaText>
-              </TouchableOpacity>
-            ))}
-          </ScrollView>
-        </SafeAreaView>
-      </Modal>
     </SafeAreaView>
   );
 }

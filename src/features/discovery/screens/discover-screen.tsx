@@ -25,15 +25,17 @@ import {
   restoreCreatorOpportunityPreference,
   setCreatorOpportunityPreference,
 } from '../api';
-import { DiscoverAdCard } from '../components/discover-ad-card';
 import { ConsumerUtilityHeader } from '../components/consumer-utility-header';
 import { OpportunityCard } from '../components/opportunity-card';
-import { injectDiscoverAdSlots, type DiscoverDeckEntry } from '../deck';
 import type { CreatorOpportunityFeedItem, OpportunityPreferenceState } from '../types';
 
 const SWIPE_DECK_MIN = 5;
 const FEED_LIMIT = 150;
-const AD_EVERY = 5;
+type OpportunityDeckEntry = {
+  kind: 'opportunity';
+  key: string;
+  item: CreatorOpportunityFeedItem;
+};
 
 function createStyles(c: SemanticColors, tokens: DesignTokens) {
   return {
@@ -121,7 +123,7 @@ export default function DiscoverScreen() {
   const queryClient = useQueryClient();
   const { session } = useAuth();
   const { selectedMall, malls, loadInitialData } = useShopStore();
-  const [history, setHistory] = useState<DiscoverDeckEntry[]>([]);
+  const [history, setHistory] = useState<OpportunityDeckEntry[]>([]);
   const [reduceMotion, setReduceMotion] = useState(false);
   const [actedKeys, setActedKeys] = useState<string[]>([]);
   const impressions = useRef(new Set<string>());
@@ -165,8 +167,8 @@ export default function DiscoverScreen() {
   });
 
   const actedSet = useMemo(() => new Set(actedKeys), [actedKeys]);
-  const fullDeck = useMemo(
-    () => injectDiscoverAdSlots(feed.data ?? [], AD_EVERY),
+  const fullDeck = useMemo<OpportunityDeckEntry[]>(
+    () => (feed.data ?? []).map(item => ({ kind: 'opportunity', key: `opp-${item.opportunity_id}`, item })),
     [feed.data],
   );
   const deck = useMemo(
@@ -187,14 +189,14 @@ export default function DiscoverScreen() {
     }
   }, [current?.key]);
 
-  const markActed = (entry: DiscoverDeckEntry) => {
+  const markActed = (entry: OpportunityDeckEntry) => {
     setActedKeys(previous => (previous.includes(entry.key) ? previous : [...previous, entry.key]));
   };
 
   const handleOpportunityAction = async (
     state: OpportunityPreferenceState,
     item: CreatorOpportunityFeedItem,
-    entry: DiscoverDeckEntry,
+    entry: OpportunityDeckEntry,
   ) => {
     if (actionLock.current === entry.key || actedSet.has(entry.key)) return;
     actionLock.current = entry.key;
@@ -210,23 +212,6 @@ export default function DiscoverScreen() {
     } finally {
       if (actionLock.current === entry.key) actionLock.current = null;
     }
-  };
-
-  const handleAdPass = (entry: DiscoverDeckEntry) => {
-    if (actionLock.current === entry.key || actedSet.has(entry.key)) return;
-    actionLock.current = entry.key;
-    setHistory(previous => [entry, ...previous].slice(0, 1));
-    markActed(entry);
-    actionLock.current = null;
-  };
-
-  const handleAdCta = (entry: DiscoverDeckEntry) => {
-    if (actionLock.current === entry.key || actedSet.has(entry.key)) return;
-    actionLock.current = entry.key;
-    setHistory(previous => [entry, ...previous].slice(0, 1));
-    markActed(entry);
-    actionLock.current = null;
-    router.push('/auth');
   };
 
   const undo = async () => {
@@ -313,23 +298,13 @@ export default function DiscoverScreen() {
           <>
             {deck[2] && <View pointerEvents="none" style={[styles.nextCard, styles.nextCardDeep]} />}
             {deck[1] && <View pointerEvents="none" style={[styles.nextCard, styles.nextCardNear]} />}
-            {current.kind === 'opportunity' ? (
-              <OpportunityCard
-                key={current.key}
-                item={current.item}
-                reduceMotion={reduceMotion}
-                onAction={state => handleOpportunityAction(state, current.item, current)}
-                onDetails={() => openDetails(current.item)}
-              />
-            ) : (
-              <DiscoverAdCard
-                key={current.key}
-                ad={current.ad}
-                reduceMotion={reduceMotion}
-                onPass={() => handleAdPass(current)}
-                onCta={() => handleAdCta(current)}
-              />
-            )}
+            <OpportunityCard
+              key={current.key}
+              item={current.item}
+              reduceMotion={reduceMotion}
+              onAction={state => handleOpportunityAction(state, current.item, current)}
+              onDetails={() => openDetails(current.item)}
+            />
           </>
         ) : (
           <View style={styles.emptyCard}>

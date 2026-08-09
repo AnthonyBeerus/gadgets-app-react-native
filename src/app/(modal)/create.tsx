@@ -33,25 +33,11 @@ export default function MerchantCreateScreen() {
           <Text style={styles.itemLabel}>Product</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.item} onPress={() => handleNavigation("/services/create")}>
-          <View style={[styles.iconBox, { backgroundColor: theme.colors.yellow }]}>
-            <MaterialIcons name="design-services" size={32} color="black" />
-          </View>
-          <Text style={styles.itemLabel}>Service</Text>
-        </TouchableOpacity>
-      
         <TouchableOpacity style={styles.item} onPress={() => handleNavigation("/challenges/create")}>
           <View style={[styles.iconBox, { backgroundColor: theme.colors.red }]}>
               <MaterialIcons name="emoji-events" size={32} color="white" />
           </View>
-          <Text style={styles.itemLabel}>Challenge</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.item} onPress={() => handleNavigation("/events/create")}>
-          <View style={[styles.iconBox, { backgroundColor: theme.colors.blue }]}>
-            <MaterialIcons name="event" size={32} color="white" />
-          </View>
-          <Text style={styles.itemLabel}>Event</Text>
+          <Text style={styles.itemLabel}>Creator opportunity</Text>
         </TouchableOpacity>
       </View>
     </View>

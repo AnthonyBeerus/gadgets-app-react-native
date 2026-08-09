@@ -48,16 +48,15 @@ const TabsLayout = () => {
         }}
       />
       <Tabs.Screen
-        name="profile"
+        name="activity"
         options={{
-          title: "Profile",
+          title: "Activity",
         }}
       />
       <Tabs.Screen
-        name="services"
+        name="profile"
         options={{
-          title: "Services",
-          href: null,
+          title: "Profile",
         }}
       />
       <Tabs.Screen
@@ -68,13 +67,6 @@ const TabsLayout = () => {
         }}
       />
 
-      <Tabs.Screen
-        name="events"
-        options={{
-          title: "Events",
-          href: null,
-        }}
-      />
     </Tabs>
   );
 };

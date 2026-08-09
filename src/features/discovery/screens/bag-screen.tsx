@@ -263,7 +263,7 @@ export default function BagScreen() {
               const eligible = Boolean(item.eligibility_proof_id && !item.eligibility_consumed);
               const potLabel = competitive && item.pot_value != null
                 ? `P${Number(item.pot_value).toFixed(0)} POT`
-                : `P${Number(item.reward_value).toFixed(0)} VOUCHER`;
+                : `P${Number(item.accepted_entry_fee).toFixed(0)} ACCEPTED-ENTRY FEE`;
               return (
                 <View key={item.opportunity_id} style={styles.card}>
                   <Image source={{ uri: item.hero_image }} style={styles.image} contentFit="cover" />
