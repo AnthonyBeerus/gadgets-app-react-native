@@ -1,6 +1,6 @@
 import { PROTOTYPE_OPPORTUNITIES } from '../prototype-opportunities';
 
-describe('partner prototype opportunity feed', () => {
+describe('alpha preview opportunity feed', () => {
   it('contains a credible, cash-based Molapo and partner ecosystem showcase', () => {
     expect(PROTOTYPE_OPPORTUNITIES.length).toBeGreaterThanOrEqual(10);
     expect(PROTOTYPE_OPPORTUNITIES.every(item => item.is_prototype)).toBe(true);

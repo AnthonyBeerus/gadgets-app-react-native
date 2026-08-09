@@ -20,7 +20,7 @@ export const useCheckout = () => {
     if (containsPrototypeCheckoutItem(items)) {
       Alert.alert(
         'Prototype item',
-        'This partner-demo item can be added to the bag, but it cannot enter live checkout or payment systems.',
+        'This alpha-preview item can be added to the bag, but it cannot enter live checkout or payment systems.',
       );
       return;
     }

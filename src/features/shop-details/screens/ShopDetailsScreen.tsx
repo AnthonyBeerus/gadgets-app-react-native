@@ -32,7 +32,7 @@ export default function ShopDetailsScreen() {
           {profile.isSponsored && <View style={styles.sponsored}><Text variant="caption">SPONSORED CONCEPT</Text></View>}
         </View>
         <View style={styles.body}>
-          {profile.isPrototype && <View style={styles.prototype}><Text variant="caption">PARTNER PROTOTYPE · NOT A LIVE OFFER</Text></View>}
+          {profile.isPrototype && <View style={styles.prototype}><Text variant="caption">ALPHA PREVIEW · NOT A LIVE OFFER</Text></View>}
           <Text variant="caption" color={colors.accent}>{profile.intent.toUpperCase()} · MOLAPO</Text>
           <Text variant="h1">{profile.name}</Text>
           <Text variant="body" color={colors.inkMuted}>{profile.story}</Text>

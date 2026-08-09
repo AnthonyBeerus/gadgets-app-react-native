@@ -243,7 +243,7 @@ export default function DiscoverScreen() {
       <ConsumerUtilityHeader />
       {feed.data?.some(item => item.is_prototype) && (
         <View style={styles.prototypeBanner}>
-          <Text variant="caption" align="center">Partner prototype · campaign concepts are illustrative, not live offers</Text>
+          <Text variant="caption" align="center">Alpha preview · campaign concepts are illustrative, not live offers</Text>
         </View>
       )}
       <View style={styles.locationRow}>

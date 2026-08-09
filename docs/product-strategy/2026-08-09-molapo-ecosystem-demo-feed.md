@@ -1,4 +1,4 @@
-# Molapo ecosystem partner-demo feed
+# Molapo ecosystem alpha-preview feed
 
 **Status:** Prototype content direction  
 **Rule:** Every campaign below is an inference for product demonstration. It is not a claim of a live campaign, sponsorship or commercial commitment.

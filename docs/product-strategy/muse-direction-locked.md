@@ -1,7 +1,7 @@
 # Muse product direction (locked)
 
 **Last updated:** 2026-08-09
-**Status:** Direction locked for partner prototype — this cash-payout revision supersedes voucher framing
+**Status:** Direction locked for alpha preview — this cash-payout revision supersedes voucher framing
 **Branch snapshot:** `mvp-refinement-gut-ugc-ai`
 
 This is the memory doc for the finer details. Older research in `ugc-marketplace-audit-and-research.md` and `.codex-audit/` still has useful comps; **this file wins when they conflict**.
@@ -71,8 +71,8 @@ Restaurant-shaped loop (applies to salons, braai, lunch boxes, etc.):
 - **Shops** = merchant-first browsing for businesses building Botswana's digital economy through funded creator campaigns; products appear as qualifying conversion rails within each business
 - **Saved** = shortlist from right-swipes; saving does **not** enter you  
 - Showcase builds inject clearly labelled **generated sponsored-demo slots** every four opportunity cards to demonstrate merchant placement value and open the revenue model.
-- When the live feed is unavailable or empty, the partner prototype uses clearly labelled, locally researched fixture campaigns. These never enter live payment or settlement paths.
-- The partner prototype centers Molapo merchants, creator briefs, illustrative external-social outcomes and qualifying commerce. It does not claim to be an all-in-one directory, booking platform or national local-business catalogue.
+- When the live feed is unavailable or empty, the alpha preview uses clearly labelled, locally researched fixture campaigns. These never enter live payment or settlement paths.
+- The alpha preview centers Molapo merchants, creator briefs, illustrative external-social outcomes and qualifying commerce. It does not claim to be an all-in-one directory, booking platform or national local-business catalogue.
 - Browse Botswana is treated as a broad directory/storefront competitor. Muse differentiates on the measurable loop: **merchant funding → creator brief → external social content → qualifying commerce → merchant growth**.
 
 ---

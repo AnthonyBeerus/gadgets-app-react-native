@@ -22,7 +22,7 @@ export default function PrototypeOpportunityScreen() {
           <Pressable accessibilityRole="button" accessibilityLabel="Back" onPress={() => router.back()} style={{ position: 'absolute', top: space.md, left: space.md, width: 44, height: 44, borderRadius: 22, backgroundColor: colors.surface, alignItems: 'center', justifyContent: 'center' }}><Ionicons name="arrow-back" size={22} color={colors.ink} /></Pressable>
         </View>
         <View style={{ padding: space.md, gap: space.md }}>
-          <View style={{ alignSelf: 'flex-start', paddingHorizontal: space.sm, paddingVertical: 6, borderRadius: radii.sm, backgroundColor: colors.accentMuted }}><Text variant="caption">PARTNER PROTOTYPE · NOT LIVE</Text></View>
+          <View style={{ alignSelf: 'flex-start', paddingHorizontal: space.sm, paddingVertical: 6, borderRadius: radii.sm, backgroundColor: colors.accentMuted }}><Text variant="caption">ALPHA PREVIEW · NOT LIVE</Text></View>
           <Text variant="caption" color={colors.inkMuted}>{item.merchant_name}</Text>
           <Text variant="h1">{item.opportunity_title}</Text>
           <Text variant="body" color={colors.inkMuted}>{item.opportunity_description}</Text>
