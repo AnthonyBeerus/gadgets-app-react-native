@@ -54,4 +54,4 @@ export default function ProductDetailsScreen() {
   </StackScreenTemplate>;
 }
 
-const styles = StyleSheet.create({ content: { padding: 16, paddingBottom: 170, gap: 14 }, hero: { height: 310, borderWidth: 2 }, chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 }, actions: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: 10 }, flex: { flex: 1 }, skeleton: { height: 560, borderWidth: 2 } });
+const styles = StyleSheet.create({ content: { padding: 16, paddingBottom: 170, gap: 14 }, hero: { height: 310, borderWidth: 2 }, chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 }, actions: { flexDirection: 'row', alignItems: 'center', gap: 10 }, flex: { flex: 1 }, skeleton: { height: 560, borderWidth: 2 } });

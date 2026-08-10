@@ -18,4 +18,4 @@ export default function CheckoutScreen(){
   {attribution?.opportunityId?<EligibilityPanel model={{title:'Your linked creator opportunity',perEntry:0,qualifying:true}}/>:null}
  </StackScreenTemplate>;
 }
-const s=StyleSheet.create({section:{gap:10},methods:{flexDirection:'row',gap:9},method:{flex:1},line:{flexDirection:'row',justifyContent:'space-between',gap:12},payRow:{flexDirection:'row',alignItems:'center',gap:13,marginTop:10},pay:{flex:1}});
+const s=StyleSheet.create({section:{gap:10},methods:{flexDirection:'row',gap:9},method:{flex:1},line:{flexDirection:'row',justifyContent:'space-between',gap:12},payRow:{flexDirection:'row',alignItems:'center',gap:13},pay:{flex:1}});

@@ -51,7 +51,10 @@ const AppNavigator = () => {
   }).remove, [router]);
   
   return (
-    <Stack>
+    // Every Muse screen draws its own ScreenHeader, so the native header is off by
+    // default. Registering a route only to hide its header is how the opportunity
+    // and order-detail screens ended up with two stacked headers.
+    <Stack screenOptions={{ headerShown: false }}>
       <Stack.Screen
         name="(merchant)"
         options={{ headerShown: false, title: "Merchant Dashboard" }}
@@ -150,6 +153,14 @@ const AppNavigator = () => {
           presentation: 'card',
           animation: 'slide_from_right', 
         }} 
+      />
+      <Stack.Screen
+        name="orders/[slug]"
+        options={{ headerShown: false, title: "Order", animation: 'ios_from_right' }}
+      />
+      <Stack.Screen
+        name="opportunity/[id]"
+        options={{ headerShown: false, title: "Opportunity", animation: 'ios_from_right' }}
       />
       <Stack.Screen
         name="challenges"

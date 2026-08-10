@@ -23,7 +23,7 @@ export default function OpportunityDetailScreen() {
   return <StackScreenTemplate
     title="Opportunity"
     fallbackHref="/(shop)"
-    footer={<PinnedActionBar><View style={styles.footer}><Text variant="caption">{item.is_prototype ? 'Illustrative · not a live payable brief' : 'Qualifying purchase required'}</Text><Button variant="commerce" onPress={() => router.push({ pathname: '/product/[slug]', params: { slug: item.product_slug, source: 'discover', opportunityId: item.opportunity_id } })}>See qualifying products</Button></View></PinnedActionBar>}
+    footer={<PinnedActionBar><Text variant="caption">{item.is_prototype ? 'Illustrative · not a live payable brief' : 'Qualifying purchase required'}</Text><Button variant="commerce" onPress={() => router.push({ pathname: '/product/[slug]', params: { slug: item.product_slug, source: 'discover', opportunityId: item.opportunity_id } })}>See qualifying products</Button></PinnedActionBar>}
     scrollProps={{ contentContainerStyle: styles.content }}
   >
     <Image source={{ uri: item.hero_image }} style={[styles.hero, { borderColor: colors.stroke }]} contentFit="cover" />
@@ -38,4 +38,4 @@ export default function OpportunityDetailScreen() {
   </StackScreenTemplate>;
 }
 
-const styles = StyleSheet.create({ content: { padding: 16, paddingBottom: 150, gap: 14 }, hero: { height: 250, borderWidth: 2 }, payout: { borderWidth: 2, padding: 16, gap: 7 }, requirement: { flexDirection: 'row', alignItems: 'flex-start', gap: 10 }, bullet: { width: 18, height: 18, borderWidth: 2 }, flex: { flex: 1 }, footer: { flex: 1, gap: 6 }, skeleton: { height: 520, borderWidth: 2 } });
+const styles = StyleSheet.create({ content: { padding: 16, paddingBottom: 150, gap: 14 }, hero: { height: 250, borderWidth: 2 }, payout: { borderWidth: 2, padding: 16, gap: 7 }, requirement: { flexDirection: 'row', alignItems: 'flex-start', gap: 10 }, bullet: { width: 18, height: 18, borderWidth: 2 }, flex: { flex: 1 }, skeleton: { height: 520, borderWidth: 2 } });

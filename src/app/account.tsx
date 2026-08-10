@@ -1,9 +1,9 @@
 import { useAuth, useUser } from '../shared/clerk';
-import { Redirect, Stack, useRouter } from 'expo-router';
+import { Redirect, useRouter } from 'expo-router';
 import { ActivityIndicator, Alert, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { Button, Plate, Text, layout, space, useDesignTokens, useThemedStyles, type SemanticColors } from '../shared/design-system';
+import { Button, Plate, ScreenHeader, Text, layout, space, useDesignTokens, useThemedStyles, type SemanticColors } from '../shared/design-system';
 
 function createStyles(c: SemanticColors) {
   return {
@@ -30,8 +30,8 @@ export default function AccountScreen() {
   ]);
 
   return (
-    <SafeAreaView style={styles.safe} edges={['bottom']}>
-      <Stack.Screen options={{ title: 'Account and security' }} />
+    <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
+      <ScreenHeader title="Account and security" onBack={() => router.canGoBack() ? router.back() : router.replace('/(shop)/profile')} />
       <View style={styles.content}>
         <Plate style={styles.card}>
           <Text variant="label">Signed in as</Text>

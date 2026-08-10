@@ -1,6 +1,8 @@
 import React from 'react';
 import { Image as ExpoImage, type ImageProps } from 'expo-image';
 import { Pressable, StyleSheet, View, type ViewProps } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { layout } from '../tokens/space';
 import { useDesignTokens } from '../theme/DesignTokensProvider';
 import { Text } from './Text';
 
@@ -10,6 +12,10 @@ export function OffsetPlane({ children, style, ...props }: ViewProps) { const t 
 export function DashedWell({ title, children, style }: ViewProps & { title: string }) { const t = useDesignTokens(); return <View style={[styles.well, { borderColor: t.colors.strokeDim, backgroundColor: t.colors.surfaceSunken }, style]}><Text variant="label" align="center">{title}</Text>{children}</View>; }
 export function Skeleton({ style }: ViewProps) { const t = useDesignTokens(); return <View accessibilityLabel="Loading" style={[styles.skeleton, { borderColor: t.colors.strokeDim, backgroundColor: t.colors.surfaceSunken }, style]} />; }
 export function StrokedImage({ style, ...props }: ImageProps) { const t = useDesignTokens(); return <ExpoImage {...props} style={[styles.image, { borderColor: t.colors.stroke, backgroundColor: t.colors.surfaceSunken }, style]} />; }
-export function PinnedActionBar({ children, style }: ViewProps) { const t = useDesignTokens(); return <View style={[styles.pinned, { borderTopColor: t.colors.stroke, backgroundColor: t.colors.canvas }, style]}>{children}</View>; }
+/**
+ * Owns its own bottom inset so a pay bar always sits above the gesture pill,
+ * whatever the host screen does about safe areas.
+ */
+export function PinnedActionBar({ children, style }: ViewProps) { const t = useDesignTokens(); const insets = useSafeAreaInsets(); return <View style={[styles.pinned, { paddingBottom: insets.bottom + layout.safeBottom, borderTopColor: t.colors.stroke, backgroundColor: t.colors.canvas }, style]}>{children}</View>; }
 export function Control({ selected, kind = 'checkbox', onPress, label }: { selected: boolean; kind?: 'checkbox' | 'radio' | 'switch'; onPress: () => void; label: string }) { const t = useDesignTokens(); return <Pressable accessibilityRole={kind === 'switch' ? 'switch' : kind} accessibilityState={{ checked: selected }} accessibilityLabel={label} onPress={onPress} style={styles.hit}><View style={[kind === 'switch' ? styles.switch : styles.control, kind === 'radio' && styles.radio, { borderColor: t.colors.stroke, backgroundColor: selected ? t.colors.commerce : t.colors.surface }]}>{kind === 'switch' ? <View style={[styles.thumb, { backgroundColor: selected ? t.colors.onCommerce : t.colors.ink, transform: [{ translateX: selected ? 18 : 0 }] }]} /> : selected ? <Text align="center">✓</Text> : null}</View></Pressable>; }
-const styles = StyleSheet.create({ plate: { borderWidth: 2, borderRadius: 0 }, offsetWrap: { position: 'relative' }, back: { position: 'absolute', left: 12, right: -8, top: 8, bottom: -6, borderWidth: 2 }, front: { flex: 1 }, well: { borderWidth: 2, borderStyle: 'dashed', padding: 18, gap: 12 }, skeleton: { borderWidth: 2 }, image: { borderWidth: 2, borderRadius: 0, overflow: 'hidden' }, pinned: { borderTopWidth: 2, paddingHorizontal: 18, paddingTop: 12, paddingBottom: 12 }, hit: { width: 44, height: 44, alignItems: 'center', justifyContent: 'center' }, control: { width: 26, height: 26, borderWidth: 2, borderRadius: 3 }, radio: { borderRadius: 13 }, switch: { width: 48, height: 28, borderWidth: 2, borderRadius: 14, padding: 3 }, thumb: { width: 18, height: 18, borderRadius: 9 }, });
+const styles = StyleSheet.create({ plate: { borderWidth: 2, borderRadius: 0 }, offsetWrap: { position: 'relative' }, back: { position: 'absolute', left: 12, right: -8, top: 8, bottom: -6, borderWidth: 2 }, front: { flex: 1 }, well: { borderWidth: 2, borderStyle: 'dashed', padding: 18, gap: 12 }, skeleton: { borderWidth: 2 }, image: { borderWidth: 2, borderRadius: 0, overflow: 'hidden' }, pinned: { borderTopWidth: 2, paddingHorizontal: 18, paddingTop: 12, gap: 10 }, hit: { width: 44, height: 44, alignItems: 'center', justifyContent: 'center' }, control: { width: 26, height: 26, borderWidth: 2, borderRadius: 3 }, radio: { borderRadius: 13 }, switch: { width: 48, height: 28, borderWidth: 2, borderRadius: 14, padding: 3 }, thumb: { width: 18, height: 18, borderRadius: 9 }, });
