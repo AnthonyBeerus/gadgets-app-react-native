@@ -1,6 +1,129 @@
-import { Redirect, useRouter } from 'expo-router'; import React, { useMemo } from 'react'; import { Pressable, ScrollView, StyleSheet, View } from 'react-native'; import { SafeAreaView } from 'react-native-safe-area-context';
-import { Button, Chip, Money, Plate, Progress, Text, useDesignTokens } from '../../shared/design-system'; import { getMerchantDashboardStats, getShopChallenges, getShopProducts } from '../../shared/api/api'; import { useAuth } from '../../shared/providers/auth-provider';
-export default function MerchantDashboard(){const t=useDesignTokens();const router=useRouter();const {isMerchant,merchantShopId,switchRole}=useAuth();const {data:stats}=getMerchantDashboardStats(merchantShopId);const {data:products=[]}=getShopProducts(merchantShopId||0);const {data:challenges=[]}=getShopChallenges(merchantShopId||0);if(!isMerchant)return <Redirect href="/open-shop"/>;const pending=Number(stats?.pending_order_count??0);const active=challenges.find((x:any)=>x.status==='active'&&x.contest_mode==='competitive_pot') as any;const pot=Number(active?.pot_value??0);const spent=Number(active?.pot_paid_out??0);const progress=pot?spent/pot:0;
- return <SafeAreaView style={[s.safe,{backgroundColor:t.colors.canvas}]}><ScrollView contentContainerStyle={s.content}><View style={s.header}><View><Chip kind="disclosure" tone="sponsored" label="MERCHANT MODE"/><Text variant="display">Workspace</Text></View><Button variant="secondary" onPress={()=>{switchRole('shopper');router.replace('/(shop)')}}>Shopper mode</Button></View><Text variant="label">Needs you now</Text><View style={s.counters}><Counter value={pending} label="New orders" onPress={()=>router.push('/(merchant)/orders')}/><Counter value={pending} label="To prepare" onPress={()=>router.push('/(merchant)/orders')}/><Counter value={0} label="Entries to review" onPress={()=>router.push('/(merchant)/community/challenges')}/></View><Text variant="label">Orders</Text><Plate style={s.orders}><Text variant="h3">{pending ? `${pending} orders need action` : 'No new orders'}</Text><Text variant="bodySm">Accept, prepare and hand over paid orders from one timeline.</Text><Button onPress={()=>router.push('/(merchant)/orders')}>Open orders</Button></Plate><Text variant="label">Campaign</Text><Plate style={s.campaign}>{active?<><Text variant="h2">{active.title}</Text><View style={s.money}><Money amount={Math.max(0,pot-spent)} format="prize" emphasis="hero"/><Text variant="caption">remaining</Text></View><Progress value={progress}/><Text variant="caption">Payout depletion is confirmed from accepted entries.</Text></>:<><Text variant="h3">No funded campaign</Text><Text variant="bodySm">Fund a pot after adding a qualifying product.</Text><Button onPress={()=>router.push('/challenges/create')}>Fund a campaign</Button></>}</Plate><View style={s.actions}><Button variant="secondary" onPress={()=>router.push('/create-product')}>Add product</Button><Button variant="secondary" onPress={()=>router.push('/scan-order')}>Scan collection</Button></View></ScrollView></SafeAreaView>}
-function Counter({value,label,onPress}:{value:number;label:string;onPress:()=>void}){const t=useDesignTokens();return <Pressable onPress={onPress} style={[s.counter,{borderColor:t.colors.stroke,backgroundColor:t.colors.surface}]}><Text variant="h1" selectableData>{value}</Text><Text variant="caption">{label}</Text></Pressable>}
-const s=StyleSheet.create({safe:{flex:1},content:{padding:18,paddingBottom:32,gap:16},header:{flexDirection:'row',justifyContent:'space-between',alignItems:'flex-start',gap:12},counters:{flexDirection:'row',gap:8},counter:{flex:1,borderWidth:2,padding:12,gap:4},orders:{padding:16,gap:12},campaign:{padding:16,gap:12},money:{flexDirection:'row',alignItems:'flex-end',gap:8},actions:{flexDirection:'row',gap:8}});
+import { Redirect, useRouter } from 'expo-router';
+import { useMemo } from 'react';
+import { View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+
+import { useMerchantCampaigns } from '../../features/campaigns/api/campaigns';
+import { CampaignStatusTag, describeDeadline } from '../../features/campaigns/components/StatusTag';
+import {
+  Button,
+  Money,
+  Rule,
+  ScreenHeader,
+  Skeleton,
+  Surface,
+  Text,
+  space,
+  useThemedStyles,
+  type SemanticColors,
+} from '../../shared/design-system';
+import { useAuth } from '../../shared/providers/auth-provider';
+
+export default function MerchantDashboard() {
+  const styles = useThemedStyles(createStyles);
+  const router = useRouter();
+  const { isMerchant } = useAuth();
+  const { data: campaigns, isLoading } = useMerchantCampaigns();
+
+  if (!isMerchant) return <Redirect href="/open-shop" />;
+
+  const live = useMemo(
+    () => (campaigns ?? []).filter(c => c.status === 'published'),
+    [campaigns],
+  );
+  const needsAttention = useMemo(
+    () => (campaigns ?? []).filter(c => c.status === 'closed'),
+    [campaigns],
+  );
+  const totalCommitted = useMemo(
+    () =>
+      (campaigns ?? [])
+        .filter(c => c.status === 'published' || c.status === 'closed')
+        .reduce((sum, c) => sum + Number(c.pot_value ?? 0), 0),
+    [campaigns],
+  );
+
+  return (
+    <SafeAreaView style={styles.safe} edges={['top']}>
+      <ScreenHeader title="Dashboard" />
+      <View style={styles.body}>
+        {isLoading ? (
+          <>
+            <Skeleton style={styles.skeleton} />
+            <Skeleton style={styles.skeleton} />
+          </>
+        ) : (
+          <>
+            <Surface style={styles.hero}>
+              <Text variant="label">Committed to prizes</Text>
+              <Money amount={totalCommitted} format="prize" emphasis="hero" />
+              <Text variant="caption" style={styles.muted}>
+                Across {live.length} live campaign{live.length === 1 ? '' : 's'}
+              </Text>
+            </Surface>
+
+            {needsAttention.length > 0 ? (
+              <Surface style={styles.callout}>
+                <Text variant="label">Waiting on you</Text>
+                {needsAttention.map(campaign => (
+                  <View key={campaign.id} style={styles.row}>
+                    <Text variant="body" style={styles.flex} numberOfLines={1}>
+                      {campaign.title}
+                    </Text>
+                    <Button
+                      variant="secondary"
+                      onPress={() => router.push(`/(merchant)/campaigns/${campaign.id}`)}
+                    >
+                      Pick winners
+                    </Button>
+                  </View>
+                ))}
+              </Surface>
+            ) : null}
+
+            <Rule />
+
+            <Text variant="label">Live campaigns</Text>
+            {live.length === 0 ? (
+              <Text variant="body" style={styles.muted}>
+                Nothing running right now. Launch a campaign to start collecting content.
+              </Text>
+            ) : (
+              live.map(campaign => (
+                <Surface key={campaign.id} style={styles.card}>
+                  <View style={styles.row}>
+                    <Text variant="body" style={styles.flex} numberOfLines={1}>
+                      {campaign.title}
+                    </Text>
+                    <CampaignStatusTag status={campaign.status} />
+                  </View>
+                  <Text variant="caption" style={styles.muted}>
+                    {describeDeadline(campaign.deadline)}
+                  </Text>
+                </Surface>
+              ))
+            )}
+
+            <Button onPress={() => router.push('/(merchant)/campaigns/new')}>
+              Create a campaign
+            </Button>
+          </>
+        )}
+      </View>
+    </SafeAreaView>
+  );
+}
+
+function createStyles(c: SemanticColors) {
+  return {
+    safe: { flex: 1, backgroundColor: c.canvas },
+    body: { padding: space.lg, gap: space.sm },
+    skeleton: { height: 110 },
+    hero: { padding: space.md, gap: space.xxs },
+    callout: { padding: space.md, gap: space.sm, backgroundColor: c.warningSoft },
+    card: { padding: space.md, gap: space.xxs },
+    row: { flexDirection: 'row' as const, alignItems: 'center' as const, gap: space.sm },
+    flex: { flex: 1 },
+    muted: { color: c.inkMuted },
+  };
+}

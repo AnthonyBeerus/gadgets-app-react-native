@@ -24,7 +24,7 @@ export function MerchantGrowthCard({ profile, onPress, compact }: Props) {
         {profile.opportunity && (
           <View style={styles.opportunity}>
             <Ionicons name="sparkles" size={16} color={colors.accent} />
-            <Text variant="caption" style={styles.opportunityText} numberOfLines={1}>{profile.opportunity.opportunity_title} · P{profile.opportunity.accepted_entry_fee} accepted</Text>
+            <Text variant="caption" style={styles.opportunityText} numberOfLines={1}>{profile.opportunity.opportunity_title} · P{profile.opportunity.pot_value ?? 0} pot</Text>
           </View>
         )}
         <View style={styles.footer}><Text variant="bodyBold">Explore business</Text><Ionicons name="arrow-forward" size={18} color={colors.ink} /></View>

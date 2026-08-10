@@ -18,18 +18,22 @@ Deno.serve(async request => {
     );
     if (event.type === 'payment_intent.succeeded') {
       const intent = event.data.object;
-      if (intent.metadata.muse_purpose === 'creator_opportunity_funding') {
-        await admin.from('creator_opportunities').update({
-          status: 'AWAITING_APPROVAL',
-          funded_at: new Date().toISOString(),
-        }).eq('id', intent.metadata.opportunity_id).eq('stripe_payment_intent_id', intent.id);
+      if (intent.metadata.muse_purpose === 'campaign_pot_funding') {
+        // A funded pot makes the campaign publishable; the merchant still hits Publish.
+        await admin.from('challenges')
+          .update({ pot_value: intent.amount_received / 1 })
+          .eq('id', Number(intent.metadata.challenge_id))
+          .eq('status', 'draft');
       }
     }
     if (event.type === 'payment_intent.payment_failed' || event.type === 'payment_intent.canceled') {
       const intent = event.data.object;
-      if (intent.metadata.muse_purpose === 'creator_opportunity_funding') {
-        await admin.from('creator_opportunities').update({ status: 'AWAITING_FUNDING' })
-          .eq('id', intent.metadata.opportunity_id).eq('stripe_payment_intent_id', intent.id);
+      if (intent.metadata.muse_purpose === 'campaign_pot_funding') {
+        // Funding failed, so the pot goes back to unfunded and publish_campaign will refuse.
+        await admin.from('challenges')
+          .update({ pot_value: null })
+          .eq('id', Number(intent.metadata.challenge_id))
+          .eq('status', 'draft');
       }
     }
     return new Response(JSON.stringify({ received: true }), {

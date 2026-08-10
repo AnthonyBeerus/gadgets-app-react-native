@@ -1,3 +1,6 @@
+> **HISTORICAL.** This PRD describes the pre-pivot product (gems, subscriptions, ride-hailing, AI tools, events). It is kept for reference only.
+> The current direction is `docs/product-strategy/muse-direction-locked.md`.
+
 # **Muse — Powered by Molapo Creative Hub**
 
 ## **Product Requirements Document (PRD)**

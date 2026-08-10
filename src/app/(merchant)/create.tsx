@@ -1,7 +1,7 @@
-/* eslint-disable prettier/prettier */
+import { Redirect } from 'expo-router';
 
-// This route is intentionally empty. The tab press is intercepted in (tabs)/_layout
-// to open the create modal at /create.
-export default function CreateTabPlaceholder() {
-  return null;
+// The tab bar intercepts `tabPress` and pushes the wizard directly, so this screen is
+// only reached by a deep link. Sending it on keeps that path working.
+export default function MerchantCreateTab() {
+  return <Redirect href="/(merchant)/campaigns/new" />;
 }

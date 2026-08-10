@@ -60,6 +60,7 @@
       ],
       "@react-native-community/datetimepicker",
       "@sentry/react-native",
+      "expo-video",
       "expo-secure-store",
       [
         "@stripe/stripe-react-native",

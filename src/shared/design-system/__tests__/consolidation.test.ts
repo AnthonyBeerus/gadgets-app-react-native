@@ -27,8 +27,9 @@ describe('Muse consolidation contract', () => {
     expect(exists('src/shared/design-system/patterns/TabBar.tsx')).toBe(true);
   });
 
-  it('keeps one canonical bag route', () => {
-    expect(fs.readFileSync(path.join(root, 'src/app/cart.tsx'), 'utf8')).toContain('Redirect');
-    expect(exists('src/app/bag.tsx')).toBe(true);
+  // The bag/cart pair went with the commerce teardown; the campaign surface replaces it.
+  it('keeps one canonical media upload surface', () => {
+    expect(exists('src/shared/components/media/AssetUploadField.tsx')).toBe(true);
+    expect(exists('src/shared/components/ui/UploadBox.tsx')).toBe(false);
   });
 });

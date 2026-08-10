@@ -61,39 +61,40 @@ export default function SavedOpportunitiesScreen() {
         </>
       ) : saved.data?.length ? (
         saved.data.map(item => {
-          const competitive = item.contest_mode === 'competitive_pot';
-          const eligible = Boolean(item.eligibility_proof_id && !item.eligibility_consumed);
+          const joined = item.has_joined;
           return (
             <View key={item.opportunity_id} style={[styles.card, { borderColor: colors.stroke, backgroundColor: colors.surface }]}>
               <StrokedImage source={{ uri: item.hero_image }} style={styles.image} contentFit="cover" />
               <View style={styles.body}>
                 <Chip
                   kind="status"
-                  tone={eligible ? 'success' : 'warning'}
-                  label={eligible ? 'Ready to enter' : 'Purchase to qualify'}
+                  tone={joined ? 'success' : 'warning'}
+                  label={joined ? 'You joined' : 'Free to enter'}
                 />
-                <Text variant="h2">{item.opportunity_title || item.product_title}</Text>
+                <Text variant="h2">{item.opportunity_title}</Text>
                 <MerchantIdentityRow merchant={{ id: item.merchant_id, name: item.merchant_name, location: item.merchant_location }} />
                 <Text variant="caption" numberOfLines={2}>{item.opportunity_description}</Text>
                 <Rule />
                 <View style={styles.payout}>
-                  {competitive && item.pot_value != null ? (
+                  {item.pot_value != null ? (
                     <View>
                       <Text variant="label" color={colors.payout}>Prize pot</Text>
                       <Money amount={Number(item.pot_value)} format="prize" emphasis="strong" style={{ color: colors.payout }} />
                     </View>
                   ) : null}
                   <View>
-                    <Text variant="label">Per accepted entry</Text>
-                    <Money amount={Number(item.accepted_entry_fee)} format="payout" emphasis="strong" />
+                    <Text variant="label">What to make</Text>
+                    <Text variant="body">
+                      {item.deliverable_count} {item.content_format === 'photo' ? 'photo' : 'video'}
+                      {item.deliverable_count === 1 ? '' : 's'}
+                    </Text>
                   </View>
                 </View>
-                <Text variant="caption">Qualifying purchase from <Money amount={Number(item.price)} format="prize" emphasis="body" style={styles.inline} /></Text>
                 <Button
-                  variant={eligible ? 'commerce' : 'primary'}
-                  onPress={() => router.push(eligible ? `/challenges/entry/${item.opportunity_id}` : `/opportunity/${item.opportunity_id}`)}
+                  variant="primary"
+                  onPress={() => router.push(`/opportunity/${item.opportunity_id}`)}
                 >
-                  {eligible ? 'Enter this brief' : 'View brief'}
+                  {joined ? 'View your entry' : 'View brief'}
                 </Button>
                 <Pressable
                   accessibilityRole="button"

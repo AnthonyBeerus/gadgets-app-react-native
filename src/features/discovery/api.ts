@@ -1,4 +1,4 @@
-import { supabase } from '../../shared/lib/supabase';
+import { isSignedInToMuse, supabase } from '../../shared/lib/supabase';
 import { diversifyOpportunityFeed } from './ranking';
 import {
   clearGuestOpportunityPreferences,
@@ -19,23 +19,39 @@ const db = supabase as any;
 function normalizeFeed(rows: any[] | null): CreatorOpportunityFeedItem[] {
   return (rows ?? []).map(row => ({
     ...row,
-    opportunity_id: Number(row.opportunity_id),
-    product_id: Number(row.product_id),
-    price: Number(row.price),
-    max_quantity: Number(row.max_quantity),
-    category_id: Number(row.category_id),
-    merchant_id: Number(row.merchant_id),
+    // The RPC speaks the campaign schema; the deck speaks "opportunity".
+    opportunity_id: Number(row.id ?? row.opportunity_id),
+    opportunity_title: row.title ?? row.opportunity_title,
+    opportunity_description: row.description ?? row.opportunity_description,
+    hero_image: row.image_url ?? row.hero_image,
+    merchant_id: row.shop_id == null ? 0 : Number(row.shop_id),
+    merchant_name: row.brand_name ?? row.merchant_name ?? '',
+    merchant_location: row.merchant_location ?? '',
     mall_id: row.mall_id == null ? null : Number(row.mall_id),
-    reward_value: Number(row.reward_value),
-    rank_score: Number(row.rank_score),
     requirements: Array.isArray(row.requirements) ? row.requirements : [],
-    contest_mode: row.contest_mode === 'competitive_pot' ? 'competitive_pot' : 'standard',
+    talking_points: Array.isArray(row.talking_points) ? row.talking_points : [],
+    dos: Array.isArray(row.dos) ? row.dos : [],
+    donts: Array.isArray(row.donts) ? row.donts : [],
+    brand_asset_paths: Array.isArray(row.brand_asset_paths) ? row.brand_asset_paths : [],
+    content_format: row.content_format ?? 'either',
+    deliverable_count: Number(row.deliverable_count ?? 1),
+    video_min_seconds: row.video_min_seconds == null ? null : Number(row.video_min_seconds),
+    video_max_seconds: row.video_max_seconds == null ? null : Number(row.video_max_seconds),
+    usage_rights: row.usage_rights ?? 'organic_social_12m',
+    revisions_allowed: Number(row.revisions_allowed ?? 0),
+    review_sla_days: Number(row.review_sla_days ?? 5),
+    participants_count: Number(row.participants_count ?? 0),
+    has_joined: Boolean(row.has_joined),
+    my_submission_status: row.my_submission_status ?? null,
+    status: row.status ?? 'published',
     pot_value: row.pot_value == null ? null : Number(row.pot_value),
     pot_currency: row.pot_currency ?? 'BWP',
-    pot_splits: row.pot_splits && typeof row.pot_splits === 'object' ? row.pot_splits : { '1': 0.4, '2': 0.25, '3': 0.15, '4': 0.1, '5': 0.1 },
-    accepted_entry_fee: Number(row.accepted_entry_fee ?? row.consolation_voucher_value ?? row.reward_value ?? 0),
+    pot_splits:
+      row.pot_splits && typeof row.pot_splits === 'object'
+        ? row.pot_splits
+        : { '1': 0.4, '2': 0.25, '3': 0.15, '4': 0.1, '5': 0.1 },
     settled_at: row.settled_at ?? null,
-    score_rule: 'hybrid_quality_engagement',
+    rank_score: Number(row.rank_score ?? 0),
   }));
 }
 
@@ -54,12 +70,8 @@ export async function getCreatorOpportunityFeed({
   let normalized = diversifyOpportunityFeed(result.records);
   if (includeHiddenPreferences) return normalized;
 
-  try {
-    const { data: authData } = await supabase.auth.getUser();
-    if (authData.user) return normalized;
-  } catch {
-    // Public discovery still works as a guest when the auth service is offline.
-  }
+  // Signed-in creators get their saved/dismissed state from the RPC itself.
+  if (isSignedInToMuse()) return normalized;
 
   const guestPreferences = await getGuestOpportunityPreferences();
   const hidden = new Set(
@@ -107,8 +119,7 @@ export async function getSavedCreatorOpportunities() {
       .filter((item): item is CreatorOpportunityFeedItem => Boolean(item))
       .map(item => ({ ...item, preference_state: 'saved' as const }));
   }
-  const { data: authData } = await supabase.auth.getUser();
-  if (authData.user) {
+  if (isSignedInToMuse()) {
     const { data, error } = await db.rpc('get_saved_creator_opportunities');
     if (error) throw error;
     return normalizeFeed(data);
@@ -135,8 +146,7 @@ export async function setCreatorOpportunityPreference(
   state: OpportunityPreferenceState,
 ) {
   if (opportunityId < 0) return setGuestOpportunityPreference(opportunityId, state);
-  const { data: authData } = await supabase.auth.getUser();
-  if (!authData.user) return setGuestOpportunityPreference(opportunityId, state);
+  if (!isSignedInToMuse()) return setGuestOpportunityPreference(opportunityId, state);
   const { data, error } = await db.rpc('set_creator_opportunity_preference', {
     p_opportunity_id: opportunityId,
     p_state: state,
@@ -148,8 +158,7 @@ export async function setCreatorOpportunityPreference(
 
 export async function restoreCreatorOpportunityPreference(opportunityId: number) {
   if (opportunityId < 0) return restoreGuestOpportunityPreference(opportunityId);
-  const { data: authData } = await supabase.auth.getUser();
-  if (!authData.user) return restoreGuestOpportunityPreference(opportunityId);
+  if (!isSignedInToMuse()) return restoreGuestOpportunityPreference(opportunityId);
   const { error } = await db.rpc('restore_creator_opportunity_preference', {
     p_opportunity_id: opportunityId,
   });
@@ -161,8 +170,7 @@ export async function mergeGuestCreatorOpportunityPreferences() {
   const preferences = (await getGuestOpportunityPreferences())
     .filter(preference => preference.opportunity_id > 0);
   if (preferences.length === 0) return 0;
-  const { data: authData } = await supabase.auth.getUser();
-  if (!authData.user) return 0;
+  if (!isSignedInToMuse()) return 0;
   const { data, error } = await db.rpc('merge_creator_opportunity_preferences', {
     p_preferences: preferences,
   });
@@ -177,52 +185,11 @@ export async function recordCreatorOpportunityEvent(
   source: OpportunitySource,
 ) {
   if (opportunityId < 0) return;
-  const { data: authData } = await supabase.auth.getUser();
-  if (!authData.user) return;
+  if (!isSignedInToMuse()) return;
   const { error } = await db.rpc('record_creator_opportunity_event', {
     p_opportunity_id: opportunityId,
     p_event_type: eventType,
     p_source: source,
   });
   if (error) throw error;
-}
-
-export async function getOpportunityForProduct(productId: number, opportunityId?: number) {
-  if (productId < 0) {
-    const prototype = opportunityId
-      ? getPrototypeOpportunity(opportunityId)
-      : PROTOTYPE_OPPORTUNITIES.find(item => item.product_id === productId) ?? null;
-    if (!prototype) return null;
-    return {
-      id: prototype.opportunity_id,
-      title: prototype.opportunity_title,
-      description: prototype.opportunity_description,
-      requirements: prototype.requirements,
-      deadline: prototype.deadline,
-      reward_value: prototype.reward_value,
-      accepted_entry_fee: prototype.accepted_entry_fee,
-      reward_currency: prototype.reward_currency,
-      product_id: prototype.product_id,
-      status: 'prototype',
-    };
-  }
-  let query = db.from('challenges')
-    .select('id,title,description,requirements,deadline,reward_value,reward_currency,product_id,status')
-    .eq('product_id', productId)
-    .eq('status', 'active');
-  if (opportunityId) query = query.eq('id', opportunityId);
-  const { data, error } = await query.maybeSingle();
-  if (error) throw error;
-  return data as null | {
-    id: number;
-    title: string;
-    description: string;
-    requirements: string[];
-    deadline: string;
-    reward_value: number;
-    accepted_entry_fee?: number;
-    reward_currency: string;
-    product_id: number;
-    status: string;
-  };
 }

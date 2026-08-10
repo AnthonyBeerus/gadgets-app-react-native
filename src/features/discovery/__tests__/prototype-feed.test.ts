@@ -6,7 +6,7 @@ describe('alpha preview opportunity feed', () => {
     expect(PROTOTYPE_OPPORTUNITIES.every(item => item.is_prototype)).toBe(true);
     expect(PROTOTYPE_OPPORTUNITIES.every(item => item.opportunity_id < 0)).toBe(true);
     expect(PROTOTYPE_OPPORTUNITIES.every(item => (item.pot_value ?? 0) > 0)).toBe(true);
-    expect(PROTOTYPE_OPPORTUNITIES.every(item => item.accepted_entry_fee > 0)).toBe(true);
+    expect(PROTOTYPE_OPPORTUNITIES.every(item => item.deliverable_count > 0)).toBe(true);
 
     const merchants = PROTOTYPE_OPPORTUNITIES.map(item => item.merchant_name).join(' ');
     expect(merchants).toContain('Miss World Botswana');

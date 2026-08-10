@@ -33,60 +33,54 @@ Deno.serve(async request => {
       .single();
     if (profileError || profile?.role !== 'MERCHANT') return reply({ error: 'Merchant access required' }, 403);
 
+    // Funds the prize pot for an existing draft campaign. Entry is open, so there is
+    // no accepted-entry-fee liability to pre-fund any more -- the pot is the whole ask.
     const body = await request.json();
-    const entryFeeMinor = Number(body.acceptedEntryFeeMinor);
-    const maximumEntries = Number(body.maximumAcceptedEntries);
+    const challengeId = Number(body.challengeId);
     const prizePotMinor = Number(body.prizePotMinor);
-    const requiredAmountMinor = entryFeeMinor * maximumEntries + prizePotMinor;
-    if (!Number.isInteger(entryFeeMinor) || entryFeeMinor < 0) return reply({ error: 'Invalid accepted-entry fee' }, 400);
-    if (!Number.isInteger(maximumEntries) || maximumEntries < 1 || maximumEntries > 10_000) return reply({ error: 'Invalid entry limit' }, 400);
-    if (!Number.isInteger(prizePotMinor) || prizePotMinor < 1) return reply({ error: 'Invalid prize pot' }, 400);
-    if (requiredAmountMinor < 100) return reply({ error: 'Funding amount is below the minimum' }, 400);
+    if (!Number.isInteger(challengeId) || challengeId < 1) return reply({ error: 'Invalid campaign' }, 400);
+    if (!Number.isInteger(prizePotMinor) || prizePotMinor < 100) {
+      return reply({ error: 'Prize pot is below the minimum' }, 400);
+    }
 
     const { data: shop } = await admin.from('shops').select('id').eq('owner_id', profile.id).single();
-    if (!shop) return reply({ error: 'Create a merchant shop before funding an opportunity' }, 409);
+    if (!shop) return reply({ error: 'Create a merchant shop before funding a campaign' }, 409);
 
-    const { data: opportunity, error: opportunityError } = await admin
-      .from('creator_opportunities')
-      .insert({
-        shop_id: shop.id,
-        title: String(body.title ?? '').trim(),
-        brief: String(body.brief ?? '').trim(),
-        image_url: body.imageUrl || null,
-        accepted_entry_fee_minor: entryFeeMinor,
-        maximum_accepted_entries: maximumEntries,
-        prize_pot_minor: prizePotMinor,
-        ends_at: body.endsAt,
-        created_by: profile.id,
-        status: 'AWAITING_FUNDING',
-      })
-      .select('id')
+    const { data: campaign, error: campaignError } = await admin
+      .from('challenges')
+      .select('id, status, shop_id')
+      .eq('id', challengeId)
+      .eq('shop_id', shop.id)
       .single();
-    if (opportunityError) throw opportunityError;
+    if (campaignError || !campaign) return reply({ error: 'Campaign not found' }, 404);
+    if (campaign.status !== 'draft') {
+      return reply({ error: 'Only a draft campaign can be funded' }, 409);
+    }
 
     const intent = await stripe.paymentIntents.create(
       {
-        amount: requiredAmountMinor,
+        amount: prizePotMinor,
         currency: 'bwp',
         automatic_payment_methods: { enabled: true },
         metadata: {
-          muse_purpose: 'creator_opportunity_funding',
-          opportunity_id: opportunity.id,
+          muse_purpose: 'campaign_pot_funding',
+          challenge_id: String(campaign.id),
           merchant_profile_id: profile.id,
         },
       },
-      { idempotencyKey: `fund_creator_opportunity_${opportunity.id}` },
+      { idempotencyKey: `fund_campaign_${campaign.id}_${prizePotMinor}` },
     );
-    await admin.from('creator_opportunities')
-      .update({ stripe_payment_intent_id: intent.id })
-      .eq('id', opportunity.id);
+
+    await admin.from('challenges')
+      .update({ pot_value: prizePotMinor })
+      .eq('id', campaign.id);
 
     return reply({
-      opportunityId: opportunity.id,
+      challengeId: campaign.id,
       paymentIntentClientSecret: intent.client_secret,
-      requiredAmountMinor,
+      requiredAmountMinor: prizePotMinor,
     });
   } catch (error) {
-    return reply({ error: error instanceof Error ? error.message : 'Could not fund opportunity' }, 400);
+    return reply({ error: error instanceof Error ? error.message : 'Could not fund campaign' }, 400);
   }
 });

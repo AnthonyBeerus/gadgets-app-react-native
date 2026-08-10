@@ -57,7 +57,7 @@ export default function MarketplaceScreen() {
   </SafeAreaView>;
 }
 
-function pot(profile: MerchantGrowthProfile) { return Number(profile.opportunity?.pot_value ?? profile.opportunity?.reward_value ?? 0); }
+function pot(profile: MerchantGrowthProfile) { return Number(profile.opportunity?.pot_value ?? profile.opportunity?.pot_value ?? 0); }
 function identity(profile: MerchantGrowthProfile) { return { id: profile.id, name: profile.name, location: profile.location, imageUrl: profile.logoUrl }; }
 function FeaturedMerchant({ profile, onPress }: { profile: MerchantGrowthProfile; onPress: () => void }) {
   const { colors } = useDesignTokens();

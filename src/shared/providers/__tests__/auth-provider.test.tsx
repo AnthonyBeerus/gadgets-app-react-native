@@ -31,6 +31,7 @@ jest.mock('@clerk/expo', () => ({
 
 jest.mock('../../lib/supabase', () => ({
   setSupabaseAccessTokenProvider: jest.fn(),
+  setCurrentProfileIdProvider: jest.fn(),
   supabase: {
     rpc: jest.fn(),
     from: jest.fn(),

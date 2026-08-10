@@ -12,7 +12,6 @@ import React from "react";
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import * as Notifications from 'expo-notifications';
 import { notificationHref } from '../shared/navigation/notification-route';
-import { usePaymentResume } from '../features/cart/hooks/use-payment-resume';
 
 import * as Sentry from '@sentry/react-native';
 
@@ -44,7 +43,6 @@ import { StripeProviderWrapper } from "../shared/providers/stripe";
 const AppNavigator = () => {
   const { isMerchant } = useAuth();
   const router = useRouter();
-  usePaymentResume();
   React.useEffect(() => Notifications.addNotificationResponseReceivedListener(response => {
     const href = notificationHref(response.notification.request.content.data);
     if (href) router.push(href as never);
@@ -59,41 +57,9 @@ const AppNavigator = () => {
         name="(merchant)"
         options={{ headerShown: false, title: "Merchant Dashboard" }}
       />
-      <Stack.Protected guard={isMerchant}>
-        <Stack.Screen
-          name="scan-order"
-          options={{ 
-            presentation: "fullScreenModal",
-            headerShown: false, 
-            title: "Scan Order",
-            animation: 'slide_from_bottom',
-          }}
-        />
-      </Stack.Protected>
-
       <Stack.Screen
         name="(shop)"
         options={{ headerShown: false, title: "Shop" }}
-      />
-      <Stack.Screen
-        name="categories"
-        options={{ headerShown: false, title: "Categories", animation: 'ios_from_right', }}
-      />
-      <Stack.Screen
-        name="product"
-        options={{ headerShown: false, title: "Product", animation: 'ios_from_right', }}
-      />
-      <Stack.Screen
-        name="shop"
-        options={{ headerShown: false, title: "Shop Details", animation: 'ios_from_right', }}
-      />
-      <Stack.Screen
-        name="cart"
-        options={{
-          presentation: "modal",
-          headerShown: false,
-          title: "Cart",
-        }}
       />
       <Stack.Screen
         name="mall-selector"
@@ -119,70 +85,13 @@ const AppNavigator = () => {
         }}
       />
       <Stack.Screen
-        name="bag"
-        options={{
-          headerShown: false,
-          title: "Bag",
-          animation: "ios_from_right",
-        }}
+        name="opportunity/[id]/index"
+        options={{ headerShown: false, title: "Campaign", animation: 'ios_from_right' }}
       />
       <Stack.Screen
-        name="checkout"
-        options={{ headerShown: false, title: "Review order", animation: "ios_from_right" }}
+        name="opportunity/[id]/submit"
+        options={{ headerShown: false, title: "Submit content", animation: 'ios_from_right' }}
       />
-      <Stack.Screen name="payment-failure" options={{ headerShown: false, title: "Payment" }} />
-      <Stack.Screen
-        name="saved-opportunities"
-        options={{
-          headerShown: false,
-          title: "Saved",
-          animation: "ios_from_right",
-        }}
-      />
-      <Stack.Screen
-        name="order-success"
-        options={{ headerShown: false, title: "Order Success" }}
-      />
-      <Stack.Screen name="payment-processing" options={{ headerShown: false, title: "Processing payment" }} />
-      <Stack.Screen name="order-confirmed" options={{ headerShown: false, title: "Order confirmed" }} />
-      <Stack.Screen
-        name="orders/index"
-        options={{ 
-          headerShown: false, 
-          title: "Orders", 
-          presentation: 'card',
-          animation: 'slide_from_right', 
-        }} 
-      />
-      <Stack.Screen
-        name="orders/[slug]"
-        options={{ headerShown: false, title: "Order", animation: 'ios_from_right' }}
-      />
-      <Stack.Screen
-        name="opportunity/[id]"
-        options={{ headerShown: false, title: "Opportunity", animation: 'ios_from_right' }}
-      />
-      <Stack.Screen
-        name="challenges"
-        options={{ headerShown: false, title: "Challenges", animation: 'ios_from_right', }}
-      />
-      <Stack.Screen
-          name="create-product"
-          options={{
-            headerShown: false,
-            title: "Create Product",
-            animation: 'ios_from_right',
-          }}
-        />
-      <Stack.Screen
-          name="(modal)"
-          options={{
-            presentation: "formSheet",
-            sheetAllowedDetents: [0.5, 0.75],
-            sheetGrabberVisible: true,
-            headerShown: false,
-          }}
-        />
     </Stack>
   );
 }

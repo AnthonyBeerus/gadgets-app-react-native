@@ -11,8 +11,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { Button, ErrorNotice, Input, Rule, Text, formatMoney, useDesignTokens, useThemedStyles, type DesignTokens, type SemanticColors } from '../shared/design-system';
-import { useCartStore } from '../store/cart-store';
+import { Button, ErrorNotice, Input, Rule, Text, useDesignTokens, useThemedStyles, type DesignTokens, type SemanticColors } from '../shared/design-system';
 
 type AuthStep = 'sign_in' | 'sign_up' | 'verify_email' | 'forgot_password' | 'reset_password';
 
@@ -44,7 +43,6 @@ function createStyles(c: SemanticColors, tokens: DesignTokens) {
 export default function AuthScreen() {
   const styles = useThemedStyles(createStyles);
   const { colors } = useDesignTokens();
-  const cart = useCartStore();
   const router = useRouter();
   const params = useLocalSearchParams<{ returnTo?: string }>();
   const destination = useMemo(() => safeReturnTo(params.returnTo), [params.returnTo]);
@@ -134,10 +132,10 @@ export default function AuthScreen() {
         : step === 'forgot_password' ? 'Reset password'
           : 'Choose a new password';
   // Sign-in must state what it is protecting, not just demand credentials.
-  const protectingBag = destination === '/checkout' && cart.items.length > 0;
-  const bagMessage = protectingBag
-    ? `Your bag is safe — ${formatMoney(Number(cart.getTotalPrice()))} at ${cart.items[0].shopName}, ${cart.checkoutDraft.fulfilment}. We'll bring you straight back to checkout.`
-    : 'Sign in only when you transact. Everything you were doing is waiting on the other side.';
+  const enteringCampaign = destination.startsWith('/opportunity');
+  const bagMessage = enteringCampaign
+    ? "Your place in this campaign is waiting. Sign in and we'll take you straight back to it."
+    : 'Sign in only when you enter a campaign. Everything you were doing is waiting on the other side.';
 
   return (
     <SafeAreaView style={styles.safe}>

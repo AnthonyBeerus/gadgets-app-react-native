@@ -7,7 +7,7 @@ import { TabBar, type TabBarItem } from "../../shared/design-system";
 const TABS = [
   { key: 'index', label: 'Discover', icon: 'flame' },
   { key: 'marketplace', label: 'Shops', icon: 'storefront' },
-  { key: 'activity', label: 'Activity', icon: 'pulse' },
+  { key: 'entries', label: 'My entries', icon: 'pulse' },
   { key: 'profile', label: 'Profile', icon: 'person' },
 ] as const satisfies readonly TabBarItem[];
 
@@ -56,22 +56,15 @@ const TabsLayout = () => {
         }}
       />
       <Tabs.Screen
-        name="activity"
+        name="entries"
         options={{
-          title: "Activity",
+          title: "My entries",
         }}
       />
       <Tabs.Screen
         name="profile"
         options={{
           title: "Profile",
-        }}
-      />
-      <Tabs.Screen
-        name="challenges"
-        options={{
-          title: "Creator Opportunities",
-          href: null,
         }}
       />
 

@@ -1,8 +1,8 @@
 # Muse product direction (locked)
 
-**Last updated:** 2026-08-09
-**Status:** Direction locked for alpha preview — this cash-payout revision supersedes voucher framing
-**Branch snapshot:** `mvp-refinement-gut-ugc-ai`
+**Last updated:** 2026-08-10
+**Status:** Direction locked — UGC campaign platform. This supersedes the cash-payout / purchase-proof revision below it.
+**Branch snapshot:** `codex/muse-partner-prototype`
 
 This is the memory doc for the finer details. Older research in `ugc-marketplace-audit-and-research.md` and `.codex-audit/` still has useful comps; **this file wins when they conflict**.
 
@@ -10,7 +10,7 @@ This is the memory doc for the finer details. Older research in `ugc-marketplace
 
 ## One-line thesis
 
-Muse helps **local businesses and institutions turn creator participation into measurable commerce and funding** through cash-paid content competitions, sponsored discovery and shoppable local experiences.
+Muse is where **a local business launches a content campaign and gets content back**. Merchants brief, fund a prize, and pick winners. Creators browse, join, upload, and get paid.
 
 ---
 
@@ -18,81 +18,51 @@ Muse helps **local businesses and institutions turn creator participation into m
 
 | Role | Job | Notes |
 | --- | --- | --- |
-| **Primary customer** | Merchant (Molapo / Gaborone SMEs: food, beauty, services) | Growth = foot traffic, WhatsApp closes, reusable creative cheaper than agencies |
+| **Primary customer** | Merchant (Molapo / Gaborone SMEs: food, beauty, services) | Growth = reusable creative, cheaper than an agency, plus reach from creators posting |
 | **Participant** | Anyone who will make content as a side hustle | Youth supply; **UB student was only an example** — do not over-index on campus |
 
 ---
 
-## What Muse is / is not
+## The canonical loop
 
-| Keep | Kill (as identity) |
-| --- | --- |
-| Product catalog, buy/cart, till proof | “We are a marketplace company” competing on selection + logistics + GMV |
-| Commerce ↔ social loop | Pure creator marketplace / DM collab board |
-| WhatsApp still closing sales | Replacing WhatsApp as the close channel in pilot |
-
-**Products stay** as inventory + conversion rails. Differentiator is the loop: **buy/till proof → post → rights/rewards**, not catalogue density.
-
----
-
-## Canonical product: competitive challenge pots
-
-Restaurant-shaped loop (applies to salons, braai, lunch boxes, etc.):
-
-1. Merchant funds the **accepted-entry fees and ranked cash prize pot** and picks qualifying products/services
-2. User **buys** a qualifying SKU in Muse **or** claims a **till purchase code**  
-3. User posts a **public TikTok** and submits (with rights)  
-4. Merchant/admin **approves** (quality + rights gate)  
-5. Live **leaderboard**; at deadline merchant hits **Settle**  
-6. Every accepted entry earns the disclosed cash fee; top placers additionally share the ranked cash prize pot
+1. Merchant signs up, opens a shop, and **creates a campaign**: title, brief, talking points, do's and don'ts, format and length, deliverable count, **brand assets**, prize pot, deadline, **usage rights**, revision policy, review SLA.
+2. Merchant **publishes**. `publish_campaign` refuses a campaign with no funded pot, no brand assets, or a past deadline.
+3. Creators **browse** the Discover deck, open a brief, and **join** — free, no purchase, no gate.
+4. Creator **uploads** video or photos in-app. Muse hosts the file; the merchant gets a usable asset. An optional social link is accepted for creators who already posted.
+5. Merchant **reviews** in a dashboard: approve, reject, or **request changes** (bounded by the campaign's revision allowance, note required).
+6. Merchant **closes** the campaign, **ranks winners 1–5**, and settles. The pot pays out through `reward_vouchers`.
 
 ### Locked rules (do not casually change)
 
 | Decision | Choice |
 | --- | --- |
-| Pot split | Top **5** share **40 / 25 / 15 / 10 / 10** |
-| Score | `likes + 3×comments + 2×saves` — **views are vanity only**, not ranking |
-| Prize | Merchant-funded cash pot paid through Stripe; Orange Money is the second payout adapter |
-| Accepted-entry fee | Fixed cash fee for every approved, compliant entry; the merchant pre-funds the maximum liability |
-| Entry | Purchase proof required (Muse order **or** till code) |
-| Qualifying SKUs | **Multi-product** allowed (“any meal”, “any nail set”) |
-| Discover swipe | **Save / Pass only** — Buy/Enter live on details, not on the card |
-| Thin inventory | If active challenges **&lt; 5** → **list**, not Tinder deck |
-| Pilot metrics | **Manual** paste of likes/comments/saves (TikTok API later) |
-
-**Pitch template:**  
-“Post while dining here this weekend. Buy any meal through Muse (or claim till code) to enter. Every accepted post earns P50, and the top five share an additional P1,000 cash prize pot.”
+| Entry | **Open**. No purchase proof, no till code, no qualifying SKU |
+| Submission | **Uploaded to Muse** (video/photo), optional social link. 200MB cap, private bucket |
+| Winner | **Merchant picks manually**, ranked 1st–5th. No engagement formula |
+| Pot split | Top 5 share **40 / 25 / 15 / 10 / 10**, **renormalised** over the ranks actually filled — a 3-winner campaign spends the whole pot |
+| Usage rights | Explicit on every brief: none / organic 12m / paid ads 12m / perpetual |
+| Revisions | Merchant sets an allowance per campaign; a revision request must carry a note |
+| Review SLA | Merchant-set, 1–30 days, shown to creators. Industry norm is 3–7 |
+| Discover | **Tinder swipe deck** — Save / Pass. Below 5 live campaigns it renders a list instead (`SWIPE_DECK_MIN`) |
+| Commerce | **Deleted.** No cart, checkout, orders, products or storefront |
 
 ---
 
-## Discover + Shops
+## What changed from the previous locked direction
 
-- **Discover** = swipe deck of live challenge cards (pot, deadline, buy-to-enter, Save/Pass)  
-- **Shops** = merchant-first browsing for businesses building Botswana's digital economy through funded creator campaigns; products appear as qualifying conversion rails within each business
-- **Saved** = shortlist from right-swipes; saving does **not** enter you  
-- Showcase builds inject clearly labelled **generated sponsored-demo slots** every four opportunity cards to demonstrate merchant placement value and open the revenue model.
-- When the live feed is unavailable or empty, the alpha preview uses clearly labelled, locally researched fixture campaigns. These never enter live payment or settlement paths.
-- The alpha preview centers Molapo merchants, creator briefs, illustrative external-social outcomes and qualifying commerce. It does not claim to be an all-in-one directory, booking platform or national local-business catalogue.
-- Browse Botswana is treated as a broad directory/storefront competitor. Muse differentiates on the measurable loop: **merchant funding → creator brief → external social content → qualifying commerce → merchant growth**.
+The prior revision required a **qualifying purchase** to enter, ranked winners by `likes + 3×comments + 2×saves`, and deliberately **never hosted media** (creators pasted a TikTok link). All three are gone:
 
----
+- Purchase proof was friction on the supply side and kept the whole commerce stack on the critical path.
+- An engagement leaderboard rewards reach, not the creative the merchant is buying — and it cannot run without TikTok metrics.
+- Link-only submission meant the merchant never actually received a reusable asset, which is the thing every comparable platform sells.
 
-## Competitive wedge (why this, not comps alone)
-
-Pieces already exist elsewhere (FanBitz, Idukki, Euka/Growi TikTok Shop contests, CollabSwipe, ShoutOut, GYG burrito contest).  
-
-**Muse opening:** one local consumer app that combines **products + pot + swipe + purchase proof + board + rights** for Molapo-scale merchants — not Shopify SaaS contests and not views-only restaurant campaigns.
+Retained: merchant growth first, creators as supply, cash prizes, the Molapo pilot framing.
 
 ---
 
-## Pilot success (what “working” means)
+## Competitive grounding
 
-- Merchants fund pots and settle without Muse ops heroics  
-- Entrants understand: buy → post → earn an acceptance fee → compete for cash prizes
-- Approved posts are reusable creative the merchant would otherwise pay for  
-- WhatsApp can still close; Muse owns brief → proof → board → settle  
-
-Not success: raw GMV as marketplace, content volume without merchant reuse, or campus-only positioning.
+Feature set is deliberately conventional — Billo, Trend.io, Insense, Collabstr for the marketplace shape; Woobox, Gleam, Easypromos for contest mechanics. Standard brief fields, standard review states (pending → approved / rejected / revision-requested), standard winner-picking dashboard. **Muse's opening is the market, not the mechanic**: a Setswana-market, mobile-first campaign platform priced for Molapo-scale merchants.
 
 ---
 
@@ -100,28 +70,32 @@ Not success: raw GMV as marketplace, content volume without merchant reuse, or c
 
 | Area | Where |
 | --- | --- |
-| Schema / RPCs | `supabase/migrations/20260807171427_competitive_challenge_pots.sql` (+ feed fix / limit migrations dated 20260807) |
-| Discover | `src/features/discovery/` |
-| Entry / review / settle | challenges screens + `CampaignReviewScreen`, merchant community challenges |
-| Open a shop | `/open-shop` → `src/features/merchant/screens/OpenShopScreen.tsx` (outside merchant guard); Profile + auth intent; dashboard launch checklist |
-| Types | `src/shared/types/database.types.ts` |
+| Clerk identity repair | `supabase/migrations/20260811090000_clerk_campaign_identity.sql` |
+| Campaign brief schema | `supabase/migrations/20260811100000_campaign_brief_and_assets.sql` |
+| Storage + RLS | `supabase/migrations/20260811110000_campaign_storage.sql` |
+| Review / winners / settle | `supabase/migrations/20260811120000_campaign_review_and_winners.sql` |
+| Feed / join / submit | `supabase/migrations/20260811130000_campaign_feed_and_join.sql` |
+| Commerce teardown | `supabase/migrations/20260811140000_commerce_teardown.sql` |
+| Campaign feature | `src/features/campaigns/` (domain, media, api, screens, components) |
+| Upload pipeline | `src/shared/lib/storage.ts`, `src/features/campaigns/media/` |
+| Discovery deck | `src/features/discovery/` — deck mechanics unchanged, card fields now campaign-shaped |
+| Route contract | `src/app/__tests__/handoff-routes.test.ts` |
 
-Remote project used in this phase: **project-muse-rebuild**. Showcase seed data (100+ pots, Molapo mall) may exist in that DB for demos — **trim before real pilot**.
+Buckets: `challenge-submissions` (private, creator + reviewing merchant only) and `campaign-assets` (public brand material).
 
 ---
 
 ## Explicitly deferred
 
-- TikTok API auto-metrics  
-- An internal Muse stored-value wallet; payouts go directly through Stripe or Orange Money
-- Campus ambassador programme as the product  
-- Killing the product catalog  
-- Views-only leaderboards  
+- Creator payouts beyond the voucher rail (Stripe Connect / Orange Money direct)
+- Auto-metrics from any social platform
+- Campus ambassador programme as the product
+- Bringing back a catalogue
 
 ---
 
 ## If you only remember three things
 
-1. **Merchant growth first**; youth creators are supply.  
-2. **Accepted-entry fee + ranked cash pot + purchase proof** is the product.
-3. **Shops keeps commerce as rails**; merchant-funded creator growth is the identity, not catalogue breadth.
+1. **A business launches a campaign and gets content back.** That is the whole product.
+2. **Open join, uploaded content, merchant-picked winners.**
+3. **Usage rights and revisions are first-class**, because they are what the merchant is actually buying.

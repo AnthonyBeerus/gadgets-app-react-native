@@ -10,9 +10,8 @@ import { TabBar, type TabBarItem } from "../../shared/design-system";
 
 const TABS = [
   { key: 'index', label: 'Dashboard', icon: 'grid' },
-  { key: 'catalog', label: 'Catalog', icon: 'storefront' },
+  { key: 'campaigns', label: 'Campaigns', icon: 'megaphone' },
   { key: 'create', label: 'Create', icon: 'add-circle' },
-  { key: 'community', label: 'Community', icon: 'people' },
   { key: 'profile', label: 'Profile', icon: 'person' },
 ] as const satisfies readonly TabBarItem[];
 
@@ -64,31 +63,25 @@ const MerchantTabsLayout = () => {
         }}
       />
       <Tabs.Screen
-        name="catalog"
+        name="campaigns"
         options={{
-          title: "Catalog",
+          title: "Campaigns",
         }}
       />
-      
-      {/* Middle Create Button - Empty listener to open modal */}
-        <Tabs.Screen
-            name="create"
-            options={{
-                title: "Create",
-            }}
-            listeners={() => ({
-                tabPress: (e) => {
-                    e.preventDefault();
-                    router.push('/(modal)/create');
-                },
-            })}
-        />
 
+      {/* Middle create key jumps straight into the campaign wizard; there is only one
+          thing a merchant creates now, so the chooser modal is gone. */}
       <Tabs.Screen
-        name="community"
+        name="create"
         options={{
-          title: "Community",
+          title: "Create",
         }}
+        listeners={() => ({
+          tabPress: (e) => {
+            e.preventDefault();
+            router.push('/(merchant)/campaigns/new');
+          },
+        })}
       />
 
       <Tabs.Screen

@@ -12,7 +12,6 @@ import { useNeoStyles } from "../../../shared/hooks/useNeoStyles";
 import { ProfileOption } from "../components/ProfileOption";
 import { AnimatedHeaderLayout } from "../../../shared/components/layout/AnimatedHeaderLayout";
 import { router } from "expo-router";
-import { HeaderRightGroup } from "../../../shared/components/ui/header-right-group";
 import { NEO_THEME } from "../../../shared/constants/neobrutalism";
 
 const PREFERENCE_OPTIONS: { value: ThemePreference; label: string }[] = [
@@ -67,8 +66,6 @@ const ProfileScreen = () => {
     <AnimatedHeaderLayout
       renderSmallTitle={renderSmallTitle}
       renderLargeTitle={renderLargeTitle}
-      smallHeaderRight={<HeaderRightGroup />}
-      largeHeaderRight={<HeaderRightGroup />}
     >
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>ACCOUNT</Text>
@@ -157,7 +154,7 @@ const ProfileScreen = () => {
               icon="fact-check"
               title="CREATOR MODERATION"
               subtitle="Verify posts, judge quality, and release payouts"
-              onPress={() => router.push('/challenges/review')}
+              onPress={() => router.push('/(merchant)/campaigns')}
             />
           </View>
         </View>

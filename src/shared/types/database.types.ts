@@ -12,80 +12,33 @@ export type Database = {
   __InternalSupabase: {
     PostgrestVersion: "14.5"
   }
+  graphql_public: {
+    Tables: {
+      [_ in never]: never
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      graphql: {
+        Args: {
+          extensions?: Json
+          operationName?: string
+          query?: string
+          variables?: Json
+        }
+        Returns: Json
+      }
+    }
+    Enums: {
+      [_ in never]: never
+    }
+    CompositeTypes: {
+      [_ in never]: never
+    }
+  }
   public: {
     Tables: {
-      appointments: {
-        Row: {
-          appointment_date: string
-          appointment_time: string
-          created_at: string
-          customer_email: string | null
-          customer_name: string
-          customer_phone: string
-          duration_minutes: number | null
-          id: number
-          notes: string | null
-          price: number | null
-          service_type: string
-          shop_id: number | null
-          special_requests: string | null
-          status: string | null
-          updated_at: string
-          user_id: string | null
-        }
-        Insert: {
-          appointment_date: string
-          appointment_time: string
-          created_at?: string
-          customer_email?: string | null
-          customer_name: string
-          customer_phone: string
-          duration_minutes?: number | null
-          id?: number
-          notes?: string | null
-          price?: number | null
-          service_type: string
-          shop_id?: number | null
-          special_requests?: string | null
-          status?: string | null
-          updated_at?: string
-          user_id?: string | null
-        }
-        Update: {
-          appointment_date?: string
-          appointment_time?: string
-          created_at?: string
-          customer_email?: string | null
-          customer_name?: string
-          customer_phone?: string
-          duration_minutes?: number | null
-          id?: number
-          notes?: string | null
-          price?: number | null
-          service_type?: string
-          shop_id?: number | null
-          special_requests?: string | null
-          status?: string | null
-          updated_at?: string
-          user_id?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "appointments_shop_id_fkey"
-            columns: ["shop_id"]
-            isOneToOne: false
-            referencedRelation: "shops"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "appointments_shop_id_fkey"
-            columns: ["shop_id"]
-            isOneToOne: false
-            referencedRelation: "shops_with_product_count"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       category: {
         Row: {
           created_at: string
@@ -131,135 +84,78 @@ export type Database = {
         }
         Relationships: []
       }
-      challenge_qualifying_products: {
-        Row: {
-          challenge_id: number
-          created_at: string
-          product_id: number
-        }
-        Insert: {
-          challenge_id: number
-          created_at?: string
-          product_id: number
-        }
-        Update: {
-          challenge_id?: number
-          created_at?: string
-          product_id?: number
-        }
-        Relationships: [
-          {
-            foreignKeyName: "challenge_qualifying_products_challenge_id_fkey"
-            columns: ["challenge_id"]
-            isOneToOne: false
-            referencedRelation: "challenges"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "challenge_qualifying_products_product_id_fkey"
-            columns: ["product_id"]
-            isOneToOne: false
-            referencedRelation: "product"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       challenge_submissions: {
         Row: {
+          asset_meta: Json
+          asset_paths: string[]
           caption: string | null
           challenge_id: number
-          comment_count: number
           consent_version: string | null
           consented_at: string | null
           content_url: string | null
           created_at: string
           final_rank: number | null
           id: number
-          like_count: number
           media_type: string | null
-          metrics_captured_at: string | null
-          platform: string
-          platform_account_id: number | null
-          platform_author_open_id: string | null
-          platform_video_id: string | null
-          post_description: string | null
-          post_published_at: string | null
+          merchant_note: string | null
+          platform: string | null
           public_share_url: string | null
-          purchase_proof_id: number | null
           rejection_reason: string | null
           reviewed_at: string | null
           reviewed_by: string | null
-          save_count: number
-          score: number
+          revision_count: number
           status: string
+          submitted_at: string | null
+          thumbnail_path: string | null
           user_id: string
-          verification_status: string
-          verified_at: string | null
-          view_count: number
         }
         Insert: {
+          asset_meta?: Json
+          asset_paths?: string[]
           caption?: string | null
           challenge_id: number
-          comment_count?: number
           consent_version?: string | null
           consented_at?: string | null
           content_url?: string | null
           created_at?: string
           final_rank?: number | null
           id?: never
-          like_count?: number
           media_type?: string | null
-          metrics_captured_at?: string | null
-          platform?: string
-          platform_account_id?: number | null
-          platform_author_open_id?: string | null
-          platform_video_id?: string | null
-          post_description?: string | null
-          post_published_at?: string | null
+          merchant_note?: string | null
+          platform?: string | null
           public_share_url?: string | null
-          purchase_proof_id?: number | null
           rejection_reason?: string | null
           reviewed_at?: string | null
           reviewed_by?: string | null
-          save_count?: number
-          score?: number
+          revision_count?: number
           status?: string
+          submitted_at?: string | null
+          thumbnail_path?: string | null
           user_id: string
-          verification_status?: string
-          verified_at?: string | null
-          view_count?: number
         }
         Update: {
+          asset_meta?: Json
+          asset_paths?: string[]
           caption?: string | null
           challenge_id?: number
-          comment_count?: number
           consent_version?: string | null
           consented_at?: string | null
           content_url?: string | null
           created_at?: string
           final_rank?: number | null
           id?: never
-          like_count?: number
           media_type?: string | null
-          metrics_captured_at?: string | null
-          platform?: string
-          platform_account_id?: number | null
-          platform_author_open_id?: string | null
-          platform_video_id?: string | null
-          post_description?: string | null
-          post_published_at?: string | null
+          merchant_note?: string | null
+          platform?: string | null
           public_share_url?: string | null
-          purchase_proof_id?: number | null
           rejection_reason?: string | null
           reviewed_at?: string | null
           reviewed_by?: string | null
-          save_count?: number
-          score?: number
+          revision_count?: number
           status?: string
+          submitted_at?: string | null
+          thumbnail_path?: string | null
           user_id?: string
-          verification_status?: string
-          verified_at?: string | null
-          view_count?: number
         }
         Relationships: [
           {
@@ -270,17 +166,17 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "challenge_submissions_platform_account_id_fkey"
-            columns: ["platform_account_id"]
+            foreignKeyName: "challenge_submissions_reviewed_by_fkey"
+            columns: ["reviewed_by"]
             isOneToOne: false
-            referencedRelation: "creator_platform_accounts"
+            referencedRelation: "users"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "challenge_submissions_purchase_proof_id_fkey"
-            columns: ["purchase_proof_id"]
+            foreignKeyName: "challenge_submissions_user_id_fkey"
+            columns: ["user_id"]
             isOneToOne: false
-            referencedRelation: "purchase_proofs"
+            referencedRelation: "users"
             referencedColumns: ["id"]
           },
         ]
@@ -288,111 +184,122 @@ export type Database = {
       challenges: {
         Row: {
           ai_allowed: boolean | null
+          brand_asset_paths: string[]
           brand_logo_url: string | null
           brand_name: string
+          campaign_goal: string | null
           category: string | null
-          consolation_voucher_value: number | null
-          contest_mode: string
+          closed_at: string | null
+          content_format: string
           created_at: string | null
           deadline: string
+          deliverable_count: number
           description: string
-          entry_fee: number | null
+          donts: string[]
+          dos: string[]
           id: number
           image_url: string
-          is_premium: boolean | null
-          manual_verification_enabled: boolean
           participants_count: number | null
           pot_currency: string
           pot_splits: Json
           pot_value: number | null
-          product_id: number | null
+          published_at: string | null
           requirements: string[]
+          review_sla_days: number
+          revisions_allowed: number
           reward: string
           reward_currency: string
           reward_value: number
-          score_rule: string
           settled_at: string | null
           shop_id: number | null
           status: string
+          talking_points: string[]
           title: string
-          type: string
           updated_at: string | null
+          usage_rights: string
+          video_max_seconds: number | null
+          video_min_seconds: number | null
           voucher_valid_days: number
         }
         Insert: {
           ai_allowed?: boolean | null
+          brand_asset_paths?: string[]
           brand_logo_url?: string | null
           brand_name: string
+          campaign_goal?: string | null
           category?: string | null
-          consolation_voucher_value?: number | null
-          contest_mode?: string
+          closed_at?: string | null
+          content_format?: string
           created_at?: string | null
           deadline: string
+          deliverable_count?: number
           description: string
-          entry_fee?: number | null
+          donts?: string[]
+          dos?: string[]
           id?: number
           image_url: string
-          is_premium?: boolean | null
-          manual_verification_enabled?: boolean
           participants_count?: number | null
           pot_currency?: string
           pot_splits?: Json
           pot_value?: number | null
-          product_id?: number | null
+          published_at?: string | null
           requirements: string[]
+          review_sla_days?: number
+          revisions_allowed?: number
           reward: string
           reward_currency?: string
           reward_value?: number
-          score_rule?: string
           settled_at?: string | null
           shop_id?: number | null
           status?: string
+          talking_points?: string[]
           title: string
-          type?: string
           updated_at?: string | null
+          usage_rights?: string
+          video_max_seconds?: number | null
+          video_min_seconds?: number | null
           voucher_valid_days?: number
         }
         Update: {
           ai_allowed?: boolean | null
+          brand_asset_paths?: string[]
           brand_logo_url?: string | null
           brand_name?: string
+          campaign_goal?: string | null
           category?: string | null
-          consolation_voucher_value?: number | null
-          contest_mode?: string
+          closed_at?: string | null
+          content_format?: string
           created_at?: string | null
           deadline?: string
+          deliverable_count?: number
           description?: string
-          entry_fee?: number | null
+          donts?: string[]
+          dos?: string[]
           id?: number
           image_url?: string
-          is_premium?: boolean | null
-          manual_verification_enabled?: boolean
           participants_count?: number | null
           pot_currency?: string
           pot_splits?: Json
           pot_value?: number | null
-          product_id?: number | null
+          published_at?: string | null
           requirements?: string[]
+          review_sla_days?: number
+          revisions_allowed?: number
           reward?: string
           reward_currency?: string
           reward_value?: number
-          score_rule?: string
           settled_at?: string | null
           shop_id?: number | null
           status?: string
+          talking_points?: string[]
           title?: string
-          type?: string
           updated_at?: string | null
+          usage_rights?: string
+          video_max_seconds?: number | null
+          video_min_seconds?: number | null
           voucher_valid_days?: number
         }
         Relationships: [
-          {
-            foreignKeyName: "challenges_product_id_fkey"
-            columns: ["product_id"]
-            isOneToOne: false
-            referencedRelation: "product"
-            referencedColumns: ["id"]
-          },
           {
             foreignKeyName: "challenges_shop_id_fkey"
             columns: ["shop_id"]
@@ -400,38 +307,7 @@ export type Database = {
             referencedRelation: "shops"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "challenges_shop_id_fkey"
-            columns: ["shop_id"]
-            isOneToOne: false
-            referencedRelation: "shops_with_product_count"
-            referencedColumns: ["id"]
-          },
         ]
-      }
-      creator_oauth_states: {
-        Row: {
-          consumed_at: string | null
-          expires_at: string
-          redirect_uri: string
-          state: string
-          user_id: string
-        }
-        Insert: {
-          consumed_at?: string | null
-          expires_at: string
-          redirect_uri: string
-          state: string
-          user_id: string
-        }
-        Update: {
-          consumed_at?: string | null
-          expires_at?: string
-          redirect_uri?: string
-          state?: string
-          user_id?: string
-        }
-        Relationships: []
       }
       creator_opportunity_events: {
         Row: {
@@ -464,6 +340,13 @@ export type Database = {
             columns: ["opportunity_id"]
             isOneToOne: false
             referencedRelation: "challenges"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "creator_opportunity_events_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
             referencedColumns: ["id"]
           },
         ]
@@ -501,302 +384,11 @@ export type Database = {
             referencedRelation: "challenges"
             referencedColumns: ["id"]
           },
-        ]
-      }
-      creator_platform_accounts: {
-        Row: {
-          avatar_url: string | null
-          connected_at: string
-          connection_status: string
-          display_name: string | null
-          granted_scopes: string[]
-          id: number
-          platform: string
-          platform_open_id: string
-          profile_deep_link: string | null
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          avatar_url?: string | null
-          connected_at?: string
-          connection_status?: string
-          display_name?: string | null
-          granted_scopes?: string[]
-          id?: number
-          platform?: string
-          platform_open_id: string
-          profile_deep_link?: string | null
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          avatar_url?: string | null
-          connected_at?: string
-          connection_status?: string
-          display_name?: string | null
-          granted_scopes?: string[]
-          id?: number
-          platform?: string
-          platform_open_id?: string
-          profile_deep_link?: string | null
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
-      creator_platform_tokens: {
-        Row: {
-          access_expires_at: string
-          access_token: string
-          account_id: number
-          refresh_expires_at: string
-          refresh_token: string
-          updated_at: string
-        }
-        Insert: {
-          access_expires_at: string
-          access_token: string
-          account_id: number
-          refresh_expires_at: string
-          refresh_token: string
-          updated_at?: string
-        }
-        Update: {
-          access_expires_at?: string
-          access_token?: string
-          account_id?: number
-          refresh_expires_at?: string
-          refresh_token?: string
-          updated_at?: string
-        }
-        Relationships: [
           {
-            foreignKeyName: "creator_platform_tokens_account_id_fkey"
-            columns: ["account_id"]
-            isOneToOne: true
-            referencedRelation: "creator_platform_accounts"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      delivery_orders: {
-        Row: {
-          actual_delivery_time: string | null
-          collection_time: string | null
-          created_at: string
-          delivery_address: string | null
-          delivery_fee: number | null
-          delivery_notes: string | null
-          delivery_person_name: string | null
-          delivery_person_phone: string | null
-          delivery_phone: string
-          delivery_type: string
-          estimated_delivery_time: string | null
-          id: number
-          order_id: number | null
-          shop_id: number | null
-          status: string | null
-          tracking_number: string | null
-          updated_at: string
-        }
-        Insert: {
-          actual_delivery_time?: string | null
-          collection_time?: string | null
-          created_at?: string
-          delivery_address?: string | null
-          delivery_fee?: number | null
-          delivery_notes?: string | null
-          delivery_person_name?: string | null
-          delivery_person_phone?: string | null
-          delivery_phone: string
-          delivery_type: string
-          estimated_delivery_time?: string | null
-          id?: number
-          order_id?: number | null
-          shop_id?: number | null
-          status?: string | null
-          tracking_number?: string | null
-          updated_at?: string
-        }
-        Update: {
-          actual_delivery_time?: string | null
-          collection_time?: string | null
-          created_at?: string
-          delivery_address?: string | null
-          delivery_fee?: number | null
-          delivery_notes?: string | null
-          delivery_person_name?: string | null
-          delivery_person_phone?: string | null
-          delivery_phone?: string
-          delivery_type?: string
-          estimated_delivery_time?: string | null
-          id?: number
-          order_id?: number | null
-          shop_id?: number | null
-          status?: string | null
-          tracking_number?: string | null
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "delivery_orders_order_id_fkey"
-            columns: ["order_id"]
+            foreignKeyName: "creator_opportunity_preferences_user_id_fkey"
+            columns: ["user_id"]
             isOneToOne: false
-            referencedRelation: "order"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "delivery_orders_shop_id_fkey"
-            columns: ["shop_id"]
-            isOneToOne: false
-            referencedRelation: "shops"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "delivery_orders_shop_id_fkey"
-            columns: ["shop_id"]
-            isOneToOne: false
-            referencedRelation: "shops_with_product_count"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      event_venue: {
-        Row: {
-          amenities: string[] | null
-          capacity: string
-          color: string | null
-          created_at: string
-          description: string
-          email: string | null
-          icon: string | null
-          id: number
-          image_url: string | null
-          is_available: boolean | null
-          location: string
-          name: string
-          phone: string | null
-          price_range: string | null
-          type: string
-        }
-        Insert: {
-          amenities?: string[] | null
-          capacity: string
-          color?: string | null
-          created_at?: string
-          description: string
-          email?: string | null
-          icon?: string | null
-          id?: number
-          image_url?: string | null
-          is_available?: boolean | null
-          location: string
-          name: string
-          phone?: string | null
-          price_range?: string | null
-          type: string
-        }
-        Update: {
-          amenities?: string[] | null
-          capacity?: string
-          color?: string | null
-          created_at?: string
-          description?: string
-          email?: string | null
-          icon?: string | null
-          id?: number
-          image_url?: string | null
-          is_available?: boolean | null
-          location?: string
-          name?: string
-          phone?: string | null
-          price_range?: string | null
-          type?: string
-        }
-        Relationships: []
-      }
-      events: {
-        Row: {
-          available_tickets: number
-          category: string
-          created_at: string
-          description: string
-          end_time: string
-          event_date: string
-          id: number
-          image_url: string | null
-          is_featured: boolean | null
-          price: number
-          shop_id: number | null
-          start_time: string
-          status: string | null
-          tags: string[] | null
-          title: string
-          total_tickets: number
-          updated_at: string
-          venue_id: number | null
-        }
-        Insert: {
-          available_tickets?: number
-          category: string
-          created_at?: string
-          description: string
-          end_time: string
-          event_date: string
-          id?: number
-          image_url?: string | null
-          is_featured?: boolean | null
-          price: number
-          shop_id?: number | null
-          start_time: string
-          status?: string | null
-          tags?: string[] | null
-          title: string
-          total_tickets?: number
-          updated_at?: string
-          venue_id?: number | null
-        }
-        Update: {
-          available_tickets?: number
-          category?: string
-          created_at?: string
-          description?: string
-          end_time?: string
-          event_date?: string
-          id?: number
-          image_url?: string | null
-          is_featured?: boolean | null
-          price?: number
-          shop_id?: number | null
-          start_time?: string
-          status?: string | null
-          tags?: string[] | null
-          title?: string
-          total_tickets?: number
-          updated_at?: string
-          venue_id?: number | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "events_shop_id_fkey"
-            columns: ["shop_id"]
-            isOneToOne: false
-            referencedRelation: "shops"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "events_shop_id_fkey"
-            columns: ["shop_id"]
-            isOneToOne: false
-            referencedRelation: "shops_with_product_count"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "events_venue_id_fkey"
-            columns: ["venue_id"]
-            isOneToOne: false
-            referencedRelation: "event_venue"
+            referencedRelation: "users"
             referencedColumns: ["id"]
           },
         ]
@@ -858,385 +450,6 @@ export type Database = {
         }
         Relationships: []
       }
-      merchant_purchase_codes: {
-        Row: {
-          amount: number
-          claimed_at: string | null
-          claimed_by: string | null
-          code: string
-          created_at: string
-          created_by: string
-          currency: string
-          expires_at: string
-          id: number
-          product_id: number
-          shop_id: number
-        }
-        Insert: {
-          amount?: number
-          claimed_at?: string | null
-          claimed_by?: string | null
-          code: string
-          created_at?: string
-          created_by: string
-          currency?: string
-          expires_at: string
-          id?: number
-          product_id: number
-          shop_id: number
-        }
-        Update: {
-          amount?: number
-          claimed_at?: string | null
-          claimed_by?: string | null
-          code?: string
-          created_at?: string
-          created_by?: string
-          currency?: string
-          expires_at?: string
-          id?: number
-          product_id?: number
-          shop_id?: number
-        }
-        Relationships: [
-          {
-            foreignKeyName: "merchant_purchase_codes_product_id_fkey"
-            columns: ["product_id"]
-            isOneToOne: false
-            referencedRelation: "product"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "merchant_purchase_codes_shop_id_fkey"
-            columns: ["shop_id"]
-            isOneToOne: false
-            referencedRelation: "shops"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "merchant_purchase_codes_shop_id_fkey"
-            columns: ["shop_id"]
-            isOneToOne: false
-            referencedRelation: "shops_with_product_count"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      order: {
-        Row: {
-          created_at: string
-          description: string | null
-          discovery_source: string | null
-          fulfillment_token: string | null
-          id: number
-          opportunity_id: number | null
-          payment_intent_id: string | null
-          slug: string
-          status: string
-          stripe_payment_intent_id: string | null
-          stripe_payment_status: string | null
-          totalPrice: number
-          user: string
-        }
-        Insert: {
-          created_at?: string
-          description?: string | null
-          discovery_source?: string | null
-          fulfillment_token?: string | null
-          id?: number
-          opportunity_id?: number | null
-          payment_intent_id?: string | null
-          slug: string
-          status: string
-          stripe_payment_intent_id?: string | null
-          stripe_payment_status?: string | null
-          totalPrice: number
-          user: string
-        }
-        Update: {
-          created_at?: string
-          description?: string | null
-          discovery_source?: string | null
-          fulfillment_token?: string | null
-          id?: number
-          opportunity_id?: number | null
-          payment_intent_id?: string | null
-          slug?: string
-          status?: string
-          stripe_payment_intent_id?: string | null
-          stripe_payment_status?: string | null
-          totalPrice?: number
-          user?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "order_opportunity_id_fkey"
-            columns: ["opportunity_id"]
-            isOneToOne: false
-            referencedRelation: "challenges"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "order_user_fkey"
-            columns: ["user"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      order_item: {
-        Row: {
-          created_at: string
-          id: number
-          order: number
-          price: number
-          product: number
-          quantity: number
-        }
-        Insert: {
-          created_at?: string
-          id?: number
-          order: number
-          price?: number
-          product: number
-          quantity: number
-        }
-        Update: {
-          created_at?: string
-          id?: number
-          order?: number
-          price?: number
-          product?: number
-          quantity?: number
-        }
-        Relationships: [
-          {
-            foreignKeyName: "order_item_order_fkey"
-            columns: ["order"]
-            isOneToOne: false
-            referencedRelation: "order"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "order_item_product_fkey"
-            columns: ["product"]
-            isOneToOne: false
-            referencedRelation: "product"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      product: {
-        Row: {
-          brand: string | null
-          category: number
-          color_variants: Json | null
-          created_at: string
-          description: string | null
-          dimensions: Json | null
-          heroImage: string
-          id: number
-          imagesUrl: string[]
-          is_available: boolean | null
-          maxQuantity: number
-          price: number
-          shop_id: number | null
-          sku: string | null
-          slug: string
-          title: string
-          weight: number | null
-        }
-        Insert: {
-          brand?: string | null
-          category: number
-          color_variants?: Json | null
-          created_at?: string
-          description?: string | null
-          dimensions?: Json | null
-          heroImage: string
-          id?: number
-          imagesUrl: string[]
-          is_available?: boolean | null
-          maxQuantity: number
-          price: number
-          shop_id?: number | null
-          sku?: string | null
-          slug: string
-          title: string
-          weight?: number | null
-        }
-        Update: {
-          brand?: string | null
-          category?: number
-          color_variants?: Json | null
-          created_at?: string
-          description?: string | null
-          dimensions?: Json | null
-          heroImage?: string
-          id?: number
-          imagesUrl?: string[]
-          is_available?: boolean | null
-          maxQuantity?: number
-          price?: number
-          shop_id?: number | null
-          sku?: string | null
-          slug?: string
-          title?: string
-          weight?: number | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "product_category_fkey"
-            columns: ["category"]
-            isOneToOne: false
-            referencedRelation: "category"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "product_shop_id_fkey"
-            columns: ["shop_id"]
-            isOneToOne: false
-            referencedRelation: "shops"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "product_shop_id_fkey"
-            columns: ["shop_id"]
-            isOneToOne: false
-            referencedRelation: "shops_with_product_count"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      product_variants: {
-        Row: {
-          color_hex: string
-          color_name: string
-          created_at: string | null
-          id: number
-          image_url: string | null
-          is_available: boolean | null
-          product_id: number
-          stock_quantity: number | null
-          updated_at: string | null
-        }
-        Insert: {
-          color_hex: string
-          color_name: string
-          created_at?: string | null
-          id?: number
-          image_url?: string | null
-          is_available?: boolean | null
-          product_id: number
-          stock_quantity?: number | null
-          updated_at?: string | null
-        }
-        Update: {
-          color_hex?: string
-          color_name?: string
-          created_at?: string | null
-          id?: number
-          image_url?: string | null
-          is_available?: boolean | null
-          product_id?: number
-          stock_quantity?: number | null
-          updated_at?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "product_variants_product_id_fkey"
-            columns: ["product_id"]
-            isOneToOne: false
-            referencedRelation: "product"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      purchase_proofs: {
-        Row: {
-          amount: number
-          claimed_at: string | null
-          consumed_by_submission_id: number | null
-          created_at: string
-          currency: string
-          expires_at: string | null
-          id: number
-          order_id: number | null
-          product_id: number
-          redemption_code: string | null
-          shop_id: number
-          source: string
-          user_id: string | null
-        }
-        Insert: {
-          amount?: number
-          claimed_at?: string | null
-          consumed_by_submission_id?: number | null
-          created_at?: string
-          currency?: string
-          expires_at?: string | null
-          id?: number
-          order_id?: number | null
-          product_id: number
-          redemption_code?: string | null
-          shop_id: number
-          source: string
-          user_id?: string | null
-        }
-        Update: {
-          amount?: number
-          claimed_at?: string | null
-          consumed_by_submission_id?: number | null
-          created_at?: string
-          currency?: string
-          expires_at?: string | null
-          id?: number
-          order_id?: number | null
-          product_id?: number
-          redemption_code?: string | null
-          shop_id?: number
-          source?: string
-          user_id?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "purchase_proofs_consumed_by_submission_id_fkey"
-            columns: ["consumed_by_submission_id"]
-            isOneToOne: false
-            referencedRelation: "challenge_submissions"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "purchase_proofs_order_id_fkey"
-            columns: ["order_id"]
-            isOneToOne: false
-            referencedRelation: "order"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "purchase_proofs_product_id_fkey"
-            columns: ["product_id"]
-            isOneToOne: false
-            referencedRelation: "product"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "purchase_proofs_shop_id_fkey"
-            columns: ["shop_id"]
-            isOneToOne: false
-            referencedRelation: "shops"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "purchase_proofs_shop_id_fkey"
-            columns: ["shop_id"]
-            isOneToOne: false
-            referencedRelation: "shops_with_product_count"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       reward_vouchers: {
         Row: {
           code: string
@@ -1285,17 +498,17 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "reward_vouchers_shop_id_fkey"
-            columns: ["shop_id"]
+            foreignKeyName: "reward_vouchers_redeemed_by_fkey"
+            columns: ["redeemed_by"]
             isOneToOne: false
-            referencedRelation: "shops"
+            referencedRelation: "users"
             referencedColumns: ["id"]
           },
           {
             foreignKeyName: "reward_vouchers_shop_id_fkey"
             columns: ["shop_id"]
             isOneToOne: false
-            referencedRelation: "shops_with_product_count"
+            referencedRelation: "shops"
             referencedColumns: ["id"]
           },
           {
@@ -1305,361 +518,8 @@ export type Database = {
             referencedRelation: "challenge_submissions"
             referencedColumns: ["id"]
           },
-        ]
-      }
-      service: {
-        Row: {
-          category_id: number
-          created_at: string
-          description: string | null
-          duration_minutes: number
-          id: number
-          image_url: string | null
-          is_active: boolean | null
-          max_advance_booking_days: number | null
-          name: string
-          price: number
-          provider_id: number
-          rating: number | null
-          slug: string
-          total_reviews: number | null
-        }
-        Insert: {
-          category_id: number
-          created_at?: string
-          description?: string | null
-          duration_minutes: number
-          id?: number
-          image_url?: string | null
-          is_active?: boolean | null
-          max_advance_booking_days?: number | null
-          name: string
-          price: number
-          provider_id: number
-          rating?: number | null
-          slug: string
-          total_reviews?: number | null
-        }
-        Update: {
-          category_id?: number
-          created_at?: string
-          description?: string | null
-          duration_minutes?: number
-          id?: number
-          image_url?: string | null
-          is_active?: boolean | null
-          max_advance_booking_days?: number | null
-          name?: string
-          price?: number
-          provider_id?: number
-          rating?: number | null
-          slug?: string
-          total_reviews?: number | null
-        }
-        Relationships: [
           {
-            foreignKeyName: "service_category_id_fkey"
-            columns: ["category_id"]
-            isOneToOne: false
-            referencedRelation: "service_category"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "service_provider_id_fkey"
-            columns: ["provider_id"]
-            isOneToOne: false
-            referencedRelation: "service_provider"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      service_availability: {
-        Row: {
-          created_at: string
-          day_of_week: number
-          end_time: string
-          id: number
-          is_available: boolean | null
-          provider_id: number
-          service_id: number | null
-          start_time: string
-        }
-        Insert: {
-          created_at?: string
-          day_of_week: number
-          end_time: string
-          id?: number
-          is_available?: boolean | null
-          provider_id: number
-          service_id?: number | null
-          start_time: string
-        }
-        Update: {
-          created_at?: string
-          day_of_week?: number
-          end_time?: string
-          id?: number
-          is_available?: boolean | null
-          provider_id?: number
-          service_id?: number | null
-          start_time?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "service_availability_provider_id_fkey"
-            columns: ["provider_id"]
-            isOneToOne: false
-            referencedRelation: "service_provider"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "service_availability_service_id_fkey"
-            columns: ["service_id"]
-            isOneToOne: false
-            referencedRelation: "service"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      service_booking: {
-        Row: {
-          booking_date: string
-          booking_time: string
-          cancellation_reason: string | null
-          cancelled_at: string | null
-          completed_at: string | null
-          created_at: string
-          duration_minutes: number
-          id: number
-          notes: string | null
-          payment_intent_id: string | null
-          payment_status: string
-          provider_id: number
-          service_id: number
-          slug: string
-          status: string
-          total_amount: number
-          user_id: string
-        }
-        Insert: {
-          booking_date: string
-          booking_time: string
-          cancellation_reason?: string | null
-          cancelled_at?: string | null
-          completed_at?: string | null
-          created_at?: string
-          duration_minutes: number
-          id?: number
-          notes?: string | null
-          payment_intent_id?: string | null
-          payment_status?: string
-          provider_id: number
-          service_id: number
-          slug: string
-          status?: string
-          total_amount: number
-          user_id: string
-        }
-        Update: {
-          booking_date?: string
-          booking_time?: string
-          cancellation_reason?: string | null
-          cancelled_at?: string | null
-          completed_at?: string | null
-          created_at?: string
-          duration_minutes?: number
-          id?: number
-          notes?: string | null
-          payment_intent_id?: string | null
-          payment_status?: string
-          provider_id?: number
-          service_id?: number
-          slug?: string
-          status?: string
-          total_amount?: number
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "service_booking_provider_id_fkey"
-            columns: ["provider_id"]
-            isOneToOne: false
-            referencedRelation: "service_provider"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "service_booking_service_id_fkey"
-            columns: ["service_id"]
-            isOneToOne: false
-            referencedRelation: "service"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "service_booking_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      service_category: {
-        Row: {
-          color: string
-          created_at: string
-          description: string
-          icon: string
-          id: number
-          is_active: boolean
-          name: string
-          slug: string
-        }
-        Insert: {
-          color: string
-          created_at?: string
-          description: string
-          icon: string
-          id?: number
-          is_active?: boolean
-          name: string
-          slug: string
-        }
-        Update: {
-          color?: string
-          created_at?: string
-          description?: string
-          icon?: string
-          id?: number
-          is_active?: boolean
-          name?: string
-          slug?: string
-        }
-        Relationships: []
-      }
-      service_provider: {
-        Row: {
-          address: string | null
-          avatar_url: string | null
-          created_at: string
-          description: string | null
-          email: string
-          id: number
-          is_active: boolean | null
-          is_verified: boolean | null
-          name: string
-          phone: string | null
-          rating: number | null
-          shop_id: number | null
-          total_reviews: number | null
-          user_id: string | null
-        }
-        Insert: {
-          address?: string | null
-          avatar_url?: string | null
-          created_at?: string
-          description?: string | null
-          email: string
-          id?: number
-          is_active?: boolean | null
-          is_verified?: boolean | null
-          name: string
-          phone?: string | null
-          rating?: number | null
-          shop_id?: number | null
-          total_reviews?: number | null
-          user_id?: string | null
-        }
-        Update: {
-          address?: string | null
-          avatar_url?: string | null
-          created_at?: string
-          description?: string | null
-          email?: string
-          id?: number
-          is_active?: boolean | null
-          is_verified?: boolean | null
-          name?: string
-          phone?: string | null
-          rating?: number | null
-          shop_id?: number | null
-          total_reviews?: number | null
-          user_id?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "service_provider_shop_id_fkey"
-            columns: ["shop_id"]
-            isOneToOne: false
-            referencedRelation: "shops"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "service_provider_shop_id_fkey"
-            columns: ["shop_id"]
-            isOneToOne: false
-            referencedRelation: "shops_with_product_count"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      service_review: {
-        Row: {
-          booking_id: number
-          comment: string | null
-          created_at: string
-          id: number
-          is_verified: boolean | null
-          provider_id: number
-          rating: number
-          service_id: number
-          user_id: string
-        }
-        Insert: {
-          booking_id: number
-          comment?: string | null
-          created_at?: string
-          id?: number
-          is_verified?: boolean | null
-          provider_id: number
-          rating: number
-          service_id: number
-          user_id: string
-        }
-        Update: {
-          booking_id?: number
-          comment?: string | null
-          created_at?: string
-          id?: number
-          is_verified?: boolean | null
-          provider_id?: number
-          rating?: number
-          service_id?: number
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "service_review_booking_id_fkey"
-            columns: ["booking_id"]
-            isOneToOne: true
-            referencedRelation: "service_booking"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "service_review_provider_id_fkey"
-            columns: ["provider_id"]
-            isOneToOne: false
-            referencedRelation: "service_provider"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "service_review_service_id_fkey"
-            columns: ["service_id"]
-            isOneToOne: false
-            referencedRelation: "service"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "service_review_user_id_fkey"
+            foreignKeyName: "reward_vouchers_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "users"
@@ -1703,24 +563,10 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "shop_reviews_order_id_fkey"
-            columns: ["order_id"]
-            isOneToOne: false
-            referencedRelation: "order"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "shop_reviews_shop_id_fkey"
             columns: ["shop_id"]
             isOneToOne: false
             referencedRelation: "shops"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "shop_reviews_shop_id_fkey"
-            columns: ["shop_id"]
-            isOneToOne: false
-            referencedRelation: "shops_with_product_count"
             referencedColumns: ["id"]
           },
         ]
@@ -1836,72 +682,46 @@ export type Database = {
           },
         ]
       }
-      ticket_purchases: {
-        Row: {
-          created_at: string
-          event_id: number | null
-          id: number
-          payment_intent_id: string | null
-          purchase_date: string
-          quantity: number
-          status: string | null
-          total_price: number
-          user_id: string | null
-        }
-        Insert: {
-          created_at?: string
-          event_id?: number | null
-          id?: number
-          payment_intent_id?: string | null
-          purchase_date?: string
-          quantity?: number
-          status?: string | null
-          total_price: number
-          user_id?: string | null
-        }
-        Update: {
-          created_at?: string
-          event_id?: number | null
-          id?: number
-          payment_intent_id?: string | null
-          purchase_date?: string
-          quantity?: number
-          status?: string | null
-          total_price?: number
-          user_id?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "ticket_purchases_event_id_fkey"
-            columns: ["event_id"]
-            isOneToOne: false
-            referencedRelation: "events"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       users: {
         Row: {
-          avatar_url: string
+          avatar_url: string | null
+          bio: string | null
+          clerk_user_id: string | null
           created_at: string | null
           email: string
+          full_name: string | null
           id: string
+          phone_number: string | null
+          role: string
+          stripe_account_id: string | null
           stripe_customer_id: string | null
           type: string | null
         }
         Insert: {
-          avatar_url: string
+          avatar_url?: string | null
+          bio?: string | null
+          clerk_user_id?: string | null
           created_at?: string | null
           email: string
-          id: string
+          full_name?: string | null
+          id?: string
+          phone_number?: string | null
+          role?: string
+          stripe_account_id?: string | null
           stripe_customer_id?: string | null
           type?: string | null
         }
         Update: {
-          avatar_url?: string
+          avatar_url?: string | null
+          bio?: string | null
+          clerk_user_id?: string | null
           created_at?: string | null
           email?: string
+          full_name?: string | null
           id?: string
+          phone_number?: string | null
+          role?: string
+          stripe_account_id?: string | null
           stripe_customer_id?: string | null
           type?: string | null
         }
@@ -1909,112 +729,79 @@ export type Database = {
       }
     }
     Views: {
-      shops_with_product_count: {
-        Row: {
-          category_id: number | null
-          created_at: string | null
-          delivery_fee: number | null
-          description: string | null
-          email: string | null
-          estimated_delivery_time: string | null
-          facebook_handle: string | null
-          has_appointment_booking: boolean | null
-          has_collection: boolean | null
-          has_delivery: boolean | null
-          has_online_ordering: boolean | null
-          has_virtual_try_on: boolean | null
-          id: number | null
-          image_url: string | null
-          instagram_handle: string | null
-          is_active: boolean | null
-          is_featured: boolean | null
-          location: string | null
-          logo_url: string | null
-          mall_id: number | null
-          minimum_order_amount: number | null
-          name: string | null
-          opening_hours: Json | null
-          phone: string | null
-          product_count: number | null
-          rating: number | null
-          total_reviews: number | null
-          updated_at: string | null
-          website_url: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "shops_category_id_fkey"
-            columns: ["category_id"]
-            isOneToOne: false
-            referencedRelation: "category"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "shops_mall_id_fkey"
-            columns: ["mall_id"]
-            isOneToOne: false
-            referencedRelation: "malls"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
+      [_ in never]: never
     }
     Functions: {
+      apply_order_payment_event: {
+        Args: {
+          p_event_id: string
+          p_event_type: string
+          p_payment_intent_id: string
+        }
+        Returns: number
+      }
+      campaign_prize_for_rank: {
+        Args: {
+          p_pot_splits: Json
+          p_pot_value: number
+          p_rank: number
+          p_winner_count: number
+        }
+        Returns: number
+      }
       can_manage_challenge: {
         Args: { p_challenge_id: number }
         Returns: boolean
       }
-      claim_merchant_purchase_code: {
-        Args: { p_code: string }
+      close_campaign: {
+        Args: { p_challenge_id: number }
         Returns: {
-          amount: number
-          claimed_at: string | null
-          consumed_by_submission_id: number | null
-          created_at: string
-          currency: string
-          expires_at: string | null
+          ai_allowed: boolean | null
+          brand_asset_paths: string[]
+          brand_logo_url: string | null
+          brand_name: string
+          campaign_goal: string | null
+          category: string | null
+          closed_at: string | null
+          content_format: string
+          created_at: string | null
+          deadline: string
+          deliverable_count: number
+          description: string
+          donts: string[]
+          dos: string[]
           id: number
-          order_id: number | null
-          product_id: number
-          redemption_code: string | null
-          shop_id: number
-          source: string
-          user_id: string | null
+          image_url: string
+          participants_count: number | null
+          pot_currency: string
+          pot_splits: Json
+          pot_value: number | null
+          published_at: string | null
+          requirements: string[]
+          review_sla_days: number
+          revisions_allowed: number
+          reward: string
+          reward_currency: string
+          reward_value: number
+          settled_at: string | null
+          shop_id: number | null
+          status: string
+          talking_points: string[]
+          title: string
+          updated_at: string | null
+          usage_rights: string
+          video_max_seconds: number | null
+          video_min_seconds: number | null
+          voucher_valid_days: number
         }
         SetofOptions: {
           from: "*"
-          to: "purchase_proofs"
+          to: "challenges"
           isOneToOne: true
           isSetofReturn: false
         }
-      }
-      compute_engagement_score: {
-        Args: { p_comments: number; p_likes: number; p_saves: number }
-        Returns: number
       }
       create_dev_merchant: { Args: never; Returns: Json }
-      create_merchant_purchase_code: {
-        Args: { p_amount: number; p_expires_at: string; p_product_id: number }
-        Returns: {
-          amount: number
-          claimed_at: string | null
-          claimed_by: string | null
-          code: string
-          created_at: string
-          created_by: string
-          currency: string
-          expires_at: string
-          id: number
-          product_id: number
-          shop_id: number
-        }
-        SetofOptions: {
-          from: "*"
-          to: "merchant_purchase_codes"
-          isOneToOne: true
-          isSetofReturn: false
-        }
-      }
       create_merchant_shop: {
         Args: {
           enable_collection?: boolean
@@ -2029,26 +816,57 @@ export type Database = {
         }
         Returns: Json
       }
+      current_muse_profile: {
+        Args: never
+        Returns: {
+          avatar_url: string | null
+          bio: string | null
+          clerk_user_id: string | null
+          created_at: string | null
+          email: string
+          full_name: string | null
+          id: string
+          phone_number: string | null
+          role: string
+          stripe_account_id: string | null
+          stripe_customer_id: string | null
+          type: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "users"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       decrement_product_quantity: {
         Args: { product_id: number; quantity: number }
         Returns: undefined
       }
-      get_challenge_leaderboard: {
-        Args: { p_challenge_id: number }
+      ensure_clerk_profile: {
+        Args: { p_avatar_url?: string; p_email: string; p_full_name?: string }
         Returns: {
-          comment_count: number
-          final_rank: number
-          like_count: number
-          metrics_captured_at: string
-          public_share_url: string
-          save_count: number
-          score: number
-          status: string
-          submission_id: number
-          user_id: string
-          view_count: number
-        }[]
+          avatar_url: string | null
+          bio: string | null
+          clerk_user_id: string | null
+          created_at: string | null
+          email: string
+          full_name: string | null
+          id: string
+          phone_number: string | null
+          role: string
+          stripe_account_id: string | null
+          stripe_customer_id: string | null
+          type: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "users"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
+      get_campaign_results: { Args: { p_challenge_id: number }; Returns: Json }
       get_creator_opportunity_feed: {
         Args: {
           p_cursor?: number
@@ -2057,54 +875,36 @@ export type Database = {
           p_seed?: string
         }
         Returns: {
-          category_id: number
-          consolation_voucher_value: number
-          contest_mode: string
+          brand_asset_paths: string[]
+          brand_logo_url: string
+          brand_name: string
+          campaign_goal: string
+          category: string
+          content_format: string
           deadline: string
-          eligibility_consumed: boolean
-          eligibility_proof_id: number
-          has_collection: boolean
-          has_delivery: boolean
-          hero_image: string
-          mall_id: number
-          max_quantity: number
-          merchant_id: number
-          merchant_location: string
-          merchant_name: string
-          opportunity_description: string
-          opportunity_id: number
-          opportunity_title: string
+          deliverable_count: number
+          description: string
+          donts: string[]
+          dos: string[]
+          has_joined: boolean
+          id: number
+          image_url: string
+          my_submission_status: string
+          participants_count: number
           pot_currency: string
           pot_splits: Json
           pot_value: number
           preference_state: string
-          price: number
-          product_description: string
-          product_id: number
-          product_slug: string
-          product_title: string
-          rank_score: number
           requirements: string[]
-          reward_currency: string
-          reward_value: number
-          score_rule: string
-          settled_at: string
-        }[]
-      }
-      get_creator_opportunity_results: {
-        Args: { p_challenge_id: number }
-        Returns: {
-          approved_posts: number
-          attributed_purchases: number
-          connected_creators: number
-          detail_opens: number
-          eligible_purchasers: number
-          impressions: number
-          saves: number
-          submitted_posts: number
-          verified_posts: number
-          vouchers_issued: number
-          vouchers_redeemed: number
+          review_sla_days: number
+          revisions_allowed: number
+          shop_id: number
+          status: string
+          talking_points: string[]
+          title: string
+          usage_rights: string
+          video_max_seconds: number
+          video_min_seconds: number
         }[]
       }
       get_merchant_dashboard_stats: {
@@ -2118,47 +918,131 @@ export type Database = {
       get_saved_creator_opportunities: {
         Args: never
         Returns: {
-          category_id: number
-          consolation_voucher_value: number
-          contest_mode: string
+          ai_allowed: boolean | null
+          brand_asset_paths: string[]
+          brand_logo_url: string | null
+          brand_name: string
+          campaign_goal: string | null
+          category: string | null
+          closed_at: string | null
+          content_format: string
+          created_at: string | null
           deadline: string
-          eligibility_consumed: boolean
-          eligibility_proof_id: number
-          has_collection: boolean
-          has_delivery: boolean
-          hero_image: string
-          mall_id: number
-          max_quantity: number
-          merchant_id: number
-          merchant_location: string
-          merchant_name: string
-          opportunity_description: string
-          opportunity_id: number
-          opportunity_title: string
+          deliverable_count: number
+          description: string
+          donts: string[]
+          dos: string[]
+          id: number
+          image_url: string
+          participants_count: number | null
           pot_currency: string
           pot_splits: Json
-          pot_value: number
-          preference_state: string
-          price: number
-          product_description: string
-          product_id: number
-          product_slug: string
-          product_title: string
-          rank_score: number
+          pot_value: number | null
+          published_at: string | null
           requirements: string[]
+          review_sla_days: number
+          revisions_allowed: number
+          reward: string
           reward_currency: string
           reward_value: number
-          score_rule: string
-          settled_at: string
+          settled_at: string | null
+          shop_id: number | null
+          status: string
+          talking_points: string[]
+          title: string
+          updated_at: string | null
+          usage_rights: string
+          video_max_seconds: number | null
+          video_min_seconds: number | null
+          voucher_valid_days: number
         }[]
+        SetofOptions: {
+          from: "*"
+          to: "challenges"
+          isOneToOne: false
+          isSetofReturn: true
+        }
       }
-      mark_submission_manually_verified: {
-        Args: { p_submission_id: number }
-        Returns: undefined
+      join_campaign: {
+        Args: { p_challenge_id: number }
+        Returns: {
+          asset_meta: Json
+          asset_paths: string[]
+          caption: string | null
+          challenge_id: number
+          consent_version: string | null
+          consented_at: string | null
+          content_url: string | null
+          created_at: string
+          final_rank: number | null
+          id: number
+          media_type: string | null
+          merchant_note: string | null
+          platform: string | null
+          public_share_url: string | null
+          rejection_reason: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          revision_count: number
+          status: string
+          submitted_at: string | null
+          thumbnail_path: string | null
+          user_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "challenge_submissions"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
-      merge_creator_opportunity_preferences: {
-        Args: { p_preferences: Json }
-        Returns: number
+      publish_campaign: {
+        Args: { p_challenge_id: number }
+        Returns: {
+          ai_allowed: boolean | null
+          brand_asset_paths: string[]
+          brand_logo_url: string | null
+          brand_name: string
+          campaign_goal: string | null
+          category: string | null
+          closed_at: string | null
+          content_format: string
+          created_at: string | null
+          deadline: string
+          deliverable_count: number
+          description: string
+          donts: string[]
+          dos: string[]
+          id: number
+          image_url: string
+          participants_count: number | null
+          pot_currency: string
+          pot_splits: Json
+          pot_value: number | null
+          published_at: string | null
+          requirements: string[]
+          review_sla_days: number
+          revisions_allowed: number
+          reward: string
+          reward_currency: string
+          reward_value: number
+          settled_at: string | null
+          shop_id: number | null
+          status: string
+          talking_points: string[]
+          title: string
+          updated_at: string | null
+          usage_rights: string
+          video_max_seconds: number | null
+          video_min_seconds: number | null
+          voucher_valid_days: number
+        }
+        SetofOptions: {
+          from: "*"
+          to: "challenges"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       record_creator_opportunity_event: {
         Args: {
@@ -2169,45 +1053,41 @@ export type Database = {
         Returns: undefined
       }
       redeem_reward_voucher: { Args: { p_code: string }; Returns: Json }
-      refresh_submission_metrics: {
+      reserve_checkout_order: {
         Args: {
-          p_comment_count: number
-          p_like_count: number
-          p_save_count: number
-          p_submission_id: number
-          p_view_count?: number
+          p_attribution: Json
+          p_fulfilment: Json
+          p_idempotency_key: string
+          p_items: Json
+          p_user_id: string
         }
+        Returns: Json
+      }
+      review_campaign_submission: {
+        Args: { p_decision: string; p_note?: string; p_submission_id: number }
         Returns: {
+          asset_meta: Json
+          asset_paths: string[]
           caption: string | null
           challenge_id: number
-          comment_count: number
           consent_version: string | null
           consented_at: string | null
           content_url: string | null
           created_at: string
           final_rank: number | null
           id: number
-          like_count: number
           media_type: string | null
-          metrics_captured_at: string | null
-          platform: string
-          platform_account_id: number | null
-          platform_author_open_id: string | null
-          platform_video_id: string | null
-          post_description: string | null
-          post_published_at: string | null
+          merchant_note: string | null
+          platform: string | null
           public_share_url: string | null
-          purchase_proof_id: number | null
           rejection_reason: string | null
           reviewed_at: string | null
           reviewed_by: string | null
-          save_count: number
-          score: number
+          revision_count: number
           status: string
+          submitted_at: string | null
+          thumbnail_path: string | null
           user_id: string
-          verification_status: string
-          verified_at: string | null
-          view_count: number
         }
         SetofOptions: {
           from: "*"
@@ -2216,83 +1096,47 @@ export type Database = {
           isSetofReturn: false
         }
       }
-      restore_creator_opportunity_preference: {
-        Args: { p_opportunity_id: number }
-        Returns: undefined
-      }
-      review_creator_submission: {
-        Args: {
-          p_decision: string
-          p_rejection_reason?: string
-          p_submission_id: number
-        }
+      select_campaign_winners: {
+        Args: { p_challenge_id: number; p_ranked_submission_ids: number[] }
         Returns: Json
       }
       set_creator_opportunity_preference: {
         Args: { p_opportunity_id: number; p_state: string }
-        Returns: {
-          created_at: string
-          dismissed_until: string | null
-          opportunity_id: number
-          state: string
-          updated_at: string
-          user_id: string
-        }
-        SetofOptions: {
-          from: "*"
-          to: "creator_opportunity_preferences"
-          isOneToOne: true
-          isSetofReturn: false
-        }
+        Returns: undefined
       }
-      settle_competitive_challenge: {
-        Args: { p_challenge_id: number }
-        Returns: Json
-      }
-      submit_creator_opportunity: {
+      settle_campaign: { Args: { p_challenge_id: number }; Returns: Json }
+      submit_campaign_entry: {
         Args: {
+          p_asset_meta?: Json
+          p_asset_paths: string[]
+          p_caption?: string
           p_challenge_id: number
-          p_consent_version: string
-          p_platform_account_id: number
-          p_platform_author_open_id: string
-          p_platform_video_id: string
-          p_post_description: string
-          p_post_published_at: string
-          p_public_share_url: string
-          p_purchase_proof_id: number
-          p_verification_status: string
+          p_consent_version?: string
+          p_public_share_url?: string
         }
         Returns: {
+          asset_meta: Json
+          asset_paths: string[]
           caption: string | null
           challenge_id: number
-          comment_count: number
           consent_version: string | null
           consented_at: string | null
           content_url: string | null
           created_at: string
           final_rank: number | null
           id: number
-          like_count: number
           media_type: string | null
-          metrics_captured_at: string | null
-          platform: string
-          platform_account_id: number | null
-          platform_author_open_id: string | null
-          platform_video_id: string | null
-          post_description: string | null
-          post_published_at: string | null
+          merchant_note: string | null
+          platform: string | null
           public_share_url: string | null
-          purchase_proof_id: number | null
           rejection_reason: string | null
           reviewed_at: string | null
           reviewed_by: string | null
-          save_count: number
-          score: number
+          revision_count: number
           status: string
+          submitted_at: string | null
+          thumbnail_path: string | null
           user_id: string
-          verification_status: string
-          verified_at: string | null
-          view_count: number
         }
         SetofOptions: {
           from: "*"
@@ -2429,6 +1273,9 @@ export type CompositeTypes<
     : never
 
 export const Constants = {
+  graphql_public: {
+    Enums: {},
+  },
   public: {
     Enums: {},
   },

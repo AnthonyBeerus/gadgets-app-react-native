@@ -13,6 +13,23 @@ export function setSupabaseAccessTokenProvider(provider: AccessTokenProvider) {
   accessTokenProvider = provider;
 }
 
+// Identity lives in Clerk, so `supabase.auth.getUser()` always resolves to null and
+// any code branching on it silently falls through to its guest path. Non-hook modules
+// read the current Muse profile id through here instead; AuthProvider registers it.
+let currentProfileIdProvider: () => string | null = () => null;
+
+export function setCurrentProfileIdProvider(provider: () => string | null) {
+  currentProfileIdProvider = provider;
+}
+
+export function currentProfileId(): string | null {
+  return currentProfileIdProvider();
+}
+
+export function isSignedInToMuse(): boolean {
+  return currentProfileId() != null;
+}
+
 export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
   accessToken: () => accessTokenProvider(),
 });

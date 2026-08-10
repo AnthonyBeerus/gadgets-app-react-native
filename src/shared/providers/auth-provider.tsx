@@ -1,7 +1,7 @@
 import { useAuth as useClerkAuth, useUser as useClerkUser } from '../clerk';
 import { createContext, PropsWithChildren, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 
-import { setSupabaseAccessTokenProvider, supabase } from '../lib/supabase';
+import { setCurrentProfileIdProvider, setSupabaseAccessTokenProvider, supabase } from '../lib/supabase';
 
 export type MuseRole = 'CREATOR' | 'MERCHANT' | 'OPERATOR';
 
@@ -105,6 +105,15 @@ export default function AuthProvider({ children }: PropsWithChildren) {
       return current;
     });
     return () => setSupabaseAccessTokenProvider(async () => null);
+  }, []);
+
+  // Non-hook modules (discovery/api.ts) need to know whether there is a Muse profile.
+  // A ref keeps the provider stable while still reading the latest value.
+  const profileIdRef = useRef<string | null>(null);
+  profileIdRef.current = user?.id ?? null;
+  useEffect(() => {
+    setCurrentProfileIdProvider(() => profileIdRef.current);
+    return () => setCurrentProfileIdProvider(() => null);
   }, []);
 
   const fetchProfile = useCallback(async () => {
