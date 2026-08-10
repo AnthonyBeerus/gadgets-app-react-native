@@ -1,5 +1,4 @@
-import { useAuth } from '@clerk/expo';
-import { useSignIn, useSignUp } from '@clerk/expo/legacy';
+import { useAuth, useSignIn, useSignUp } from '../shared/clerk';
 import { Redirect, Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useMemo, useState } from 'react';
 import {

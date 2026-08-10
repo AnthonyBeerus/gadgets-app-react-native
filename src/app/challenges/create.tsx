@@ -1,10 +1,10 @@
-import { initPaymentSheet, presentPaymentSheet } from '@stripe/stripe-react-native';
 import { Stack, useRouter } from 'expo-router';
 import { useMemo, useState } from 'react';
 import type { ReactNode } from 'react';
 import { ActivityIndicator, Alert, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
 
 import { calculatePrizeAllocations, DEFAULT_PRIZE_SPLITS, validateCompetitionBudget } from '../../features/opportunities/domain/competition';
+import { initializeChallengePaymentSheet, presentChallengePaymentSheet } from '../../shared/lib/stripe';
 import { supabase } from '../../shared/lib/supabase';
 
 export default function CreateCreatorOpportunityScreen() {
@@ -52,13 +52,13 @@ export default function CreateCreatorOpportunityScreen() {
         },
       });
       if (error || data?.error) throw new Error(data?.error || error?.message || 'Funding setup failed');
-      const initialized = await initPaymentSheet({
+      const initialized = await initializeChallengePaymentSheet({
         merchantDisplayName: 'Muse',
         paymentIntentClientSecret: data.paymentIntentClientSecret,
         returnURL: 'muse://stripe-redirect',
       });
       if (initialized.error) throw new Error(initialized.error.message);
-      const presented = await presentPaymentSheet();
+      const presented = await presentChallengePaymentSheet();
       if (presented.error) {
         if (presented.error.code === 'Canceled') return;
         throw new Error(presented.error.message);

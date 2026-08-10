@@ -1,4 +1,4 @@
-import { useAuth, useUser } from '@clerk/expo';
+import { useAuth, useUser } from '../shared/clerk';
 import { Redirect, Stack, useRouter } from 'expo-router';
 import { ActivityIndicator, Alert, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';

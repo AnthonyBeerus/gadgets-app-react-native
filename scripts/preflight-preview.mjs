@@ -105,6 +105,10 @@ function runAndroidExport() {
   }
 }
 
+function runEagerAndroidBundle() {
+  run('npx expo export:embed --eager --platform android --dev false');
+}
+
 async function step(label, task) {
   process.stdout.write(`\n> ${label}\n`);
   await task();
@@ -120,6 +124,7 @@ async function main() {
   await step('Android build concurrency guard', assertNoActiveAndroidBuilds);
   await step('Expo Doctor', runDoctor);
   await step('Focused Jest', runFocusedTests);
+  await step('Eager Android and server bundle', runEagerAndroidBundle);
   await step('Android export', runAndroidExport);
   console.log('\nMuse preview preflight passed.');
 }

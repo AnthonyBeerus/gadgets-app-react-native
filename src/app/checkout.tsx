@@ -1,6 +1,6 @@
-import { useUser } from '@clerk/expo'; import { randomUUID } from 'expo-crypto'; import { Redirect, useRouter } from 'expo-router'; import React, { useEffect, useMemo, useRef, useState } from 'react'; import { Alert, StyleSheet, View } from 'react-native';
+import { useUser } from '../shared/clerk'; import { randomUUID } from 'expo-crypto'; import { Redirect, useRouter } from 'expo-router'; import React, { useEffect, useMemo, useRef, useState } from 'react'; import { Alert, StyleSheet, View } from 'react-native';
 import { Button, EligibilityPanel, Input, MerchantIdentityRow, Money, PinnedActionBar, PriceBreakdown, Rule, StackScreenTemplate, Text, useDesignTokens } from '../shared/design-system';
-import { calculateCheckoutTotals, isBotswanaPhone, type FulfilmentType } from '../features/cart/domain/commerce'; import { openStripeCheckout, setupStripePaymentSheet } from '../shared/lib/stripe.native'; import { useAuth as useMuseAuth } from '../shared/providers/auth-provider'; import { useCartStore } from '../store/cart-store';
+import { calculateCheckoutTotals, isBotswanaPhone, type FulfilmentType } from '../features/cart/domain/commerce'; import { openStripeCheckout, setupStripePaymentSheet } from '../shared/lib/stripe'; import { useAuth as useMuseAuth } from '../shared/providers/auth-provider'; import { useCartStore } from '../store/cart-store';
 
 export default function CheckoutScreen(){
  const t=useDesignTokens(); const router=useRouter(); const {user,isLoaded,isSignedIn}=useUser(); const {session,mounting}=useMuseAuth();

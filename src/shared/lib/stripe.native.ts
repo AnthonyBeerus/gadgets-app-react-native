@@ -57,3 +57,6 @@ export const openStripeCheckout = async () => {
 
   return true;
 };
+
+export const initializeChallengePaymentSheet = initPaymentSheet;
+export const presentChallengePaymentSheet = presentPaymentSheet;

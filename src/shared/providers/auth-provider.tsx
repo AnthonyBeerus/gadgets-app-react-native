@@ -1,4 +1,4 @@
-import { useAuth as useClerkAuth, useUser as useClerkUser } from '@clerk/expo';
+import { useAuth as useClerkAuth, useUser as useClerkUser } from '../clerk';
 import { createContext, PropsWithChildren, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 
 import { setSupabaseAccessTokenProvider, supabase } from '../lib/supabase';

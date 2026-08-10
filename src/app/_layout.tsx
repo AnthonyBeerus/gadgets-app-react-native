@@ -1,8 +1,7 @@
 import { Stack, useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { ToastProvider } from "react-native-toast-notifications";
-import { ClerkProvider } from '@clerk/expo';
-import { tokenCache } from '@clerk/expo/token-cache';
+import { ClerkProvider, tokenCache } from '../shared/clerk';
 import AuthProvider, { useAuth } from "../shared/providers/auth-provider";
 import QueryProvider from "../shared/providers/query-provider";
 import { SafeAreaProvider } from "react-native-safe-area-context";
