@@ -1,5 +1,4 @@
 import { supabase } from '../../shared/lib/supabase';
-import Constants from 'expo-constants';
 import { diversifyOpportunityFeed } from './ranking';
 import {
   clearGuestOpportunityPreferences,
@@ -13,7 +12,7 @@ import type {
   OpportunitySource,
 } from './types';
 import { getPrototypeOpportunity, PROTOTYPE_OPPORTUNITIES } from './prototype-opportunities';
-import { shouldUsePrototypeFeedImmediately } from './feed-mode';
+import { withIllustrativeFallback, type RepositoryResult } from './repositories';
 
 const db = supabase as any;
 
@@ -51,14 +50,37 @@ export async function getCreatorOpportunityFeed({
   mallId?: number | null;
   includeHiddenPreferences?: boolean;
 } = {}) {
-  const appVariant = Constants.expoConfig?.extra?.appVariant;
-  if (shouldUsePrototypeFeedImmediately(appVariant) || (__DEV__ && !appVariant)) {
-    return PROTOTYPE_OPPORTUNITIES.slice(cursor, cursor + limit);
+  const result = await getCreatorOpportunityFeedResult({ cursor, limit, mallId });
+  let normalized = diversifyOpportunityFeed(result.records);
+  if (includeHiddenPreferences) return normalized;
+
+  try {
+    const { data: authData } = await supabase.auth.getUser();
+    if (authData.user) return normalized;
+  } catch {
+    // Public discovery still works as a guest when the auth service is offline.
   }
 
+  const guestPreferences = await getGuestOpportunityPreferences();
+  const hidden = new Set(
+    guestPreferences
+      .filter(item => item.state === 'saved' || (item.state === 'dismissed' && Date.now() - Date.parse(item.updated_at) < 30 * 86400000))
+      .map(item => item.opportunity_id),
+  );
+  return normalized.filter(item => !hidden.has(item.opportunity_id));
+}
+
+export async function getCreatorOpportunityFeedResult({
+  cursor = 0,
+  limit = 20,
+  mallId = null,
+}: {
+  cursor?: number;
+  limit?: number;
+  mallId?: number | null;
+} = {}): Promise<RepositoryResult<CreatorOpportunityFeedItem>> {
   const seed = new Date().toISOString().slice(0, 10);
-  let rows: any[] | null = null;
-  try {
+  return withIllustrativeFallback(async () => {
     const result = await Promise.race([
       db.rpc('get_creator_opportunity_feed', {
         p_cursor: cursor,
@@ -69,31 +91,8 @@ export async function getCreatorOpportunityFeed({
       new Promise<never>((_, reject) => setTimeout(() => reject(new Error('Opportunity feed timed out')), 5000)),
     ]);
     if (result.error) throw result.error;
-    rows = result.data;
-  } catch (error) {
-    console.warn('[Discover] Live feed unavailable; using clearly labelled prototype opportunities.', error);
-    rows = null;
-  }
-
-  const liveFeed = normalizeFeed(rows);
-  const normalized = diversifyOpportunityFeed(liveFeed.length > 0 ? liveFeed : PROTOTYPE_OPPORTUNITIES);
-  if (includeHiddenPreferences) return normalized;
-
-  const { data: authData } = await supabase.auth.getUser();
-  // Server feed already applies auth preferences; only filter guest prefs when logged out.
-  if (authData.user) return normalized;
-
-  const guestPreferences = await getGuestOpportunityPreferences();
-  const hidden = new Set(
-    guestPreferences
-      .filter(item => {
-        if (item.state === 'saved') return true;
-        if (item.state !== 'dismissed') return false;
-        return Date.now() - Date.parse(item.updated_at) < 30 * 86400000;
-      })
-      .map(item => item.opportunity_id),
-  );
-  return normalized.filter(item => !hidden.has(item.opportunity_id));
+    return normalizeFeed(result.data);
+  }, PROTOTYPE_OPPORTUNITIES.slice(cursor, cursor + limit));
 }
 
 export async function getSavedCreatorOpportunities() {

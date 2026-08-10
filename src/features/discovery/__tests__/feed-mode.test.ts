@@ -1,8 +1,8 @@
 import { shouldUsePrototypeFeedImmediately } from '../feed-mode';
 
 describe('Discovery feed mode', () => {
-  it.each(['development', 'preview'])('uses fixtures immediately for %s builds', variant => {
-    expect(shouldUsePrototypeFeedImmediately(variant)).toBe(true);
+  it.each(['development', 'preview', 'production'])('attempts live data before fallback for %s builds', variant => {
+    expect(shouldUsePrototypeFeedImmediately(variant)).toBe(false);
   });
 
   it('does not replace the production feed before attempting live data', () => {

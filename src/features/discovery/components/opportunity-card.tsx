@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons'; import { useEffect, useRef } from 'react'; import { Pressable, StyleSheet, View, useWindowDimensions } from 'react-native'; import { Gesture, GestureDetector } from 'react-native-gesture-handler'; import Animated,{interpolate,useAnimatedStyle,useSharedValue,withSpring,withTiming} from 'react-native-reanimated';
 import { Chip, IconButton, Money, Rule, StrokedImage, Text, useDesignTokens } from '../../../shared/design-system'; import type { CreatorOpportunityFeedItem, OpportunityPreferenceState } from '../types';
 type Props={item:CreatorOpportunityFeedItem;reduceMotion:boolean;onAction:(state:OpportunityPreferenceState)=>void;onDetails:()=>void;compact?:boolean};
-const daysLeft=(deadline:string)=>Math.max(0,Math.ceil((new Date(deadline).getTime()-Date.now())/86400000));
+const daysLeft=(deadline:string)=>{const value=new Date(deadline).getTime();return Number.isFinite(value)?Math.max(0,Math.ceil((value-Date.now())/86400000)):0;};
 export function OpportunityCard({item,reduceMotion,onAction,onDetails,compact}:Props){const {width}=useWindowDimensions();const t=useDesignTokens();const x=useSharedValue(0);const leaving=useSharedValue(false);const committed=useRef(false);const threshold=Math.min(110,width*.25);
  useEffect(()=>{committed.current=false;leaving.value=false;x.value=0},[item.opportunity_id]);
  const finish=(state:OpportunityPreferenceState)=>{if(leaving.value||committed.current)return;leaving.value=true;committed.current=true;if(reduceMotion){onAction(state);return}x.value=withTiming(state==='saved'?width*1.3:-width*1.3,{duration:170});setTimeout(()=>onAction(state),150)};

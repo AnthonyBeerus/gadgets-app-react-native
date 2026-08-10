@@ -138,6 +138,8 @@ const AppNavigator = () => {
         name="order-success"
         options={{ headerShown: false, title: "Order Success" }}
       />
+      <Stack.Screen name="payment-processing" options={{ headerShown: false, title: "Processing payment" }} />
+      <Stack.Screen name="order-confirmed" options={{ headerShown: false, title: "Order confirmed" }} />
       <Stack.Screen
         name="orders/index"
         options={{ 

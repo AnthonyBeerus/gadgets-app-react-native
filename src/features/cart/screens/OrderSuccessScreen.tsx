@@ -1,10 +1,40 @@
-import { useQuery } from '@tanstack/react-query'; import { useLocalSearchParams, useRouter } from 'expo-router'; import React, { useEffect } from 'react'; import { ActivityIndicator, StyleSheet, View } from 'react-native';
-import { Button, Chip, EligibilityPanel, MerchantIdentityRow, Money, PinnedActionBar, Plate, PriceBreakdown, StatusScreenTemplate, Text, useDesignTokens } from '../../../shared/design-system'; import { getMyOrder } from '../../../shared/api/api'; import { supabase } from '../../../shared/lib/supabase'; import { useCartStore } from '../../../store/cart-store';
-export default function OrderSuccessScreen(){const t=useDesignTokens();const router=useRouter();const {orderId}=useLocalSearchParams<{orderId?:string}>();const id=Array.isArray(orderId)?orderId[0]:orderId??'';const query=getMyOrder(id);const order=query.data;const store=useCartStore();const settled=['succeeded','failed','cancelled','refunded'].includes(order?.payment_status??'');
- useEffect(()=>{if(settled)return;const timer=setInterval(()=>query.refetch(),2000);return()=>clearInterval(timer)},[settled,query.refetch]);
- useEffect(()=>{if(order?.payment_status==='succeeded')store.clearCompletedCheckout()},[order?.payment_status,store.clearCompletedCheckout]);
- const opportunity=useQuery({queryKey:['order-purchase-proof',order?.id],enabled:order?.payment_status==='succeeded',queryFn:async()=>{const {data:proof}=await(supabase as any).from('purchase_proofs').select('product_id').eq('order_id',order!.id).is('revoked_at',null).limit(1).maybeSingle();if(!proof)return null;const {data}=await(supabase as any).from('challenges').select('id,title,reward_value,pot_value,contest_mode').eq('product_id',proof.product_id).eq('status','active').limit(1).maybeSingle();return data??null}});
- if(!order||['requires_payment','processing'].includes(order.payment_status))return <StatusScreenTemplate><ActivityIndicator size="large" color={t.colors.ink}/><Text variant="display">Confirming your payment</Text><Text variant="body">Your card has authorised. We are waiting for the payment network to confirm the order. You can safely leave this screen.</Text><Plate style={s.progress}><Text variant="bodySm">● Card authorised</Text><Text variant="bodySm" color={t.colors.warning}>● Confirming with the payment network</Text><Text variant="bodySm" color={t.colors.inkMuted}>○ Order sent to merchant</Text></Plate><Text variant="label">REF MUSE-{id} · SANDBOX</Text></StatusScreenTemplate>;
- if(order.payment_status!=='succeeded')return <StatusScreenTemplate><Text variant="display">Payment not completed</Text><Text variant="body">The payment network did not confirm this order. Nothing was charged.</Text><Button onPress={()=>router.replace('/bag')}>Back to bag</Button></StatusScreenTemplate>;
- const items=order.order_items??[];const total=order.total_minor/100;return <View style={[s.safe,{backgroundColor:t.colors.canvas}]}><View style={[s.hero,{backgroundColor:t.mode==='dark'?t.colors.ink:t.colors.ink}]}><Chip kind="status" tone="success" label="Payment confirmed"/><Text variant="display" color={t.colors.onInk}>Order MUSE-{order.id}</Text><Text variant="bodySm" color={t.colors.onInk}>Confirmed by the payment network, not by this phone. {order.shops?.name??'The shop'} has your order.</Text></View><View style={s.body}>{items.map((item:any)=><View key={item.id} style={s.line}><Text variant="bodySm">{item.quantity} × {item.products?.title??'Product'}</Text><Money amount={(item.products?.price??0)*item.quantity}/></View>)}<View style={s.line}><Text variant="h3">Paid</Text><Money amount={total} emphasis="strong"/></View>{opportunity.data?<EligibilityPanel model={{title:opportunity.data.title,perEntry:Number(opportunity.data.reward_value??0),pot:Number(opportunity.data.pot_value??0),qualifying:true}}/>:null}<Text variant="label">Next</Text><Text variant="bodySm">We will tell you when it is ready. A collection code appears only after the shop marks the order ready.</Text></View><PinnedActionBar><Button onPress={()=>router.replace(`/orders/${order.slug??order.id}`)}>Track order</Button></PinnedActionBar></View>}
-const s=StyleSheet.create({safe:{flex:1},hero:{paddingHorizontal:16,paddingVertical:26,gap:11},body:{flex:1,padding:16,gap:14},line:{flexDirection:'row',justifyContent:'space-between',gap:12},progress:{padding:14,gap:11}});
+import { useQuery } from '@tanstack/react-query';
+import { useLocalSearchParams, usePathname, useRouter } from 'expo-router';
+import { useEffect } from 'react';
+import { StyleSheet, View } from 'react-native';
+
+import { getMyOrder } from '../../../shared/api/api';
+import { supabase } from '../../../shared/lib/supabase';
+import { Button, Chip, EligibilityPanel, Money, PaymentProcessingOrganism, PinnedActionBar, StatusScreenTemplate, Text, useDesignTokens } from '../../../shared/design-system';
+import { useCartStore } from '../../../store/cart-store';
+
+export default function OrderSuccessScreen() {
+  const tokens = useDesignTokens();
+  const router = useRouter();
+  const pathname = usePathname();
+  const params = useLocalSearchParams<{ orderId?: string; id?: string }>();
+  const id = String(params.orderId ?? params.id ?? '');
+  const query = getMyOrder(id);
+  const order = query.data;
+  const clear = useCartStore(state => state.clearCompletedCheckout);
+  const terminal = ['succeeded', 'failed', 'cancelled', 'refunded'].includes(order?.payment_status ?? '');
+  useEffect(() => { if (terminal) return; const timer = setInterval(() => query.refetch(), 2_000); return () => clearInterval(timer); }, [terminal, query.refetch]);
+  useEffect(() => { if (order?.payment_status === 'succeeded') clear(); }, [clear, order?.payment_status]);
+  useEffect(() => { if (pathname === '/payment-processing' && order?.payment_status === 'succeeded') router.replace(`/order-confirmed/${order.id}`); }, [order?.id, order?.payment_status, pathname, router]);
+  const proof = useQuery({
+    queryKey: ['order-purchase-proof', order?.id], enabled: order?.payment_status === 'succeeded',
+    queryFn: async () => { const { data: purchase } = await (supabase as any).from('purchase_proofs').select('product_id').eq('order_id', order!.id).is('revoked_at', null).limit(1).maybeSingle(); if (!purchase) return null; const { data } = await (supabase as any).from('challenges').select('id,title,reward_value,pot_value,contest_mode').eq('product_id', purchase.product_id).eq('status', 'active').limit(1).maybeSingle(); return data ?? null; },
+  });
+  if (!order || ['requires_payment', 'processing'].includes(order.payment_status)) return <StatusScreenTemplate><PaymentProcessingOrganism model={{ reference: `MUSE-${id}`, cardAuthorized: true, networkConfirmed: false, merchantNotified: false }} /></StatusScreenTemplate>;
+  if (order.payment_status !== 'succeeded') return <StatusScreenTemplate><Text variant="display">Payment not completed</Text><Text variant="body">The payment network did not confirm this order. Nothing was charged.</Text><Button onPress={() => router.replace('/bag')}>Back to bag</Button></StatusScreenTemplate>;
+  const dark = tokens.mode === 'dark';
+  const heroBackground = dark ? tokens.colors.ink : tokens.colors.ink;
+  const heroText = tokens.colors.onInk;
+  const items = order.order_items ?? [];
+  return <View style={[styles.safe, { backgroundColor: tokens.colors.canvas }]}>
+    <View style={[styles.hero, { backgroundColor: heroBackground }]}><Chip kind="status" tone="success" label="Payment confirmed" /><Text variant="display" color={heroText}>Order MUSE-{order.id}</Text><Text variant="bodySm" color={heroText}>Confirmed by the payment network, not by this phone. {order.shops?.name ?? 'The shop'} has your order.</Text></View>
+    <View style={styles.body}>{items.map((item: any) => <View key={item.id} style={styles.line}><Text variant="bodySm">{item.quantity} × {item.products?.title ?? 'Product'}</Text><Money amount={Number(item.products?.price ?? 0) * item.quantity} /></View>)}<View style={styles.line}><Text variant="h3">Paid</Text><Money amount={order.total_minor / 100} emphasis="strong" /></View>{proof.data ? <EligibilityPanel model={{ title: proof.data.title, perEntry: Number(proof.data.reward_value ?? 0), pot: Number(proof.data.pot_value ?? 0), qualifying: true }} /> : null}<Text variant="label">Next</Text><Text variant="bodySm">We will tell you when it is ready. A collection code appears only after the shop marks the order ready.</Text></View>
+    <PinnedActionBar><Button onPress={() => router.replace(`/orders/${order.slug ?? order.id}`)}>Track order</Button></PinnedActionBar>
+  </View>;
+}
+const styles = StyleSheet.create({ safe: { flex: 1 }, hero: { paddingHorizontal: 16, paddingVertical: 26, gap: 11 }, body: { flex: 1, padding: 16, gap: 14 }, line: { flexDirection: 'row', justifyContent: 'space-between', gap: 12 } });

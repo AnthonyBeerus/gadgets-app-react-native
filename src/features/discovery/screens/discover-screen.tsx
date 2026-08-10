@@ -2,7 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'expo-router';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { AccessibilityInfo, ActivityIndicator, FlatList, Pressable, View } from 'react-native';
+import { AccessibilityInfo, FlatList, Pressable, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import {
@@ -13,11 +13,11 @@ import {
   radii,
   space,
   fonts,
-  type DesignTokens,
   type SemanticColors,
 } from '../../../shared/design-system';
 import { useAuth } from '../../../shared/providers/auth-provider';
 import { useShopStore } from '../../../store/shop-store';
+import { useNetworkStatus } from '../../../shared/hooks/use-network-status';
 import {
   getCreatorOpportunityFeed,
   mergeGuestCreatorOpportunityPreferences,
@@ -34,7 +34,7 @@ import type { CreatorOpportunityFeedItem, DiscoveryDeckEntry, OpportunityPrefere
 
 const SWIPE_DECK_MIN = 5;
 const FEED_LIMIT = 150;
-function createStyles(c: SemanticColors, tokens: DesignTokens) {
+function createStyles(c: SemanticColors) {
   return {
     container: { flex: 1, backgroundColor: c.canvas },
     locationRow: {
@@ -45,24 +45,13 @@ function createStyles(c: SemanticColors, tokens: DesignTokens) {
       paddingHorizontal: space.md,
       paddingBottom: space.xs,
     },
-    locationButton: {
-      minHeight: 38,
-      flexShrink: 1,
-      flexDirection: 'row' as const,
-      alignItems: 'center' as const,
-      gap: 5,
-      backgroundColor: c.surface,
-      borderRadius: radii.md,
-      paddingHorizontal: space.sm,
-      ...tokens.elevation.hairline,
-    },
     undoButton: {
       minHeight: 38,
       flexDirection: 'row' as const,
       alignItems: 'center' as const,
       gap: 5,
       backgroundColor: c.accentMuted,
-      borderRadius: radii.md,
+      borderRadius: 0,
       paddingHorizontal: space.sm,
       borderWidth: 1,
       borderColor: c.accent,
@@ -72,9 +61,10 @@ function createStyles(c: SemanticColors, tokens: DesignTokens) {
       alignItems: 'center' as const,
       justifyContent: 'center' as const,
       backgroundColor: c.surface,
-      borderRadius: radii.md,
+      borderRadius: 0,
       paddingHorizontal: space.sm,
-      ...tokens.elevation.hairline,
+      borderWidth: 2,
+      borderColor: c.stroke,
     },
     deck: { flex: 1, justifyContent: 'center' as const, paddingHorizontal: space.md, paddingBottom: 6 },
     listContent: { paddingBottom: 100 },
@@ -104,10 +94,11 @@ function createStyles(c: SemanticColors, tokens: DesignTokens) {
       alignItems: 'center' as const,
       justifyContent: 'center' as const,
       gap: space.md,
-      borderRadius: radii.lg,
+      borderRadius: 0,
+      borderWidth: 2,
+      borderColor: c.stroke,
       backgroundColor: c.surface,
       padding: space.lg,
-      ...tokens.elevation.hairline,
     },
     hint: { paddingBottom: 84, color: c.inkMuted, fontFamily: fonts.regular },
     prototypeBanner: { marginHorizontal: space.md, marginBottom: space.xs, paddingHorizontal: space.sm, paddingVertical: 7, borderRadius: radii.sm, backgroundColor: c.accentMuted },
@@ -124,6 +115,7 @@ export default function DiscoverScreen() {
   const [history, setHistory] = useState<DiscoveryDeckEntry[]>([]);
   const [reduceMotion, setReduceMotion] = useState(false);
   const discoveryState = useDiscoveryStore();
+  const network = useNetworkStatus();
   const actedKeys = discoveryState.actedKeys;
   const setActedKeys = (updater: string[] | ((previous: string[]) => string[])) => {
     const next = typeof updater === 'function' ? updater(discoveryState.actedKeys) : updater;
@@ -151,6 +143,24 @@ export default function DiscoverScreen() {
       })
       .catch(error => console.warn('Could not merge guest opportunity preferences', error));
   }, [session?.user?.id, queryClient]);
+
+  useEffect(() => {
+    if (!network.isConnected || network.isInternetReachable === false || discoveryState.offlineQueue.length === 0) return;
+    let cancelled = false;
+    const flush = async () => {
+      for (const mutation of discoveryState.offlineQueue) {
+        if (cancelled) return;
+        try {
+          if (mutation.state === 'restore') await restoreCreatorOpportunityPreference(mutation.opportunityId);
+          else await setCreatorOpportunityPreference(mutation.opportunityId, mutation.state);
+          discoveryState.dequeue(mutation.id);
+        } catch { return; }
+      }
+      queryClient.invalidateQueries({ queryKey: ['creator-opportunity-saved'] });
+    };
+    void flush();
+    return () => { cancelled = true; };
+  }, [discoveryState.offlineQueue, network.isConnected, network.isInternetReachable, queryClient]);
 
   useEffect(() => {
     discoveryState.setScope(String(selectedMall ?? 'all'));
@@ -207,14 +217,14 @@ export default function DiscoverScreen() {
     actionLock.current = entry.key;
     if (!useList) setHistory(previous => [entry, ...previous].slice(0, 1));
     markActed(entry);
-    if (entry.kind === 'opportunity') discoveryState.act(entry.key, { id: `${Date.now()}-${entry.item.opportunity_id}`, opportunityId: entry.item.opportunity_id, state, createdAt: new Date().toISOString() });
+    const mutationId = `${Date.now()}-${entry.item.opportunity_id}`;
+    if (entry.kind === 'opportunity') discoveryState.act(entry.key, { id: mutationId, opportunityId: entry.item.opportunity_id, state, createdAt: new Date().toISOString() });
     try {
       await setCreatorOpportunityPreference(item.opportunity_id, state);
+      discoveryState.dequeue(mutationId);
       queryClient.invalidateQueries({ queryKey: ['creator-opportunity-saved'] });
     } catch (error) {
-      setActedKeys(previous => previous.filter(key => key !== entry.key));
-      if (!useList) setHistory([]);
-      console.warn('Could not save opportunity preference', error);
+      console.warn('Opportunity preference queued for reconnect', error);
     } finally {
       if (actionLock.current === entry.key) actionLock.current = null;
     }
@@ -262,11 +272,6 @@ export default function DiscoverScreen() {
         </View>
       ) : null}
       <View style={styles.locationRow}>
-        <Pressable accessibilityRole="button" onPress={() => router.push('/mall-selector')} style={styles.locationButton}>
-          <Ionicons name="location" size={16} color={colors.ink} />
-          <Text variant="caption">{malls.find(mall => mall.id === selectedMall)?.name ?? 'All locations'}</Text>
-          <Ionicons name="chevron-down" size={14} color={colors.ink} />
-        </Pressable>
         {!useList && history.length > 0 && (
           <Pressable accessibilityRole="button" accessibilityLabel="Undo last swipe" onPress={undo} style={styles.undoButton}>
             <Ionicons name="arrow-undo" size={17} color={colors.ink} />
@@ -282,7 +287,7 @@ export default function DiscoverScreen() {
 
       <View style={styles.deck}>
         {feed.isLoading ? (
-          <ActivityIndicator size="large" color={colors.ink} />
+          <DeckSkeleton location={malls.find(mall => mall.id === selectedMall)?.name ?? 'Molapo'} />
         ) : feed.error && !feedItems.length ? (
           <View style={styles.emptyCard}>
             <Ionicons name="cloud-offline" size={48} color={colors.inkMuted} />
@@ -357,4 +362,15 @@ export default function DiscoverScreen() {
       )}
     </SafeAreaView>
   );
+}
+
+function DeckSkeleton({ location }: { location: string }) {
+  const { colors } = useDesignTokens();
+  return <View style={{ flex: 1, gap: 12 }}>
+    <View style={{ flex: 1, borderWidth: 2, borderColor: colors.strokeDim, backgroundColor: colors.surfaceSunken }}>
+      <View style={{ height: 250, borderBottomWidth: 2, borderBottomColor: colors.strokeDim }} />
+      <View style={{ padding: 16, gap: 11 }}><View style={{ height: 18, width: '55%', borderWidth: 2, borderColor: colors.strokeQuiet }} /><View style={{ height: 62, borderWidth: 2, borderColor: colors.strokeQuiet }} /><View style={{ height: 2, backgroundColor: colors.strokeQuiet }} /><View style={{ height: 70, borderWidth: 2, borderColor: colors.strokeQuiet }} /></View>
+    </View>
+    <Text variant="caption" align="center">Finding funded briefs near {location}</Text>
+  </View>;
 }

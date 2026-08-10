@@ -1,7 +1,9 @@
 import { supabase } from '../../shared/lib/supabase';
-import Constants from 'expo-constants';
 import { getCreatorOpportunityFeed } from './api';
 import { buildMerchantGrowthProfiles, PROTOTYPE_MERCHANTS, type MerchantSeed, type ShopIntent } from './shops-model';
+import { withIllustrativeFallback, type RepositoryResult } from './repositories';
+import type { MerchantGrowthProfile } from './shops-model';
+import { PROTOTYPE_OPPORTUNITIES } from './prototype-opportunities';
 
 const db = supabase as any;
 
@@ -56,28 +58,18 @@ function inferIntent(categoryName: string): ShopIntent {
 }
 
 export async function getCampaignAwareShops() {
-  const variant = Constants.expoConfig?.extra?.appVariant;
-  if (variant === 'development' || variant === 'preview' || (__DEV__ && !variant)) {
-    const opportunities = await getCreatorOpportunityFeed({ includeHiddenPreferences: true, limit: 200 });
-    const prototypes = buildMerchantGrowthProfiles(PROTOTYPE_MERCHANTS, opportunities);
-    try {
-      const catalog = await getMarketplaceCatalog();
-      const alphaCatalog = {
-        ...catalog,
-        shops: catalog.shops.filter(shop => shop.name === 'Muse Alpha Shop'),
-      };
-      const alphaProfiles = buildMerchantGrowthProfiles(catalogToMerchants(alphaCatalog), opportunities);
-      return [...alphaProfiles, ...prototypes];
-    } catch {
-      return prototypes;
-    }
-  }
+  return (await getCampaignAwareShopsResult()).records;
+}
 
-  const [catalog, opportunities] = await Promise.all([
-    getMarketplaceCatalog(),
-    getCreatorOpportunityFeed({ includeHiddenPreferences: true, limit: 200 }),
-  ]);
-  return buildMerchantGrowthProfiles(catalogToMerchants(catalog), opportunities);
+export async function getCampaignAwareShopsResult(): Promise<RepositoryResult<MerchantGrowthProfile>> {
+  const fallback = buildMerchantGrowthProfiles(PROTOTYPE_MERCHANTS, PROTOTYPE_OPPORTUNITIES);
+  return withIllustrativeFallback(async () => {
+    const [catalog, opportunities] = await Promise.all([
+      getMarketplaceCatalog(),
+      getCreatorOpportunityFeed({ includeHiddenPreferences: true, limit: 200 }),
+    ]);
+    return buildMerchantGrowthProfiles(catalogToMerchants(catalog), opportunities);
+  }, fallback);
 }
 
 function catalogToMerchants(catalog: Awaited<ReturnType<typeof getMarketplaceCatalog>>): MerchantSeed[] {

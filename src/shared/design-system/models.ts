@@ -7,3 +7,7 @@ export type PaymentFailureModel = { kind: 'declined' | 'cancelled' | 'authentica
 export type OrderTimelineModel = { id: string; label: string; detail: string; state: 'complete' | 'current' | 'pending' }[];
 export type CollectionCodeModel = { orderId: string | number; token: string; spokenCode: string; merchant: string; location?: string };
 export type OpportunityCardModel = { id: number; merchant: MerchantIdentityModel; title: string; heroImage?: string; payout: PayoutModel; deadline: string; qualifyingPrice: number; illustrative?: boolean; platform?: string };
+export type DiscoverScreenState = 'loading' | 'resting' | 'swipe-intent' | 'undo' | 'exhausted' | 'offline' | 'sponsored';
+export type PaymentScreenState = 'processing' | 'declined' | 'cancelled' | 'authentication-required' | 'timed-out' | 'setup-failed' | 'confirmed';
+export type OrderScreenState = 'preparing' | 'ready-for-collection' | 'delivery';
+export type AuthInterruptionState = 'sign-in' | 'sign-up' | 'verify-email' | 'expired-session' | 'profile-recovery';

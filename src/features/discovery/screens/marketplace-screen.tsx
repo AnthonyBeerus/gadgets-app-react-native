@@ -1,114 +1,80 @@
-import { Ionicons } from '@expo/vector-icons';
 import { useQuery } from '@tanstack/react-query';
 import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
 import { useMemo, useState } from 'react';
-import { ActivityIndicator, Pressable, ScrollView, TextInput, View } from 'react-native';
+import { FlatList, Pressable, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { Text, fonts, radii, space, useDesignTokens, useThemedStyles, type DesignTokens, type SemanticColors } from '../../../shared/design-system';
+import { MerchantIdentityRow, Money, SearchField, Text, useDesignTokens } from '../../../shared/design-system';
 import { useShopStore } from '../../../store/shop-store';
-import { ConsumerUtilityHeader } from '../components/consumer-utility-header';
-import { MerchantGrowthCard } from '../components/merchant-growth-card';
-import { getCampaignAwareShops } from '../marketplace-api';
-import { searchMerchantGrowthProfiles, type ShopIntent } from '../shops-model';
-
-const intents: Array<ShopIntent | 'All'> = ['All', 'Eat', 'Beauty', 'Style', 'Creator Tech', 'Experiences'];
+import { getCampaignAwareShopsResult } from '../marketplace-api';
+import type { MerchantGrowthProfile } from '../shops-model';
 
 export default function MarketplaceScreen() {
-  const styles = useThemedStyles(createStyles);
   const { colors } = useDesignTokens();
   const router = useRouter();
+  const [query, setQuery] = useState('');
   const selectedMall = useShopStore(state => state.selectedMall);
   const malls = useShopStore(state => state.malls);
-  const [query, setQuery] = useState('');
-  const [intent, setIntent] = useState<ShopIntent | 'All'>('All');
-  const [fulfillment, setFulfillment] = useState<'all' | 'collection' | 'delivery'>('all');
-  const shops = useQuery({ queryKey: ['campaign-aware-shops'], queryFn: getCampaignAwareShops, staleTime: 60_000 });
+  const shops = useQuery({
+    queryKey: ['shops', 'campaign-aware', selectedMall],
+    queryFn: getCampaignAwareShopsResult,
+    staleTime: 60_000,
+    retry: 2,
+  });
+  const records = shops.data?.records ?? [];
+  const filtered = useMemo(() => {
+    const term = query.trim().toLowerCase();
+    if (!term) return records;
+    return records.filter(item => `${item.name} ${item.story}`.toLowerCase().includes(term));
+  }, [query, records]);
+  const featured = filtered[0];
+  const list = featured ? filtered.slice(1) : [];
+  const location = malls.find(mall => mall.id === selectedMall)?.name ?? 'Molapo';
+  const open = (id: number) => router.push(`/shop/${id}`);
 
-  const profiles = useMemo(() => (shops.data ?? []).filter(profile => {
-    const intentMatch = intent === 'All' || profile.intent === intent;
-    const fulfillmentMatch = fulfillment === 'all' || (fulfillment === 'collection' ? profile.hasCollection : profile.hasDelivery);
-    return intentMatch && fulfillmentMatch;
-  }), [fulfillment, intent, shops.data]);
-  const results = useMemo(() => searchMerchantGrowthProfiles(profiles, query), [profiles, query]);
-  const location = malls.find(mall => mall.id === selectedMall)?.name ?? 'Molapo Crossing';
-  const sponsored = profiles.find(profile => profile.isSponsored);
-  const active = profiles.filter(profile => profile.opportunity && profile.id !== sponsored?.id);
-  const allShops = profiles.filter(profile => profile.id !== sponsored?.id);
-  const searching = query.trim().length > 0;
-  const openMerchant = (id: number) => router.push(`/shop/${id}`);
-  const openOpportunity = (id: number) => router.push(`/opportunity/${id}`);
-  const openProduct = (slug: string, opportunityId?: number) => router.push({ pathname: '/product/[slug]', params: { slug, source: 'merchant', ...(opportunityId ? { opportunityId } : {}) } });
-
-  return (
-    <SafeAreaView edges={['top']} style={styles.container}>
-      <ConsumerUtilityHeader />
-      <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
-        <View style={styles.heading}>
-          <Text variant="caption" color={colors.accent}>SHOPS · {location.toUpperCase()}</Text>
-          <Text variant="h1">Shop businesses building Botswana&apos;s digital economy.</Text>
-          <Text variant="body" color={colors.inkMuted}>Discover local businesses funding creator campaigns, generating social content and turning attention into real commerce.</Text>
-        </View>
-
-        <View style={styles.searchBox}>
-          <Ionicons name="search" size={20} color={colors.inkMuted} />
-          <TextInput accessibilityLabel="Search businesses, opportunities and products" value={query} onChangeText={setQuery} placeholder="Search businesses, briefs or products" placeholderTextColor={colors.inkMuted} style={styles.searchInput} />
-          {!!query && <Pressable accessibilityLabel="Clear search" onPress={() => setQuery('')}><Ionicons name="close-circle" size={20} color={colors.inkMuted} /></Pressable>}
-        </View>
-
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chips}>
-          {intents.map(value => <Chip key={value} label={value} active={intent === value} onPress={() => setIntent(value)} styles={styles} />)}
-        </ScrollView>
-        <View style={styles.fulfillment}>
-          <Chip label="Any fulfilment" active={fulfillment === 'all'} onPress={() => setFulfillment('all')} styles={styles} />
-          <Chip label="Collection" active={fulfillment === 'collection'} onPress={() => setFulfillment('collection')} styles={styles} />
-          <Chip label="Delivery" active={fulfillment === 'delivery'} onPress={() => setFulfillment('delivery')} styles={styles} />
-        </View>
-
-        {shops.isLoading ? <ActivityIndicator size="large" color={colors.ink} /> : shops.error ? (
-          <View style={styles.empty}><Text variant="h2">Shops took a break</Text><Text variant="body" color={colors.inkMuted}>Try again to load creator-backed businesses.</Text><Pressable onPress={() => shops.refetch()} style={styles.retry}><Text variant="bodyBold">Try again</Text></Pressable></View>
-        ) : searching ? (
-          <View style={styles.sections}>
-            <SectionTitle title="Businesses" count={results.merchants.length} />
-            {results.merchants.map(profile => <MerchantGrowthCard key={profile.id} profile={profile} onPress={() => openMerchant(profile.id)} />)}
-            <SectionTitle title="Opportunities" count={results.opportunities.length} />
-            {results.opportunities.map(item => <Pressable key={item.opportunity_id} onPress={() => openOpportunity(item.opportunity_id)} style={styles.resultRow}><Ionicons name="sparkles" size={20} color={colors.accent} /><View style={styles.resultCopy}><Text variant="bodyBold">{item.opportunity_title}</Text><Text variant="caption" color={colors.inkMuted}>P{item.pot_value} pot · {item.merchant_name}</Text></View><Ionicons name="chevron-forward" size={18} color={colors.inkMuted} /></Pressable>)}
-            <SectionTitle title="Products" count={results.products.length} />
-            {results.products.map(item => <Pressable key={item.id} onPress={() => openProduct(item.slug)} style={styles.resultRow}><Image source={{ uri: item.heroImage }} style={styles.productThumb} /><View style={styles.resultCopy}><Text variant="bodyBold">{item.title}</Text><Text variant="caption" color={colors.inkMuted}>P{item.price}</Text></View><Ionicons name="chevron-forward" size={18} color={colors.inkMuted} /></Pressable>)}
-            {results.merchants.length + results.opportunities.length + results.products.length === 0 && <View style={styles.empty}><Text variant="h2">Nothing matched</Text><Text variant="body" color={colors.inkMuted}>Try a merchant, category or product name.</Text></View>}
-          </View>
-        ) : (
-          <View style={styles.sections}>
-            {sponsored && <><SectionTitle title="Sponsored spotlight" /><MerchantGrowthCard profile={sponsored} onPress={() => openMerchant(sponsored.id)} /></>}
-            <SectionTitle title="Businesses powering creator campaigns" count={active.length} />
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.horizontalCards}>{active.map(profile => <MerchantGrowthCard key={profile.id} profile={profile} compact onPress={() => openMerchant(profile.id)} />)}</ScrollView>
-            <SectionTitle title="Campaign collections" />
-            <View style={styles.collectionRow}>
-              <CollectionCard title="Beauty Made in Botswana" subtitle="Scents, style and local professionals" icon="color-palette" onPress={() => { setIntent('Beauty'); setQuery(''); }} styles={styles} />
-              <CollectionCard title="Made at Molapo" subtitle="Creative experiences and creator tools" icon="videocam" onPress={() => { setIntent('Experiences'); setQuery(''); }} styles={styles} />
-            </View>
-            <SectionTitle title="All shops" count={allShops.length} />
-            {allShops.map(profile => <MerchantGrowthCard key={profile.id} profile={profile} onPress={() => openMerchant(profile.id)} />)}
-          </View>
-        )}
-      </ScrollView>
-    </SafeAreaView>
-  );
+  return <SafeAreaView edges={['top']} style={[styles.safe, { backgroundColor: colors.canvas }]}>
+    <View style={[styles.header, { borderBottomColor: colors.stroke }]}>
+      <Text variant="h2">Shops</Text>
+      <Pressable onPress={() => router.push('/mall-selector')} accessibilityLabel="Change location"><Text variant="label" color={colors.inkMuted}>{location.toUpperCase()} ▾</Text></Pressable>
+    </View>
+    <FlatList
+      data={list}
+      keyExtractor={item => String(item.id)}
+      contentContainerStyle={styles.content}
+      refreshing={shops.isFetching}
+      onRefresh={() => shops.refetch()}
+      ListHeaderComponent={<View style={styles.top}>
+        <SearchField label="Search" placeholder="Search shops" value={query} onChangeText={setQuery} />
+        {shops.data?.provenance === 'illustrative-fallback' ? <View style={[styles.disclosure, { backgroundColor: colors.ink }]}><Text variant="label" color={colors.onInk}>Illustrative · live shops unavailable</Text></View> : null}
+        {shops.isLoading ? <ShopSkeleton /> : featured ? <FeaturedMerchant profile={featured} onPress={() => open(featured.id)} /> : <View style={[styles.empty, { borderColor: colors.strokeDim }]}><Text variant="h1">No shops yet</Text><Text variant="body">No businesses match this search. Clear it to see every available shop.</Text></View>}
+        {list.length ? <Text variant="label">All shops</Text> : null}
+      </View>}
+      renderItem={({ item }) => <MerchantRow profile={item} onPress={() => open(item.id)} />}
+      ItemSeparatorComponent={() => <View style={[styles.rule, { backgroundColor: colors.strokeDim }]} />}
+    />
+  </SafeAreaView>;
 }
 
-function SectionTitle({ title, count }: { title: string; count?: number }) { return <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}><Text variant="h2">{title}</Text>{count != null && <Text variant="caption">{count}</Text>}</View>; }
-function Chip({ label, active, onPress, styles }: { label: string; active: boolean; onPress: () => void; styles: ReturnType<typeof createStyles> }) { return <Pressable accessibilityRole="button" accessibilityState={{ selected: active }} onPress={onPress} style={[styles.chip, active && styles.chipActive]}><Text variant="caption">{label}</Text></Pressable>; }
-function CollectionCard({ title, subtitle, icon, onPress, styles }: { title: string; subtitle: string; icon: keyof typeof Ionicons.glyphMap; onPress: () => void; styles: ReturnType<typeof createStyles> }) { const { colors } = useDesignTokens(); return <Pressable onPress={onPress} style={styles.collection}><Ionicons name={icon} size={25} color={colors.accent} /><Text variant="bodyBold">{title}</Text><Text variant="caption" color={colors.inkMuted}>{subtitle}</Text></Pressable>; }
-
-function createStyles(c: SemanticColors, tokens: DesignTokens) {
-  return {
-    container: { flex: 1, backgroundColor: c.canvas }, content: { gap: space.md, paddingHorizontal: space.md, paddingBottom: 110 }, heading: { gap: space.xs },
-    searchBox: { minHeight: 50, flexDirection: 'row' as const, alignItems: 'center' as const, gap: space.sm, borderRadius: radii.md, backgroundColor: c.surface, paddingHorizontal: space.md, ...tokens.elevation.hairline },
-    searchInput: { flex: 1, color: c.ink, fontFamily: fonts.regular, fontSize: 15 }, chips: { gap: space.xs, paddingRight: space.md }, chip: { minHeight: 38, justifyContent: 'center' as const, borderRadius: 999, borderWidth: 1, borderColor: c.border, backgroundColor: c.surface, paddingHorizontal: space.md }, chipActive: { backgroundColor: c.accentMuted, borderColor: c.accent },
-    fulfillment: { flexDirection: 'row' as const, flexWrap: 'wrap' as const, gap: space.xs }, sections: { gap: space.md }, horizontalCards: { gap: space.md, paddingRight: space.md },
-    collectionRow: { flexDirection: 'row' as const, gap: space.sm }, collection: { flex: 1, minHeight: 150, borderRadius: radii.md, backgroundColor: c.surface, padding: space.md, gap: space.xs, ...tokens.elevation.hairline },
-    resultRow: { minHeight: 72, flexDirection: 'row' as const, alignItems: 'center' as const, gap: space.sm, borderRadius: radii.md, backgroundColor: c.surface, padding: space.sm, ...tokens.elevation.hairline }, resultCopy: { flex: 1, gap: 3 }, productThumb: { width: 54, height: 54, borderRadius: radii.sm },
-    empty: { alignItems: 'center' as const, gap: space.sm, borderRadius: radii.md, backgroundColor: c.surface, padding: space.lg }, retry: { minHeight: 44, justifyContent: 'center' as const, borderRadius: radii.md, backgroundColor: c.accentMuted, paddingHorizontal: space.md },
-  };
+function pot(profile: MerchantGrowthProfile) { return Number(profile.opportunity?.pot_value ?? profile.opportunity?.reward_value ?? 0); }
+function identity(profile: MerchantGrowthProfile) { return { id: profile.id, name: profile.name, location: profile.location, imageUrl: profile.logoUrl }; }
+function FeaturedMerchant({ profile, onPress }: { profile: MerchantGrowthProfile; onPress: () => void }) {
+  const { colors } = useDesignTokens();
+  return <Pressable onPress={onPress} style={[styles.featured, { borderColor: colors.stroke, backgroundColor: colors.surface }]}>
+    <View style={[styles.heroFrame, { borderBottomColor: colors.stroke }]}><Image source={{ uri: profile.imageUrl }} style={styles.hero} contentFit="cover" /></View>
+    <View style={styles.featuredBody}><MerchantIdentityRow merchant={identity(profile)} />
+      <View style={[styles.pot, { backgroundColor: colors.ink }]}><Text variant="label" color={colors.onInk}>Open creator pot</Text><Money amount={pot(profile)} format="prize" emphasis="strong" style={{ color: colors.payout }} /></View>
+    </View>
+  </Pressable>;
 }
+function MerchantRow({ profile, onPress }: { profile: MerchantGrowthProfile; onPress: () => void }) {
+  return <Pressable onPress={onPress} style={styles.row}><View style={styles.rowIdentity}><MerchantIdentityRow merchant={identity(profile)} /></View><View style={styles.rowMoney}><Money amount={pot(profile)} format="prize" emphasis="strong" /><Text variant="caption">pot</Text></View></Pressable>;
+}
+function ShopSkeleton() { const { colors } = useDesignTokens(); return <View style={[styles.skeleton, { borderColor: colors.strokeDim, backgroundColor: colors.surfaceSunken }]}><View style={[styles.skeletonHero, { borderBottomColor: colors.strokeDim }]} /><View style={styles.skeletonLines}><View style={[styles.skeletonLine, { borderColor: colors.strokeDim }]} /><View style={[styles.skeletonLineShort, { borderColor: colors.strokeDim }]} /></View></View>; }
+
+const styles = StyleSheet.create({
+  safe: { flex: 1 }, header: { minHeight: 58, paddingHorizontal: 16, borderBottomWidth: 2, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  content: { paddingHorizontal: 16, paddingBottom: 104 }, top: { gap: 14, paddingVertical: 14 }, disclosure: { padding: 10 }, featured: { borderWidth: 2 }, heroFrame: { height: 174, borderBottomWidth: 2 }, hero: { width: '100%', height: '100%' }, featuredBody: { padding: 12, gap: 12 }, pot: { padding: 12, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  row: { minHeight: 72, paddingVertical: 10, flexDirection: 'row', alignItems: 'center', gap: 8 }, rowIdentity: { flex: 1, minWidth: 0 }, rowMoney: { flexShrink: 0, alignItems: 'flex-end' }, rule: { height: 1 },
+  empty: { borderWidth: 2, borderStyle: 'dashed', padding: 20, gap: 8 }, skeleton: { height: 286, borderWidth: 2 }, skeletonHero: { height: 174, borderBottomWidth: 2 }, skeletonLines: { padding: 14, gap: 10 }, skeletonLine: { height: 24, width: '70%', borderWidth: 2 }, skeletonLineShort: { height: 18, width: '42%', borderWidth: 2 },
+});

@@ -1,74 +1,19 @@
-import { Ionicons } from '@expo/vector-icons';
+import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
 import { Pressable, StyleSheet, View } from 'react-native';
 
-import {
-  Text,
-  space,
-  radii,
-  useDesignTokens,
-  useThemedStyles,
-  type DesignTokens,
-  type SemanticColors,
-} from '../../../shared/design-system';
+import { Text, useDesignTokens } from '../../../shared/design-system';
+import { useShopStore } from '../../../store/shop-store';
 
 export function ConsumerUtilityHeader() {
   const router = useRouter();
-  const { colors, elevation } = useDesignTokens();
-  const styles = useThemedStyles(createStyles);
-
-  return (
-    <View style={styles.container}>
-      <View style={styles.brand}>
-        <Text variant="h2">Muse</Text>
-        <Text variant="caption" style={styles.subtitle}>
-          Find it. Create for it.
-        </Text>
-      </View>
-      <Pressable
-        accessibilityRole="button"
-        accessibilityLabel="Creator activity"
-        onPress={() => router.push('/(shop)/challenges/my-entries')}
-        style={[styles.utility, elevation.hairline]}
-      >
-        <Ionicons name="sparkles-outline" size={18} color={colors.ink} />
-        <Text variant="caption" style={styles.utilityLabel}>
-          Activity
-        </Text>
-      </Pressable>
-    </View>
-  );
+  const { colors } = useDesignTokens();
+  const selectedMall = useShopStore(state => state.selectedMall);
+  const malls = useShopStore(state => state.malls);
+  const location = malls.find(mall => mall.id === selectedMall)?.name ?? 'Molapo';
+  return <View style={[styles.header, { borderBottomColor: colors.stroke }]}>
+    <View style={styles.brand}><View style={[styles.mark, { borderColor: colors.stroke }]}><Image source={require('../../../../assets/adaptive-icon.png')} style={styles.icon} contentFit="cover" /></View><Text variant="h2">Muse</Text></View>
+    <Pressable onPress={() => router.push('/mall-selector')} accessibilityLabel="Change location" style={styles.location}><Text variant="label" color={colors.inkMuted}>{location.toUpperCase()} ▾</Text></Pressable>
+  </View>;
 }
-
-function createStyles(c: SemanticColors, _tokens: DesignTokens) {
-  return {
-    container: {
-      flexDirection: 'row' as const,
-      alignItems: 'center' as const,
-      justifyContent: 'space-between' as const,
-      gap: space.xs,
-      paddingHorizontal: space.md,
-      paddingVertical: space.sm,
-      backgroundColor: c.canvas,
-    },
-    brand: { flex: 1 },
-    subtitle: {
-      marginTop: 2,
-      color: c.inkMuted,
-    },
-    utility: {
-      minWidth: 52,
-      minHeight: 44,
-      alignItems: 'center' as const,
-      justifyContent: 'center' as const,
-      gap: 2,
-      borderRadius: radii.md,
-      backgroundColor: c.surface,
-      paddingHorizontal: space.sm,
-    },
-    utilityLabel: {
-      fontSize: 10,
-      color: c.inkMuted,
-    },
-  };
-}
+const styles = StyleSheet.create({ header: { minHeight: 58, paddingHorizontal: 16, borderBottomWidth: 2, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }, brand: { flexDirection: 'row', alignItems: 'center', gap: 9 }, mark: { width: 36, height: 36, borderWidth: 2, overflow: 'hidden' }, icon: { width: 104, height: 104, marginLeft: -36, marginTop: -34 }, location: { minHeight: 44, justifyContent: 'center' } });

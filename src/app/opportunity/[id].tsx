@@ -1,43 +1,41 @@
-import { Ionicons } from '@expo/vector-icons';
+import { useQuery } from '@tanstack/react-query';
 import { Image } from 'expo-image';
-import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
-import { Pressable, ScrollView, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { useLocalSearchParams, useRouter } from 'expo-router';
+import { StyleSheet, View } from 'react-native';
 
-import { getPrototypeOpportunity } from '../../features/discovery/prototype-opportunities';
-import { Button, Text, radii, space, useDesignTokens } from '../../shared/design-system';
+import { getCreatorOpportunityFeed } from '../../features/discovery/api';
+import { Button, EligibilityExplainer, MerchantIdentityRow, Money, PinnedActionBar, Rule, StackScreenTemplate, Text, useDesignTokens } from '../../shared/design-system';
 
-export default function PrototypeOpportunityScreen() {
+export default function OpportunityDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
-  const { colors, elevation } = useDesignTokens();
-  const item = getPrototypeOpportunity(Number(id));
-  if (!item) return <SafeAreaView style={{ flex: 1, padding: space.lg }}><Text variant="h1">Opportunity not found</Text><Button onPress={() => router.back()}>Go back</Button></SafeAreaView>;
-  return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: colors.canvas }}>
-      <Stack.Screen options={{ headerShown: false }} />
-      <ScrollView contentContainerStyle={{ paddingBottom: 48 }}>
-        <View style={{ height: 310 }}>
-          <Image source={{ uri: item.hero_image }} style={{ flex: 1 }} contentFit="cover" />
-          <Pressable accessibilityRole="button" accessibilityLabel="Back" onPress={() => router.back()} style={{ position: 'absolute', top: space.md, left: space.md, width: 44, height: 44, borderRadius: 22, backgroundColor: colors.surface, alignItems: 'center', justifyContent: 'center' }}><Ionicons name="arrow-back" size={22} color={colors.ink} /></Pressable>
-        </View>
-        <View style={{ padding: space.md, gap: space.md }}>
-          <View style={{ alignSelf: 'flex-start', paddingHorizontal: space.sm, paddingVertical: 6, borderRadius: radii.sm, backgroundColor: colors.accentMuted }}><Text variant="caption">ALPHA PREVIEW · NOT LIVE</Text></View>
-          <Text variant="caption" color={colors.inkMuted}>{item.merchant_name}</Text>
-          <Text variant="h1">{item.opportunity_title}</Text>
-          <Text variant="body" color={colors.inkMuted}>{item.opportunity_description}</Text>
-          <View style={{ flexDirection: 'row', gap: space.sm }}>
-            <View style={{ flex: 1, padding: space.md, borderRadius: radii.md, backgroundColor: colors.surface, ...elevation.hairline }}><Text variant="caption" color={colors.inkMuted}>PRIZE POT</Text><Text variant="h2">P{item.pot_value}</Text></View>
-            <View style={{ flex: 1, padding: space.md, borderRadius: radii.md, backgroundColor: colors.surface, ...elevation.hairline }}><Text variant="caption" color={colors.inkMuted}>ACCEPTED ENTRY</Text><Text variant="h2">P{item.accepted_entry_fee}</Text></View>
-          </View>
-          <Text variant="h2">The brief</Text>
-          {item.requirements.map(requirement => <View key={requirement} style={{ flexDirection: 'row', gap: space.sm }}><Ionicons name="checkmark-circle" size={20} color={colors.accent} /><Text variant="body" style={{ flex: 1 }}>{requirement}</Text></View>)}
-          <View style={{ padding: space.md, borderRadius: radii.md, backgroundColor: colors.surface, gap: space.xs }}><Text variant="bodyBold">Qualifying item</Text><Text variant="body">{item.product_title} · from P{item.price}</Text><Text variant="caption" color={colors.inkMuted}>In a live campaign, a Muse order or verified till code unlocks submission.</Text></View>
-          <Button onPress={() => router.push('/(shop)/marketplace')}>Explore Shops</Button>
-          <Button variant="secondary" onPress={() => router.push('/auth')}>Preview creator sign-in</Button>
-          <Text variant="caption" color={colors.inkMuted}>{item.prototype_disclaimer}</Text>
-        </View>
-      </ScrollView>
-    </SafeAreaView>
-  );
+  const { colors } = useDesignTokens();
+  const opportunityId = Number(id);
+  const query = useQuery({
+    queryKey: ['opportunity', opportunityId],
+    queryFn: async () => (await getCreatorOpportunityFeed({ limit: 200, includeHiddenPreferences: true })).find(item => item.opportunity_id === opportunityId) ?? null,
+    staleTime: 60_000,
+    retry: 2,
+  });
+  const item = query.data;
+  if (query.isLoading) return <StackScreenTemplate title="Opportunity" fallbackHref="/(shop)"><View style={[styles.skeleton, { borderColor: colors.strokeDim, backgroundColor: colors.surfaceSunken }]} /></StackScreenTemplate>;
+  if (!item) return <StackScreenTemplate title="Opportunity" fallbackHref="/(shop)"><Text variant="h1">Opportunity unavailable</Text><Text variant="body">This brief could not be loaded.</Text><Button onPress={() => query.refetch()}>Try again</Button></StackScreenTemplate>;
+  return <StackScreenTemplate
+    title="Opportunity"
+    fallbackHref="/(shop)"
+    footer={<PinnedActionBar><View style={styles.footer}><Text variant="caption">{item.is_prototype ? 'Illustrative · not a live payable brief' : 'Qualifying purchase required'}</Text><Button variant="commerce" onPress={() => router.push({ pathname: '/product/[slug]', params: { slug: item.product_slug, source: 'discover', opportunityId: item.opportunity_id } })}>See qualifying products</Button></View></PinnedActionBar>}
+    scrollProps={{ contentContainerStyle: styles.content }}
+  >
+    <Image source={{ uri: item.hero_image }} style={[styles.hero, { borderColor: colors.stroke }]} contentFit="cover" />
+    <MerchantIdentityRow merchant={{ id: item.merchant_id, name: item.merchant_name, location: item.merchant_location }} />
+    <Text variant="display">{item.opportunity_title}</Text>
+    <Text variant="body" color={colors.inkMuted}>{item.opportunity_description}</Text>
+    <View style={[styles.payout, { backgroundColor: colors.ink, borderColor: colors.stroke }]}><Text variant="label" color={colors.onInk}>Prize pot</Text><Money amount={Number(item.pot_value ?? 0)} format="prize" emphasis="hero" style={{ color: colors.payout }} /><Text variant="body" color={colors.onInk}><Money amount={item.accepted_entry_fee} format="payout" emphasis="strong" style={{ color: colors.onInk }} /> per accepted entry</Text></View>
+    <Rule />
+    <Text variant="label">How it works</Text><EligibilityExplainer />
+    <Rule />
+    <Text variant="label">What to make</Text>{item.requirements.map(requirement => <View key={requirement} style={styles.requirement}><View style={[styles.bullet, { backgroundColor: colors.creator, borderColor: colors.stroke }]} /><Text variant="body" style={styles.flex}>{requirement}</Text></View>)}
+  </StackScreenTemplate>;
 }
+
+const styles = StyleSheet.create({ content: { padding: 16, paddingBottom: 150, gap: 14 }, hero: { height: 250, borderWidth: 2 }, payout: { borderWidth: 2, padding: 16, gap: 7 }, requirement: { flexDirection: 'row', alignItems: 'flex-start', gap: 10 }, bullet: { width: 18, height: 18, borderWidth: 2 }, flex: { flex: 1 }, footer: { flex: 1, gap: 6 }, skeleton: { height: 520, borderWidth: 2 } });
