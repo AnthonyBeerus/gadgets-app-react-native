@@ -4,10 +4,11 @@ import {
   type ColorMode,
   type SemanticColors,
 } from './colors';
-import { fonts, resolveTextVariants, type TextVariant } from './typography';
-import { space } from './space';
+import { fonts, textVariants, resolveTextVariants, type TextVariant } from './typography';
+import { space, layout } from './space';
 import { radii } from './radii';
 import { elevation, resolveElevation, type ElevationLevel } from './elevation';
+import { strokes, targets, icons, layers } from './structure';
 import {
   duration,
   stagger,
@@ -23,9 +24,15 @@ export function resolveDesignTokens(mode: ColorMode) {
   return {
     colors: semantic,
     fonts,
-    textVariants: resolveTextVariants(semantic),
+    textVariants: resolveTextVariants(semantic, mode === 'dark'),
+    typography: resolveTextVariants(semantic, mode === 'dark'),
     space,
+    layout,
     radii,
+    strokes,
+    targets,
+    icons,
+    layers,
     elevation: resolveElevation(semantic, mode),
     mode,
     motion: {
@@ -48,9 +55,15 @@ export {
   colors,
   resolveSemanticColors,
   fonts,
+  textVariants,
   resolveTextVariants,
   space,
+  layout,
   radii,
+  strokes,
+  targets,
+  icons,
+  layers,
   elevation,
   resolveElevation,
   duration,

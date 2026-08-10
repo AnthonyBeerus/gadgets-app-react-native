@@ -1,18 +1,23 @@
 import { Tabs, Redirect, useRouter } from "expo-router";
 import { useAuth } from "../../shared/providers/auth-provider";
 import {
-  useSafeAreaInsets,
-} from "react-native-safe-area-context";
+  ActivityIndicator,
+  View,
+} from "react-native";
 import React from "react";
 import MerchantTabBar from "../../components/merchant/MerchantTabBar";
 
 const MerchantTabsLayout = () => {
-  const insets = useSafeAreaInsets();
   const { isMerchant, activeRole, mounting } = useAuth();
   const router = useRouter();
   
+  if (mounting) {
+    return <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}><ActivityIndicator /></View>;
+  }
+
   // Only allow if actually a merchant AND in merchant mode
-  if (!isMerchant || activeRole !== 'merchant') return <Redirect href="/(shop)" />;
+  if (!isMerchant) return <Redirect href="/open-shop" />;
+  if (activeRole !== 'merchant') return <Redirect href="/(shop)" />;
 
   return (
     <Tabs

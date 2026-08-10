@@ -1,75 +1,9 @@
 import React from 'react';
-import {
-  Pressable,
-  PressableProps,
-  StyleSheet,
-  ViewStyle,
-} from 'react-native';
-import Animated, {
-  useAnimatedStyle,
-  useSharedValue,
-  withTiming,
-} from 'react-native-reanimated';
+import { Pressable, StyleSheet, type PressableProps } from 'react-native';
 import { useDesignTokens } from '../theme/DesignTokensProvider';
-import { radii } from '../tokens/radii';
-import { scale, timingConfig } from '../tokens/motion';
-
-const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
-
-export interface IconButtonProps extends PressableProps {
-  children: React.ReactNode;
-  style?: ViewStyle;
-  active?: boolean;
+export interface IconButtonProps extends PressableProps { children: React.ReactNode; accessibilityLabel: string; variant?: 'default' | 'payout' | 'quiet'; active?: boolean; }
+export function IconButton({ children, variant = 'default', active, style, ...props }: IconButtonProps) {
+  const t = useDesignTokens(); const tone = active ? 'payout' : variant;
+  return <Pressable accessibilityRole="button" style={({ pressed }) => [styles.base, { borderColor: tone === 'quiet' ? t.colors.strokeDim : t.colors.stroke, backgroundColor: tone === 'payout' ? t.colors.payout : tone === 'quiet' ? 'transparent' : t.colors.surface, opacity: pressed ? .75 : 1, transform: [{ scale: pressed ? .98 : 1 }] }, style as any]} {...props}>{children}</Pressable>;
 }
-
-export const IconButton: React.FC<IconButtonProps> = ({
-  children,
-  style,
-  active = false,
-  onPress,
-  ...props
-}) => {
-  const { colors, elevation } = useDesignTokens();
-  const pressScale = useSharedValue(scale.normal);
-  const rStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: pressScale.value }],
-  }));
-
-  return (
-    <AnimatedPressable
-      style={[
-        styles.button,
-        {
-          backgroundColor: colors.surface,
-          ...elevation.hairline,
-        },
-        active && {
-          backgroundColor: colors.accentMuted,
-          borderColor: colors.accent,
-        },
-        rStyle,
-        style,
-      ]}
-      onPressIn={() => {
-        pressScale.value = withTiming(scale.pressed, timingConfig.fast);
-      }}
-      onPressOut={() => {
-        pressScale.value = withTiming(scale.normal, timingConfig.normal);
-      }}
-      onPress={onPress}
-      {...props}
-    >
-      {children}
-    </AnimatedPressable>
-  );
-};
-
-const styles = StyleSheet.create({
-  button: {
-    width: 44,
-    height: 44,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: radii.md,
-  },
-});
+const styles = StyleSheet.create({ base: { width: 50, height: 50, borderWidth: 2, borderRadius: 0, alignItems: 'center', justifyContent: 'center' } });

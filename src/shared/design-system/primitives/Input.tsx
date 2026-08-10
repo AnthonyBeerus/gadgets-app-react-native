@@ -1,70 +1,18 @@
-import React from 'react';
-import {
-  TextInput,
-  View,
-  StyleSheet,
-  TextInputProps,
-  StyleProp,
-  ViewStyle,
-  TextStyle,
-} from 'react-native';
+import React, { useState } from 'react';
+import { StyleSheet, TextInput, View, type TextInputProps } from 'react-native';
 import { useDesignTokens } from '../theme/DesignTokensProvider';
-import { fonts } from '../tokens/typography';
-import { radii } from '../tokens/radii';
-import { space } from '../tokens/space';
+import { Text } from './Text';
 
-export interface InputProps extends TextInputProps {
-  containerStyle?: StyleProp<ViewStyle>;
-  inputStyle?: StyleProp<TextStyle>;
-  leftIcon?: React.ReactNode;
-  rightIcon?: React.ReactNode;
-}
-
-export const Input: React.FC<InputProps> = ({
-  containerStyle,
-  inputStyle,
-  leftIcon,
-  rightIcon,
-  ...props
-}) => {
-  const { colors, elevation } = useDesignTokens();
-  return (
-    <View
-      style={[
-        styles.container,
-        { backgroundColor: colors.surface, ...elevation.hairline },
-        containerStyle,
-      ]}
-    >
-      {leftIcon ? <View style={styles.iconLeft}>{leftIcon}</View> : null}
-      <TextInput
-        style={[styles.input, { color: colors.ink }, inputStyle]}
-        placeholderTextColor={colors.inkMuted}
-        {...props}
-      />
-      {rightIcon ? <View style={styles.iconRight}>{rightIcon}</View> : null}
+export interface InputProps extends TextInputProps { label?: string; error?: string; leftIcon?: React.ReactNode; rightIcon?: React.ReactNode; containerStyle?: any; inputStyle?: any; }
+export function Input({ label, error, leftIcon, rightIcon, containerStyle, inputStyle, onFocus, onBlur, ...props }: InputProps) {
+  const t = useDesignTokens(); const [focused, setFocused] = useState(false);
+  return <View style={[styles.group, containerStyle]}>
+    {label ? <Text variant="label">{label}</Text> : null}
+    <View style={[styles.field, { backgroundColor: t.colors.surface, borderColor: error ? t.colors.danger : t.colors.stroke }, focused && { borderWidth: 3, borderColor: t.colors.creator }]}>
+      {leftIcon}<TextInput {...props} placeholderTextColor={t.colors.placeholder} style={[styles.input, { color: t.colors.ink }, inputStyle]}
+        onFocus={e => { setFocused(true); onFocus?.(e); }} onBlur={e => { setFocused(false); onBlur?.(e); }} />{rightIcon}
     </View>
-  );
-};
-
-const styles = StyleSheet.create({
-  container: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    height: 48,
-    borderRadius: radii.md,
-    paddingHorizontal: space.md,
-  },
-  input: {
-    flex: 1,
-    height: '100%',
-    fontFamily: fonts.regular,
-    fontSize: 15,
-  },
-  iconLeft: {
-    marginRight: space.xs,
-  },
-  iconRight: {
-    marginLeft: space.xs,
-  },
-});
+    {error ? <Text variant="caption" color={t.colors.danger}>{error}</Text> : null}
+  </View>;
+}
+const styles = StyleSheet.create({ group: { gap: 6 }, field: { minHeight: 50, borderWidth: 2, borderRadius: 0, flexDirection: 'row', alignItems: 'center', paddingHorizontal: 12, gap: 8 }, input: { flex: 1, height: 48, fontFamily: 'SpaceGrotesk_400Regular', fontSize: 15 } });

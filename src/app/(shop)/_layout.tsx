@@ -1,32 +1,12 @@
-import { Redirect, Tabs, useRouter } from "expo-router";
-import {
-  SafeAreaView,
-  useSafeAreaInsets,
-} from "react-native-safe-area-context";
-import { ActivityIndicator, StyleSheet, Platform, View } from "react-native";
-import { FontAwesome, MaterialIcons } from "@expo/vector-icons";
-import { useEffect, useRef } from "react";
+import { Redirect, Tabs } from "expo-router";
+import { ActivityIndicator, View } from "react-native";
 import { useAuth } from "../../shared/providers/auth-provider";
 import ShopTabBar from "../../components/shop/ShopTabBar";
-import { consumeOpenShopIntent } from "../../features/merchant/open-shop-intent";
 
 const TabsLayout = () => {
-  const router = useRouter();
-  const { session, mounting, isMerchant, activeRole } = useAuth();
-  const insets = useSafeAreaInsets();
-  const intentHandled = useRef(false);
+  const { mounting, isMerchant, activeRole } = useAuth();
 
-  useEffect(() => {
-    if (mounting || !session || isMerchant || intentHandled.current) return;
-    intentHandled.current = true;
-    consumeOpenShopIntent()
-      .then(shouldOpen => {
-        if (shouldOpen) router.replace("/open-shop");
-      })
-      .catch(() => undefined);
-  }, [mounting, session, isMerchant, router]);
-
-  if (mounting) return <ActivityIndicator />;
+  if (mounting) return <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}><ActivityIndicator /></View>;
   if (isMerchant && activeRole === 'merchant') return <Redirect href="/(merchant)" />;
 
   return (

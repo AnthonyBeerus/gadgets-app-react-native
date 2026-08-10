@@ -1,57 +1,40 @@
-/**
- * Quiet commerce color tokens (v1).
- * Primary CTA = ink. Accent = challenge energy only.
- *
- * Static `colors` = light reference + raw dark* keys.
- * Runtime UI should use `resolveSemanticColors(mode)` via DesignTokensProvider.
- */
-
 export type ColorMode = 'light' | 'dark';
 
-/** Light reference palette (+ dark* raw keys for docs/tests) */
-export const colors = {
-  canvas: '#FAFAF8',
-  surface: '#FFFFFF',
-  ink: '#111111',
-  inkMuted: '#6B7280',
-  /** Visible structural edge — denser than gray-300, not comic black */
-  border: '#B0B6C0',
-  accent: '#E85D04',
-  accentMuted: '#FFF4ED',
-
-  gray50: '#F9FAFB',
-  gray100: '#F3F4F6',
-  gray200: '#E5E7EB',
-  gray300: '#D1D5DB',
-  gray400: '#9CA3AF',
-  gray500: '#6B7280',
-  gray700: '#374151',
-  gray900: '#111111',
-
-  success: '#16A34A',
-  warning: '#D97706',
-  error: '#DC2626',
-  info: '#2563EB',
-
-  /** Raw dark swatches (prefer resolveSemanticColors for UI) */
-  darkCanvas: '#111111',
-  darkSurface: '#1C1C1A',
-  darkBorder: '#3F3F46',
-  darkInk: '#F4F4F2',
-  darkInkMuted: '#A1A1AA',
-} as const;
-
-export type ColorToken = keyof typeof colors;
-
-/** Semantic roles shared by light and dark (same key names). */
 export type SemanticColors = {
   canvas: string;
   surface: string;
+  surfaceSunken: string;
   ink: string;
   inkMuted: string;
+  stroke: string;
+  strokeQuiet: string;
+  strokeDim: string;
+  placeholder: string;
+  creator: string;
+  creatorDeep: string;
+  payout: string;
+  payoutSoft: string;
+  commerce: string;
+  commerceInk: string;
+  success: string;
+  successSoft: string;
+  successText: string;
+  warning: string;
+  warningSoft: string;
+  warningText: string;
+  danger: string;
+  dangerSoft: string;
+  dangerText: string;
+  onInk: string;
+  onCreator: string;
+  onPayout: string;
+  onCommerce: string;
+  /** Temporary compatibility roles for screens awaiting migration. */
   border: string;
   accent: string;
   accentMuted: string;
+  error: string;
+  info: string;
   gray50: string;
   gray100: string;
   gray200: string;
@@ -60,10 +43,6 @@ export type SemanticColors = {
   gray500: string;
   gray700: string;
   gray900: string;
-  success: string;
-  warning: string;
-  error: string;
-  info: string;
   darkCanvas: string;
   darkSurface: string;
   darkBorder: string;
@@ -71,35 +50,55 @@ export type SemanticColors = {
   darkInkMuted: string;
 };
 
-export function resolveSemanticColors(mode: ColorMode): SemanticColors {
-  if (mode === 'light') {
-    return { ...colors };
-  }
+const light = {
+  canvas: '#F7F4EC', surface: '#FFFFFF', surfaceSunken: '#E8E2D4',
+  ink: '#101010', inkMuted: '#5F5C55', stroke: '#101010',
+  strokeQuiet: 'rgba(16,16,16,0.18)', strokeDim: 'rgba(16,16,16,0.30)', placeholder: '#9A968D',
+  creator: '#6C3FC5', creatorDeep: '#3A1F73', payout: '#FCC81E', payoutSoft: '#FFF6DA',
+  commerce: '#4F86E8', commerceInk: '#0B1A33', success: '#1F8A4C', successSoft: '#E4F3EA',
+  successText: '#14612F', warning: '#B87400', warningSoft: '#FBF0DC', warningText: '#7A4E00',
+  danger: '#C22F2F', dangerSoft: '#FBE7E7', dangerText: '#8E2020',
+  onInk: '#F7F4EC', onCreator: '#FFFFFF', onPayout: '#0E0E0D', onCommerce: '#0B1A33',
+} as const;
 
+const dark = {
+  canvas: '#0E0E0D', surface: '#1A1A18', surfaceSunken: '#26251F',
+  ink: '#F5F2EA', inkMuted: '#A8A49A', stroke: '#F5F2EA', strokeQuiet: '#35342F',
+  strokeDim: '#4A4842', placeholder: '#6E6B64', creator: '#8B63E0', creatorDeep: '#3A1F73',
+  payout: '#E8B923', payoutSoft: '#1A1A18', commerce: '#6F9EF0', commerceInk: '#0B1A33',
+  success: '#3FA96B', successSoft: '#1A1A18', successText: '#3FA96B', warning: '#D9A63A',
+  warningSoft: '#1A1A18', warningText: '#D9A63A', danger: '#E05656', dangerSoft: '#1A1A18',
+  dangerText: '#E05656', onInk: '#0E0E0D', onCreator: '#FFFFFF', onPayout: '#0E0E0D', onCommerce: '#0B1A33',
+} as const;
+
+function withCompatibility(c: typeof light | typeof dark): SemanticColors {
   return {
-    canvas: colors.darkCanvas,
-    surface: colors.darkSurface,
-    ink: colors.darkInk,
-    inkMuted: colors.darkInkMuted,
-    border: colors.darkBorder,
-    accent: colors.accent,
-    accentMuted: '#3D2314',
-    gray50: '#18181B',
-    gray100: '#27272A',
-    gray200: '#3F3F46',
-    gray300: '#52525B',
-    gray400: '#A1A1AA',
-    gray500: '#A1A1AA',
-    gray700: '#D4D4D8',
-    gray900: colors.darkInk,
-    success: colors.success,
-    warning: colors.warning,
-    error: colors.error,
-    info: colors.info,
-    darkCanvas: colors.darkCanvas,
-    darkSurface: colors.darkSurface,
-    darkBorder: colors.darkBorder,
-    darkInk: colors.darkInk,
-    darkInkMuted: colors.darkInkMuted,
+    ...c,
+    border: c.stroke,
+    accent: c.creator,
+    accentMuted: c.surfaceSunken,
+    error: c.danger,
+    info: c.commerce,
+    gray50: c.canvas,
+    gray100: c.surfaceSunken,
+    gray200: c.strokeQuiet,
+    gray300: c.strokeDim,
+    gray400: c.placeholder,
+    gray500: c.inkMuted,
+    gray700: c.ink,
+    gray900: c.ink,
+    darkCanvas: dark.canvas,
+    darkSurface: dark.surface,
+    darkBorder: dark.stroke,
+    darkInk: dark.ink,
+    darkInkMuted: dark.inkMuted,
   };
 }
+
+export const colors = withCompatibility(light);
+
+export function resolveSemanticColors(mode: ColorMode): SemanticColors {
+  return withCompatibility(mode === 'dark' ? dark : light);
+}
+
+export type ColorToken = keyof SemanticColors;

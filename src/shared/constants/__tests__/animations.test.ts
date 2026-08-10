@@ -3,10 +3,10 @@ import { DURATION, STAGGER, EASING, TIMING_CONFIG, SCROLL_THRESHOLDS, SCALE, OPA
 describe('Animation Constants', () => {
   describe('DURATION', () => {
     it('should export duration presets', () => {
-      expect(DURATION.fast).toBe(150);
-      expect(DURATION.normal).toBe(250);
-      expect(DURATION.slow).toBe(400);
-      expect(DURATION.header).toBe(200);
+      expect(DURATION.fast).toBe(90);
+      expect(DURATION.normal).toBe(240);
+      expect(DURATION.slow).toBe(240);
+      expect(DURATION.header).toBe(240);
     });
   });
 
@@ -28,10 +28,10 @@ describe('Animation Constants', () => {
 
   describe('TIMING_CONFIG', () => {
     it('should export timing configs with duration and easing', () => {
-      expect(TIMING_CONFIG.fast.duration).toBe(150);
-      expect(TIMING_CONFIG.normal.duration).toBe(250);
-      expect(TIMING_CONFIG.slow.duration).toBe(400);
-      expect(TIMING_CONFIG.header.duration).toBe(200);
+      expect(TIMING_CONFIG.fast.duration).toBe(90);
+      expect(TIMING_CONFIG.normal.duration).toBe(240);
+      expect(TIMING_CONFIG.slow.duration).toBe(240);
+      expect(TIMING_CONFIG.header.duration).toBe(240);
     });
   });
 
@@ -48,14 +48,14 @@ describe('Animation Constants', () => {
     it('should export scale values', () => {
       expect(SCALE.pressed).toBe(0.98);
       expect(SCALE.normal).toBe(1);
-      expect(SCALE.active).toBe(1.01);
+      expect(SCALE.active).toBe(1);
     });
   });
 
   describe('OPACITY', () => {
     it('should export opacity values', () => {
       expect(OPACITY.hidden).toBe(0);
-      expect(OPACITY.dimmed).toBe(0.5);
+      expect(OPACITY.dimmed).toBe(0.4);
       expect(OPACITY.visible).toBe(1);
     });
   });

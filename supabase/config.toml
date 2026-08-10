@@ -212,6 +212,13 @@ enabled = false
 # user_pool_id = "my-user-pool-id"
 # user_pool_region = "us-east-1"
 
+# Muse uses Clerk's current first-class third-party auth integration. The app
+# sends the normal Clerk session token; do not reintroduce the deprecated
+# shared-secret `supabase` JWT template.
+[auth.third_party.clerk]
+enabled = true
+domain = "tough-antelope-1.clerk.accounts.dev"
+
 [edge_runtime]
 enabled = true
 # Configure one of the supported request policies: `oneshot`, `per_worker`.
@@ -223,10 +230,19 @@ inspector_port = 8083
 verify_jwt = true
 
 [functions.stripe-checkout]
-verify_jwt = true
+verify_jwt = false
+
+[functions.stripe-order-webhook]
+verify_jwt = false
+
+[functions.order-actions]
+verify_jwt = false
+
+[functions.claim-alpha-merchant]
+verify_jwt = false
 
 [functions.verify-fulfillment]
-verify_jwt = true
+verify_jwt = false
 
 [analytics]
 enabled = true

@@ -8,6 +8,7 @@ export interface MuseTextProps extends TextProps {
   children: React.ReactNode;
   align?: 'left' | 'center' | 'right';
   color?: string;
+  selectableData?: boolean;
 }
 
 export const Text: React.FC<MuseTextProps> = ({
@@ -15,6 +16,7 @@ export const Text: React.FC<MuseTextProps> = ({
   children,
   align = 'left',
   color,
+  selectableData,
   style,
   ...props
 }) => {
@@ -27,6 +29,7 @@ export const Text: React.FC<MuseTextProps> = ({
         color ? { color } : null,
         style,
       ]}
+      selectable={selectableData ?? props.selectable}
       {...props}
     >
       {children}

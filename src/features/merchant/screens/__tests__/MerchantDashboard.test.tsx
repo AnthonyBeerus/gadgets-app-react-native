@@ -48,15 +48,16 @@ describe('MerchantDashboard', () => {
     });
   });
 
-  it('renders launch checklist and next-step CTA when no products exist', () => {
+  it('leads with work counters and the orders queue', () => {
     const { getByText } = render(<MerchantDashboard />);
 
-    expect(getByText('Launch checklist')).toBeTruthy();
-    expect(getByText('Add your first product')).toBeTruthy();
+    expect(getByText('Needs you now')).toBeTruthy();
+    expect(getByText('New orders')).toBeTruthy();
+    expect(getByText('No new orders')).toBeTruthy();
     expect(getByText('Add product')).toBeTruthy();
   });
 
-  it('prompts for a challenge pot after the first product exists', () => {
+  it('offers campaign funding when there is no active pot', () => {
     (getShopProducts as jest.Mock).mockReturnValue({
       data: [{ id: 1, is_available: true, maxQuantity: 10 }],
     });
@@ -65,7 +66,8 @@ describe('MerchantDashboard', () => {
     });
 
     const { getByText } = render(<MerchantDashboard />);
-    expect(getByText('Fund your first challenge pot')).toBeTruthy();
+    expect(getByText('No funded campaign')).toBeTruthy();
+    expect(getByText('Fund a campaign')).toBeTruthy();
   });
 
   it('redirects non-merchants to open-shop', () => {

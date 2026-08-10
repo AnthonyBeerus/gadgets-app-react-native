@@ -1,86 +1,26 @@
-import { TextStyle } from 'react-native';
+import type { TextStyle } from 'react-native';
 import type { SemanticColors } from './colors';
-import { colors } from './colors';
 
-/**
- * Calm UI type scale. Inter for UI; display weight via Inter bold (no dual neo voice).
- */
 export const fonts = {
-  regular: 'Inter_400Regular',
-  medium: 'Inter_500Medium',
-  semibold: 'Inter_600SemiBold',
-  bold: 'Inter_700Bold',
-  /** Display alias — same family, heavier weight role */
-  displaySemibold: 'Inter_600SemiBold',
-  displayBold: 'Inter_700Bold',
-  displayBlack: 'Inter_700Bold',
+  regular: 'SpaceGrotesk_400Regular', medium: 'SpaceGrotesk_500Medium', semibold: 'SpaceGrotesk_700Bold',
+  bold: 'SpaceGrotesk_700Bold', displaySemibold: 'Archivo_700Bold', displayBold: 'Archivo_800ExtraBold',
+  displayBlack: 'Archivo_900Black',
 } as const;
 
-export type TextVariant =
-  | 'display'
-  | 'h1'
-  | 'h2'
-  | 'h3'
-  | 'body'
-  | 'bodyBold'
-  | 'label'
-  | 'caption';
+export type TextVariant = 'display' | 'h1' | 'h2' | 'h3' | 'body' | 'bodyBold' | 'bodySm' | 'label' | 'caption';
 
-export function resolveTextVariants(c: SemanticColors): Record<TextVariant, TextStyle> {
+export function resolveTextVariants(c: SemanticColors, dark = false): Record<TextVariant, TextStyle> {
   return {
-    display: {
-      fontFamily: fonts.displayBold,
-      fontSize: 40,
-      lineHeight: 48,
-      letterSpacing: -0.5,
-      color: c.ink,
-    },
-    h1: {
-      fontFamily: fonts.displayBold,
-      fontSize: 28,
-      lineHeight: 36,
-      letterSpacing: -0.3,
-      color: c.ink,
-    },
-    h2: {
-      fontFamily: fonts.semibold,
-      fontSize: 22,
-      lineHeight: 28,
-      letterSpacing: -0.2,
-      color: c.ink,
-    },
-    h3: {
-      fontFamily: fonts.semibold,
-      fontSize: 18,
-      lineHeight: 24,
-      color: c.ink,
-    },
-    body: {
-      fontFamily: fonts.regular,
-      fontSize: 16,
-      lineHeight: 24,
-      color: c.ink,
-    },
-    bodyBold: {
-      fontFamily: fonts.semibold,
-      fontSize: 16,
-      lineHeight: 24,
-      color: c.ink,
-    },
-    label: {
-      fontFamily: fonts.medium,
-      fontSize: 14,
-      lineHeight: 20,
-      color: c.ink,
-    },
-    caption: {
-      fontFamily: fonts.regular,
-      fontSize: 12,
-      lineHeight: 18,
-      color: c.inkMuted,
-    },
+    display: { fontFamily: dark ? fonts.displayBold : fonts.displayBlack, fontSize: 34, lineHeight: 33, letterSpacing: -1.02, color: c.ink, textTransform: 'uppercase' },
+    h1: { fontFamily: fonts.displayBlack, fontSize: 28, lineHeight: 30, letterSpacing: -0.84, color: c.ink },
+    h2: { fontFamily: fonts.displayBold, fontSize: 20, lineHeight: 24, letterSpacing: -0.4, color: c.ink },
+    h3: { fontFamily: fonts.bold, fontSize: 15, lineHeight: 20, color: c.ink },
+    body: { fontFamily: fonts.regular, fontSize: 15, lineHeight: 22, color: c.ink },
+    bodyBold: { fontFamily: fonts.bold, fontSize: 15, lineHeight: 22, color: c.ink },
+    bodySm: { fontFamily: fonts.medium, fontSize: 13, lineHeight: 19, color: c.ink },
+    label: { fontFamily: fonts.bold, fontSize: 10, lineHeight: 14, letterSpacing: 1.4, textTransform: 'uppercase', color: c.inkMuted },
+    caption: { fontFamily: fonts.regular, fontSize: 12, lineHeight: 18, color: c.inkMuted },
   };
 }
 
-/** @deprecated Prefer resolveTextVariants via DesignTokensProvider */
-export const textVariants: Record<TextVariant, TextStyle> = resolveTextVariants(colors);
+export const textVariants = resolveTextVariants({ ink: '#101010', inkMuted: '#5F5C55' } as SemanticColors);

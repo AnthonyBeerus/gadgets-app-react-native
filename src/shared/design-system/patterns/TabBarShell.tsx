@@ -28,7 +28,7 @@ export const TabBarShell: React.FC<TabBarShellProps> = ({
   style,
 }) => {
   const insets = useSafeAreaInsets();
-  const { colors, elevation } = useDesignTokens();
+  const { colors } = useDesignTokens();
 
   return (
     <View
@@ -43,8 +43,7 @@ export const TabBarShell: React.FC<TabBarShellProps> = ({
           styles.bar,
           {
             backgroundColor: colors.surface,
-            borderColor: colors.border,
-            ...elevation.soft,
+            borderColor: colors.stroke,
           },
         ]}
       >
@@ -83,21 +82,19 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    paddingHorizontal: space.md,
     backgroundColor: 'transparent',
   },
   bar: {
     flexDirection: 'row',
-    borderRadius: radii.lg,
-    padding: space.xxs,
-    borderWidth: 1,
+    borderRadius: 0,
+    borderWidth: 2,
   },
   item: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: space.sm,
-    borderRadius: radii.md,
+    borderRadius: 0,
     gap: 2,
   },
   label: {

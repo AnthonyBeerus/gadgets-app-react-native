@@ -41,7 +41,7 @@ describe('NuviaButton (compat wrapper)', () => {
     );
     expect(getByTestId('nuvia-button').props.style).toEqual(
       expect.arrayContaining([
-        expect.objectContaining({ backgroundColor: colors.gray100 }),
+        expect.objectContaining({ backgroundColor: colors.surface }),
       ]),
     );
   });
@@ -56,7 +56,7 @@ describe('NuviaButton (compat wrapper)', () => {
     );
     expect(getByTestId('nuvia-button').props.style).toEqual(
       expect.arrayContaining([
-        expect.objectContaining({ backgroundColor: 'transparent' }),
+        expect.objectContaining({ backgroundColor: colors.surface }),
       ]),
     );
   });

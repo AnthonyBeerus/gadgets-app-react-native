@@ -1,0 +1,2 @@
+import { notificationHref } from '../notification-route';
+describe('notificationHref',()=>{it('opens orders from ready notifications',()=>expect(notificationHref({version:1,destination:'collection',recordId:'order-42'})).toBe('/orders/order-42'));it('rejects unversioned payloads',()=>expect(notificationHref({destination:'order',recordId:'42'})).toBeNull());it('rejects unknown destinations',()=>expect(notificationHref({version:1,destination:'url',recordId:'https://example.com'})).toBeNull());});

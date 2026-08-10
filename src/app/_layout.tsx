@@ -1,4 +1,4 @@
-import { Stack } from "expo-router";
+import { Stack, useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { ToastProvider } from "react-native-toast-notifications";
 import { ClerkProvider } from '@clerk/expo';
@@ -11,6 +11,8 @@ import { ThemeProvider, useTheme } from "../shared/providers/theme-provider";
 import { DesignTokensProvider } from "../shared/design-system";
 import React from "react";
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import * as Notifications from 'expo-notifications';
+import { notificationHref } from '../shared/navigation/notification-route';
 
 import * as Sentry from '@sentry/react-native';
 
@@ -41,14 +43,19 @@ import { StripeProviderWrapper } from "../shared/providers/stripe";
 
 const AppNavigator = () => {
   const { isMerchant } = useAuth();
+  const router = useRouter();
+  React.useEffect(() => Notifications.addNotificationResponseReceivedListener(response => {
+    const href = notificationHref(response.notification.request.content.data);
+    if (href) router.push(href as never);
+  }).remove, [router]);
   
   return (
     <Stack>
+      <Stack.Screen
+        name="(merchant)"
+        options={{ headerShown: false, title: "Merchant Dashboard" }}
+      />
       <Stack.Protected guard={isMerchant}>
-        <Stack.Screen
-          name="(merchant)"
-          options={{ headerShown: false, title: "Merchant Dashboard" }}
-        />
         <Stack.Screen
           name="scan-order"
           options={{ 
@@ -115,6 +122,11 @@ const AppNavigator = () => {
           animation: "ios_from_right",
         }}
       />
+      <Stack.Screen
+        name="checkout"
+        options={{ headerShown: false, title: "Review order", animation: "ios_from_right" }}
+      />
+      <Stack.Screen name="payment-failure" options={{ headerShown: false, title: "Payment" }} />
       <Stack.Screen
         name="saved-opportunities"
         options={{

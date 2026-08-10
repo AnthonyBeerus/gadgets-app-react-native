@@ -29,6 +29,7 @@ import { ConsumerUtilityHeader } from '../components/consumer-utility-header';
 import { OpportunityCard } from '../components/opportunity-card';
 import { DiscoverAdCard } from '../components/discover-ad-card';
 import { buildDiscoveryDeck } from '../deck';
+import { useDiscoveryStore } from '../discovery-store';
 import type { CreatorOpportunityFeedItem, DiscoveryDeckEntry, OpportunityPreferenceState } from '../types';
 
 const SWIPE_DECK_MIN = 5;
@@ -122,7 +123,12 @@ export default function DiscoverScreen() {
   const { selectedMall, malls, loadInitialData } = useShopStore();
   const [history, setHistory] = useState<DiscoveryDeckEntry[]>([]);
   const [reduceMotion, setReduceMotion] = useState(false);
-  const [actedKeys, setActedKeys] = useState<string[]>([]);
+  const discoveryState = useDiscoveryStore();
+  const actedKeys = discoveryState.actedKeys;
+  const setActedKeys = (updater: string[] | ((previous: string[]) => string[])) => {
+    const next = typeof updater === 'function' ? updater(discoveryState.actedKeys) : updater;
+    useDiscoveryStore.setState({ actedKeys: next });
+  };
   const impressions = useRef(new Set<string>());
   const actionLock = useRef<string | null>(null);
 
@@ -147,7 +153,7 @@ export default function DiscoverScreen() {
   }, [session?.user?.id, queryClient]);
 
   useEffect(() => {
-    setActedKeys([]);
+    discoveryState.setScope(String(selectedMall ?? 'all'));
     setHistory([]);
     actionLock.current = null;
   }, [selectedMall]);
@@ -162,19 +168,21 @@ export default function DiscoverScreen() {
     },
     staleTime: 60_000,
   });
+  useEffect(() => { if (feed.data?.length) discoveryState.setCachedFeed(feed.data); }, [feed.data, discoveryState.setCachedFeed]);
+  const feedItems = feed.data ?? discoveryState.cachedFeed;
 
   const actedSet = useMemo(() => new Set(actedKeys), [actedKeys]);
   const fullDeck = useMemo<DiscoveryDeckEntry[]>(
-    () => buildDiscoveryDeck(feed.data ?? []),
-    [feed.data],
+    () => buildDiscoveryDeck(feedItems),
+    [feedItems],
   );
   const deck = useMemo(
     () => fullDeck.filter(entry => !actedSet.has(entry.key)),
     [fullDeck, actedSet],
   );
-  const useList = (feed.data?.length ?? 0) > 0 && (feed.data?.length ?? 0) < SWIPE_DECK_MIN;
+  const useList = feedItems.length > 0 && feedItems.length < SWIPE_DECK_MIN;
   const current = deck[0];
-  const opportunityCount = (feed.data ?? []).filter(
+  const opportunityCount = feedItems.filter(
     item => !actedSet.has(`opp-${item.opportunity_id}`),
   ).length;
 
@@ -199,6 +207,7 @@ export default function DiscoverScreen() {
     actionLock.current = entry.key;
     if (!useList) setHistory(previous => [entry, ...previous].slice(0, 1));
     markActed(entry);
+    if (entry.kind === 'opportunity') discoveryState.act(entry.key, { id: `${Date.now()}-${entry.item.opportunity_id}`, opportunityId: entry.item.opportunity_id, state, createdAt: new Date().toISOString() });
     try {
       await setCreatorOpportunityPreference(item.opportunity_id, state);
       queryClient.invalidateQueries({ queryKey: ['creator-opportunity-saved'] });
@@ -216,6 +225,7 @@ export default function DiscoverScreen() {
     if (!last) return;
     setHistory([]);
     setActedKeys(previous => previous.filter(key => key !== last.key));
+    discoveryState.undo();
     if (last.kind === 'opportunity') {
       await restoreCreatorOpportunityPreference(last.item.opportunity_id);
       queryClient.invalidateQueries({ queryKey: ['creator-opportunity-saved'] });
@@ -241,11 +251,16 @@ export default function DiscoverScreen() {
   return (
     <SafeAreaView edges={['top']} style={styles.container}>
       <ConsumerUtilityHeader />
-      {feed.data?.some(item => item.is_prototype) && (
+      {feedItems.some(item => item.is_prototype) && (
         <View style={styles.prototypeBanner}>
           <Text variant="caption" align="center">Alpha preview · campaign concepts are illustrative, not live offers</Text>
         </View>
       )}
+      {feed.error && feedItems.length ? (
+        <View style={{ backgroundColor: colors.ink, paddingHorizontal: 16, paddingVertical: 9 }}>
+          <Text variant="label" color={colors.onInk}>Offline · showing your last deck</Text>
+        </View>
+      ) : null}
       <View style={styles.locationRow}>
         <Pressable accessibilityRole="button" onPress={() => router.push('/mall-selector')} style={styles.locationButton}>
           <Ionicons name="location" size={16} color={colors.ink} />
@@ -268,7 +283,7 @@ export default function DiscoverScreen() {
       <View style={styles.deck}>
         {feed.isLoading ? (
           <ActivityIndicator size="large" color={colors.ink} />
-        ) : feed.error ? (
+        ) : feed.error && !feedItems.length ? (
           <View style={styles.emptyCard}>
             <Ionicons name="cloud-offline" size={48} color={colors.inkMuted} />
             <Text variant="h2" align="center">Discovery took a break</Text>
@@ -328,7 +343,7 @@ export default function DiscoverScreen() {
             <Text variant="body" align="center" color={colors.inkMuted}>
               Passed challenges return after 30 days. Your saved picks are waiting whenever you are ready.
             </Text>
-            <Button onPress={() => router.push('/bag?tab=saved')}>View saved</Button>
+            <Button onPress={() => router.push('/saved-opportunities')}>View saved</Button>
             <Button variant="secondary" onPress={() => router.push('/(shop)/marketplace')}>
               Explore Shops
             </Button>

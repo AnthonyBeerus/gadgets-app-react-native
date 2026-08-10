@@ -1,6 +1,5 @@
 import React from 'react';
 import { View, StyleSheet, ViewStyle, Pressable } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Text } from '../primitives/Text';
 import { useDesignTokens } from '../theme/DesignTokensProvider';
 import { space } from '../tokens/space';
@@ -24,7 +23,6 @@ export const ScreenHeader: React.FC<ScreenHeaderProps> = ({
   style,
   onBack,
 }) => {
-  const insets = useSafeAreaInsets();
   const router = useRouter();
   const { colors } = useDesignTokens();
 
@@ -43,9 +41,9 @@ export const ScreenHeader: React.FC<ScreenHeaderProps> = ({
       style={[
         styles.wrap,
         {
-          paddingTop: insets.top + space.xs,
+          paddingTop: space.xs,
           backgroundColor: colors.canvas,
-          borderBottomColor: colors.border,
+          borderBottomColor: colors.stroke,
         },
         style,
       ]}
@@ -86,7 +84,7 @@ const styles = StyleSheet.create({
   wrap: {
     paddingHorizontal: space.md,
     paddingBottom: space.sm,
-    borderBottomWidth: 1,
+    borderBottomWidth: 2,
   },
   row: {
     flexDirection: 'row',

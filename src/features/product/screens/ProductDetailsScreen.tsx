@@ -9,6 +9,7 @@ import {
   FlatList,
   Dimensions,
   ActivityIndicator,
+  Alert,
 } from "react-native";
 import { useLocalSearchParams, useRouter, Redirect } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
@@ -374,7 +375,7 @@ export default function ProductDetailsScreen() {
   const toast = useToast();
 
   const { data: product, error, isLoading } = getProduct(slug);
-  const { items, addItem, incrementItem, decrementItem, setAttribution } = useCartStore();
+  const { items, addItem, replaceCart, incrementItem, decrementItem, setAttribution } = useCartStore();
 
   const cartItem = items.find((item) => item.id === product?.id);
   const initialQuantity = cartItem ? cartItem.quantity : 0;
@@ -439,14 +440,40 @@ export default function ProductDetailsScreen() {
     if (quantity === 0) {
       setQuantity(1);
     }
-    addItem({
+    const cartItemToAdd = {
       id: product.id,
+      shopId: Number((product as any).shop_id ?? -1),
+      shopName: (product as any).shop?.name ?? (product as any).merchantName ?? 'Muse shop',
+      hasDelivery: Boolean((product as any).shop?.has_delivery),
+      hasCollection: (product as any).shop?.has_collection !== false,
+      deliveryFee: Number((product as any).shop?.delivery_fee ?? 0),
+      minimumOrderAmount: Number((product as any).shop?.minimum_order_amount ?? 0),
       title: product.title,
       heroImage: product.heroImage || "",
       price: product.price || 0,
       quantity: quantity === 0 ? 1 : quantity,
       maxQuantity: product.maxQuantity || 0,
-    });
+    };
+    const result = addItem(cartItemToAdd);
+    if (result === 'merchant_conflict') {
+      Alert.alert(
+        'Start a new bag?',
+        'Muse checks out one business at a time. Replacing your bag keeps fulfilment and fees accurate.',
+        [
+          { text: 'Keep current bag', style: 'cancel' },
+          {
+            text: 'Replace bag',
+            style: 'destructive',
+            onPress: () => {
+              replaceCart(cartItemToAdd);
+              if (source) setAttribution({ source, opportunityId: parsedOpportunityId });
+              router.push('/bag');
+            },
+          },
+        ],
+      );
+      return;
+    }
     if (source) setAttribution({ source, opportunityId: parsedOpportunityId });
     toast.show("Added to cart", {
       type: "success",

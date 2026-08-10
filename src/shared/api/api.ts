@@ -1,7 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "../lib/supabase";
 import { useAuth } from "../providers/auth-provider";
-import { generateOrderSlug } from "../utils/utils";
 import { Database, Tables, TablesInsert } from '../types/database.types';
 import { getPrototypeProduct } from '../../features/discovery/shops-model';
 
@@ -39,7 +38,7 @@ export const getProduct = (slug: string) => {
       try {
         const { data, error } = await supabase
           .from("product")
-          .select("*")
+          .select("*, shop:shops(id, name, has_delivery, has_collection, delivery_fee, minimum_order_amount)")
           .eq("slug", slug)
           .single();
           
@@ -259,7 +258,7 @@ export const getMyOrders = () => {
 
       const { data, error } = await supabase
         .from("order")
-        .select("*")
+        .select("*, shops:shop_id(id,name)")
         .order("created_at", { ascending: false })
         .eq("user", userId);
 
@@ -270,157 +269,33 @@ export const getMyOrders = () => {
 
       return data;
     },
+    enabled: !!userId,
   });
 };
 
-export const createOrder = () => {
-  const { user } = useAuth();
-  const userId = user?.id;
+export const getMerchantOrders = (shopId: number | null) => useQuery({
+  queryKey: ['merchant-orders', shopId],
+  enabled: !!shopId,
+  refetchInterval: 5_000,
+  queryFn: async () => {
+    const { data, error } = await (supabase as any)
+      .from('order')
+      .select('*, delivery_orders(*), order_items:order_item(*, products:product(*))')
+      .eq('shop_id', shopId)
+      .in('order_status', ['paid', 'accepted', 'preparing', 'ready_for_collection', 'out_for_delivery'])
+      .order('created_at', { ascending: true });
+    if (error) throw error;
+    return data ?? [];
+  },
+});
 
-  const slug = generateOrderSlug();
-
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    async mutationFn({ totalPrice, paymentIntentId, paymentStatus }: { totalPrice: number; paymentIntentId?: string; paymentStatus?: string }) {
-      if (!userId) throw new Error("User not authenticated");
-
-      const { data, error } = await supabase
-        .from("order")
-        .insert({
-          totalPrice,
-          slug,
-          user: userId,
-          status: "Pending",
-          payment_intent_id: paymentIntentId,
-          stripe_payment_status: paymentStatus || 'pending',
-        })
-        .select("*")
-        .single();
-
-      if (error)
-        throw new Error(
-          "An error occurred while creating order: " + error.message
-        );
-
-      return data;
-    },
-
-
-    async onSuccess() {
-      await queryClient.invalidateQueries({ queryKey: ["order"] });
-    },
+export async function performOrderAction(orderId: number, action: string, reason?: string) {
+  const { data, error } = await supabase.functions.invoke('order-actions', {
+    body: { orderId, action, reason },
   });
-};
-
-export const deleteOrder = () => {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    async mutationFn(orderId: number) {
-      const { error } = await supabase.from("order").delete().eq("id", orderId);
-      if (error) throw new Error(error.message);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["orders"] });
-    },
-  });
-};
-
-export const updateOrder = () => {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    async mutationFn({
-      orderId,
-      updates,
-    }: {
-      orderId: number;
-      updates: Partial<Tables<"order">>;
-    }) {
-      const { data, error } = await supabase
-        .from("order")
-        .update(updates)
-        .eq("id", orderId)
-        .select("*")
-        .single();
-
-      if (error) {
-        throw new Error(
-          "An error occurred while updating order: " + error.message
-        );
-      }
-
-      return data;
-    },
-
-    async onSuccess(data) {
-      await queryClient.invalidateQueries({ queryKey: ["order"] });
-      // Also invalidate specific order
-      if (data) {
-          await queryClient.invalidateQueries({ queryKey: ["orders", data.slug] });
-      }
-    },
-  });
-};
-
-export const createOrderItem = () => {
-  return useMutation({
-    async mutationFn(
-      insertData: {
-        orderId: number;
-        productId: number;
-        quantity: number;
-        price: number;
-      }[]
-    ) {
-      const { data, error } = await supabase
-        .from("order_item")
-        .insert(
-          insertData.map(({ orderId, quantity, productId, price }) => ({
-            order: orderId,
-            product: productId,
-            quantity,
-            price
-          }))
-        )
-        .select("*");
-
-      if (error)
-        throw new Error(
-          "An error occurred while creating order item: " + error.message
-        );
-
-      const productQuantities = insertData.reduce(
-        (acc, { productId, quantity }) => {
-          if (!acc[productId]) {
-            acc[productId] = 0;
-          }
-          acc[productId] += quantity;
-          return acc;
-        },
-        {} as Record<number, number>
-      );
-
-      await Promise.all(
-        Object.entries(productQuantities).map(
-          async ([productId, totalQuantity]) => {
-            const { error: stockError } = await supabase.rpc("decrement_product_quantity", {
-              product_id: Number(productId),
-              quantity: totalQuantity,
-            });
-
-            if (stockError) {
-              throw new Error("Failed to decrement stock: " + stockError.message);
-            }
-          }
-        )
-      );
-
-      return data;
-    },
-  });
-};
+  if (error || data?.error) throw new Error(data?.error ?? error?.message ?? 'Order action failed');
+  return data;
+}
 
 export interface OrderWithItems {
   id: number;
@@ -430,6 +305,21 @@ export interface OrderWithItems {
   totalPrice: number;
   fulfillment_token: string | null;
   stripe_payment_status: string | null;
+  payment_status: string;
+  order_status: string;
+  subtotal_minor: number;
+  delivery_fee_minor: number;
+  total_minor: number;
+  currency: string;
+  fulfilment_type: 'collection' | 'delivery' | null;
+  shop_id: number | null;
+  shops?: { id: number; name: string } | null;
+  delivery_orders?: Array<{
+    delivery_address: string | null;
+    delivery_phone: string;
+    delivery_notes: string | null;
+    status: string;
+  }>;
   order_items: {
     id: number;
     quantity: number;
@@ -457,7 +347,7 @@ export const getMyOrder = (idOrSlug: string) => {
 
       let query = supabase
         .from("order")
-        .select("*, order_items:order_item(*, products:product(*))")
+        .select("*, shops:shop_id(id,name), delivery_orders(*), order_items:order_item(*, products:product(*))")
         .eq("user", userId);
 
       query =

@@ -70,3 +70,7 @@ jest.mock('react-native-worklets', () => ({
 jest.mock('@react-native-async-storage/async-storage', () =>
   require('@react-native-async-storage/async-storage/jest/async-storage-mock')
 );
+jest.mock('expo-brightness', () => ({
+  getBrightnessAsync: jest.fn(async () => 0.5),
+  setBrightnessAsync: jest.fn(async () => undefined),
+}));

@@ -1,136 +1,36 @@
-import React, { useMemo } from 'react';
-import {
-  Text,
-  StyleSheet,
-  ViewStyle,
-  TextStyle,
-  Pressable,
-  PressableProps,
-} from 'react-native';
-import Animated, {
-  useAnimatedStyle,
-  useSharedValue,
-  withTiming,
-} from 'react-native-reanimated';
+import React from 'react';
+import { ActivityIndicator, Pressable, type PressableProps, StyleSheet, Text, View } from 'react-native';
+import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import { useDesignTokens } from '../theme/DesignTokensProvider';
-import { fonts } from '../tokens/typography';
-import { radii } from '../tokens/radii';
-import { space } from '../tokens/space';
-import { scale, timingConfig } from '../tokens/motion';
-import type { SemanticColors } from '../tokens/colors';
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
+export type ButtonVariant = 'primary' | 'commerce' | 'secondary' | 'outline' | 'ghost' | 'accent';
+export interface ButtonProps extends PressableProps { variant?: ButtonVariant; children: React.ReactNode; loading?: boolean; disabledReason?: string; }
 
-export type ButtonVariant = 'primary' | 'secondary' | 'outline' | 'ghost' | 'accent';
-
-export interface ButtonProps extends PressableProps {
-  variant?: ButtonVariant;
-  children: React.ReactNode;
-  style?: ViewStyle;
-  textStyle?: TextStyle;
-}
-
-function backgroundFor(variant: ButtonVariant, c: SemanticColors): string {
-  switch (variant) {
-    case 'primary':
-      return c.ink;
-    case 'secondary':
-      return c.gray100;
-    case 'accent':
-      return c.accent;
-    case 'outline':
-    case 'ghost':
-      return 'transparent';
-    default:
-      return c.ink;
-  }
-}
-
-function borderFor(variant: ButtonVariant, c: SemanticColors): string {
-  switch (variant) {
-    case 'ghost':
-      return 'transparent';
-    case 'outline':
-    case 'secondary':
-      return c.border;
-    default:
-      return 'transparent';
-  }
-}
-
-function textFor(variant: ButtonVariant, c: SemanticColors): string {
-  switch (variant) {
-    case 'primary':
-    case 'accent':
-      return c.surface;
-    default:
-      return c.ink;
-  }
-}
-
-export const Button: React.FC<ButtonProps> = ({
-  variant = 'primary',
-  children,
-  style,
-  textStyle,
-  onPress,
-  ...props
-}) => {
-  const { colors } = useDesignTokens();
-  const pressScale = useSharedValue(scale.normal);
-
-  const rStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: pressScale.value }],
-  }));
-
-  const styles = useMemo(
-    () =>
-      StyleSheet.create({
-        button: {
-          paddingVertical: space.sm + 2,
-          paddingHorizontal: space.lg,
-          alignItems: 'center',
-          justifyContent: 'center',
-          borderRadius: radii.md,
-          minHeight: 48,
-        },
-        text: {
-          fontFamily: fonts.semibold,
-          fontSize: 16,
-          letterSpacing: -0.1,
-        },
-      }),
-    [],
-  );
-
-  return (
+export function Button({ variant = 'primary', children, loading = false, disabled, disabledReason, style, ...props }: ButtonProps) {
+  const t = useDesignTokens();
+  const pressed = useSharedValue(1);
+  const animated = useAnimatedStyle(() => ({ transform: [{ scale: pressed.value }] }));
+  const semantic = variant === 'outline' ? 'secondary' : variant === 'accent' ? 'primary' : variant;
+  const backgroundColor = semantic === 'primary' ? t.colors.ink : semantic === 'commerce' ? t.colors.commerce : semantic === 'ghost' ? 'transparent' : t.colors.surface;
+  const color = semantic === 'primary' ? t.colors.onInk : semantic === 'commerce' ? t.colors.onCommerce : t.colors.ink;
+  const unavailable = Boolean(disabled || loading);
+  return <View style={styles.wrapper}>
     <AnimatedPressable
-      style={[
-        styles.button,
-        {
-          backgroundColor: backgroundFor(variant, colors),
-          borderColor: borderFor(variant, colors),
-          borderWidth: variant === 'ghost' ? 0 : 1,
-        },
-        rStyle,
-        style,
-      ]}
-      onPressIn={() => {
-        pressScale.value = withTiming(scale.pressed, timingConfig.fast);
-      }}
-      onPressOut={() => {
-        pressScale.value = withTiming(scale.normal, timingConfig.normal);
-      }}
-      onPress={onPress}
+      accessibilityRole="button" accessibilityState={{ disabled: unavailable, busy: loading }} disabled={unavailable}
+      onPressIn={() => { pressed.value = withTiming(0.98, { duration: 90 }); }}
+      onPressOut={() => { pressed.value = withTiming(1, { duration: 90 }); }}
+      style={[styles.button, { backgroundColor, borderColor: semantic === 'ghost' ? 'transparent' : t.colors.stroke, opacity: unavailable ? .4 : 1 }, animated, style]}
       {...props}
     >
-      {typeof children === 'string' ? (
-        <Text style={[styles.text, { color: textFor(variant, colors) }, textStyle]}>
-          {children}
-        </Text>
-      ) : (
-        children
-      )}
+      {loading ? <ActivityIndicator color={color} /> : typeof children === 'string' ? <Text style={[styles.label, { color }, semantic === 'secondary' && styles.secondaryLabel]}>{children}</Text> : children}
     </AnimatedPressable>
-  );
-};
+    {unavailable && disabledReason ? <Text style={[styles.reason, { color: t.colors.inkMuted }]}>{disabledReason}</Text> : null}
+  </View>;
+}
+
+const styles = StyleSheet.create({
+  wrapper: { gap: 4 }, button: { minHeight: 50, paddingHorizontal: 16, borderWidth: 2, borderRadius: 0, alignItems: 'center', justifyContent: 'center' },
+  label: { fontFamily: 'Archivo_900Black', fontSize: 15, textTransform: 'uppercase' }, secondaryLabel: { fontFamily: 'SpaceGrotesk_700Bold', textTransform: 'none' },
+  reason: { fontFamily: 'SpaceGrotesk_400Regular', fontSize: 12, lineHeight: 18 },
+});

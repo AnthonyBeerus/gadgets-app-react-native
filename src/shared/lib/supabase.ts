@@ -16,3 +16,8 @@ export function setSupabaseAccessTokenProvider(provider: AccessTokenProvider) {
 export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
   accessToken: () => accessTokenProvider(),
 });
+
+// Public catalogue reads must remain available even while an authenticated
+// session is expired or an external identity provider is temporarily
+// unavailable. This client intentionally never attaches the Clerk token.
+export const publicSupabase = createClient<Database>(supabaseUrl, supabaseAnonKey);

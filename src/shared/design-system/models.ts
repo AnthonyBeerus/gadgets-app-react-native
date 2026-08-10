@@ -1,0 +1,9 @@
+export type MerchantIdentityModel = { id: number | string; name: string; location?: string; imageUrl?: string };
+export type PayoutModel = { mode: 'competition'; pot: number; perEntry: number } | { mode: 'flat'; perEntry: number };
+export type EligibilityModel = { title: string; pot?: number; perEntry: number; qualifying: boolean; illustrative?: boolean };
+export type PriceBreakdownModel = { subtotal: number; fulfilmentLabel: string; fulfilmentFee: number; total: number };
+export type PaymentProgressModel = { reference: string; cardAuthorized: boolean; networkConfirmed: boolean; merchantNotified: boolean };
+export type PaymentFailureModel = { kind: 'declined' | 'cancelled' | 'authentication_required' | 'timed_out' | 'setup_failed'; title: string; impact: string; recovery: string };
+export type OrderTimelineModel = { id: string; label: string; detail: string; state: 'complete' | 'current' | 'pending' }[];
+export type CollectionCodeModel = { orderId: string | number; token: string; spokenCode: string; merchant: string; location?: string };
+export type OpportunityCardModel = { id: number; merchant: MerchantIdentityModel; title: string; heroImage?: string; payout: PayoutModel; deadline: string; qualifyingPrice: number; illustrative?: boolean; platform?: string };

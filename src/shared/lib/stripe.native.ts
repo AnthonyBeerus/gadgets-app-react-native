@@ -1,16 +1,10 @@
 import { supabase } from './supabase';
 import { initPaymentSheet, presentPaymentSheet } from '@stripe/stripe-react-native';
-import type { CartAttribution } from '../../store/cart-store';
+import type { CreateCheckoutRequest, CreateCheckoutResponse } from '../../features/cart/api/checkout-contract';
 
-type CheckoutItem = { productId: number; quantity: number };
-
-const fetchStripeKeys = async (items: CheckoutItem[], attribution: CartAttribution | null) => {
+const fetchStripeKeys = async (request: CreateCheckoutRequest): Promise<CreateCheckoutResponse> => {
   const { data, error } = await supabase.functions.invoke('stripe-checkout', {
-    body: {
-      action: 'create',
-      items,
-      attribution,
-    },
+    body: request,
   });
 
   if (error) {
@@ -21,17 +15,24 @@ const fetchStripeKeys = async (items: CheckoutItem[], attribution: CartAttributi
   return data;
 };
 
-export const setupStripePaymentSheet = async (items: CheckoutItem[], attribution: CartAttribution | null = null) => {
+export const setupStripePaymentSheet = async (request: CreateCheckoutRequest) => {
   // Fetch paymentIntent and publishable key from server
-  const { paymentIntent, publicKey, ephemeralKey, customer, orderId, totalAmount } =
-    await fetchStripeKeys(items, attribution);
+  const { paymentIntent, publicKey, ephemeralKey, customer, orderId, totalMinor, paymentStatus } =
+    await fetchStripeKeys(request);
+
+  if (paymentStatus === 'succeeded') {
+    return { paymentIntent, orderId: Number(orderId), totalAmount: Number(totalMinor), paymentStatus };
+  }
+  if (['failed', 'cancelled', 'refunded'].includes(paymentStatus)) {
+    throw new Error('This payment attempt has ended. Start a new checkout attempt.');
+  }
 
   if (!paymentIntent || !publicKey) {
     throw new Error('Failed to fetch Stripe keys');
   }
 
   const { error } = await initPaymentSheet({
-    merchantDisplayName: 'Codewithlari',
+    merchantDisplayName: 'Muse Alpha Shop',
     paymentIntentClientSecret: paymentIntent,
     customerId: customer,
     customerEphemeralKeySecret: ephemeralKey,
@@ -41,15 +42,7 @@ export const setupStripePaymentSheet = async (items: CheckoutItem[], attribution
      throw new Error(error.message);
    }
 
-  return { paymentIntent, orderId: Number(orderId), totalAmount: Number(totalAmount) };
-};
-
-export const confirmStripeOrder = async (orderId: number) => {
-  const { data, error } = await supabase.functions.invoke('stripe-checkout', {
-    body: { action: 'confirm', orderId },
-  });
-  if (error || data?.error) throw new Error(data?.error || error?.message || 'Payment confirmation failed');
-  return data.order;
+  return { paymentIntent, orderId: Number(orderId), totalAmount: Number(totalMinor), paymentStatus };
 };
 
 export const openStripeCheckout = async () => {

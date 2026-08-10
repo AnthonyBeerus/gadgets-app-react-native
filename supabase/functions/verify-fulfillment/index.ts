@@ -1,133 +1,43 @@
 import 'jsr:@supabase/functions-js/edge-runtime.d.ts';
 import { createClient } from 'jsr:@supabase/supabase-js@2';
-// @ts-ignore
-import Stripe from 'npm:stripe@^16.10.0';
 
-const stripe = Stripe(Deno.env.get('STRIPE_SECRET_KEY')!, {
-  httpClient: Stripe.createFetchHttpClient(),
-});
+const url = Deno.env.get('SUPABASE_URL')!;
+const anonKey = Deno.env.get('SUPABASE_ANON_KEY')!;
+const admin = createClient(url, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!);
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+  'Content-Type': 'application/json',
+};
+const reply = (body: unknown, status = 200) => new Response(JSON.stringify(body), { status, headers: corsHeaders });
 
-const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-const supabaseServiceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-
-// Service role client for admin tasks (reading orders, updating status)
-const supabaseAdmin = createClient(supabaseUrl, supabaseServiceRoleKey);
-
-Deno.serve(async (req) => {
+Deno.serve(async req => {
+  if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
+  if (req.method !== 'POST') return reply({ error: 'Method not allowed' }, 405);
   try {
-    // CORS headers
-    const corsHeaders = {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-    };
+    const authorization = req.headers.get('Authorization');
+    if (!authorization) return reply({ error: 'Sign in again' }, 401);
+    const userClient = createClient(url, anonKey, { global: { headers: { Authorization: authorization } } });
+    const { data: actor } = await userClient.rpc('current_muse_profile');
+    if (!actor?.id) return reply({ error: 'Sign in again' }, 401);
 
-    if (req.method === 'OPTIONS') {
-      return new Response('ok', { headers: corsHeaders });
-    }
+    const { orderId, token } = await req.json();
+    const { data: order } = await admin.from('order').select('*, shops:shop_id(owner_id)')
+      .eq('id', Number(orderId)).single();
+    if (!order) return reply({ error: 'Order not found' }, 404);
+    if (order.shops?.owner_id !== actor.id && actor.role !== 'OPERATOR') return reply({ error: 'This order belongs to another business' }, 403);
+    if (order.fulfilment_type !== 'collection') return reply({ error: 'Delivery orders do not use collection QR codes' }, 409);
+    if (order.payment_status !== 'succeeded') return reply({ error: 'Payment is not confirmed' }, 409);
+    if (order.order_status === 'completed') return reply({ error: 'This collection code has already been used' }, 409);
+    if (order.order_status !== 'ready_for_collection') return reply({ error: 'Order is not ready for collection' }, 409);
+    if (!order.fulfillment_token || order.fulfillment_token !== token) return reply({ error: 'Invalid collection code' }, 403);
 
-    const { orderId, token: fulfillmentToken } = await req.json();
-
-    if (!orderId || !fulfillmentToken) {
-       return new Response('Missing orderId or fulfillmentToken', { status: 400, headers: corsHeaders });
-    }
-
-    // 0. AUTHENTICATION & AUTHORIZATION check
-    const authHeader = req.headers.get('Authorization');
-    if (!authHeader) {
-      return new Response('Unauthorized', { status: 401, headers: corsHeaders });
-    }
-
-    const supabaseClient = createClient(
-      supabaseUrl,
-      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
-      { global: { headers: { Authorization: authHeader } } }
-    );
-
-    const { data: { user }, error: authError } = await supabaseClient.auth.getUser();
-
-    if (authError || !user) {
-      return new Response('Unauthorized', { status: 401, headers: corsHeaders });
-    }
-
-    // 1. Fetch Order
-    const { data: order, error: orderError } = await supabaseAdmin
-        .from('order')
-        .select('*')
-        .eq('id', orderId)
-        .single();
-
-    if (orderError || !order) {
-        return new Response('Order not found', { status: 404, headers: corsHeaders });
-    }
-
-    const { data: ownedItems, error: ownershipError } = await supabaseAdmin
-      .from('order_item')
-      .select('product!inner(shop_id, shops!inner(owner_id))')
-      .eq('order', orderId);
-    if (ownershipError || !ownedItems?.length || ownedItems.some((item: any) => item.product?.shops?.owner_id !== user.id)) {
-      return new Response('Forbidden: order belongs to another merchant', { status: 403, headers: corsHeaders });
-    }
-
-    // 2. TOKEN & IDEMPOTENCY CHECK
-    // Prevent Replay Attacks
-    if (order.status === 'Completed') {
-        return new Response(JSON.stringify({ 
-             // Ideally we warn the merchant "Already Picked Up" but return verified=true 
-             // so they know it WAS a valid order, just already processed.
-             // OR return verified: false to alert duplicate usage.
-             // Let's return verified: false with specific message.
-            verified: false,
-            message: '⚠️ Order ALREADY fulfilled/picked up.' 
-        }), {
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        });
-    }
-
-    // Validate Secure Token
-    if (order.fulfillment_token !== fulfillmentToken) {
-        return new Response('Invalid Fulfillment Token', { status: 403, headers: corsHeaders });
-    }
-
-    // 3. Validate Payment
-    const paymentIntentId = order.stripe_payment_intent_id;
-    if (!paymentIntentId) {
-         return new Response(JSON.stringify({ 
-             verified: false, 
-             message: 'No payment record found for this order.' 
-         }), { 
-             headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-         });
-    }
-
-    // 4. Retrieve PaymentIntent from Stripe
-    const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
-
-    if (paymentIntent.status === 'succeeded') {
-        // 5. Update Order Status
-        await supabaseAdmin.from('order').update({ 
-            status: 'Completed', 
-            stripe_payment_status: 'succeeded' 
-        }).eq('id', orderId);
-
-        return new Response(JSON.stringify({ 
-            verified: true, 
-            message: 'Payment Verified & Order Fulfilled',
-            amount: paymentIntent.amount / 100,
-            currency: paymentIntent.currency,
-            customer_email: order.user_email
-        }), {
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        });
-    } else {
-         return new Response(JSON.stringify({ 
-            verified: false, 
-            message: `Payment not successful. Status: ${paymentIntent.status}` 
-        }), {
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        });
-    }
-
-  } catch (err: any) {
-    return new Response(JSON.stringify({ error: err.message }), { status: 500, headers: { 'Content-Type': 'application/json' } });
+    await admin.from('order').update({ order_status: 'completed', status: 'Completed' }).eq('id', order.id).eq('order_status', 'ready_for_collection');
+    await admin.from('delivery_orders').update({ status: 'delivered', actual_delivery_time: new Date().toISOString() }).eq('order_id', order.id);
+    return reply({ success: true, orderId: order.id, status: 'completed' });
+  } catch (error) {
+    console.error('[verify-fulfillment]', error instanceof Error ? error.message : error);
+    return reply({ error: error instanceof Error ? error.message : 'Collection verification failed' }, 400);
   }
 });

@@ -1,10 +1,2 @@
-/** Modest radii — not pill-default */
-export const radii = {
-  sm: 6,
-  md: 10,
-  lg: 16,
-  /** Rare: chips only when interaction needs a capsule */
-  pill: 9999,
-} as const;
-
+export const radii = { none: 0, badge: 3, sm: 3, md: 0, lg: 0, pill: 999 } as const;
 export type RadiusToken = keyof typeof radii;

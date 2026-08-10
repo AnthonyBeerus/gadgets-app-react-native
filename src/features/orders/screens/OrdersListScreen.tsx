@@ -1,216 +1,58 @@
-import { useNeoStyles } from '../../../shared/hooks/useNeoStyles';
-import { useTheme } from '../../../shared/providers/theme-provider';
-import React from 'react';
-import {
-  ActivityIndicator,
-  Pressable,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
-import { Link, Stack } from 'expo-router';
 import { FlashList } from '@shopify/flash-list';
 import { format } from 'date-fns';
-import { formatOrderId } from '../../../shared/utils/order';
+import { Stack, useRouter } from 'expo-router';
+import React from 'react';
+import { ActivityIndicator, Pressable, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { Tables } from '../../../shared/types/database.types';
+import { NuviaText } from '../../../components/atoms/nuvia-text';
 import { getMyOrders } from '../../../shared/api/api';
-import { AnimatedHeaderLayout } from '../../../shared/components/layout/AnimatedHeaderLayout';
-import { NEO_THEME } from '../../../shared/constants/neobrutalism';
-import { NeoView } from '../../../shared/components/ui/neo-view';
-import { HeaderRightGroup } from '../../../shared/components/ui/header-right-group';
+import { useDesignTokens, useThemedStyles, type DesignTokens, type SemanticColors } from '../../../shared/design-system';
 
-// Fix for missing types in DB schema and FlashList
-type OrderWithExtras = Tables<'order'> & { slug: string; description: string };
 const FlashListFixed = FlashList as unknown as <T>(props: React.ComponentProps<typeof FlashList<T>> & { estimatedItemSize: number }) => React.ReactElement;
 
-const OrdersListScreen = () => {
-  const styles = useNeoStyles(createStyles);
-  const { theme } = useTheme();
-  const { data: orders, error, isLoading } = getMyOrders();
-
-  const renderItem = (item: OrderWithExtras) => (
-    <Link href={`/orders/${item.slug}`} asChild key={item.id}>
-      <Pressable>
-        <NeoView style={styles.orderContainer} containerStyle={styles.neoContainer}>
-          <View style={styles.orderContent}>
-            <View style={styles.orderDetailsContainer}>
-              <Text style={styles.orderItem}>Order {formatOrderId(item.slug)}</Text>
-              <Text style={styles.orderDetails}>{item.description}</Text>
-              <Text style={styles.orderDate}>
-                {format(new Date(item.created_at), 'MMM dd, yyyy')}
-              </Text>
-            </View>
-            <View
-              style={[styles.statusBadge, styles[`statusBadge_${item.status}`]]}
-            >
-              <Text style={styles.statusText}>{item.status.toUpperCase()}</Text>
-            </View>
-          </View>
-        </NeoView>
-      </Pressable>
-    </Link>
-  );
-
-  const renderSmallTitle = () => (
-    <Text style={styles.smallHeaderTitle}>My Orders</Text>
-  );
-
-  const renderLargeTitle = () => (
-    <View>
-      <Text style={styles.largeHeaderTitle}>My Orders</Text>
-      <Text style={styles.largeHeaderSubtitle}>Track your purchases</Text>
-    </View>
-  );
-
-  if (isLoading) return <ActivityIndicator size="large" color={theme.colors.primary} style={{ marginTop: 40 }} />;
-
-  if (error) return <Text style={styles.errorText}>Error: {error?.message}</Text>;
-
-  return (
-    <AnimatedHeaderLayout
-      renderSmallTitle={renderSmallTitle}
-      renderLargeTitle={renderLargeTitle}
-      smallHeaderRight={<HeaderRightGroup />}
-      largeHeaderRight={<HeaderRightGroup />}
-    >
-      <Stack.Screen options={{ headerShown: false }} />
-      <View style={styles.content}>
-        {!orders || !orders.length ? (
-          <View style={styles.emptyContainer}>
-            <Text style={styles.emptyTitle}>NO ORDERS YET</Text>
-            <Text style={styles.emptyMessage}>
-              Start shopping to see your orders here!
-            </Text>
-          </View>
-        ) : (
-          <View style={{ flex: 1, minHeight: 2 }}>
-            <FlashListFixed<OrderWithExtras>
-                data={orders as unknown as OrderWithExtras[]}
-                renderItem={({ item }) => renderItem(item)}
-                estimatedItemSize={100}
-                contentContainerStyle={styles.listContainer}
-            />
-          </View>
-        )}
-      </View>
-    </AnimatedHeaderLayout>
-  );
-};
-
-export default OrdersListScreen;
-
-function createStyles(c) {
+function createStyles(c: SemanticColors, tokens: DesignTokens) {
   return {
-  content: {
-    flex: 1,
-    paddingBottom: 40,
-  },
-  smallHeaderTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: c.black,
-    fontFamily: NEO_THEME.fonts.bold,
-  },
-  largeHeaderTitle: {
-    fontSize: 32,
-    fontWeight: '600',
-    color: c.black,
-    fontFamily: NEO_THEME.fonts.bold,
-    letterSpacing: -1,
-  },
-  largeHeaderSubtitle: {
-    fontSize: 14,
-    color: c.grey,
-    marginTop: 4,
-    fontWeight: '700',
-    fontFamily: NEO_THEME.fonts.bold,
-  },
-  listContainer: {
-    padding: 16,
-  },
-  orderContainer: {
-    backgroundColor: c.white,
-    padding: 16,
-    borderRadius: 16, // Rounded
-  },
-  neoContainer: {
-    marginBottom: 16,
-    borderRadius: 16, // Rounded Shadow
-    width: '100%',
-  },
-  orderContent: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  orderDetailsContainer: {
-    flex: 1,
-  },
-  orderItem: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: c.black,
-    fontFamily: NEO_THEME.fonts.bold,
-    marginBottom: 4,
-  },
-  orderDetails: {
-    fontSize: 14,
-    color: c.grey,
-    marginBottom: 4,
-  },
-  orderDate: {
-    fontSize: 12,
-    color: c.black,
-    fontWeight: '700',
-  },
-  statusBadge: {
-    paddingVertical: 6,
-    paddingHorizontal: 12,
-    borderRadius: 20, // Pill
-    alignSelf: 'flex-start',
-    borderWidth: 1,
-    borderColor: c.border,
-  },
-  statusText: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: c.black,
-    fontFamily: NEO_THEME.fonts.bold,
-  },
-  statusBadge_Pending: {
-    backgroundColor: c.yellow,
-  },
-  statusBadge_Completed: {
-    backgroundColor: '#4caf50', 
-  },
-  statusBadge_Shipped: {
-    backgroundColor: c.blue,
-  },
-  statusBadge_InTransit: {
-    backgroundColor: '#ff9800', 
-  },
-  emptyContainer: {
-    alignItems: "center",
-    paddingVertical: 40,
-  },
-  emptyTitle: {
-    fontSize: 20,
-    fontWeight: '600',
-    color: c.black,
-    marginTop: 16,
-    marginBottom: 8,
-    fontFamily: NEO_THEME.fonts.bold,
-  },
-  emptyMessage: {
-    fontSize: 16,
-    color: c.grey,
-    textAlign: "center",
-  },
-  errorText: {
-    color: 'red',
-    textAlign: 'center',
-    marginTop: 20,
-  }
+    safe: { flex: 1, backgroundColor: c.canvas },
+    header: { gap: 4, padding: 20, paddingBottom: 12 },
+    list: { padding: 20, paddingTop: 6, paddingBottom: 48 },
+    card: { gap: 8, marginBottom: 12, borderWidth: 1, borderColor: c.border, borderRadius: 18, backgroundColor: c.surface, padding: 16, ...tokens.elevation.hairline },
+    row: { flexDirection: 'row' as const, justifyContent: 'space-between' as const, alignItems: 'center' as const, gap: 12 },
+    badge: { borderRadius: 999, backgroundColor: c.accentMuted, paddingHorizontal: 10, paddingVertical: 5 },
+    empty: { alignItems: 'center' as const, gap: 10, padding: 40 },
   };
+}
+
+export default function OrdersListScreen() {
+  const styles = useThemedStyles(createStyles);
+  const { colors } = useDesignTokens();
+  const router = useRouter();
+  const query = getMyOrders();
+  return (
+    <SafeAreaView style={styles.safe}>
+      <Stack.Screen options={{ headerShown: false }} />
+      <View style={styles.header}><NuviaText variant="display">MY ORDERS</NuviaText><NuviaText variant="body" color={colors.inkMuted}>Payments and fulfilment in one timeline</NuviaText></View>
+      {query.isLoading ? <ActivityIndicator color={colors.ink} /> : query.error ? (
+        <View style={styles.empty}><NuviaText variant="h2">ORDERS COULDN'T LOAD</NuviaText><Pressable onPress={() => query.refetch()}><NuviaText variant="bodyBold">TRY AGAIN</NuviaText></Pressable></View>
+      ) : !query.data?.length ? (
+        <View style={styles.empty}><NuviaText variant="h2">NO ORDERS YET</NuviaText><NuviaText variant="body" align="center">Purchases from Muse Alpha Shop appear here.</NuviaText></View>
+      ) : (
+        <FlashListFixed<any>
+          data={query.data}
+          estimatedItemSize={128}
+          contentContainerStyle={styles.list}
+          renderItem={({ item }) => (
+            <Pressable onPress={() => router.push(`/orders/${item.slug}`)} style={styles.card}>
+              <View style={styles.row}>
+                <NuviaText variant="h3">ORDER #{item.id}</NuviaText>
+                <View style={styles.badge}><NuviaText variant="caption">{String(item.order_status ?? item.status).replaceAll('_', ' ').toUpperCase()}</NuviaText></View>
+              </View>
+              <NuviaText variant="body">{item.shops?.name ?? 'Muse shop'} · {item.fulfilment_type ?? 'Collection'}</NuviaText>
+              <View style={styles.row}><NuviaText variant="caption">{format(new Date(item.created_at), 'dd MMM yyyy, HH:mm')}</NuviaText><NuviaText variant="bodyBold">P{(Number(item.total_minor ?? item.totalPrice * 100) / 100).toFixed(2)}</NuviaText></View>
+            </Pressable>
+          )}
+        />
+      )}
+    </SafeAreaView>
+  );
 }

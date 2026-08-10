@@ -1,5 +1,5 @@
 import { useAuth as useClerkAuth, useUser as useClerkUser } from '@clerk/expo';
-import { createContext, PropsWithChildren, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { createContext, PropsWithChildren, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 
 import { setSupabaseAccessTokenProvider, supabase } from '../lib/supabase';
 
@@ -35,7 +35,9 @@ type MuseSession = { user: { id: string; clerkUserId: string } };
 
 type AuthData = {
   session: MuseSession | null;
+  isSignedIn: boolean;
   mounting: boolean;
+  profileError: string | null;
   user: User | null;
   isMerchant: boolean;
   isAdmin: boolean;
@@ -43,7 +45,7 @@ type AuthData = {
   merchantProviderId: number | null;
   activeRole: 'shopper' | 'merchant';
   createMerchantShop: (input: CreateMerchantShopInput) => Promise<unknown>;
-  refreshProfile: () => Promise<void>;
+  refreshProfile: () => Promise<User | null>;
   signOut: () => Promise<void>;
   switchRole: (_role: 'shopper' | 'merchant') => void;
   createDevMerchant: () => Promise<unknown>;
@@ -51,49 +53,104 @@ type AuthData = {
 
 const AuthContext = createContext<AuthData | null>(null);
 
+function tokenClaims(token: string): { exp?: number; role?: string } | null {
+  try {
+    const encoded = token.split('.')[1];
+    const base64 = encoded.replace(/-/g, '+').replace(/_/g, '/');
+    const normalized = base64.padEnd(Math.ceil(base64.length / 4) * 4, '=');
+    return JSON.parse(globalThis.atob(normalized)) as { exp?: number; role?: string };
+  } catch {
+    return null;
+  }
+}
+
+function tokenExpiresSoon(token: string, leewaySeconds = 30) {
+  const claims = tokenClaims(token);
+  return !claims?.exp || claims.exp <= Math.floor(Date.now() / 1000) + leewaySeconds;
+}
+
+async function withTimeout<T>(operation: PromiseLike<T>, timeoutMs = 10000): Promise<T> {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const timeout = new Promise<never>((_, reject) => {
+    timer = setTimeout(() => reject(new Error('Muse could not prepare your account in time. Check your connection and try again.')), timeoutMs);
+  });
+  try {
+    return await Promise.race([Promise.resolve(operation), timeout]);
+  } finally {
+    if (timer) clearTimeout(timer);
+  }
+}
+
 export default function AuthProvider({ children }: PropsWithChildren) {
   const { isLoaded, isSignedIn, userId, getToken, signOut } = useClerkAuth();
   const { user: clerkUser } = useClerkUser();
   const [user, setUser] = useState<User | null>(null);
   const [merchantShopId, setMerchantShopId] = useState<number | null>(null);
   const [profileLoading, setProfileLoading] = useState(false);
+  const [profileError, setProfileError] = useState<string | null>(null);
+  const [activeRole, setActiveRole] = useState<'shopper' | 'merchant'>('shopper');
+  const getTokenRef = useRef(getToken);
 
   useEffect(() => {
-    setSupabaseAccessTokenProvider(async () => getToken());
-    return () => setSupabaseAccessTokenProvider(async () => null);
+    getTokenRef.current = getToken;
   }, [getToken]);
+
+  useEffect(() => {
+    setSupabaseAccessTokenProvider(async () => {
+      const token = await getTokenRef.current();
+      const current = !token || tokenExpiresSoon(token) ? await getTokenRef.current({ skipCache: true }) : token;
+      if (current && tokenClaims(current)?.role !== 'authenticated') {
+        console.warn('[Auth] Clerk session token is missing role=authenticated. Complete Clerk Connect with Supabase.');
+      }
+      return current;
+    });
+    return () => setSupabaseAccessTokenProvider(async () => null);
+  }, []);
 
   const fetchProfile = useCallback(async () => {
     if (!isSignedIn || !userId) {
       setUser(null);
       setMerchantShopId(null);
-      return;
+      setProfileError(null);
+      return null;
     }
 
     setProfileLoading(true);
+    setProfileError(null);
     try {
+      const freshToken = await withTimeout(getTokenRef.current({ skipCache: true }));
+      if (!freshToken) throw new Error('Your Clerk session expired. Sign in again to continue.');
+      if (tokenClaims(freshToken)?.role !== 'authenticated') {
+        throw new Error('Muse account connection is not active yet. Activate the Supabase integration in Clerk, then sign out and sign in again.');
+      }
       const email = clerkUser?.primaryEmailAddress?.emailAddress ?? '';
-      await (supabase as any).rpc('ensure_clerk_profile', {
+      const { error: ensureError } = await withTimeout<{ error: unknown | null }>((supabase as any).rpc('ensure_clerk_profile', {
         p_email: email,
         p_full_name: clerkUser?.fullName ?? null,
         p_avatar_url: clerkUser?.imageUrl ?? null,
-      });
+      }));
+      if (ensureError) throw ensureError;
 
-      const { data: profile, error } = await (supabase as any)
+      const { data: profile, error } = await withTimeout<{ data: User | null; error: unknown | null }>((supabase as any)
         .from('users')
         .select('*')
         .eq('clerk_user_id', userId)
-        .single();
+        .single());
       if (error) throw error;
+      if (!profile) throw new Error('Muse could not find your profile after preparing it. Try again.');
       setUser(profile as User);
 
-      const { data: shop, error: shopError } = await (supabase as any)
+      const { data: shop, error: shopError } = await withTimeout<{ data: { id: number } | null; error: unknown | null }>((supabase as any)
         .from('shops')
         .select('id')
         .eq('owner_id', profile.id)
-        .maybeSingle();
+        .maybeSingle());
       if (shopError) throw shopError;
       setMerchantShopId(shop?.id ?? null);
+      return profile as User;
+    } catch (error) {
+      setProfileError(error instanceof Error ? error.message : 'Could not load your Muse profile');
+      throw error;
     } finally {
       setProfileLoading(false);
     }
@@ -103,7 +160,15 @@ export default function AuthProvider({ children }: PropsWithChildren) {
     void fetchProfile().catch(error => console.warn('[Auth] Could not load Muse profile', error));
   }, [fetchProfile]);
 
-  const createMerchantShop = async (input: CreateMerchantShopInput) => {
+  useEffect(() => {
+    if (!user) {
+      setActiveRole('shopper');
+    } else if (user.role === 'MERCHANT') {
+      setActiveRole('merchant');
+    }
+  }, [user?.id, user?.role]);
+
+  const createMerchantShop = useCallback(async (input: CreateMerchantShopInput) => {
     const { data, error } = await (supabase as any).rpc('create_merchant_shop', {
       shop_name: input.shopName,
       shop_location: input.shopLocation,
@@ -118,28 +183,30 @@ export default function AuthProvider({ children }: PropsWithChildren) {
     if (error) throw error;
     await fetchProfile();
     return data;
-  };
+  }, [fetchProfile]);
 
   const session = user && userId ? { user: { id: user.id, clerkUserId: userId } } : null;
   const value = useMemo<AuthData>(() => ({
     session,
+    isSignedIn: Boolean(isSignedIn),
     mounting: !isLoaded || profileLoading,
+    profileError,
     user,
     isMerchant: user?.role === 'MERCHANT',
     isAdmin: user?.role === 'OPERATOR',
     merchantShopId,
     merchantProviderId: null,
-    activeRole: user?.role === 'MERCHANT' ? 'merchant' : 'shopper',
+    activeRole,
     createMerchantShop,
     refreshProfile: fetchProfile,
     signOut: async () => signOut(),
-    switchRole: () => undefined,
+    switchRole: setActiveRole,
     createDevMerchant: () => createMerchantShop({
       shopName: 'My Shop',
       shopLocation: 'Gaborone',
       enableCollection: true,
     }),
-  }), [fetchProfile, isLoaded, merchantShopId, profileLoading, session, signOut, user]);
+  }), [activeRole, createMerchantShop, fetchProfile, isLoaded, isSignedIn, merchantShopId, profileError, profileLoading, session, signOut, user]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

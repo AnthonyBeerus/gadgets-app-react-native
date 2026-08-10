@@ -58,17 +58,33 @@ function inferIntent(categoryName: string): ShopIntent {
 export async function getCampaignAwareShops() {
   const variant = Constants.expoConfig?.extra?.appVariant;
   if (variant === 'development' || variant === 'preview' || (__DEV__ && !variant)) {
-    return buildMerchantGrowthProfiles(PROTOTYPE_MERCHANTS, await getCreatorOpportunityFeed({ includeHiddenPreferences: true, limit: 200 }));
+    const opportunities = await getCreatorOpportunityFeed({ includeHiddenPreferences: true, limit: 200 });
+    const prototypes = buildMerchantGrowthProfiles(PROTOTYPE_MERCHANTS, opportunities);
+    try {
+      const catalog = await getMarketplaceCatalog();
+      const alphaCatalog = {
+        ...catalog,
+        shops: catalog.shops.filter(shop => shop.name === 'Muse Alpha Shop'),
+      };
+      const alphaProfiles = buildMerchantGrowthProfiles(catalogToMerchants(alphaCatalog), opportunities);
+      return [...alphaProfiles, ...prototypes];
+    } catch {
+      return prototypes;
+    }
   }
 
   const [catalog, opportunities] = await Promise.all([
     getMarketplaceCatalog(),
     getCreatorOpportunityFeed({ includeHiddenPreferences: true, limit: 200 }),
   ]);
+  return buildMerchantGrowthProfiles(catalogToMerchants(catalog), opportunities);
+}
+
+function catalogToMerchants(catalog: Awaited<ReturnType<typeof getMarketplaceCatalog>>): MerchantSeed[] {
   const categoryById = new Map<number, string>(
     catalog.categories.map((category: any): [number, string] => [Number(category.id), String(category.name)]),
   );
-  const merchants: MerchantSeed[] = catalog.shops.map(shop => {
+  return catalog.shops.map(shop => {
     const products = catalog.products.filter(product => product.shop_id === shop.id).slice(0, 4);
     const categoryName = products[0] ? categoryById.get(products[0].category) ?? '' : '';
     return {
@@ -81,11 +97,11 @@ export async function getCampaignAwareShops() {
       intent: inferIntent(categoryName),
       hasDelivery: shop.has_delivery,
       hasCollection: shop.has_collection,
+      isSponsored: shop.name === 'Muse Alpha Shop',
       isPrototype: false,
       products: products.map(product => ({ ...product, description: product.description ?? product.title })),
     };
   });
-  return buildMerchantGrowthProfiles(merchants, opportunities);
 }
 
 export async function getCampaignAwareShopById(id: number) {

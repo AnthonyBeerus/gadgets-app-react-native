@@ -9,7 +9,12 @@ export {
   textVariants,
   resolveTextVariants,
   space,
+  layout,
   radii,
+  strokes,
+  targets,
+  icons,
+  layers,
   elevation,
   resolveElevation,
   duration,
@@ -33,6 +38,21 @@ export {
   Surface,
   Tag,
   IconButton,
+  Money,
+  Chip,
+  Progress,
+  QuantityStepper,
+  IdentityMark,
+  Avatar,
+  MerchantMark,
+  Rule,
+  Plate,
+  OffsetPlane,
+  DashedWell,
+  Skeleton,
+  StrokedImage,
+  PinnedActionBar,
+  Control,
   type ButtonProps,
   type ButtonVariant,
   type MuseTextProps,
@@ -41,6 +61,8 @@ export {
   type TagProps,
   type TagTone,
   type IconButtonProps,
+  type MoneyProps,
+  type ChipProps,
 } from './primitives';
 
 export {
@@ -49,7 +71,15 @@ export {
   type ScreenHeaderProps,
   type TabBarShellProps,
   type TabBarItem,
+  StackScreenTemplate,
+  StatusScreenTemplate,
 } from './patterns';
+
+export { MerchantIdentityRow, PayoutSummary, EligibilityPanel, PriceBreakdown, OrderStatusStep, CollectionCode, EmptyState, ErrorNotice } from './molecules/commerce';
+export { SearchField, FulfilmentSelector, CartLineItem, EligibilityExplainer, SponsoredDisclosure, PaymentProcessingPanel, PaymentFailureNotice, HeldOrderSummary, PurchaseProofPanel } from './molecules/flows';
+export { SponsoredCard, CheckoutSheet, PaymentProcessingOrganism } from './organisms/commerce';
+export { formatMoney, type MoneyFormat } from './utils/money';
+export type * from './models';
 
 export {
   DesignTokensProvider,

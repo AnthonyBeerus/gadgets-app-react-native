@@ -1,4 +1,4 @@
-import { supabase } from "../lib/supabase";
+import { publicSupabase, supabase } from "../lib/supabase";
 import { Tables } from "../types/database.types";
 
 export type Shop = Tables<"shops">;
@@ -9,7 +9,7 @@ export type Mall = Tables<"malls">;
 
 // Mall Functions
 export const getMalls = async () => {
-  const { data, error } = await supabase
+  const { data, error } = await publicSupabase
     .from("malls")
     .select(
       `
@@ -25,7 +25,7 @@ export const getMalls = async () => {
 };
 
 export const getMallById = async (mallId: number) => {
-  const { data, error } = await supabase
+  const { data, error } = await publicSupabase
     .from("malls")
     .select("*")
     .eq("id", mallId)
@@ -36,7 +36,7 @@ export const getMallById = async (mallId: number) => {
 };
 
 export const getMallBySlug = async (slug: string) => {
-  const { data, error } = await supabase
+  const { data, error } = await publicSupabase
     .from("malls")
     .select("*")
     .eq("slug", slug)
@@ -47,7 +47,7 @@ export const getMallBySlug = async (slug: string) => {
 };
 
 export const getFeaturedMalls = async () => {
-  const { data, error } = await supabase
+  const { data, error } = await publicSupabase
     .from("malls")
     .select("*")
     .eq("is_featured", true)
@@ -58,7 +58,7 @@ export const getFeaturedMalls = async () => {
 };
 
 export const getShopsByMall = async (mallId: number) => {
-  const { data, error } = await (supabase
+  const { data, error } = await (publicSupabase
     .from("shops")
     .select(
       `
@@ -82,7 +82,7 @@ export const getShopsByMall = async (mallId: number) => {
 
 // Shop Functions
 export const getShops = async () => {
-  const { data, error } = await (supabase
+  const { data, error } = await (publicSupabase
     .from("shops")
     .select(
       `
@@ -109,7 +109,7 @@ export const getShops = async () => {
 };
 
 export const getShopsByCategory = async (categoryId: number) => {
-  const { data, error } = await (supabase
+  const { data, error } = await (publicSupabase
     .from("shops")
     .select(
       `
@@ -134,7 +134,7 @@ export const getShopsByCategory = async (categoryId: number) => {
 export const getShopById = async (shopId: number) => {
   console.log("getShopById called with ID:", shopId);
 
-  const { data, error } = await (supabase
+  const { data, error } = await (publicSupabase
     .from("shops")
     .select(
       `
@@ -167,7 +167,7 @@ export const getShopById = async (shopId: number) => {
 };
 
 export const getFeaturedShops = async () => {
-  const { data, error } = await (supabase
+  const { data, error } = await (publicSupabase
     .from("shops")
     .select(
       `
@@ -190,7 +190,7 @@ export const getFeaturedShops = async () => {
 
 // Review Functions
 export const getShopReviews = async (shopId: number) => {
-  const { data, error } = await supabase
+  const { data, error } = await publicSupabase
     .from("shop_reviews")
     .select(
       `
@@ -435,7 +435,7 @@ export const updateDeliveryOrder = async (
 
 // Category Functions with Shop Features
 export const getCategoriesWithShopFeatures = async () => {
-  const { data, error } = await supabase
+  const { data, error } = await publicSupabase
     .from("category")
     .select("*")
     .order("name");
@@ -446,7 +446,7 @@ export const getCategoriesWithShopFeatures = async () => {
 
 // Search Functions
 export const searchShops = async (query: string) => {
-  const { data, error } = await (supabase
+  const { data, error } = await (publicSupabase
     .from("shops")
     .select(
       `
@@ -474,7 +474,7 @@ export const getShopsWithFeature = async (
     | "has_appointment_booking"
     | "has_virtual_try_on"
 ) => {
-  const { data, error } = await (supabase
+  const { data, error } = await (publicSupabase
     .from("shops")
     .select(
       `
@@ -499,7 +499,7 @@ export const getShopsWithFeature = async (
 export const getShopProducts = async (shopId: number) => {
   console.log("getShopProducts called with shopId:", shopId);
 
-  const { data, error } = await supabase
+  const { data, error } = await publicSupabase
     .from("product")
     .select(
       `

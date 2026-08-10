@@ -1,42 +1,9 @@
-import { ViewStyle } from 'react-native';
 import type { SemanticColors } from './colors';
-import { colors } from './colors';
-
 export type ElevationLevel = 'none' | 'hairline' | 'soft';
-
-export function resolveElevation(
-  c: SemanticColors,
-  mode: 'light' | 'dark' = 'light',
-): Record<ElevationLevel, ViewStyle> {
-  return {
-    none: {
-      shadowColor: 'transparent',
-      shadowOffset: { width: 0, height: 0 },
-      shadowOpacity: 0,
-      shadowRadius: 0,
-      elevation: 0,
-      borderWidth: 0,
-    },
-    hairline: {
-      shadowColor: 'transparent',
-      shadowOffset: { width: 0, height: 0 },
-      shadowOpacity: 0,
-      shadowRadius: 0,
-      elevation: 0,
-      borderWidth: 1,
-      borderColor: c.border,
-    },
-    soft: {
-      shadowColor: '#000000',
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: mode === 'dark' ? 0.35 : 0.08,
-      shadowRadius: mode === 'dark' ? 6 : 8,
-      elevation: 2,
-      borderWidth: 1,
-      borderColor: c.border,
-    },
-  };
-}
-
-/** @deprecated Prefer resolveElevation via DesignTokensProvider */
-export const elevation: Record<ElevationLevel, ViewStyle> = resolveElevation(colors, 'light');
+/** @deprecated Compatibility only. Muse has no shadows; migrate to Plate/OffsetPlane. */
+export const resolveElevation = (c: SemanticColors, _mode?: 'light' | 'dark') => ({
+  none: { borderWidth: 0, shadowOpacity: 0, shadowRadius: 0, shadowOffset: { width: 0, height: 0 }, elevation: 0 },
+  hairline: { borderWidth: 2, borderColor: c.stroke, shadowOpacity: 0, shadowRadius: 0, shadowOffset: { width: 0, height: 0 }, elevation: 0 },
+  soft: { borderWidth: 2, borderColor: c.stroke, shadowOpacity: 0, shadowRadius: 0, shadowOffset: { width: 0, height: 0 }, elevation: 0 },
+} as const);
+export const elevation = resolveElevation({ stroke: '#101010' } as SemanticColors);
