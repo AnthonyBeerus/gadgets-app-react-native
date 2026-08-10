@@ -8,10 +8,16 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import {
   Text,
   Button,
+  Chip,
+  DashedWell,
+  Money,
+  Plate,
+  ScreenHeader,
+  Skeleton,
   useDesignTokens,
   useThemedStyles,
-  radii,
   space,
+  layout,
   fonts,
   type SemanticColors,
 } from '../../../shared/design-system';
@@ -20,12 +26,12 @@ import { useShopStore } from '../../../store/shop-store';
 import { useNetworkStatus } from '../../../shared/hooks/use-network-status';
 import {
   getCreatorOpportunityFeed,
+  getSavedCreatorOpportunities,
   mergeGuestCreatorOpportunityPreferences,
   recordCreatorOpportunityEvent,
   restoreCreatorOpportunityPreference,
   setCreatorOpportunityPreference,
 } from '../api';
-import { ConsumerUtilityHeader } from '../components/consumer-utility-header';
 import { OpportunityCard } from '../components/opportunity-card';
 import { DiscoverAdCard } from '../components/discover-ad-card';
 import { buildDiscoveryDeck } from '../deck';
@@ -34,74 +40,60 @@ import type { CreatorOpportunityFeedItem, DiscoveryDeckEntry, OpportunityPrefere
 
 const SWIPE_DECK_MIN = 5;
 const FEED_LIMIT = 150;
+/** The undo bar exists only while undo is possible — it is not permanent header chrome. */
+const UNDO_WINDOW_MS = 6_000;
+
 function createStyles(c: SemanticColors) {
   return {
     container: { flex: 1, backgroundColor: c.canvas },
-    locationRow: {
+    banner: { paddingHorizontal: layout.screenGutter, paddingVertical: 9, backgroundColor: c.ink },
+    bannerRow: { flexDirection: 'row' as const, alignItems: 'center' as const, justifyContent: 'space-between' as const, gap: space.sm },
+    disclosureRow: { paddingHorizontal: layout.screenGutter, paddingTop: space.xs },
+    deckMeta: {
       flexDirection: 'row' as const,
-      alignItems: 'center' as const,
-      justifyContent: 'space-between' as const,
-      gap: space.xs,
-      paddingHorizontal: space.md,
-      paddingBottom: space.xs,
-    },
-    undoButton: {
-      minHeight: 38,
-      flexDirection: 'row' as const,
-      alignItems: 'center' as const,
-      gap: 5,
-      backgroundColor: c.accentMuted,
-      borderRadius: 0,
-      paddingHorizontal: space.sm,
-      borderWidth: 1,
-      borderColor: c.accent,
-    },
-    deckCount: {
-      minHeight: 38,
-      alignItems: 'center' as const,
-      justifyContent: 'center' as const,
-      backgroundColor: c.surface,
-      borderRadius: 0,
-      paddingHorizontal: space.sm,
-      borderWidth: 2,
-      borderColor: c.stroke,
+      justifyContent: 'flex-end' as const,
+      paddingHorizontal: layout.screenGutter,
+      paddingTop: space.xs,
     },
     deck: { flex: 1, justifyContent: 'center' as const, paddingHorizontal: space.md, paddingBottom: 6 },
     listContent: { paddingBottom: 100 },
-    nextCard: {
+    /** Depth is a second stroked plane behind, off-axis — never a shadow. */
+    backPlane: {
       position: 'absolute' as const,
-      borderRadius: radii.lg,
-      borderWidth: 1,
-      borderColor: c.border,
-    },
-    nextCardNear: {
-      left: 20,
-      right: 12,
+      left: 12,
+      right: -8,
       top: 8,
-      bottom: 4,
-      backgroundColor: c.surface,
-      opacity: 0.7,
+      bottom: -6,
+      borderWidth: 2,
+      borderRadius: 0,
+      borderColor: c.stroke,
+      backgroundColor: c.surfaceSunken,
     },
-    nextCardDeep: {
-      left: 28,
-      right: 6,
-      top: 16,
-      bottom: -2,
-      backgroundColor: c.gray100,
-      opacity: 0.55,
-    },
-    emptyCard: {
+    exhausted: { gap: space.md },
+    shortlist: { padding: space.md, gap: space.xs },
+    shortlistRow: { flexDirection: 'row' as const, alignItems: 'flex-end' as const, justifyContent: 'space-between' as const, gap: space.sm },
+    errorPlate: {
       alignItems: 'center' as const,
       justifyContent: 'center' as const,
       gap: space.md,
-      borderRadius: 0,
-      borderWidth: 2,
-      borderColor: c.stroke,
-      backgroundColor: c.surface,
       padding: space.lg,
     },
+    undoBar: {
+      flexDirection: 'row' as const,
+      alignItems: 'center' as const,
+      justifyContent: 'space-between' as const,
+      gap: space.sm,
+      marginHorizontal: space.md,
+      marginTop: space.xs,
+      paddingHorizontal: space.sm,
+      paddingVertical: 9,
+      borderWidth: 2,
+      borderRadius: 0,
+      borderColor: c.stroke,
+      backgroundColor: c.surface,
+    },
+    undoAction: { minHeight: 44, flexDirection: 'row' as const, alignItems: 'center' as const, gap: 6, paddingHorizontal: space.xs },
     hint: { paddingBottom: 84, color: c.inkMuted, fontFamily: fonts.regular },
-    prototypeBanner: { marginHorizontal: space.md, marginBottom: space.xs, paddingHorizontal: space.sm, paddingVertical: 7, borderRadius: radii.sm, backgroundColor: c.accentMuted },
   };
 }
 
@@ -168,6 +160,13 @@ export default function DiscoverScreen() {
     actionLock.current = null;
   }, [selectedMall]);
 
+  // The undo bar auto-dismisses; the next card is already in place beneath it.
+  useEffect(() => {
+    if (history.length === 0) return;
+    const timer = setTimeout(() => setHistory([]), UNDO_WINDOW_MS);
+    return () => clearTimeout(timer);
+  }, [history]);
+
   const feed = useQuery({
     queryKey: ['creator-opportunity-feed', selectedMall],
     queryFn: async () => {
@@ -195,6 +194,8 @@ export default function DiscoverScreen() {
   const opportunityCount = feedItems.filter(
     item => !actedSet.has(`opp-${item.opportunity_id}`),
   ).length;
+  const offline = !network.isConnected || network.isInternetReachable === false || Boolean(feed.error);
+  const location = malls.find(mall => mall.id === selectedMall)?.name ?? 'Molapo';
 
   useEffect(() => {
     if (!current || impressions.current.has(current.key)) return;
@@ -215,7 +216,8 @@ export default function DiscoverScreen() {
   ) => {
     if (actionLock.current === entry.key || actedSet.has(entry.key)) return;
     actionLock.current = entry.key;
-    if (!useList) setHistory(previous => [entry, ...previous].slice(0, 1));
+    // Only a save is undoable — a pass simply returns to the deck in 30 days.
+    if (!useList && state === 'saved') setHistory([entry]);
     markActed(entry);
     const mutationId = `${Date.now()}-${entry.item.opportunity_id}`;
     if (entry.kind === 'opportunity') discoveryState.act(entry.key, { id: mutationId, opportunityId: entry.item.opportunity_id, state, createdAt: new Date().toISOString() });
@@ -260,41 +262,51 @@ export default function DiscoverScreen() {
 
   return (
     <SafeAreaView edges={['top']} style={styles.container}>
-      <ConsumerUtilityHeader />
+      <ScreenHeader
+        variant="brand"
+        title="Muse"
+        right={
+          <Pressable
+            onPress={() => router.push('/mall-selector')}
+            accessibilityRole="button"
+            accessibilityLabel="Change location"
+            hitSlop={10}
+          >
+            <Text variant="label" color={colors.inkMuted}>{location.toUpperCase()} ▾</Text>
+          </Pressable>
+        }
+      />
       {feedItems.some(item => item.is_prototype) && (
-        <View style={styles.prototypeBanner}>
-          <Text variant="caption" align="center">Alpha preview · campaign concepts are illustrative, not live offers</Text>
+        <View style={styles.disclosureRow}>
+          <Chip kind="disclosure" tone="ink" label="ALPHA PREVIEW · CONCEPTS ARE ILLUSTRATIVE" />
         </View>
       )}
-      {feed.error && feedItems.length ? (
-        <View style={{ backgroundColor: colors.ink, paddingHorizontal: 16, paddingVertical: 9 }}>
-          <Text variant="label" color={colors.onInk}>Offline · showing your last deck</Text>
+      {offline && feedItems.length ? (
+        <View style={styles.banner}>
+          <View style={styles.bannerRow}>
+            <Text variant="label" color={colors.onInk}>Offline · showing your last deck</Text>
+            <Pressable onPress={() => feed.refetch()} accessibilityRole="button" accessibilityLabel="Try again" hitSlop={10}>
+              <Text variant="label" color={colors.payout}>Try again</Text>
+            </Pressable>
+          </View>
         </View>
       ) : null}
-      <View style={styles.locationRow}>
-        {!useList && history.length > 0 && (
-          <Pressable accessibilityRole="button" accessibilityLabel="Undo last swipe" onPress={undo} style={styles.undoButton}>
-            <Ionicons name="arrow-undo" size={17} color={colors.ink} />
-            <Text variant="caption">Undo</Text>
-          </Pressable>
-        )}
-        {!useList && deck.length > 0 && (
-          <View style={styles.deckCount}>
-            <Text variant="caption">{opportunityCount} pots · {deck.length} left</Text>
-          </View>
-        )}
-      </View>
+      {!useList && deck.length > 0 && (
+        <View style={styles.deckMeta}>
+          <Text variant="label" color={colors.inkMuted}>{opportunityCount} pots · {deck.length} left</Text>
+        </View>
+      )}
 
       <View style={styles.deck}>
         {feed.isLoading ? (
-          <DeckSkeleton location={malls.find(mall => mall.id === selectedMall)?.name ?? 'Molapo'} />
+          <DeckSkeleton location={location} />
         ) : feed.error && !feedItems.length ? (
-          <View style={styles.emptyCard}>
+          <Plate style={styles.errorPlate}>
             <Ionicons name="cloud-offline" size={48} color={colors.inkMuted} />
             <Text variant="h2" align="center">Discovery took a break</Text>
             <Text variant="body" align="center" color={colors.inkMuted}>Check your connection and try again.</Text>
             <Button onPress={() => feed.refetch()}>Try again</Button>
-          </View>
+          </Plate>
         ) : useList ? (
           <FlatList
             data={deck.filter((entry): entry is Extract<DiscoveryDeckEntry, { kind: 'opportunity' }> => entry.kind === 'opportunity')}
@@ -309,21 +321,11 @@ export default function DiscoverScreen() {
                 onDetails={() => openDetails(item.item)}
               />
             )}
-            ListEmptyComponent={
-              <View style={styles.emptyCard}>
-                <Ionicons name="sparkles" size={48} color={colors.accent} />
-                <Text variant="h1" align="center">No live challenges</Text>
-                <Text variant="body" align="center" color={colors.inkMuted}>Browse Shops or check saved picks.</Text>
-                <Button onPress={() => router.push('/(shop)/marketplace')}>
-                  Explore Shops
-                </Button>
-              </View>
-            }
+            ListEmptyComponent={<DeckExhausted />}
           />
         ) : current ? (
           <>
-            {deck[2] && <View pointerEvents="none" style={[styles.nextCard, styles.nextCardDeep]} />}
-            {deck[1] && <View pointerEvents="none" style={[styles.nextCard, styles.nextCardNear]} />}
+            {deck[1] && <View pointerEvents="none" style={styles.backPlane} />}
             {current.kind === 'opportunity' ? (
               <OpportunityCard
                 key={current.key}
@@ -336,25 +338,26 @@ export default function DiscoverScreen() {
               <DiscoverAdCard
                 key={current.key}
                 item={current.item}
-                onContinue={() => { setHistory([current]); markActed(current); }}
+                // Passing a sponsored slot is a continue, not a preference — it never enters the model.
+                onContinue={() => markActed(current)}
                 onLearnMore={() => router.push(`/shop/${current.item.merchantId}`)}
               />
             )}
           </>
         ) : (
-          <View style={styles.emptyCard}>
-            <Ionicons name="sparkles" size={48} color={colors.accent} />
-            <Text variant="h1" align="center">You&apos;re caught up</Text>
-            <Text variant="body" align="center" color={colors.inkMuted}>
-              Passed challenges return after 30 days. Your saved picks are waiting whenever you are ready.
-            </Text>
-            <Button onPress={() => router.push('/saved-opportunities')}>View saved</Button>
-            <Button variant="secondary" onPress={() => router.push('/(shop)/marketplace')}>
-              Explore Shops
-            </Button>
-          </View>
+          <DeckExhausted />
         )}
       </View>
+
+      {!useList && history.length > 0 ? (
+        <View style={styles.undoBar}>
+          <Text variant="bodySm">Saved to your shortlist</Text>
+          <Pressable accessibilityRole="button" accessibilityLabel="Undo last swipe" onPress={undo} style={styles.undoAction}>
+            <Ionicons name="arrow-undo" size={17} color={colors.ink} />
+            <Text variant="bodySm">Undo</Text>
+          </Pressable>
+        </View>
+      ) : null}
       {!useList && (
         <Text variant="caption" align="center" style={styles.hint}>
           Swipe left to pass · right to save
@@ -364,12 +367,52 @@ export default function DiscoverScreen() {
   );
 }
 
+/** A5 — an empty deck still carries the proposition: the rule that emptied it, then the shortlist. */
+function DeckExhausted() {
+  const styles = useThemedStyles(createStyles);
+  const router = useRouter();
+  const shortlist = useQuery({
+    queryKey: ['creator-opportunity-saved'],
+    queryFn: getSavedCreatorOpportunities,
+    staleTime: 15_000,
+  });
+  const saved = shortlist.data ?? [];
+  const openPots = saved.reduce((total, item) => total + Number(item.pot_value ?? 0), 0);
+  return (
+    <View style={styles.exhausted}>
+      <DashedWell title="You're caught up">
+        <Text variant="body" align="center">
+          Passed briefs return in 30 days. Your shortlist is waiting whenever you are.
+        </Text>
+      </DashedWell>
+      {saved.length ? (
+        <Plate style={styles.shortlist}>
+          <Text variant="label">Your shortlist</Text>
+          <View style={styles.shortlistRow}>
+            <Text variant="bodySm">{saved.length} brief{saved.length === 1 ? '' : 's'}</Text>
+            <Money amount={openPots} format="prize" emphasis="strong" />
+          </View>
+          <Text variant="caption">Combined open pots</Text>
+        </Plate>
+      ) : null}
+      <Button onPress={() => router.push('/saved-opportunities')}>View saved</Button>
+      <Button variant="secondary" onPress={() => router.push('/(shop)/marketplace')}>Browse shops</Button>
+    </View>
+  );
+}
+
+/** A4 — the skeleton carries the card's exact anatomy so nothing jumps when data lands. */
 function DeckSkeleton({ location }: { location: string }) {
   const { colors } = useDesignTokens();
   return <View style={{ flex: 1, gap: 12 }}>
     <View style={{ flex: 1, borderWidth: 2, borderColor: colors.strokeDim, backgroundColor: colors.surfaceSunken }}>
       <View style={{ height: 250, borderBottomWidth: 2, borderBottomColor: colors.strokeDim }} />
-      <View style={{ padding: 16, gap: 11 }}><View style={{ height: 18, width: '55%', borderWidth: 2, borderColor: colors.strokeQuiet }} /><View style={{ height: 62, borderWidth: 2, borderColor: colors.strokeQuiet }} /><View style={{ height: 2, backgroundColor: colors.strokeQuiet }} /><View style={{ height: 70, borderWidth: 2, borderColor: colors.strokeQuiet }} /></View>
+      <View style={{ padding: 16, gap: 11 }}>
+        <Skeleton style={{ height: 18, width: '55%', borderColor: colors.strokeQuiet }} />
+        <Skeleton style={{ height: 62, borderColor: colors.strokeQuiet }} />
+        <View style={{ height: 2, backgroundColor: colors.strokeQuiet }} />
+        <Skeleton style={{ height: 70, borderColor: colors.strokeQuiet }} />
+      </View>
     </View>
     <Text variant="caption" align="center">Finding funded briefs near {location}</Text>
   </View>;

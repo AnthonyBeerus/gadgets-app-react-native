@@ -5,7 +5,7 @@ import { useMemo, useState } from 'react';
 import { FlatList, Pressable, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { MerchantIdentityRow, Money, SearchField, Text, useDesignTokens } from '../../../shared/design-system';
+import { MerchantIdentityRow, Money, ScreenHeader, SearchField, Text, useDesignTokens } from '../../../shared/design-system';
 import { useShopStore } from '../../../store/shop-store';
 import { getCampaignAwareShopsResult } from '../marketplace-api';
 import type { MerchantGrowthProfile } from '../shops-model';
@@ -34,10 +34,11 @@ export default function MarketplaceScreen() {
   const open = (id: number) => router.push(`/shop/${id}`);
 
   return <SafeAreaView edges={['top']} style={[styles.safe, { backgroundColor: colors.canvas }]}>
-    <View style={[styles.header, { borderBottomColor: colors.stroke }]}>
-      <Text variant="h2">Shops</Text>
-      <Pressable onPress={() => router.push('/mall-selector')} accessibilityLabel="Change location"><Text variant="label" color={colors.inkMuted}>{location.toUpperCase()} ▾</Text></Pressable>
-    </View>
+    <ScreenHeader
+      variant="brand"
+      title="Shops"
+      right={<Pressable onPress={() => router.push('/mall-selector')} accessibilityRole="button" accessibilityLabel="Change location" hitSlop={10}><Text variant="label" color={colors.inkMuted}>{location.toUpperCase()} ▾</Text></Pressable>}
+    />
     <FlatList
       data={list}
       keyExtractor={item => String(item.id)}
@@ -73,7 +74,7 @@ function MerchantRow({ profile, onPress }: { profile: MerchantGrowthProfile; onP
 function ShopSkeleton() { const { colors } = useDesignTokens(); return <View style={[styles.skeleton, { borderColor: colors.strokeDim, backgroundColor: colors.surfaceSunken }]}><View style={[styles.skeletonHero, { borderBottomColor: colors.strokeDim }]} /><View style={styles.skeletonLines}><View style={[styles.skeletonLine, { borderColor: colors.strokeDim }]} /><View style={[styles.skeletonLineShort, { borderColor: colors.strokeDim }]} /></View></View>; }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1 }, header: { minHeight: 58, paddingHorizontal: 16, borderBottomWidth: 2, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  safe: { flex: 1 },
   content: { paddingHorizontal: 16, paddingBottom: 104 }, top: { gap: 14, paddingVertical: 14 }, disclosure: { padding: 10 }, featured: { borderWidth: 2 }, heroFrame: { height: 174, borderBottomWidth: 2 }, hero: { width: '100%', height: '100%' }, featuredBody: { padding: 12, gap: 12 }, pot: { padding: 12, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   row: { minHeight: 72, paddingVertical: 10, flexDirection: 'row', alignItems: 'center', gap: 8 }, rowIdentity: { flex: 1, minWidth: 0 }, rowMoney: { flexShrink: 0, alignItems: 'flex-end' }, rule: { height: 1 },
   empty: { borderWidth: 2, borderStyle: 'dashed', padding: 20, gap: 8 }, skeleton: { height: 286, borderWidth: 2 }, skeletonHero: { height: 174, borderBottomWidth: 2 }, skeletonLines: { padding: 14, gap: 10 }, skeletonLine: { height: 24, width: '70%', borderWidth: 2 }, skeletonLineShort: { height: 18, width: '42%', borderWidth: 2 },

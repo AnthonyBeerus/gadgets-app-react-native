@@ -1,50 +1,46 @@
 import React from 'react';
 import { View, StyleSheet, Pressable, ViewStyle } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Ionicons } from '@expo/vector-icons';
 import { Text } from '../primitives/Text';
 import { useDesignTokens } from '../theme/DesignTokensProvider';
-import { space } from '../tokens/space';
-import { radii } from '../tokens/radii';
+import { space, layout } from '../tokens/space';
+import { targets } from '../tokens/structure';
 
 export interface TabBarItem {
   key: string;
   label: string;
-  icon: React.ReactNode;
-  activeIcon?: React.ReactNode;
+  /** Ionicons glyph name. The bar renders it at icon.md, stroke 2. */
+  icon: React.ComponentProps<typeof Ionicons>['name'];
 }
 
-export interface TabBarShellProps {
+export interface TabBarProps {
   items: TabBarItem[];
   activeKey: string;
   onSelect: (key: string) => void;
   style?: ViewStyle;
 }
 
-/** Shared quiet chrome for shop/merchant tab bars */
-export const TabBarShell: React.FC<TabBarShellProps> = ({
-  items,
-  activeKey,
-  onSelect,
-  style,
-}) => {
+/**
+ * The single tab bar for every Muse tab root — consumer and merchant alike.
+ * Merchant mode is a chip in the header, not a different bar.
+ */
+export const TabBar: React.FC<TabBarProps> = ({ items, activeKey, onSelect, style }) => {
   const insets = useSafeAreaInsets();
-  const { colors } = useDesignTokens();
+  const { colors, icons } = useDesignTokens();
 
   return (
     <View
       style={[
         styles.wrap,
-        { paddingBottom: Math.max(insets.bottom, space.sm) },
+        { paddingBottom: insets.bottom + layout.safeBottom },
         style,
       ]}
     >
       <View
         style={[
           styles.bar,
-          {
-            backgroundColor: colors.surface,
-            borderColor: colors.stroke,
-          },
+          { backgroundColor: colors.surface, borderColor: colors.stroke },
         ]}
       >
         {items.map((item) => {
@@ -53,14 +49,16 @@ export const TabBarShell: React.FC<TabBarShellProps> = ({
             <Pressable
               key={item.key}
               onPress={() => onSelect(item.key)}
-              style={[
-                styles.item,
-                active && { backgroundColor: colors.gray100 },
-              ]}
+              style={[styles.item, active && { backgroundColor: colors.surfaceSunken }]}
               accessibilityRole="tab"
+              accessibilityLabel={item.label}
               accessibilityState={{ selected: active }}
             >
-              {active && item.activeIcon ? item.activeIcon : item.icon}
+              <Ionicons
+                name={item.icon}
+                size={icons.md}
+                color={active ? colors.ink : colors.inkMuted}
+              />
               <Text
                 variant="caption"
                 color={active ? colors.ink : colors.inkMuted}
@@ -91,6 +89,7 @@ const styles = StyleSheet.create({
   },
   item: {
     flex: 1,
+    minHeight: targets.min,
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: space.sm,

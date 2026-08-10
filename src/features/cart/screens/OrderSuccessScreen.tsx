@@ -17,10 +17,18 @@ export default function OrderSuccessScreen() {
   const query = getMyOrder(id);
   const order = query.data;
   const clear = useCartStore(state => state.clearCompletedCheckout);
+  const setPaymentFlow = useCartStore(state => state.setPaymentFlow);
   const terminal = ['succeeded', 'failed', 'cancelled', 'refunded'].includes(order?.payment_status ?? '');
   useEffect(() => { if (terminal) return; const timer = setInterval(() => query.refetch(), 2_000); return () => clearInterval(timer); }, [terminal, query.refetch]);
   useEffect(() => { if (order?.payment_status === 'succeeded') clear(); }, [clear, order?.payment_status]);
   useEffect(() => { if (pathname === '/payment-processing' && order?.payment_status === 'succeeded') router.replace(`/order-confirmed/${order.id}`); }, [order?.id, order?.payment_status, pathname, router]);
+  // A terminal non-success is the B7 branch: release the in-flight flow so the bag survives intact.
+  useEffect(() => {
+    const status = order?.payment_status;
+    if (pathname !== '/payment-processing' || !status || !['failed', 'cancelled', 'refunded'].includes(status)) return;
+    setPaymentFlow(null);
+    router.replace({ pathname: '/payment-failure', params: { kind: status === 'cancelled' ? 'cancelled' : 'declined' } });
+  }, [order?.payment_status, pathname, router, setPaymentFlow]);
   const proof = useQuery({
     queryKey: ['order-purchase-proof', order?.id], enabled: order?.payment_status === 'succeeded',
     queryFn: async () => { const { data: purchase } = await (supabase as any).from('purchase_proofs').select('product_id').eq('order_id', order!.id).is('revoked_at', null).limit(1).maybeSingle(); if (!purchase) return null; const { data } = await (supabase as any).from('challenges').select('id,title,reward_value,pot_value,contest_mode').eq('product_id', purchase.product_id).eq('status', 'active').limit(1).maybeSingle(); return data ?? null; },

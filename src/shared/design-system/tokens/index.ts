@@ -11,6 +11,7 @@ import { elevation, resolveElevation, type ElevationLevel } from './elevation';
 import { strokes, targets, icons, layers } from './structure';
 import {
   duration,
+  settle,
   stagger,
   easing,
   timingConfig,
@@ -37,6 +38,7 @@ export function resolveDesignTokens(mode: ColorMode) {
     mode,
     motion: {
       duration,
+      settle,
       stagger,
       easing,
       timingConfig,
@@ -67,6 +69,7 @@ export {
   elevation,
   resolveElevation,
   duration,
+  settle,
   stagger,
   easing,
   timingConfig,

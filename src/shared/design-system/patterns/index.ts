@@ -1,7 +1,3 @@
 export { ScreenHeader, type ScreenHeaderProps } from './ScreenHeader';
-export {
-  TabBarShell,
-  type TabBarShellProps,
-  type TabBarItem,
-} from './TabBarShell';
+export { TabBar, type TabBarProps, type TabBarItem } from './TabBar';
 export { StackScreenTemplate, StatusScreenTemplate } from './templates';

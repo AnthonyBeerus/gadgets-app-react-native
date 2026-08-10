@@ -5,9 +5,12 @@ import { Alert, StyleSheet, View } from 'react-native';
 import { useEffect, useState } from 'react';
 
 import { getProduct } from '../../../shared/api/api';
-import { Button, Chip, EligibilityPanel, MerchantIdentityRow, Money, PinnedActionBar, QuantityStepper, StackScreenTemplate, Text, useDesignTokens } from '../../../shared/design-system';
+import { Button, Chip, EligibilityPanel, MerchantIdentityRow, Money, PinnedActionBar, QuantityStepper, StackScreenTemplate, Text, formatMoney, useDesignTokens } from '../../../shared/design-system';
 import { useCartStore } from '../../../store/cart-store';
 import { getOpportunityForProduct } from '../../discovery/api';
+
+/** Below this, stock stops being reassurance and becomes a warning. */
+const LOW_STOCK = 5;
 
 export default function ProductDetailsScreen() {
   const { slug, source, opportunityId } = useLocalSearchParams<{ slug: string; source?: 'discover' | 'merchant'; opportunityId?: string }>();
@@ -26,6 +29,8 @@ export default function ProductDetailsScreen() {
   if (!product) return <Redirect href="/(shop)/marketplace" />;
   const illustrative = Number(product.id) < 0;
   const shop = product.shop ?? {};
+  const deliveryFee = Number(shop.delivery_fee ?? 0);
+  const stock = Number(product.maxQuantity ?? 0);
   const merchant = { id: Number(product.shop_id ?? -1), name: shop.name ?? product.merchantName ?? 'Muse shop' };
   const add = () => {
     if (illustrative) return;
@@ -43,7 +48,7 @@ export default function ProductDetailsScreen() {
     {illustrative ? <Chip kind="disclosure" tone="illustrative" label="ILLUSTRATIVE" /> : null}
     <MerchantIdentityRow merchant={merchant} />
     <Text variant="display">{product.title}</Text><Money amount={Number(product.price)} emphasis="hero" />
-    <View style={styles.chips}>{shop.has_collection !== false ? <Chip kind="status" tone="success" label="Collection" /> : null}{shop.has_delivery ? <Chip kind="status" tone="warning" label={`Delivery ${Number(shop.delivery_fee ?? 0) ? `P${Number(shop.delivery_fee)}` : ''}`} /> : null}<Chip kind="status" tone="warning" label={`${Number(product.maxQuantity ?? 0)} left`} /></View>
+    <View style={styles.chips}>{shop.has_collection !== false ? <Chip kind="status" tone="success" label="Collection" /> : null}{shop.has_delivery ? <Chip kind="status" tone="success" label={deliveryFee ? `Delivery ${formatMoney(deliveryFee)}` : 'Delivery'} /> : null}<Chip kind="status" tone={stock <= LOW_STOCK ? 'warning' : 'success'} label={stock <= LOW_STOCK ? `Only ${stock} left` : `${stock} in stock`} /></View>
     {eligibility ? <EligibilityPanel model={eligibility} /> : null}
     <Text variant="body" color={colors.inkMuted}>{product.description}</Text>
   </StackScreenTemplate>;

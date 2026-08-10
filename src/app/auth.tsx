@@ -11,7 +11,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { Button, ErrorNotice, Input, Money, Plate, Text, useDesignTokens, useThemedStyles, type DesignTokens, type SemanticColors } from '../shared/design-system';
+import { Button, ErrorNotice, Input, Rule, Text, formatMoney, useDesignTokens, useThemedStyles, type DesignTokens, type SemanticColors } from '../shared/design-system';
 import { useCartStore } from '../store/cart-store';
 
 type AuthStep = 'sign_in' | 'sign_up' | 'verify_email' | 'forgot_password' | 'reset_password';
@@ -128,15 +128,16 @@ export default function AuthScreen() {
 
   const isRegistration = step === 'sign_up';
   const isCodeStep = step === 'verify_email' || step === 'reset_password';
-  const title = step === 'sign_in' ? 'WELCOME BACK'
-    : step === 'sign_up' ? 'JOIN MUSE'
-      : step === 'verify_email' ? 'CHECK YOUR EMAIL'
-        : step === 'forgot_password' ? 'RESET PASSWORD'
-          : 'CHOOSE A NEW PASSWORD';
-  const bagTotal = Number(cart.getTotalPrice());
-  const bagMessage = destination === '/checkout' && cart.items.length
-    ? `Your bag is safe — ${cart.items[0].shopName}, ${cart.checkoutDraft.fulfilment}. We will bring you straight back to checkout.`
-    : 'Browsing Muse never needs an account.';
+  const title = step === 'sign_in' ? 'Welcome back'
+    : step === 'sign_up' ? 'Join Muse'
+      : step === 'verify_email' ? 'Check your email'
+        : step === 'forgot_password' ? 'Reset password'
+          : 'Choose a new password';
+  // Sign-in must state what it is protecting, not just demand credentials.
+  const protectingBag = destination === '/checkout' && cart.items.length > 0;
+  const bagMessage = protectingBag
+    ? `Your bag is safe — ${formatMoney(Number(cart.getTotalPrice()))} at ${cart.items[0].shopName}, ${cart.checkoutDraft.fulfilment}. We'll bring you straight back to checkout.`
+    : 'Sign in only when you transact. Everything you were doing is waiting on the other side.';
 
   return (
     <SafeAreaView style={styles.safe}>
@@ -147,7 +148,7 @@ export default function AuthScreen() {
           <View style={styles.heading}>
             <Text variant="display">{title}</Text>
             <Text variant="body" color={colors.inkMuted}>{isCodeStep ? `Enter the code sent to ${email}.` : bagMessage}</Text>
-            {destination === '/checkout' && cart.items.length ? <Money amount={bagTotal} emphasis="strong" /> : null}
+
           </View>
           <View style={styles.form}>
             {isRegistration ? (
@@ -166,7 +167,7 @@ export default function AuthScreen() {
             ) : null}
             {error ? <ErrorNotice title="We could not continue" impact={error} recovery="Check the details and try again." /> : null}
             <Button onPress={submit} loading={busy} variant="primary">
-              {busy ? <ActivityIndicator color={colors.surface} /> : step === 'sign_in' ? 'SIGN IN' : step === 'sign_up' ? 'CREATE ACCOUNT' : step === 'forgot_password' ? 'SEND RESET CODE' : 'CONTINUE'}
+              {busy ? <ActivityIndicator color={colors.surface} /> : step === 'sign_in' ? 'Sign in' : step === 'sign_up' ? 'Create account' : step === 'forgot_password' ? 'Send reset code' : 'Continue'}
             </Button>
             {step === 'sign_in' ? (
               <Pressable style={styles.link} onPress={() => { setError(null); setStep('forgot_password'); }}>
@@ -184,6 +185,8 @@ export default function AuthScreen() {
               <Text variant="bodyBold">Back to sign in</Text>
             </Pressable>
           )}
+          <Rule quiet />
+          <Text variant="caption" align="center">Browsing Discover and Shops never needs an account.</Text>
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>

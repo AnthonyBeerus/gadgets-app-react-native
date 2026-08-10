@@ -12,6 +12,7 @@ import React from "react";
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import * as Notifications from 'expo-notifications';
 import { notificationHref } from '../shared/navigation/notification-route';
+import { usePaymentResume } from '../features/cart/hooks/use-payment-resume';
 
 import * as Sentry from '@sentry/react-native';
 
@@ -43,6 +44,7 @@ import { StripeProviderWrapper } from "../shared/providers/stripe";
 const AppNavigator = () => {
   const { isMerchant } = useAuth();
   const router = useRouter();
+  usePaymentResume();
   React.useEffect(() => Notifications.addNotificationResponseReceivedListener(response => {
     const href = notificationHref(response.notification.request.content.data);
     if (href) router.push(href as never);

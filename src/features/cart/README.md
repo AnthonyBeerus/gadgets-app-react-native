@@ -4,7 +4,7 @@ This feature handles the shopping cart functionality.
 
 ## Structure
 
-- `screens/`: Contains `CartScreen.tsx`.
+- `screens/`: Contains `OrderSuccessScreen.tsx`. The bag lives at `/bag` (`features/discovery/screens/bag-screen.tsx`).
 - `components/`: Contains cart item and summary components.
 - `store/`: Contains `useCartStore` for state management.
 

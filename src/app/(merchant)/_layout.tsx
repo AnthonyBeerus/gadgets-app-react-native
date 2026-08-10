@@ -5,7 +5,38 @@ import {
   View,
 } from "react-native";
 import React from "react";
-import MerchantTabBar from "../../components/merchant/MerchantTabBar";
+import type { BottomTabBarProps } from "@react-navigation/bottom-tabs";
+import { TabBar, type TabBarItem } from "../../shared/design-system";
+
+const TABS = [
+  { key: 'index', label: 'Dashboard', icon: 'grid' },
+  { key: 'catalog', label: 'Catalog', icon: 'storefront' },
+  { key: 'create', label: 'Create', icon: 'add-circle' },
+  { key: 'community', label: 'Community', icon: 'people' },
+  { key: 'profile', label: 'Profile', icon: 'person' },
+] as const satisfies readonly TabBarItem[];
+
+const KEYS = TABS.map(tab => tab.key) as readonly string[];
+
+/** Merchant mode reuses the one tab bar — only the destinations change. */
+function MerchantTabBar({ state, navigation }: BottomTabBarProps) {
+  const active = state.routes[state.index]?.name;
+  if (!active || !KEYS.includes(active)) return null;
+  const routes = state.routes.filter(route => KEYS.includes(route.name));
+  return (
+    <TabBar
+      activeKey={active}
+      items={TABS.filter(tab => routes.some(route => route.name === tab.key))}
+      onSelect={key => {
+        const route = routes.find(item => item.name === key);
+        if (!route) return;
+        const event = navigation.emit({ type: 'tabPress', target: route.key, canPreventDefault: true });
+        if (route.name === active || event.defaultPrevented) return;
+        navigation.navigate(route.name, route.params);
+      }}
+    />
+  );
+}
 
 const MerchantTabsLayout = () => {
   const { isMerchant, activeRole, mounting } = useAuth();

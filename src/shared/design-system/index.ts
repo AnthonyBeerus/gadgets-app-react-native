@@ -18,6 +18,7 @@ export {
   elevation,
   resolveElevation,
   duration,
+  settle,
   stagger,
   easing,
   timingConfig,
@@ -67,9 +68,9 @@ export {
 
 export {
   ScreenHeader,
-  TabBarShell,
+  TabBar,
   type ScreenHeaderProps,
-  type TabBarShellProps,
+  type TabBarProps,
   type TabBarItem,
   StackScreenTemplate,
   StatusScreenTemplate,
