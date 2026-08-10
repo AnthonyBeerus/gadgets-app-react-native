@@ -91,9 +91,9 @@ export default function SavedOpportunitiesScreen() {
                 <Text variant="caption">Qualifying purchase from <Money amount={Number(item.price)} format="prize" emphasis="body" style={styles.inline} /></Text>
                 <Button
                   variant={eligible ? 'commerce' : 'primary'}
-                  onPress={() => router.push(`/challenges/${item.opportunity_id}`)}
+                  onPress={() => router.push(eligible ? `/challenges/entry/${item.opportunity_id}` : `/opportunity/${item.opportunity_id}`)}
                 >
-                  {eligible ? 'Enter this brief' : competitive ? 'View brief' : 'View product and brief'}
+                  {eligible ? 'Enter this brief' : 'View brief'}
                 </Button>
                 <Pressable
                   accessibilityRole="button"

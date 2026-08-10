@@ -21,6 +21,17 @@ describe('Muse handoff route contract', () => {
     expect(layout).toContain(`name="${route}"`);
   });
 
+  // A1's card tap must land on the redesigned A8, never on the legacy
+  // /challenges/[id] detail screen the redesign did not cover.
+  it.each([
+    'src/features/discovery/screens/discover-screen.tsx',
+    'src/features/discovery/screens/saved-opportunities-screen.tsx',
+  ])('routes %s to the redesigned opportunity detail', file => {
+    const source = fs.readFileSync(path.join(process.cwd(), file), 'utf8');
+    expect(source).toContain('/opportunity/${item.opportunity_id}');
+    expect(source).not.toMatch(/`\/challenges\/\$\{item\.opportunity_id\}`/);
+  });
+
   it('keeps legacy success and cart routes as redirects', () => {
     expect(fs.readFileSync(path.join(process.cwd(), 'src/app/order-success.tsx'), 'utf8')).toContain('Redirect');
     expect(fs.readFileSync(path.join(process.cwd(), 'src/app/cart.tsx'), 'utf8')).toContain('Redirect');

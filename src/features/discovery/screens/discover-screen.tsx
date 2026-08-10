@@ -244,20 +244,11 @@ export default function DiscoverScreen() {
     }
   };
 
+  // A1's card tap has exactly one destination: A8. Live briefs used to fall through
+  // to the legacy /challenges/[id] screen, which the redesign never covered.
   const openDetails = (item: CreatorOpportunityFeedItem) => {
     recordCreatorOpportunityEvent(item.opportunity_id, 'detail_open', 'discover').catch(() => undefined);
-    if (item.is_prototype) {
-      router.push(`/opportunity/${item.opportunity_id}`);
-      return;
-    }
-    if (item.contest_mode === 'competitive_pot' || item.opportunity_id > 0) {
-      router.push(`/challenges/${item.opportunity_id}`);
-      return;
-    }
-    router.push({
-      pathname: '/product/[slug]',
-      params: { slug: item.product_slug, source: 'discover', opportunityId: item.opportunity_id },
-    });
+    router.push(`/opportunity/${item.opportunity_id}`);
   };
 
   return (
