@@ -1,3 +1,4 @@
-export { ClerkProvider, useAuth, useSignIn, useSignUp, useUser } from '@clerk/react';
+export { ClerkProvider, useAuth, useUser } from '@clerk/react';
+export { useSignIn, useSignUp } from '@clerk/react/legacy';
 
 export const tokenCache = undefined;

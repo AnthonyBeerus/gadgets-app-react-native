@@ -6,6 +6,8 @@ describe('authentication surface', () => {
     const source = [
       fs.readFileSync(path.join(process.cwd(), 'src/app/auth.tsx'), 'utf8'),
       fs.readFileSync(path.join(process.cwd(), 'src/app/account.tsx'), 'utf8'),
+      fs.readFileSync(path.join(process.cwd(), 'src/shared/clerk/index.native.ts'), 'utf8'),
+      fs.readFileSync(path.join(process.cwd(), 'src/shared/clerk/index.web.ts'), 'utf8'),
     ].join('\n');
     expect(source).not.toContain('@clerk/expo/native');
     expect(source).not.toContain('ClerkAuthView');
